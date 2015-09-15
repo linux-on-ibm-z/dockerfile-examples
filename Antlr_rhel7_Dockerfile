@@ -1,0 +1,53 @@
+# Base Image
+FROM rhel7:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+#Install dependencies
+
+RUN yum -y update && yum install -y \
+   git\
+   java-1.7.0-openjdk-devel.s390x \
+   ant
+
+##setting JAVA path
+ENV JAVA_HOME /usr/lib/jvm/java-1.7.0-openjdk
+ENV PATH $PATH:$JAVA_HOME/bin
+
+#clone antlr3 package and checkout branch 3.5
+RUN git clone --branch antlr-3.5 https://github.com/antlr/antlr3.git
+
+##clone maven from github and checkout branch 3.2.5
+RUN git clone https://git-wip-us.apache.org/repos/asf/maven.git/ --branch maven-3.2.5
+
+#changing working directory to maven repo
+WORKDIR /maven
+
+##increasing buid timeout of maven
+RUN sed -i 's/timeout="600000"/timeout="2000000"/' build.xml
+
+## Run ANT to download dependencies, build Maven, and install
+RUN  ant -Dmaven.home="/maven_build"
+
+#setting path for maven
+ENV M2_HOME /maven_build
+ENV PATH $PATH:/$M2_HOME/bin
+
+#changing working directory to antlr repo
+WORKDIR /antlr3
+
+###Compile and install antlr using maven
+RUN mvn -Dgpg.skip=true -Duser.name="Kavya Kethireddy" -Dbootclasspath.compile=$JAVA_HOME/jre/lib/rt.jar -Djava6.home=$JAVA_HOME/jre install
+
+#setting classpath
+ENV CLASSPATH $CLASSPATH:/antlr3/antlr-complete/target/antlr-complete-3.5.jar
+
+
+### Setting entry point to, so we can run docker image as command.
+ENTRYPOINT ["java", "org.antlr.Tool"]
+
+
+### -version is a default command to execute
+CMD ["-version"]
+
