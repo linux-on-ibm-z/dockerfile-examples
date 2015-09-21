@@ -1,0 +1,39 @@
+# Dockerfile to build Erlang on sles12 base
+
+# Base image
+FROM sles12:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install dependencies
+RUN zypper install -y ncurses-devel \
+                      ncurses \
+                      libopenssl-devel \
+                      libssh-devel \
+                      unixODBC \
+                      unixODBC-devel \
+                      openssl \
+                      openssl-devel \
+                      wget \
+                      tar \
+                      make \
+                      gcc
+
+
+RUN echo "Dependencies installed succesfully"
+
+# Download and untar the Erlang source file
+RUN wget http://www.erlang.org/download/otp_src_17.4.tar.gz
+RUN tar zxvf otp_src_17.4.tar.gz
+
+# Build and Install Erlang
+RUN cd otp_src_17.4 && ./configure --prefix=/usr && make
+
+RUN cd otp_src_17.4 && export ERL_TOP=`pwd` && make release_tests && \
+        cd release/tests/test_server && $ERL_TOP/bin/erl -s ts install -s ts smoke_test batch -s init stop
+
+RUN cd otp_src_17.4 && make install
+
+RUN echo "Erlang installed"
+
