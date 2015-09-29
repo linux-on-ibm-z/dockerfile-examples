@@ -1,0 +1,40 @@
+# Dockerfile for building doxygen On SLES 12.0
+
+########################################
+# Doxygen
+#
+# VERSION 1.8.9.1
+########################################
+
+# Base image
+FROM sles12
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install dependencies 
+RUN zypper install -y git-core \
+	gmake \
+	GraphViz \
+	flex \
+	bison \
+	gcc \
+	gcc-c++ \
+	python-xml \
+	libxml2-tools \
+	texlive-bibtex-bin \
+	make \
+	perl-Test-Simple.noarch 
+
+
+# Clone doxygen from github
+RUN mkdir doxygen_src && cd doxygen_src && git clone https://github.com/doxygen/doxygen.git
+
+# Build and install doxygen 
+RUN cd /doygen_src/doxygen && bash -c "./configure" && make && make test && make install
+
+# Setting entry point so container can run as an executable
+ENTRYPOINT ["doxygen"]
+
+# Default command to execute
+CMD ["--help"]
