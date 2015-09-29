@@ -1,0 +1,36 @@
+# Base image
+FROM rhel7:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install dependencies
+RUN yum -y update && yum install -y \
+   git\
+   java-1.7.0-openjdk-devel.s390x \
+   ant
+
+# Set env varibales for JAVA
+ENV JAVA_HOME /usr/lib/jvm/java-1.7.0-openjdk
+ENV PATH $PATH:$JAVA_HOME/bin
+
+# Clone Maven source code from github and checkout branch 3.2.5
+RUN git clone https://git-wip-us.apache.org/repos/asf/maven.git/ --branch maven-3.2.5
+
+# Change work directory to Maven repo
+WORKDIR /maven
+
+# Increase build timeout of Maven
+RUN sed -i 's/timeout="600000"/timeout="4000000"/' build.xml
+
+# Run ANT to download dependencies, build and install Maven
+RUN  ant -Dmaven.home="/maven_build"
+
+# Set path for Maven
+ENV M2_HOME /maven_build
+ENV PATH $PATH:/$M2_HOME/bin
+
+# Start Maven
+ENTRYPOINT ["mvn"]
+CMD ["--help"]
+
