@@ -1,0 +1,56 @@
+# Base image
+FROM sles12:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Export the library path
+ENV LD_LIBRARY_PATH /usr/local/lib
+
+# Install dependencies
+RUN zypper install -y \
+	autoconf \
+	libtool \
+	automake \
+	gcc-c++ \
+	make \
+	curl \
+	git-core
+
+# Clone ProtoBuf source code from github and checkout the branch v2.6.1
+RUN git clone https://github.com/google/protobuf.git && cd protobuf && git checkout v2.6.1
+
+# Set the work directory to protobuf
+WORKDIR protobuf
+
+# Generate the configure file
+RUN ./autogen.sh
+
+# Configure and build ProtoBuf
+RUN ./configure
+RUN make
+
+# Run testcases
+RUN make check
+
+# Install Protobuf
+RUN make install
+
+# Set the work directory to /
+WORKDIR /
+
+# Clean up the code
+RUN rm -rf protobuf
+
+# Set library path for ProtoBuf
+ENV LD_LIBRARY_PATH /usr/local/lib
+
+# Start ProtoBuf
+ENTRYPOINT ["protoc"]
+
+# Default command to execute - Print help menu for ProtoBuf
+CMD ["--help"]
+
+
+
+RUN echo "Successfully installed Protobuf"
