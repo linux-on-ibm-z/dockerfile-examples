@@ -1,0 +1,45 @@
+# Base Image
+FROM sles12:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Set environment variables
+
+ENV XERCESCROOT `pwd`
+ENV LANG 'en_US.UTF-8'
+ENV LANGUAGE 'en_US.UTF-8'
+
+# Install dependent packages
+
+RUN zypper install -y \
+   libtool \
+   automake \
+   gcc-c++ \
+   make \
+   git-core
+
+# Download xerces-c and checkout the branch 3.1
+RUN git clone https://github.com/apache/xerces-c.git --branch xerces-3.1
+
+# Set current work directory
+WORKDIR xerces-c
+
+# Configure
+RUN ./reconf
+RUN ./configure
+
+# Creates make files
+RUN make
+
+# run testcases
+RUN make check
+
+# Install xerces-c
+RUN make install
+
+# Change current work directory and clean up git package
+WORKDIR /
+RUN rm -rf xerces-c
+RUN echo "Successfully installed xerces-c"
+
