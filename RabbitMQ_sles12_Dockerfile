@@ -1,0 +1,68 @@
+# Base image
+FROM erlang_sles12:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install build dependencies for RabbitMQ
+RUN zypper install -y findutils \
+        zip \
+        unzip \
+        git-core \
+        procps  \
+        ant \
+        ant-junit \
+        java \
+        patch \
+        xmlto \
+        subversion \
+        libxslt \
+        openssl \
+        python \
+        make    \
+        which
+
+RUN echo "Dependencies installed succesfully"
+
+# Set environment variables
+ENV JAVA_HOME /lib/jvm/java
+ENV ANT_HOME /usr/share/ant
+ENV ERL_TOP=/otp_src_17.4
+ENV PATH=$PATH:ERL_TOP/bin:/usr/lib/erlang/lib/erl_interface-3.7.20/bin/:$JAVA_HOME/bin:$ANT_HOME
+
+# Clone the rabbitmq-public-umbrella source code and checkout the umbrella to download all repos
+RUN git clone https://github.com/rabbitmq/rabbitmq-public-umbrella.git
+RUN cd rabbitmq-public-umbrella && make co
+
+# Build RabbitMQ server
+RUN cd /rabbitmq-public-umbrella/rabbitmq-server && make all
+
+# Set environment variables for installation
+ENV TARGET_DIR=/usr/bin
+ENV SBIN_DIR=/usr/sbin
+ENV MAN_DIR=/usr/share/man
+
+# Install RabbitMQ server
+RUN cd /rabbitmq-public-umbrella/rabbitmq-server && make install
+
+# Run qpid, java test suite
+RUN cd  /rabbitmq-public-umbrella/rabbitmq-test && make prepare && make run-qpid-testsuite
+
+# Build RabbitMQ management plugin
+RUN cd /rabbitmq-public-umbrella/rabbitmq-management && make
+
+# Set plugins directory and copy the management console plugin to the folder
+RUN cd /rabbitmq-public-umbrella/rabbitmq-server && mkdir plugins
+RUN cp -rf /rabbitmq-public-umbrella/rabbitmq-management/dist/*.ez /rabbitmq-public-umbrella/rabbitmq-server/plugins
+ENV RABBITMQ_PLUGINS_DIR=/rabbitmq-public-umbrella/rabbitmq-server/plugins
+
+
+# Expose RabbitMQ management console port and RabbitMQ server port
+EXPOSE 15672 5672
+
+# Create directory for RabbitMQ
+RUN mkdir /etc/rabbitmq
+
+# Enable RabbitMQ management plugin and start RabbitMQ server
+ENTRYPOINT /usr/sbin/rabbitmq-plugins enable rabbitmq_management && rabbitmq-server
+
