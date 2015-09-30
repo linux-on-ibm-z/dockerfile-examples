@@ -1,0 +1,49 @@
+# Base image
+FROM rhel7:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install dependencies
+RUN yum -y update && yum install -y \
+    git \
+    tar \
+    autoconf \
+    libtool \
+    make \
+    gcc-c++ \
+    bzip2
+
+# Clone ProtoBuf source code from github and checkout the branch v2.6.1
+RUN git clone https://github.com/google/protobuf.git && cd protobuf && git checkout v2.6.1
+
+# Set work directory to protobuf
+WORKDIR protobuf
+
+# Generate the configure file
+RUN ./autogen.sh
+
+# Configure and build ProtoBuf
+RUN ./configure
+RUN make
+
+# Execute testcases
+RUN make check
+
+# Install Protobuf
+RUN make install
+
+# Set work directory to /
+WORKDIR /
+
+RUN rm -rf protobuf
+
+# Start ProtoBuf
+ENTRYPOINT ["protoc"]
+
+# Default command to execute - Print help menu of ProtoBuf
+CMD ["--help"]
+
+RUN echo "Successfully installed Protobuf"
+
+
