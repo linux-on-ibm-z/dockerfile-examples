@@ -1,0 +1,38 @@
+# Base image
+FROM rhel7:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install the build dependencies,Clone the source code and build  Node.js
+RUN yum install --nogpgcheck -y \
+        git \
+        java-1.8.0-openjdk \
+        gcc-c++ \
+        make && git clone https://github.com/andrewlow/node.git && cd node/ && ./configure && make && make install
+
+# Install grunt-cli
+CMD ["npm", "install", "-g", "grunt-cli"]
+
+# Install build dependencies & rubygems.Download SQLite
+RUN yum install --nogpgcheck -y \
+        ruby-devel \
+        ruby-libs-2.0.0.598-24.el7.s390x \
+        tar \
+        wget \
+        gcc-c++ \
+        make \
+        zlib-devel \
+        patch && gem install rubygems-update && wget https://www.sqlite.org/2015/sqlite-autoconf-3081001.tar.gz && \
+        tar -xvf sqlite-autoconf-3081001.tar.gz
+
+# Build and install SQLite
+WORKDIR /sqlite-autoconf-3081001
+RUN ./configure && make && make install
+WORKDIR /
+
+# Install Rails
+RUN gem install rails
+
+# Expose port for Rails
+EXPOSE 3000 10524
