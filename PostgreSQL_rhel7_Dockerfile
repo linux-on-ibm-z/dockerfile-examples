@@ -1,0 +1,53 @@
+# Base image
+FROM rhel7
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Create postgres user and group (make sure their IDs get assigned consistently, regardless of whatever dependencies get added)
+RUN groupadd -r postgres && useradd -r -g postgres postgres  &&  mkdir /home/postgres && chown postgres:postgres /home/postgres
+
+# Install dependencies
+RUN yum install -y git build-essential \
+                gcc \
+                gcc-c++ \
+                make \
+                readline-devel \
+                zlib-devel \
+                bison \
+                flex
+
+# Change user to postgres user
+USER postgres
+
+# Clone PostgreSQL source code from github && Build PostgreSQL source code and run tests
+RUN cd /home/postgres && \
+       git clone https://github.com/postgres/postgres.git && \
+       cd /home/postgres/postgres && \
+       ./configure && make && make check
+
+# Install PostgreSQL as root user
+USER root
+RUN cd /home/postgres/postgres && make install
+
+# Create PostgreSQL data directory and make postgres user as the owner
+RUN mkdir /usr/local/pgsql/data && chown postgres:postgres /usr/local/pgsql/data
+
+# Initialize PostgreSQL data directory as postgres user
+USER postgres
+RUN /usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data/
+
+# Create a Volume to store postgresql data
+VOLUME /usr/local/pgsql/data
+
+# Port for PostgreSQL server
+EXPOSE 5432
+
+# Start the PostgreSQL server
+ENTRYPOINT /usr/local/pgsql/bin/postmaster -D /usr/local/pgsql/data
+
+# To connect from client to Postgres server, following configuration files have to be changed :-
+# 1. postgresql.conf
+# 2. pg_hba.conf
+# To run docker container using the config files use the following command-
+# docker run --name <container name> -p 5432:5432  -v `pwd`/postgresql.conf:/usr/local/pgsql/data/postgresql.conf  -v `pwd`/pg_hba.conf:/usr/local/pgsql/data/pg_hba.conf -d <image name>
