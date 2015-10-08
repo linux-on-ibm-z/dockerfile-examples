@@ -1,41 +1,20 @@
-# Docker file for building Apache http Server on sles12
+# Base image
+FROM sles12:latest
 
-FROM sles12
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-# Owner of the docker file
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
-
-# Install build dependencies
-RUN zypper install -y git \
-	openssl \
-	gcc \
-	libtool \
-	autoconf \
-	make \
-	pcre \
-	pcre-devel \
-	libxml2 \
-	libxml2-devel \
-	libexpat-devel
-
-
-# Get the source code from git
-RUN git clone https://github.com/apache/httpd.git
-
-# Change the working directory to source folder
-WORKDIR httpd
-
-# Install the dependecy package apr from source
-RUN cd srclib && git clone https://github.com/apache/apr.git && cd apr && ./buildconf && ./configure && make && make install
-
-# Build and install httpd
-RUN ./buildconf && ./configure --prefix=/usr/local && make && make install
+# Install httpd server
+RUN zypper install -y apache2
 
 # Add the server name to configuration file
-RUN echo "ServerName localhost" >> /usr/local/conf/httpd.conf
+RUN echo "ServerName localhost" >> /etc/apache2/httpd.conf
 
+# Modify configuration. File include.conf is not present by default.
+RUN sed -i '/^Include \/etc\/apache2\/sysconfig.d\/include.conf/s/^/#/' /etc/apache2/httpd.conf
+
+# Port for Apache httpd server
 EXPOSE 80
 
-# Copy the configuration file to /etc/ folder
-RUN mkdir -p /etc/httpd && cp /usr/local/conf/httpd.conf /etc/httpd/
-
+# Start Apache httpd server
+CMD ["/usr/sbin/httpd2", "-D", "FOREGROUND"]
