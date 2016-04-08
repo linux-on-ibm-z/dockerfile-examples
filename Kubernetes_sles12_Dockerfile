@@ -1,0 +1,160 @@
+############ Linux on z Systems Dockerfile for Kubernetes 1.1.0 ######################################################################################
+# 
+# Kubernetes is an open source container cluster manager by Google. 
+# It aims to provide a "platform for automating deployment, scaling, and 
+# operations of application containers across clusters of hosts
+#
+# ####################### Build Gccgo, Etcd, Pause, Kubernetes ########################################
+# This Kubernetes setup has dependency of Gccgo, Etcd and Pause. Dockerfile Steps contains build steps for gccgo,etcd,pause and kubernetes. 
+#
+# To build Kubernetes image, run the command mentioned below:
+#     docker build -t <k8s_image_name> --file=k8s_dockerfile .
+# 
+# ####################### Running Kubernetes #################################################
+#
+# Here are the steps to setup Kubernetes Single node cluster.
+#
+# Note: In the following commands all the values are specific to single node cluster setup and user may enter own values if 
+# have an idea about Kubernetes in depth.
+# 
+# Step 1: Start Etcd service in a container.
+#   docker run --net=host -d <k8s_image_name> etcd --addr=127.0.0.1:4001 --bind-addr=0.0.0.0:4001 --data-dir=/var/etcd/data
+#
+# Step 2: Start Kubernetes processes.
+# a) Start kubelet service.
+#   docker run \
+#   --volume=/:/rootfs:ro \
+#   --volume=/sys:/sys:ro \
+#   --volume=/var/lib/docker/:/var/lib/docker:ro \
+#   --volume=/var/data/kubelet:/var/data/kubelet/:rw \
+#   --volume=/var/run:/var/run:rw \
+#   --net=host \
+#   --privileged=true \
+#   -d \
+#   <k8s_image_name>:latest \
+#   hyperkube kubelet --containerized --root-dir=/var/data/kubelet --hostname-override="127.0.0.1" --address="0.0.0.0" --api-servers=http://localhost:8080 --config=/etc/kubernetes/manifests 
+#
+# b) Start apiserver service.
+#   docker run \
+#   --volume=/:/rootfs:ro \
+#   --volume=/sys:/sys:ro \
+#   --volume=/var/lib/docker/:/var/lib/docker:ro \
+#   --volume=/var/data/kubelet:/var/data/kubelet/:rw \
+#   --volume=/var/run:/var/run:rw \
+#   --net=host \
+#   --privileged=true \
+#   -d \
+#   <k8s_image_name>:latest \
+#   hyperkube apiserver --portal_net=10.0.0.1/24 --address=0.0.0.0 --insecure-bind-address=0.0.0.0 --etcd_servers=http://127.0.0.1:4001 --cluster_name=kubernetes --v=2	
+#
+# c) Start controller service.
+#   docker run -d --net=host -v /var/run/docker.sock:/var/run/docker.sock <k8s_image_name>:latest hyperkube controller-manager --master=127.0.0.1:8080 --v=2
+#
+# d) Start scheduler service.
+#   docker run -d --net=host -v /var/run/docker.sock:/var/run/docker.sock <k8s_image_name>:latest hyperkube scheduler --master=127.0.0.1:8080 --v=2	
+#
+# e) Start proxy service.
+#   docker run -d --net=host --privileged <k8s_image_name>:latest hyperkube proxy --master=http://127.0.0.1:8080 --v=2
+#
+# Step 3: Kubernetes provides kubectl executable as an interface to Kubernetes cluster. To get this executable in a host machine run the following command.
+#   docker run -v "$PWD":/copy -d <k8s_image_name>:latest cp /bin/kubectl /copy
+#   docker run -v "$PWD":/copy -d <k8s_image_name>:latest cp /opt/gccgo/lib64/libgo.so.9 /copy
+#   docker run -v "$PWD":/copy -d <k8s_image_name>:latest cp /opt/gccgo/lib64/libgo.so.9.0.0 /copy
+#   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD
+#
+# Once we get the kubectl command, we can perform various operations on the cluster like checking the status of cluster, deploying an application, getting node information etc.
+# More information about kubectl interface can be found at http://kubernetes.io/v1.0/docs/user-guide/kubectl/kubectl.html
+#
+##################################################################################################
+
+# Base image
+FROM sles12:latest
+
+# The author 
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install dependencies
+RUN zypper install -y wget tar make iptables flex subversion gcc gcc-c++ binutils-devel bzip2 git which
+
+# Set the work directory to /
+WORKDIR /
+
+# Create a directory by name build
+RUN mkdir -p gcc_srcDir/build
+
+# Clone the git source code from github
+RUN svn co svn://gcc.gnu.org/svn/gcc/trunk gcc_srcDir && \
+cd gcc_srcDir && \
+./contrib/download_prerequisites && \
+cd build && \
+../../gcc_srcDir/configure \
+    --prefix="/opt/gccgo" \
+    --enable-shared --with-system-zlib --enable-threads=posix \
+    --disable-multilib --enable-__cxa_atexit --enable-checking \
+    --enable-gnu-indirect-function --enable-languages="c,c++,go" \
+    --disable-bootstrap && \
+make all && \
+make install && \
+make clean && \
+cd / && \
+rm -rf gcc_srcDir
+
+# Set environment variables for gccgo
+ENV PATH /opt/gccgo/bin:$PATH
+
+# Export library path for gccgo
+ENV LD_LIBRARY_PATH /opt/gccgo/lib64
+
+# Set env variables for go
+ENV CGO_ENABLED 1
+
+# Set gccgo.conf file
+RUN echo /opt/gccgo/lib64 > /etc/ld.so.conf.d/gccgo.conf
+
+# Clone the kubernetes from github
+RUN git clone -b release-1.1 https://github.com/linux-on-ibm-z/kubernetes
+
+# Set the work directory to /kubernetes
+WORKDIR /kubernetes
+
+# Comment out the following lines when compiling with gccgo's go 
+RUN sed -i 161d test/e2e/scheduler_predicates.go
+RUN sed -i 177d test/e2e/scheduler_predicates.go
+RUN sed -i 29d test/e2e/scheduler_predicates.go
+RUN sed -i 's/\(\s*\)\(glog.Warningf\)\(.*\)$/\/\/\1\2\3/' pkg/master/controller.go
+RUN sed -i 's/\/\/ +build !arm,!s390x,!ppc64,!ppc64le/\/\/ +build !arm,!ppc64,!ppc64le/' Godeps/_workspace/src/github.com/docker/libcontainer/netlink/netlink_linux_notarm.go
+
+# Delete below file when compiling kubernates with gccgo's go
+RUN mv Godeps/_workspace/src/github.com/docker/libcontainer/netlink/netlink_linux_arms390x.go Godeps/_workspace/src/github.com/docker/libcontainer/netlink/netlink_linux_arms390x.go_bkp
+
+# Build kubernetes
+RUN make
+
+# Copy all the binar files to /bin
+RUN cp _output/local/go/bin/* /bin/
+
+# Set the work directory to / and insatll etcd
+WORKDIR /
+
+# Clone the etcd from github
+RUN git clone -b release-2.1 https://github.com/coreos/etcd
+
+# Set the work directory to /etcd
+WORKDIR /etcd
+
+# Build etcd
+RUN ./build
+
+# copy etcd to root and bin directory
+RUN cp bin/etcd /bin/.
+
+
+# Set the work directory to pause directory and insatll pause service
+WORKDIR /kubernetes/build/pause
+
+# Build pause
+RUN go build --ldflags '-extldflags "-static" -s' pause.go
+
+# copy pause to root and bin directory
+RUN cp pause /bin/
+

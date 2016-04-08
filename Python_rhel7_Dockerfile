@@ -1,0 +1,46 @@
+########## Linux on z Systems Dockerfile for Python version 3.4.3 #########
+#
+# This Dockerfile builds a basic installation of Python.
+#
+# Python is a widely used high-level, general-purpose, 
+# interpreted, dynamic programming language.Python supports multiple programming paradigms,
+# including object-oriented, imperative and functional programming or procedural styles.
+# It features a dynamic type system and automatic memory management and has a large and
+# comprehensive standard library.
+#
+# To build this image, from the directory containing this Dockerfile
+# (assuming that the file is named Dockerfile):
+# docker build -t <image_name> .
+#
+# To create a Python container run the below command.
+# docker run --name <container_name> -v <python_file_path>:<path_in_container> -d <image_name> <python_file_path>
+# For example : docker run --name container_name -v /home/test.py:/home/test.py -d python_rh7 /home/test.py
+##############################################
+
+# Disclaimer: 
+# 1. This base image was built using http://containerz.blogspot.co.uk/2015/03/creating-base-images.html
+#    and was configured to access suitable repositories for installing dependent software packages.
+
+# Base image
+FROM rhel7:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install the build dependencies
+RUN yum install -y gcc wget tar make bzip2 bzip2-devel ncurses ncurses-devel sqlite sqlite-devel openssl-devel tk bzip2 tk-devel bzip2-devel gdbm gdbm-devel xz xz-devel readline readline-devel zlib zlib-devel
+
+# Download the source from python.org
+RUN wget https://www.python.org/ftp/python/3.4.3/Python-3.4.3.tar.xz && tar -xvf Python-3.4.3.tar.xz
+
+# Switch to source directory
+WORKDIR Python-3.4.3
+
+# Create a log file
+RUN touch python_testcases.log
+
+# Build and install Python
+RUN ./configure --prefix=/usr/local --exec-prefix=/usr/local && make && make install
+
+ENTRYPOINT ["/usr/local/bin/python3.4"]
+

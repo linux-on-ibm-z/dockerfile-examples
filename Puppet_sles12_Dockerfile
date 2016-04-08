@@ -1,0 +1,150 @@
+########## Linux on z Systems Dockerfile for Puppet-4.2.0 #########
+#
+# This Dockerfile builds a basic installation of Puppet.
+#
+# Puppet is an open-source configuration management tool in computing. It runs on many Unix-like systems 
+# as well as on Microsoft Windows, and includes its own declarative language to describe system configuration.
+#
+# To build this image, from the directory containing this Dockerfile
+# (assuming that the file is named Dockerfile):
+# docker build -t <image_name> .
+#
+# To view whether Puppet has been built successfully, create a container from the image
+# docker run --name <container_name> -p <port>:8140 -d <image_name>
+#
+#####################################################################
+
+# Disclaimer: 
+# 1. This base image was built using http://containerz.blogspot.co.uk/2015/03/creating-base-images.html
+#    and was configured to access suitable repositories for installing dependent software packages.
+
+# Base image
+FROM sles12:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install dependencies
+RUN zypper refresh && zypper install -y gcc-c++ \
+		      readline-devel tar openssl \
+	  	      unzip libyaml-devel patch \
+		      openssl-devel make git-core \
+		      wget sqlite-devel glibc-locale
+
+# Download and Install ruby 2.1.6
+RUN wget http://cache.ruby-lang.org/pub/ruby/2.1/ruby-2.1.6.tar.gz && \
+    tar -xvf ruby-2.1.6.tar.gz && cd ruby-2.1.6 && \
+    ./configure && make && make install
+
+# Download and Install rubygems 2.1.6
+RUN wget http://production.cf.rubygems.org/rubygems/rubygems-2.1.6.tgz && \
+    tar -xvf rubygems-2.1.6.tgz && \
+    cd rubygems-2.1.6 && ruby  setup.rb
+
+# Install dependency gems
+RUN gem install sqlite3 -v 1.3.10 && \
+    gem install bundler rake-compiler
+
+# Expose default Puppet master port 
+EXPOSE 8140
+
+# Add new user, as it is always advisable to build & run tests as another user
+RUN useradd -d /home/puppet -m -s /bin/bash puppet
+
+# Change working directory to /home/puppet
+WORKDIR /home/puppet 
+
+# Switch user to puppet
+USER puppet 
+
+# Clone puppet git repository, checkout 4.2.0 branch and install dependency gems
+RUN git clone --branch 4.2.0 git://github.com/puppetlabs/puppet && \
+    cd puppet && bundle install --path .bundle/gems/
+
+# Switch user to root
+USER root
+
+# Create User,Group -  puppet
+RUN cd puppet && \
+    bundle exec puppet resource user puppet ensure=present && \
+    bundle exec puppet resource group puppet ensure=present
+
+# Switch user to puppet
+USER puppet
+
+# Initialize puppetlabs configuration
+RUN cd puppet && bundle exec puppet config print
+
+# Create config directories 
+RUN cd .puppetlabs && mkdir -p var/log && mkdir -p var/run && \
+    mkdir -p etc/code/modules && mkdir -p etc/code/environments/production/manifests && \
+    mkdir -p etc/puppet/ && mkdir -p puppet code
+
+# Switch user to root
+USER root
+
+# Create sample puppet.conf,site.pp to expected locations
+
+RUN echo -e [main] \\n \
+    certname \= puppet_host_name \\n \
+    logdir \= \/home\/puppet\/.puppetlabs\/var\/log \\n \
+    rundir \= \/home\/puppet\/.puppetlabs\/var\/run \\n \
+    basemodulepath \= \/home\/puppet\/.puppetlabs\/etc\/code\/modules \\n \
+    server \= puppet_host_name \\n \
+    user  \= puppet \\n \
+    group \= puppet \\n \
+    archive_files \= true \\n \
+    pluginsync \= true \\n \
+        \# This section is used by the Puppet master and Puppet cert applications. \\n \
+    [master] \\n \
+    certname \= puppet_host_name \\n \
+    dns_alt_names \= puppet_host_name\,puppetmaster01\,puppetmaster01.example.com\,puppet\,puppet.example.com \\n \
+    reports \= none \\n \
+    ssl_client_header \= SSL_CLIENT_S_DN \\n \
+    ssl_client_verify_header \= SSL_CLIENT_VERIFY \\n \
+    storeconfigs \= false \\n \
+    autosign \= true \\n \
+        \# This section is used by the Puppet agent application. \\n \
+        [agent] \\n \
+    report \= true \\n \
+    classfile \= \$vardir\/classes.txt \\n \
+    localconfig \= \$vardir\/localconfig \\n \
+    graph \= true \\n \
+    pluginsync \= true \\n \
+    environment \= production > .puppetlabs/etc/puppet/puppet.conf
+	
+RUN echo -e class serverdir \\n \
+{ \\n \
+  notify{\"hey..im the the server\!\"\:} \\n \
+  file { \"\/tmp\/test\"\: \\n \
+    ensure \=\> \"directory\"\, \\n \
+} } \\n \
+\
+node \/\\w\+\/ \\n \
+{ \\n \
+include serverdir    } > .puppetlabs/etc/code/environments/production/manifests/site.pp
+
+# Change the file permissions
+RUN chown puppet:users .puppetlabs/etc/puppet/puppet.conf && \
+    chown puppet:users .puppetlabs/etc/code/environments/production/manifests/site.pp
+
+# Create server_setup.sh and change file permissions
+RUN echo -e \#\!\/bin\/bash \\n \
+                        \# Get container hostname \\n \
+                        hostname\=\`hostname -f\` \\n \
+                        echo \$hostname \\n \
+                        \# Edit puppet.conf with hostname \\n \
+                        sed -i \"s\/puppet_host_name\/\$hostname\/g\" \/home\/puppet\/.puppetlabs\/etc\/puppet\/puppet.conf \\n \
+                        su puppet\<\<EOF \\n \
+                        \# Start Puppet master \\n \
+                        bundle exec puppet master --verbose --no-daemonize --autosign true \\n \
+                        EOF \\n \
+                        exit 0 > puppet/server_setup.sh
+						
+RUN chmod +x puppet/server_setup.sh
+
+# Change working directory to /home/puppet/puppet
+WORKDIR /home/puppet/puppet
+
+# Setup the puppet master service at container run
+CMD ./server_setup.sh

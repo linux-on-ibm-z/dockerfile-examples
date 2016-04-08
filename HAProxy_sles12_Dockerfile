@@ -1,0 +1,42 @@
+########## Linux on z Systems Dockerfile for HAProxy version 1.5.14 #########
+#
+# This Dockerfile builds a basic installation of HAProxy.
+#
+# HAProxy is free, open source software that provides a high availability load balancer 
+# and proxy server for TCP and HTTP-based applications that spreads requests across multiple servers.
+# 
+# To build this image, from the directory containing this Dockerfile
+# (assuming that the file is named Dockerfile):
+# docker build -t <image_name> .
+#
+# Start HAProxy
+# Use the following command to start HAProxy. 
+# docker run --name <container name> -v /haproxy.config:/etc/haproxy.config --expose 80 -p <port no>:80 -d <image name>
+#
+# Please note that you will need to expose ports based on your haproxy configuration file.
+#
+#################################################################################
+
+# Disclaimer: 
+# 1. This base image was built using http://containerz.blogspot.co.uk/2015/03/creating-base-images.html
+#    and was configured to access suitable repositories for installing dependent software packages.
+
+# Base Image
+FROM sles12:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install dependencies
+# Clone Source
+# Untar Source
+# Build Source
+# Install Source
+RUN zypper install -y wget tar make gcc && \
+	wget http://www.haproxy.org/download/1.5/src/haproxy-1.5.14.tar.gz && \
+	tar xzvf haproxy-1.5.14.tar.gz && \
+	cd haproxy-1.5.14 && \
+	make TARGET=linux26 && \
+	make install
+	
+CMD ["/usr/local/sbin/haproxy", "-db", "-f", "/etc/haproxy.config"]	

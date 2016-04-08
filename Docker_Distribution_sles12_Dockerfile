@@ -1,0 +1,125 @@
+############ Linux on z Systems Dockerfile for Docker Distribution 2.1.1 ############
+# 
+# The Registry is a stateless, highly scalable server side application that stores and lets you distribute Docker images
+#
+# To build this image, from the directory containing this Dockerfile (this
+# assumes that this file is named Dockerfile):
+# docker build -t <image_name> .
+# 
+# The filesystem location at which docker registry stores the images is by default set as /var/lib/registry in config.yml.
+# A useful way to get access to these files would be to
+# use a shared filesystem between the container and the host machine, using the
+# volume parameter to docker.
+#
+# Docker command to start registry server-
+# docker run -d -p 5000:5000 -v <host_path>:/var/lib/registry --name <container name> <image name>
+# (where host_path is the path in host machine where images will be mounted)
+# 
+# Steps to push/pull images to registry server-
+# 1.Tag the image so that it points to your registry
+# 	docker tag <image name> localhost:5000/myfirstimage 
+# 2.To push the image to server
+# 	docker push localhost:5000/myfirstimage
+# 3.To pull the image from server
+# 	docker pull localhost:5000/myfirstimage
+#
+# Note:- Instead of localhost, IP of the registry server can be given to tag/push/pull images to registry server. 
+#        To access the docker images from a different host you may have to create certificate and instruct every docker daemon to trust that certificate.
+#########################################################################################################################################################
+ 
+# Disclaimer: 
+# 1. This base image was built using http://containerz.blogspot.co.uk/2015/03/creating-base-images.html
+#    and was configured to access suitable repositories for installing dependent software packages.
+
+# Base Image
+FROM sles12
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+ 
+# Docker uses a layered filesystem which has the side effect of meaning that 
+# files can never be truly deleted if a layer has been committed. Docker
+# also creates one layer per command in a Dockerfile, hence if you wish to
+# keep the resulting image size small you must have as few RUN commands as
+# possible and remove all items you wish to delete before the RUN command
+# exits.
+# We provide a runDeps and buildDeps to add all required packages but remove
+# those that are only needed to build the product.
+
+# Install dependencies
+RUN zypper install -y gmp-devel \
+         binutils-devel \
+         mpfr-devel \
+         make \
+		 git-core \
+         mpc-devel \
+         flex subversion
+
+# Install necessary development packages
+RUN zypper install -y --type pattern Basis-Devel
+		 
+# Checkout the source code of gcc from repository
+RUN svn co svn://gcc.gnu.org/svn/gcc/trunk@223813 gcc
+
+# Set the work directory to gcc
+RUN cd gcc && \
+	mkdir build && \
+	cd build && \
+	../configure \
+    --prefix="/opt/gccgo" \
+    --enable-shared --with-system-zlib --enable-threads=posix \
+    --disable-multilib --enable-__cxa_atexit --enable-checking \
+    --enable-gnu-indirect-function --enable-languages="c,go" \
+    --disable-bootstrap && \
+	make all && \
+	make install 
+
+# Set environment variables for gccgo
+ENV PATH=/opt/gccgo/bin:$PATH
+
+# Export library path for gccgo
+ENV LD_LIBRARY_PATH=/opt/gccgo/lib64
+
+# Set gccgo.conf file
+RUN echo /opt/gccgo/lib64 > /etc/ld.so.conf.d/gccgo.conf
+
+# Create base directory for source
+RUN mkdir -p /go/src/github.com/docker
+
+# Clone source code from git and checkout version 2.1.1
+RUN cd /go/src/github.com/docker && \
+	git clone https://github.com/docker/distribution.git && \
+	cd distribution && \
+    git checkout v2.1.1
+
+# Set environment variables
+ENV DISTRIBUTION_DIR /go/src/github.com/docker/distribution
+ENV GOPATH /go
+ENV GOPATH $DISTRIBUTION_DIR/Godeps/_workspace:$GOPATH
+
+# Set work directory
+WORKDIR $DISTRIBUTION_DIR
+
+# gccgo does not support ldflags
+RUN  sed -i '/^GO_LDFLAGS/s/^/#/' Makefile
+
+# Build
+RUN make PREFIX=/go clean binaries
+
+# Run testcases
+RUN make PREFIX=/go test
+
+# Create filesystem for saving images
+VOLUME /var/lib/registry
+
+# Expose ports
+EXPOSE 5000 5001
+
+# Copy the config-dev.yml file to config.yml
+RUN cp cmd/registry/config-dev.yml cmd/registry/config.yml
+
+# Start the registry server
+ENTRYPOINT ["/go/bin/registry"]
+CMD ["cmd/registry/config.yml"]
+
+

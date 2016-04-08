@@ -1,0 +1,63 @@
+########## Linux on z Systems Dockerfile for Elasticsearch version 1.5.1 #########
+#
+# This Dockerfile builds a basic installation of Elasticsearch.
+#
+# Elasticsearch is a search server based on Lucene. It provides a distributed, multitenant-capable 
+# full-text search engine with an HTTP web interface and schema-free JSON documents.
+#
+# To build this image, from the directory containing this Dockerfile
+# (assuming that the file is named Dockerfile):
+# docker build -t <image_name> .
+#
+# Start ElasticSearch container using the below command 
+# docker run --name <container_name> -p 9200:9200 -d <image_name> 
+# 
+##########################################################################################
+
+# Disclaimer: 
+# 1. This base image was built using http://containerz.blogspot.co.uk/2015/03/creating-base-images.html
+#    and was configured to access suitable repositories for installing dependent software packages.
+
+# Base Image
+FROM sles12
+
+# The Author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install Dependencies
+RUN zypper update -y && zypper install -y git tar unzip wget java-1_7_0-openjdk java-1_7_0-openjdk-devel autoconf
+
+# Set Environment Variables
+ENV  JAVA_HOME=/usr/lib64/jvm/java-1.7.0-openjdk-1.7.0
+ENV  PATH=$PATH:/usr/lib64/jvm/java-1.7.0-openjdk-1.7.0/bin
+
+# Install Maven
+RUN wget http://apache.mirrors.pair.com/maven/maven-3/3.3.3/binaries/apache-maven-3.3.3-bin.tar.gz && tar -zxvf apache-maven-3.3.3-bin.tar.gz
+
+# Set Maven Path
+ENV PATH=$PATH:/apache-maven-3.3.3/bin
+
+# Clone ElasticsSearch Source Code
+RUN wget https://github.com/elastic/elasticsearch/archive/v1.5.1.zip && unzip v1.5.1.zip
+
+# Build  and Install
+RUN cd /elasticsearch-1.5.1 && mvn clean package -DskipTests
+
+RUN cd /elasticsearch-1.5.1/target/releases && tar -xvf elasticsearch-1.5.1.tar.gz
+
+ENV ES_HOME /elasticsearch-1.5.1/target/releases/elasticsearch-1.5.1
+WORKDIR /elasticsearch-1.5.1/target/releases/elasticsearch-1.5.1
+
+# Install elastic head plugin
+RUN bin/plugin -install mobz/elasticsearch-head
+
+# create directory for config files
+RUN mkdir /etc/elasticsearch
+RUN cp config/*.yml /etc/elasticsearch
+
+# Create volume of elastic search data
+VOLUME ["$ES_HOME/data"]
+
+EXPOSE 9200
+
+CMD ["bin/elasticsearch", "-Des.config=/etc/elasticsearch/elasticsearch.yml"]

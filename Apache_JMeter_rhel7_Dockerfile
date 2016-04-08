@@ -1,0 +1,48 @@
+########## Linux on z Systems Dockerfile for Apache JMeter version 2.13 #########
+#
+# This Dockerfile builds a basic installation of Apache JMeter.
+#
+# The Apache JMeter application is open source software, a 100% pure JAVA application
+# designed to load test functional behaviour and measure performance. It was originally
+# designed for testing Web Applications but has since expanded to other test functions.
+#
+# To build this image, from the directory containing this Dockerfile
+# (assuming that the file is named Dockerfile):
+# docker build -t <image_name> .
+#
+# To create a container of Apache JMeter image run the below command:
+# docker run --name <container_name> -it  <image_name>
+#
+# To test a JMX file use the following command:
+# docker run --rm=true -v /path/to/JMX_file/filename.jmx:/filename.jmx jmeter_imagename /filename.jmx
+#
+#################################################################################
+
+# Disclaimer: 
+# 1. This base image was built using http://containerz.blogspot.co.uk/2015/03/creating-base-images.html
+#    and was configured to access suitable repositories for installing dependent software packages.
+
+# Base image
+FROM rhel7:latest
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install the dependencies: JAVA Git and ANT
+RUN yum install -y git java ant subversion
+
+# Clone the Apache JMeter source code from svn
+RUN svn co http://svn.apache.org/repos/asf/jmeter/tags/v2_13 
+
+# Get the dependencies for Apache JMeter
+RUN cd /v2_13 && ant download_jars
+
+# Build the source
+RUN cd /v2_13 && ant
+
+# Set Environment Variable for JMeter
+ENV PATH $PATH:/v2_13/bin
+
+# The Starting Point
+ENTRYPOINT ["jmeter","-n","-t"]
+
