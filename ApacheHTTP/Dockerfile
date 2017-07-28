@@ -1,4 +1,4 @@
-########## Linux on z Systems Dockerfile for Apache Http Server version 2.4.26 #########
+################# Dockerfile for Apache Http Server version 2.4.26 #####################
 #
 # This Dockerfile builds a basic installation of Apache Http Server.
 #
