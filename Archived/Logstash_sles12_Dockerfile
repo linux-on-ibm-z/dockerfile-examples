@@ -1,0 +1,68 @@
+########## Linux on z Systems Dockerfile for Logstash version 1.5.1 #########
+#
+# This Dockerfile builds a basic installation of Logstash
+#
+# Logstash is a tool for managing events and logs. When used generically the term 
+# encompasses a larger system of log collection, processing, storage and searching activities. 
+#
+# To build this image, from the directory containing this Dockerfile
+# (assuming that the file is named Dockerfile):
+# docker build -t <image_name> .
+#
+# Start Logstash using the below command
+# docker run --name <container name> -v /logstash.conf:/logstash/logstash.conf -d <image name> bin/logstash -f /logstash/logstash.conf
+####################################################################
+
+# Disclaimer: 
+# 1. This base image was built using http://containerz.blogspot.co.uk/2015/03/creating-base-images.html
+#    and was configured to access suitable repositories for installing dependent software packages.
+
+# Base image
+FROM sles12
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install Build Dependencies
+RUN zypper install -y --type pattern Basis-Devel
+RUN zypper install -y java-1_7_0-openjdk git curl ant ruby-devel make
+
+# Set JAVA_HOME and PATH variable
+ENV JAVA_HOME /usr/lib64/jvm/java-1.7.1
+ENV PATH $JAVA_HOME/bin:$PATH
+ENV ANT_HOME /usr/share/ant
+
+# Add key from RVM
+RUN curl -sSL https://rvm.io/mpapis.asc | gpg --import -
+
+# Install RVM keys
+RUN curl -sSL https://get.rvm.io | bash -s -- --version 1.26.7
+
+# Download the source from github
+RUN bash -c "source /etc/profile.d/rvm.sh && rvm install jruby-1.7.17 && rvm use jruby-1.7.17 && git clone https://github.com/elastic/logstash.git"
+
+# Checkout branch 1.5.1
+RUN cd logstash && git checkout v1.5.1 && git branch
+
+# Download and build jffi
+RUN cd logstash && git clone https://github.com/jnr/jffi.git  --branch 1.2.8
+RUN cd logstash/jffi && ant -Dbuild.native.dir=/usr/lib
+
+RUN bash -c "source /etc/profile.d/rvm.sh && rvm use && cd logstash && rake test:install-core"
+RUN cd logstash && bin/logstash irb
+RUN cd logstash && rake artifact:tar
+RUN bash -c "source /etc/profile.d/rvm.sh && rvm use && cd logstash && rake test"
+
+# Define mountable directory
+VOLUME ["/data"]
+
+# Define working directory
+WORKDIR /logstash
+
+# Expose ports
+EXPOSE 514
+EXPOSE 5043
+EXPOSE 5000
+EXPOSE 9292
+
+CMD ["bin/logstash", "-f", "/logstash/logstash.conf"]

@@ -1,0 +1,53 @@
+########## Linux on z Systems Dockerfile for Kibana version 4.1.1 #########
+#
+# This Dockerfile builds a basic installation of Kibana.
+#
+# Kibana is an open source data visualization plugin for Elasticsearch. 
+# It provides visualization capabilities on top of the content indexed on an Elasticsearch cluster. 
+# Users can create bar, line and scatter plots, or pie charts and maps on top of large volumes of data.
+#
+# To build this image, from the directory containing this Dockerfile
+# (assuming that the file is named Dockerfile):
+# docker build -t <image_name> .
+# 
+# Start Kibana container using the below command.
+# docker run --name <container_name> -p 5601:5601 -d <image_name>    
+
+##############################################
+
+# Disclaimer: 
+# 1. This base image was built using http://containerz.blogspot.co.uk/2015/03/creating-base-images.html
+#    and was configured to access suitable repositories for installing dependent software packages.
+
+# Base Image 
+FROM sles12
+
+# The author
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+# Install the dependencies
+RUN zypper install -y autoconf automake gcc-c++ make libtool curl git-core java-1_7_0-openjdk-devel wget tar unzip httpd
+
+# Build and install node.js
+RUN git clone https://github.com/andrewlow/node.git && cd node/ && ./configure && make && make install && npm install -g grunt-cli
+
+WORKDIR /
+
+# Download Kibana 4.1.1 binary and extract it
+RUN wget https://download.elastic.co/kibana/kibana/kibana-4.1.1-linux-x64.tar.gz && tar xvf kibana-4.1.1-linux-x64.tar.gz
+
+WORKDIR /kibana-4.1.1-linux-x64
+
+# Replace `Node.js` in the package with the installed `Node.js`
+RUN mv node node_old && ln -s /usr/local node
+
+# Make directory for config file
+RUN mkdir /etc/kibana
+RUN cp config/kibana.yml /etc/kibana
+
+# Expose 5601 port used by Kibana
+# Expose 80 port used by apache
+EXPOSE 5601 80
+
+# Start Kibana service
+CMD ["bin/kibana", "-c", "/etc/kibana/kibana.yml"]
