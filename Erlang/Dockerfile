@@ -12,8 +12,8 @@
 # docker run --name <container_name> -it <image_name> /bin/bash
 #
 # Use below command to use help option for Erlang
-# docker run --rm=true --name <container_name> -d <image_name> <argument>
-# For ex. docker run --rm=true --name <container_name> -d <image_name> --help
+# docker run --rm=true --name <container_name> -it <image_name> erl <argument>
+# For ex. docker run --rm=true --name <container_name> -it <image_name> erl --help
 #
 ###########################################################################
 

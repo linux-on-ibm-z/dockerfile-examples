@@ -10,10 +10,10 @@
 # docker run -it <image_name> /bin/bash
 #
 # Below is the command to use Rails:
-# docker run --rm --name <container_name> <image_name> rails <argument>
+# docker run --rm --name <container_name> -it <image_name> rails <argument>
 #
 # Below is an example to display the installed Rails version :
-# docker run --rm --name <container_name> <image_name> rails -v
+# docker run --rm --name <container_name> -it <image_name> rails -v
 #
 #########################################################################################
 
