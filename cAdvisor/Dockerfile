@@ -1,4 +1,4 @@
-######################## Dockerfile for cAdvisor 0.25.0 #################################
+######################## Dockerfile for cAdvisor 0.26.1 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y \
  && mkdir -p $GOPATH/src/github.com/google && cd $GOPATH/src/github.com/google \
 
 # Checkout the code from repository
- && git clone https://github.com/google/cadvisor.git -b v0.25.0 \
+ && git clone https://github.com/google/cadvisor.git -b v0.26.1 \
  && cd cadvisor \
 
 # Change the work directory
