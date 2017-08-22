@@ -1,4 +1,4 @@
-################ Dockerfile for Docker Compose version 1.13.0 ####################
+################ Dockerfile for Docker Compose version 1.15.0 ####################
 #
 # This Dockerfile builds a basic installation of Docker Compose.
 #
@@ -26,7 +26,7 @@ MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/commun
 RUN apt-get update && apt-get install -y \
     python-pip \
  && pip install --upgrade pip \
- && pip install docker-compose==1.13.0 \
+ && pip install docker-compose==1.15.0 \
  
 # Clean up unused packages and data
  && apt-get remove -y python-pip \
