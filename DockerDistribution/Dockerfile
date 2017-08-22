@@ -1,4 +1,4 @@
-############### Dockerfile for Docker Distribution version v2.6.1 #################
+############### Dockerfile for Docker Distribution version v2.6.2 #################
 #
 # This Dockerfile builds a basic installation of Docker Distribution.
 #
@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -y \
 
 # Download and build source code of Docker Distribution
  && git clone https://github.com/docker/distribution.git $GOPATH/src/github.com/docker/distribution \
- && cd $GOPATH/src/github.com/docker/distribution && git checkout v2.6.1 \
+ && cd $GOPATH/src/github.com/docker/distribution && git checkout v2.6.2 \
  && make PREFIX=$GOPATH clean binaries \
  && mkdir -p /etc/docker/registry \
  && cp $DISTRIBUTION_DIR/cmd/registry/config-dev.yml /etc/docker/registry/config.yml \
