@@ -1,4 +1,4 @@
-################### Dockerfile for Ansible 2.3.1.0 ##################################
+################### Dockerfile for Ansible 2.3.2.0 ##################################
 #
 # This Dockerfile builds a basic installation of Ansible.
 #
