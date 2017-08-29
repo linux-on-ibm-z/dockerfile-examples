@@ -50,7 +50,7 @@ RUN apt-get update && apt-get install \
     make \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /tmp
+ && apt-get clean
  
 # This dockerfile does not have a CMD statement as the image is intended to be
 # used as a base for building an application. If desired it may also be run as
