@@ -58,7 +58,7 @@ RUN apt-get update && apt-get install -y \
     qt-sdk \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /tmp \
+ && apt-get clean && rm -rf /var/lib/apt/lists/* \
  && rm -rf /apt/* && rm -rf /usr/lib/debug/*
 
 # This dockerfile does not have a CMD statement as the image is intended to be
