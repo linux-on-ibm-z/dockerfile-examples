@@ -267,7 +267,7 @@ RUN apt-get update -y && apt-get install -y\
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean \
- && rm -rf $HOME/* /tmp
+ && rm -rf $HOME/*
 
 # 8091: Couchbase Web console, REST/HTTP interface
 # 8092: Views, queries, XDCR
