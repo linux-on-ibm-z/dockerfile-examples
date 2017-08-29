@@ -58,7 +58,7 @@ RUN apt-get update && apt-get install -y \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*\
- && rm -rf /tmp && rm -rf $HOME/.m2
+ && rm -rf $HOME/.m2
 
 WORKDIR $JBOSS_HOME
 
