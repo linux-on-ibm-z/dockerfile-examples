@@ -89,8 +89,7 @@ RUN apt-get update && apt-get install -y \
  && rm -rf $SOURCE_DIR /opt \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /tmp/* && rm -rf /var/tmp/*
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 VOLUME /data/db
 
