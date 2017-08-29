@@ -71,7 +71,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     xz-utils \ 
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /tmp \
+ && apt-get clean && rm -rf /var/lib/apt/lists/* \
  && rm -rf /root/Python-2.7.13.tar.xz /root/Python-2.7.13
 
 CMD python --version
