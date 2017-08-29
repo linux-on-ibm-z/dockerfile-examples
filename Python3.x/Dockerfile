@@ -67,7 +67,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     xz-utils \ 
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /tmp \
+ && apt-get clean && rm -rf /var/lib/apt/lists/* \
  && rm -rf /root/Python-3.6.1.tar.xz /root/Python-3.6.1
 
 CMD python3 --version
