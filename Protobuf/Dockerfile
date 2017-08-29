@@ -62,7 +62,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     wget \
  && apt-get autoremove -y && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /tmp /var/tmp
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
