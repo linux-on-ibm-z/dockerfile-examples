@@ -67,7 +67,7 @@ RUN apt-get update && apt-get install -y \
     wget \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /tmp
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 CMD ["R"]
 # End of Dockerfile
