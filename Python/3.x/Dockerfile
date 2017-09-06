@@ -1,4 +1,4 @@
-########## Dockerfile for Python-3.6.1 #########################################
+########## Dockerfile for Python-3.6.2 #########################################
 #
 # Python is an interactive high-level object-oriented language
 #
@@ -48,11 +48,11 @@ RUN apt-get update && apt-get install -y \
     xz-utils \ 
 
 # Download Python from the ftp site
- && wget https://www.python.org/ftp/python/3.6.1/Python-3.6.1.tar.xz \
- && tar -xvf Python-3.6.1.tar.xz \
+ && wget https://www.python.org/ftp/python/3.6.2/Python-3.6.2.tar.xz \
+ && tar -xvf Python-3.6.2.tar.xz \
 
 # Build Python
- && cd Python-3.6.1 \
+ && cd Python-3.6.2 \
  && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
  && make \
  && make install \
@@ -68,6 +68,6 @@ RUN apt-get update && apt-get install -y \
     xz-utils \ 
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /root/Python-3.6.1.tar.xz /root/Python-3.6.1
+ && rm -rf /root/Python-3.6.2.tar.xz /root/Python-3.6.2
 
 CMD python3 --version
