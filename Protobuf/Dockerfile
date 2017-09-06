@@ -1,4 +1,4 @@
-####################### Dockerfile for Protobuf version 3.3.0 ##############
+####################### Dockerfile for Protobuf version 3.4.0 ##############
 #
 # Protocol Buffers is a method of serializing structured data.
 #
@@ -43,7 +43,7 @@ RUN apt-get update && apt-get install -y \
 # Downlaod and install protobuf 
  && git clone https://github.com/google/protobuf.git \
  && cd protobuf \
- && git checkout v3.3.0 \
+ && git checkout v3.4.0 \
  && ./autogen.sh \
  && ./configure \
  && make && make install \
@@ -62,7 +62,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     wget \
  && apt-get autoremove -y && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
+ && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
