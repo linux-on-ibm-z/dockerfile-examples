@@ -79,9 +79,9 @@ RUN apt-get update -y && apt-get install -y \
  && make build-go \
 
 # Install yarn
- && cd / && wget https://yarnpkg.com/latest.tar.gz \
- && tar -C /opt/ -xzf latest.tar.gz \
- && rm -rf /latest.tar.gz \
+ && cd / && wget https://github.com/yarnpkg/yarn/releases/download/v0.27.5/yarn-v0.27.5.tar.gz \
+ && tar -C /opt/ -xzf yarn-v0.27.5.tar.gz \
+ && rm -rf /yarn-v0.27.5.tar.gz \
 
 # Install grunt
  && cd $GOPATH/src/github.com/grafana/grafana \
