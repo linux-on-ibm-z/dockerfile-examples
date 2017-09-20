@@ -1,4 +1,4 @@
-############################ Dockerfile for Logstash version 5.4.0 ###################################################
+############################ Dockerfile for Logstash version 5.5.2 ###################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -10,7 +10,7 @@
 # docker build -t <image_name> .
 #
 # Start Logstash using the below command
-# docker run --name <container name> -v <path_on_host>/logstash.conf:/etc/logstash/logstash.conf -d <logstash_image>
+# docker run --name <container name> -v <path_on_host>/logstash.conf:/etc/logstash/logstash.conf -d <logstash_image>
 #######################################################################################################################
 
 # Base image
@@ -32,14 +32,14 @@ RUN apt-get update && apt-get install -y \
 	wget \
 
 # Download the logstash source from github and build it
- && wget https://artifacts.elastic.co/downloads/logstash/logstash-5.4.0.zip \
- && unzip -u logstash-5.4.0.zip \
+ && wget https://artifacts.elastic.co/downloads/logstash/logstash-5.5.2.zip \
+ && unzip -u logstash-5.5.2.zip \
  && wget https://github.com/jnr/jffi/archive/master.zip \
  &&	unzip master.zip && cd jffi-master && ant && cd .. \
- &&	mkdir logstash-5.4.0/vendor/jruby/lib/jni/s390x-Linux  \
- &&	cp jffi-master/build/jni/libjffi-1.2.so logstash-5.4.0/vendor/jruby/lib/jni/s390x-Linux/libjffi-1.2.so \
+ &&	mkdir logstash-5.5.2/vendor/jruby/lib/jni/s390x-Linux  \
+ &&	cp jffi-master/build/jni/libjffi-1.2.so logstash-5.5.2/vendor/jruby/lib/jni/s390x-Linux/libjffi-1.2.so \
  &&	cp -r /root/jffi-master  /usr/share \
- && cp -r /root/logstash-5.4.0 /usr/share/logstash \
+ && cp -r /root/logstash-5.5.2 /usr/share/logstash \
  
 # Cleanup Cache data , unused packages and source files
  && apt-get remove -y \
@@ -59,7 +59,7 @@ EXPOSE 514 5043 5000 9292
 
 ENV PATH=/usr/share/logstash/bin:$PATH
 
-CMD ["logstash","f","/etc/logstash/logstash.conf"]
+CMD ["logstash"]
 
 # End of Dockerfile
 
