@@ -1,4 +1,4 @@
-######################## Dockerfile for Apache JMeter version 3.1 #########################################
+######################## Dockerfile for Apache JMeter version 3.2 #########################################
 #
 # This Dockerfile builds a basic installation of Apache JMeter.
 #
@@ -30,7 +30,6 @@ WORKDIR $SOURCE_DIR
 # Set Environment varibles
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
 ENV PATH=$JAVA_HOME/bin:$PATH
-ENV _JAVA_OPTIONS="-Xmx2048m -Xss512m"
 
 # Install Subversion and dependencies
 RUN apt-get update &&  apt-get install -y \
@@ -38,12 +37,16 @@ RUN apt-get update &&  apt-get install -y \
     openjdk-8-jdk \
     openssl \
     subversion \
+	openjfx \
 
 # Download from SVN and build
- && svn co http://svn.apache.org/repos/asf/jmeter/tags/v3_1 \
- && cd $SOURCE_DIR/v3_1 && ant download_jars \
- && cd $SOURCE_DIR/v3_1 && ant \
- && cp -r $SOURCE_DIR/v3_1 /opt/apache-jmeter-3.1 \
+ && svn co http://svn.apache.org/repos/asf/jmeter/tags/v3_2 \
+ && cd $SOURCE_DIR/v3_2 && ant download_jars \
+ && cd $SOURCE_DIR/v3_2 && ant \
+ && cp -r $SOURCE_DIR/v3_2 /opt/apache-jmeter-3.2 \
+
+#Remove G1GC algorithm as it is unimplemented in OpenJDK zero
+ && sed -i '93d' /opt/apache-jmeter-3.2/bin/jmeter \
  
 # Clean the Cache data and remove source files and dependencies
  && rm -rf $SOURCE_DIR \
@@ -54,7 +57,7 @@ RUN apt-get update &&  apt-get install -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set Environment Variable for JMeter
-ENV PATH $PATH:/opt/apache-jmeter-3.1/bin
+ENV PATH $PATH:/opt/apache-jmeter-3.2/bin
 
 ENTRYPOINT ["jmeter","-n","-t"]
 
