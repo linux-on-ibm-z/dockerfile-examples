@@ -1,4 +1,4 @@
-########## Dockerfile for Joomla version 3.7.4 ######
+########## Dockerfile for Joomla version 3.7.5 ######
 #
 # Joomla is an online, open source website creation tool written in PHP.
 #
@@ -36,7 +36,7 @@ RUN apt-get update -y && apt-get install -y \
     php7.0-dev \
     unzip \
     wget \
-	
+
 # Configure apache2 server
  && chmod 766 /etc/apache2/apache2.conf \
  && cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf1 \
@@ -52,11 +52,11 @@ RUN apt-get update -y && apt-get install -y \
  && chmod -R a+w /var/www/html/ \
  && mkdir Joomla \
  && cd Joomla \
- && wget https://github.com/joomla/joomla-cms/releases/download/3.7.4/Joomla_3.7.4-Stable-Full_Package.zip \
- && unzip Joomla_3.7.4-Stable-Full_Package.zip  \
+ && wget https://github.com/joomla/joomla-cms/releases/download/3.7.5/Joomla_3.7.5-Stable-Full_Package.zip \
+ && unzip Joomla_3.7.5-Stable-Full_Package.zip  \
  && chmod a+w /var/www/html/Joomla/ \
  && mv installation/configuration.php-dist installation/configuration.php \
- 
+
 # Start mysql server and create database for Joomla
  &&  mkdir -p /var/lib/mysql/data \
  && /usr/sbin/mysqld --initialize --user=mysql --datadir=/var/lib/mysql/data \
@@ -65,8 +65,8 @@ RUN apt-get update -y && apt-get install -y \
  && service mysql start && sleep 15s && /usr/bin/mysql -e "create database Joolma" \
  && /usr/bin/mysql -e "create user 'user'@'localhost' " \
  && /usr/bin/mysql -e "grant all privileges on *.* to 'user'@'localhost'" \
- 
-# Create a script to start apache2 and mysql 
+
+# Create a script to start apache2 and mysql
  && echo 'service apache2 start && /usr/bin/mysqld_safe --user=mysql' > /start.sh \
 
 # Clean up of unused packages
@@ -77,8 +77,8 @@ RUN apt-get update -y && apt-get install -y \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean \
- && rm -rf  /var/lib/apt/lists/*
-
+ && rm -rf  /var/lib/apt/lists/* \
+ && rm  /var/www/html/Joomla/Joomla_3.7.5-Stable-Full_Package.zip
 # Create volume
 VOLUME /var/www/html
 
@@ -87,4 +87,3 @@ EXPOSE 80 3306
 
 # Start apache2 and mysql sever
 CMD ["/bin/sh", "start.sh"]
-
