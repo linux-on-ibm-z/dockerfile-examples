@@ -1,4 +1,4 @@
-########## Dockerfile for V8_JavaScript version 6.0 #########
+########## Dockerfile for V8 JavaScript version 6.0 #########
 #
 # This Dockerfile builds a basic installation of V8_JavaScript.
 #
