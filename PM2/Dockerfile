@@ -1,4 +1,4 @@
-########## Dockerfile for PM2 version 2.6.0 #########
+########## Dockerfile for PM2 version 2.7.1 #########
 #
 # This Dockerfile builds a basic installation of PM2.
 #
@@ -37,7 +37,7 @@ RUN  apt-get update  \
 	 npm  \
 	 openjdk-8-jdk \
   && ln -s "$(which nodejs)" /usr/local/bin/node \
-  && npm install pm2@2.6.0 -g \
+  && npm install pm2@2.7.1 -g \
   && apt-get remove -y \
      curl \
 	 openjdk-8-jdk \
