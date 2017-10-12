@@ -1,4 +1,4 @@
-########## Dockerfile for Zabbix-server version 3.2.7 #########
+########## Dockerfile for Zabbix-server version 3.4.2 #########
 #
 # This Dockerfile builds a basic installation of Zabbix-server.
 #
@@ -54,6 +54,8 @@ RUN	apt-get update && apt-get install -y mysql-server \
 		snmptrapd \
 		vim \
 		wget \
+		libevent-dev \
+		libpcre3-dev \
 	
 # Enable PHP support by modifying Apache configuration file
 	&&	cd /etc/apache2 \
@@ -66,9 +68,9 @@ RUN	apt-get update && apt-get install -y mysql-server \
 	
 # Download and install Zabbix server
 	&&	cd $SOURCE_DIR \
-	&&	wget http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/3.2.7/zabbix-3.2.7.tar.gz/download -O zabbix-3.2.7.tar.gz \
-	&&	tar -xvf zabbix-3.2.7.tar.gz \
-	&&	cd zabbix-3.2.7/ \
+	&&	wget http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/3.4.2/zabbix-3.4.2.tar.gz/download -O zabbix-3.4.2.tar.gz \
+	&&	tar -xvf zabbix-3.4.2.tar.gz \
+	&&	cd zabbix-3.4.2/ \
 	&&	./configure --enable-server --with-mysql --enable-ipv6 --with-net-snmp --with-libcurl --with-libxml2 \
 	&&	make \
 	&&	make install \
@@ -78,7 +80,7 @@ RUN	apt-get update && apt-get install -y mysql-server \
 	&&	/usr/sbin/useradd -g zabbix zabbix \
 
 # Installing Zabbix web interface	
-	&&	cd /zabbix-3.2.7/frontends/php/ \
+	&&	cd /zabbix-3.4.2/frontends/php/ \
 	&&	mkdir -p /var/www/html/zabbix \
 	&&	cp -rf * /var/www/html/zabbix/ \
 	&&	cd /var/www/html/zabbix \
@@ -93,7 +95,7 @@ RUN	apt-get update && apt-get install -y mysql-server \
 	&& 	/usr/bin/mysql -e "create user 'zabbix'@'localhost'" \
 	&&	/usr/bin/mysql -e "grant all privileges on zabbix.* to 'zabbix'@'localhost'" \
 	
-	&&	cd /zabbix-3.2.7/database/mysql \
+	&&	cd /zabbix-3.4.2/database/mysql \
 	&&	mysql -uzabbix zabbix < schema.sql \
 	&&	mysql -uzabbix zabbix < images.sql \
 	&&	mysql -uzabbix zabbix < data.sql \
@@ -116,7 +118,7 @@ RUN	apt-get update && apt-get install -y mysql-server \
 			vim \
 			wget \
 	&& 	apt autoremove -y && apt-get clean \
-	&&	rm -rf /zabbix-3.2.7.tar.gz && rm -rf /var/lib/apt/lists/* 
+	&&	rm -rf /zabbix-3.4.2.tar.gz && rm -rf /var/lib/apt/lists/* 
 	
 EXPOSE 80
 
