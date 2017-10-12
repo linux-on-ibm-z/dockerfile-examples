@@ -1,4 +1,4 @@
-########## Dockerfile for Ruby version 2.4.1 #########
+########## Dockerfile for Ruby version 2.4.2 #########
 #
 # Ruby is a dynamic, open source programming language with a focus on simplicity and productivity.
 # It has an elegant syntax that is natural to read and easy to write.
@@ -46,9 +46,9 @@ RUN apt-get update && apt-get install -y \
     openssl \
 
 # Install Ruby
- && wget http://cache.ruby-lang.org/pub/ruby/ruby-2.4.1.tar.gz \
- && tar -xvf ruby-2.4.1.tar.gz \
- && cd ruby-2.4.1 \
+ && wget http://cache.ruby-lang.org/pub/ruby/ruby-2.4.2.tar.gz \
+ && tar -xvf ruby-2.4.2.tar.gz \
+ && cd ruby-2.4.2 \
  && ./configure \
  && make \
  && make install \
