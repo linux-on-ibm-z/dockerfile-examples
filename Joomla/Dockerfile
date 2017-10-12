@@ -1,4 +1,4 @@
-########## Dockerfile for Joomla version 3.7.5 ######
+########## Dockerfile for Joomla version 3.8.1 ######
 #
 # Joomla is an online, open source website creation tool written in PHP.
 #
@@ -52,8 +52,8 @@ RUN apt-get update -y && apt-get install -y \
  && chmod -R a+w /var/www/html/ \
  && mkdir Joomla \
  && cd Joomla \
- && wget https://github.com/joomla/joomla-cms/releases/download/3.7.5/Joomla_3.7.5-Stable-Full_Package.zip \
- && unzip Joomla_3.7.5-Stable-Full_Package.zip  \
+ && wget https://github.com/joomla/joomla-cms/releases/download/3.8.1/Joomla_3.8.1-Stable-Full_Package.zip \
+ && unzip Joomla_3.8.1-Stable-Full_Package.zip  \
  && chmod a+w /var/www/html/Joomla/ \
  && mv installation/configuration.php-dist installation/configuration.php \
 
@@ -62,7 +62,7 @@ RUN apt-get update -y && apt-get install -y \
  && /usr/sbin/mysqld --initialize --user=mysql --datadir=/var/lib/mysql/data \
  && sleep 60s && mkdir -p /var/run/mysqld \
  && chown mysql:mysql /var/run/mysqld \
- && service mysql start && sleep 15s && /usr/bin/mysql -e "create database Joolma" \
+ && service mysql start && sleep 15s && /usr/bin/mysql -e "create database Joomla" \
  && /usr/bin/mysql -e "create user 'user'@'localhost' " \
  && /usr/bin/mysql -e "grant all privileges on *.* to 'user'@'localhost'" \
 
@@ -78,7 +78,7 @@ RUN apt-get update -y && apt-get install -y \
  && apt autoremove -y \
  && apt-get clean \
  && rm -rf  /var/lib/apt/lists/* \
- && rm  /var/www/html/Joomla/Joomla_3.7.5-Stable-Full_Package.zip
+ && rm  /var/www/html/Joomla/Joomla_3.8.1-Stable-Full_Package.zip
 # Create volume
 VOLUME /var/www/html
 
