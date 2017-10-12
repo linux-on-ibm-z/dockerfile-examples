@@ -1,4 +1,4 @@
-########## Dockerfile for Zabbix-Agent version 3.2.7 ####################
+########## Dockerfile for Zabbix-Agent version 3.4.2 ####################
 #
 # This Dockerfile builds a basic installation of Zabbix-Agent.
 #
@@ -45,13 +45,14 @@ RUN	apt-get update && apt-get -y install \
 		make \
 		tar \
 		wget \
+		libpcre3-dev \
 
 # Download Zabbix agent
-	&& wget http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/3.2.7/zabbix-3.2.7.tar.gz \
-	&& tar -xvf zabbix-3.2.7.tar.gz \
+	&& wget http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/3.4.2/zabbix-3.4.2.tar.gz \
+	&& tar -xvf zabbix-3.4.2.tar.gz \
 
 # Install Zabbix agent
-	&& cd $SOURCE_DIR/zabbix-3.2.7 \
+	&& cd $SOURCE_DIR/zabbix-3.4.2 \
 	&& ./configure --enable-agent \
 	&& make \
 	&& make install \
