@@ -1,4 +1,4 @@
-#################### Dockerfile for Beats 5.5.2 #############################
+#################### Dockerfile for Beats 5.6.2 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -48,15 +48,15 @@ RUN apt-get update && apt-get install -y \
 # Install go and donload beats source code
  && python -m easy_install pip \
  && python -m pip install appdirs pyparsing six packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv \
- && wget https://storage.googleapis.com/golang/go1.8.3.linux-s390x.tar.gz  \
- && tar xvf go1.8.3.linux-s390x.tar.gz \
+ && wget https://storage.googleapis.com/golang/go1.9.linux-s390x.tar.gz  \
+ && tar xvf go1.9.linux-s390x.tar.gz \
  && ln -sf /usr/bin/gcc /usr/bin/s390x-linux-gnu-gcc \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
  && git clone https://github.com/elastic/beats.git  \
  && cd beats  \
- && git checkout v5.5.2  \
+ && git checkout v5.6.2  \
 
 # Updtae ipv4 and ipv6 source code to add support for s390x
  && sed -i "61d" $GOPATH/src/github.com/elastic/beats/vendor/golang.org/x/net/ipv4/gen.go  \
