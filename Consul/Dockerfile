@@ -1,4 +1,4 @@
-########## Dockerfile for Consul - 0.9.2 #########
+########## Dockerfile for Consul - 0.9.3 #########
 # 
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter 
@@ -53,7 +53,7 @@ RUN apt-get update &&  apt-get install -y \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/consul.git \
- && cd consul && git checkout tags/v0.9.2 \
+ && cd consul && git checkout tags/v0.9.3 \
  && go get github.com/mitchellh/gox \
 
 # Apply the patch to add s390x support
