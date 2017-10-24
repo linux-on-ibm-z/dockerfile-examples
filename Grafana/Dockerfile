@@ -1,4 +1,4 @@
-############################ Dockerfile for Grafana 4.5.0 ############################################
+############################ Dockerfile for Grafana 4.5.2 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -53,16 +53,16 @@ RUN apt-get update -y && apt-get install -y \
  && ./ibm-6.11.3.0-node-v6.11.3-linux-s390x.bin -i silent \
 
 # Install Golang
- && cd / && wget https://storage.googleapis.com/golang/go1.8.3.linux-s390x.tar.gz \
- && chmod +x go1.8.3.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.8.3.linux-s390x.tar.gz \
+ && cd / && wget https://storage.googleapis.com/golang/go1.9.linux-s390x.tar.gz \
+ && chmod +x go1.9.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.9.linux-s390x.tar.gz \
  && go version \
- && rm -rf go1.8.3.linux-s390x.tar.gz \
+ && rm -rf go1.9.linux-s390x.tar.gz \
 
 
 # Get the Grafana Soure code and build Grafana backend
  && cd / && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
- && cd $GOPATH/src/github.com/grafana/grafana && git checkout v4.5.0 \
+ && cd $GOPATH/src/github.com/grafana/grafana && git checkout v4.5.2 \
  && cd ./vendor/github.com/klauspost/compress/gzip \
  && cp gunzip.go gunzip.go.copy \
  && cp gzip.go gzip.go.copy \
