@@ -35,11 +35,11 @@ RUN apt-get update && apt-get install -y \
     tar \
     wget \
 
-#Install Go1.8.3
- && wget https://storage.googleapis.com/golang/go1.8.3.linux-s390x.tar.gz \
- && chmod ugo+r go1.8.3.linux-s390x.tar.gz \
+#Install Go1.9
+ && wget https://storage.googleapis.com/golang/go1.9.linux-s390x.tar.gz \
+ && chmod ugo+r go1.9.linux-s390x.tar.gz \
  && rm -rf /usr/local/go \
- && tar -C /usr/local -xzf go1.8.3.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.9.linux-s390x.tar.gz \
 
 # Clone etcd source
  && mkdir -p /src/github.com/coreos \
@@ -62,7 +62,7 @@ RUN apt-get update && apt-get install -y \
     wget \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /go1.8.3.linux-s390x.tar.gz /src/github.com/coreos
+ && rm -rf /go1.9.linux-s390x.tar.gz /src/github.com/coreos
 
 WORKDIR /data
 VOLUME /data
