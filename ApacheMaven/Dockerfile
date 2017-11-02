@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y \
     maven \
     openjdk-8-jdk \
 # Download and build maven code
- && wget http://apache.cs.utah.edu/maven/maven-3/3.5.0/source/apache-maven-3.5.0-src.tar.gz \
+ && wget https://archive.apache.org/dist/maven/maven-3/3.5.0/source/apache-maven-3.5.0-src.tar.gz \
  && tar -zxvf apache-maven-3.5.0-src.tar.gz \
  && cd apache-maven-3.5.0 \
  && mvn -DdistributionTargetDir="$M3_HOME" clean install \
