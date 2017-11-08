@@ -1,4 +1,4 @@
-########## Dockerfile for Python-2.7.13 #########################################
+########## Dockerfile for Python-2.7.14 #########################################
 #
 # Python is an interactive high-level object-oriented language
 #
@@ -47,17 +47,22 @@ RUN apt-get update && apt-get install -y \
     tar \
     wget \
     xz-utils \ 
+	zlib1g-dev \
+	libdb1-compat \
+	libdb-dev \
+	tk8.5-dev \
+	gdb \
 
 # Download Python from the ftp site
- && wget https://www.python.org/ftp/python/2.7.13/Python-2.7.13.tar.xz \
- && tar -xvf Python-2.7.13.tar.xz \
+ && wget https://www.python.org/ftp/python/2.7.14/Python-2.7.14.tar.xz \
+ && tar -xvf Python-2.7.14.tar.xz \
 
 # Build Python
- && cd Python-2.7.13 \
+ && cd Python-2.7.14 \
+ && wget https://github.com/python/cpython/pull/3912/commits/ab35adc682ec51800aa19a77de9947c6aaa50f41.diff \
+ && cat ab35adc682ec51800aa19a77de9947c6aaa50f41.diff | patch -p1 \
  && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
  && make \
- && wget http://bugs.python.org/file41150/fix-sslv3-test.diff \
- && patch -p1 < fix-sslv3-test.diff \
  && make install \
 
 # Clean up cache data and remove dependencies that are not required
