@@ -1,4 +1,4 @@
-############### Dockerfile for Apache Solr version 6.6.0 #########################
+############### Dockerfile for Apache Solr version 7.0.1 #########################
 #
 # To build Apache Solr image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -30,14 +30,14 @@ RUN apt-get update &&   apt-get install -y \
     wget \
 
 # Download Solr and build it
- && wget http://archive.apache.org/dist/lucene/solr/6.6.0/solr-6.6.0-src.tgz \
- && tar zxvf solr-6.6.0-src.tgz  \
- && cd solr-6.6.0/solr \
+ && wget http://archive.apache.org/dist/lucene/solr/7.0.1/solr-7.0.1-src.tgz \
+ && tar zxvf solr-7.0.1-src.tgz  \
+ && cd solr-7.0.1/solr \
  && ant ivy-bootstrap \
  && ant server \
- && cd  $SOURCE_DIR/solr-6.6.0/solr/bin  \
+ && cd  $SOURCE_DIR/solr-7.0.1/solr/bin  \
  && chmod a+x solr  \
- && cp -r $SOURCE_DIR/solr-6.6.0/solr /opt/ \
+ && cp -r $SOURCE_DIR/solr-7.0.1/solr /opt/ \
 
 # Tidy and clean up 
  && rm -rf $SOURCE_DIR \
