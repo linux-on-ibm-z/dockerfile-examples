@@ -1,4 +1,4 @@
-############################# Dockerfile for R version 3.4.1 ######################
+############################# Dockerfile for R version 3.4.2 ######################
 # This Dockerfile builds a basic installation of R.
 #
 # R is a language and environment for statistical computation and graphics.
@@ -22,7 +22,7 @@ FROM s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
-ENV R_BASE_VERSION 3.4.1
+ENV R_BASE_VERSION 3.4.2
 ENV SOURCE_DIR=/tmp/source
 
 WORKDIR $SOURCE_DIR
@@ -44,8 +44,8 @@ RUN apt-get update && apt-get install -y \
     wget \
 
 # Download and build R
- && wget https://cran.r-project.org/src/base/R-3/R-3.4.1.tar.gz \
- && tar zxvf R-3.4.1.tar.gz && cd R-3.4.1 \
+ && wget https://cran.r-project.org/src/base/R-3/R-3.4.2.tar.gz \
+ && tar zxvf R-3.4.2.tar.gz && cd R-3.4.2 \
  && ./configure --with-x=no && make && make install \
  && locale-gen "en_US.UTF-8" \
  && locale-gen "en_GB.UTF-8" \
