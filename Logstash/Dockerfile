@@ -1,4 +1,4 @@
-############################ Dockerfile for Logstash version 5.5.2 ###################################################
+############################ Dockerfile for Logstash version 5.6.1 ###################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -24,32 +24,32 @@ ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x/jre
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     ant \
-	gcc \
-	make \
-	openjdk-8-jdk \	
-	tar \	
-	unzip \	
-	wget \
+    gcc \
+    make \
+    openjdk-8-jdk \
+    tar \
+    unzip \
+    wget \
 
 # Download the logstash source from github and build it
- && wget https://artifacts.elastic.co/downloads/logstash/logstash-5.5.2.zip \
- && unzip -u logstash-5.5.2.zip \
+ && wget https://artifacts.elastic.co/downloads/logstash/logstash-5.6.1.zip \
+ && unzip -u logstash-5.6.1.zip \
  && wget https://github.com/jnr/jffi/archive/master.zip \
- &&	unzip master.zip && cd jffi-master && ant && cd .. \
- &&	mkdir logstash-5.5.2/vendor/jruby/lib/jni/s390x-Linux  \
- &&	cp jffi-master/build/jni/libjffi-1.2.so logstash-5.5.2/vendor/jruby/lib/jni/s390x-Linux/libjffi-1.2.so \
- &&	cp -r /root/jffi-master  /usr/share \
- && cp -r /root/logstash-5.5.2 /usr/share/logstash \
- 
+ && unzip master.zip && cd jffi-master && ant && cd .. \
+ && mkdir logstash-5.6.1/vendor/jruby/lib/jni/s390x-Linux  \
+ && cp jffi-master/build/jni/libjffi-1.2.so logstash-5.6.1/vendor/jruby/lib/jni/s390x-Linux/libjffi-1.2.so \
+ && cp -r /root/jffi-master  /usr/share \
+ && cp -r /root/logstash-5.6.1 /usr/share/logstash \
+
 # Cleanup Cache data , unused packages and source files
  && apt-get remove -y \
-	ant \
-	make \
-	unzip \
-	wget \
+    ant \
+    make \
+    unzip \
+    wget \
  && apt-get autoremove -y && apt-get clean \
  && rm -rf /root/ \
- && rm -rf /var/lib/apt/lists/* 
+ && rm -rf /var/lib/apt/lists/*
 
 # Define mountable directory
 VOLUME ["/data"]
@@ -60,6 +60,4 @@ EXPOSE 514 5043 5000 9292
 ENV PATH=/usr/share/logstash/bin:$PATH
 
 CMD ["logstash"]
-
 # End of Dockerfile
-
