@@ -1,4 +1,4 @@
-########## Dockerfile for Apache Mesos version 1.2.0 #########
+########## Dockerfile for Apache Mesos version 1.3.1 #########
 #
 # This Dockerfile builds a basic installation of Apache Mesos.
 #
@@ -61,15 +61,9 @@ RUN apt-get update  \
   && cd $SOURCE_DIR \
   && git clone https://github.com/apache/mesos \
   && cd $SOURCE_DIR/mesos/ \
-  && git checkout 1.2.0 \
-  && wget https://reviews.apache.org/r/51053/diff/raw/ -O patch \
-  && git apply patch \
-  && sed -i '120d' src/linux/ldcache.cpp \
-  && sed -i '119 a  \  int32_t flags; \       // Flags bits determine arch and library type.' src/linux/ldcache.cpp \
-  && sed -i '54d' src/slave/cmake/FindCurl.cmake \
-  && sed -i '53 a   \  /usr/lib64, ' src/slave/cmake/FindCurl.cmake \
-  && sed -i '54 a   \  /lib, ' src/slave/cmake/FindCurl.cmake \
-  && sed -i '55 a   \  /lib64/, ' src/slave/cmake/FindCurl.cmake \
+  && git checkout 1.3.1 \
+  && ./bootstrap \
+  && sed -i '134i \          \<maxmemory>512m</maxmemory>' src/java/mesos.pom.in \
   && ./bootstrap \
   && mkdir build && cd build \
   && ../configure && make && make install \
