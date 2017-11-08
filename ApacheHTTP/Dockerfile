@@ -1,4 +1,4 @@
-################# Dockerfile for Apache Http Server version 2.4.28 #####################
+################# Dockerfile for Apache Http Server version 2.4.29 #####################
 #
 # This Dockerfile builds a basic installation of Apache Http Server.
 #
@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y \
 	wget \
 
 # Clone httpd from git
- && git clone https://github.com/apache/httpd.git && cd httpd && git checkout 2.4.28 \
+ && git clone https://github.com/apache/httpd.git && cd httpd && git checkout 2.4.29 \
  
 # Download and Install the dependency package apr from source
  && cd $SOURCE_DIR/httpd/srclib && git clone https://github.com/apache/apr.git && cd apr \
