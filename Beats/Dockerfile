@@ -1,4 +1,4 @@
-#################### Dockerfile for Beats 5.6.2 #############################
+#################### Dockerfile for Beats 5.6.3 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -56,7 +56,7 @@ RUN apt-get update && apt-get install -y \
  && cd $GOPATH/src/github.com/elastic  \
  && git clone https://github.com/elastic/beats.git  \
  && cd beats  \
- && git checkout v5.6.2  \
+ && git checkout v5.6.3  \
 
 # Updtae ipv4 and ipv6 source code to add support for s390x
  && sed -i "61d" $GOPATH/src/github.com/elastic/beats/vendor/golang.org/x/net/ipv4/gen.go  \
