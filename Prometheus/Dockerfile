@@ -1,4 +1,4 @@
-########## Dockerfile for Prometheus 1.7.1 #########
+########## Dockerfile for Prometheus 1.8.0 #########
 #
 # This Dockerfile builds Prometheus
 #
@@ -36,18 +36,18 @@ RUN apt-get update && apt-get install -y \
     tar \
     wget \
 
-# Setup Go v1.8
- && wget https://storage.googleapis.com/golang/go1.8.3.linux-s390x.tar.gz \
- && chmod ugo+r go1.8.3.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.8.3.linux-s390x.tar.gz \
- && rm -rf /go1.8.3.linux-s390x.tar.gz \
+# Setup Go v1.9
+ && wget https://storage.googleapis.com/golang/go1.9.linux-s390x.tar.gz \
+ && chmod ugo+r go1.9.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.9.linux-s390x.tar.gz \
+ && rm -rf /go1.9.linux-s390x.tar.gz \
 
 # Download and build Prometheus
  && mkdir -p $GOPATH/src/github.com/prometheus \
  && cd $GOPATH/src/github.com/prometheus \
  && git clone https://github.com/prometheus/prometheus.git \
  && cd prometheus \
- && git checkout v1.7.1 \
+ && git checkout v1.8.0 \
  && make build \
  && mkdir -p /prometheus && cp -p prometheus promtool /prometheus/ \
  && mkdir -p /etc/prometheus \
