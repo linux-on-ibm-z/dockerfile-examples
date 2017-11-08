@@ -1,4 +1,4 @@
-############################### Dockerfile for Elasticsearch version 5.4.0 ##################################
+############################### Dockerfile for Elasticsearch version 5.6.1 ##################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -31,55 +31,62 @@ WORKDIR $SOURCE_DIR
 # Install Dependencies and gradle
 RUN apt-get update &&  apt-get install -y \
     ant \
-	autoconf \
-	automake \
-	curl \
-	git \
-	libtool \
-	libx11-dev \
-	libxt-dev \
-	locales-all \ 
-	make \
-	maven \
-	openjdk-8-jdk \
-	patch \
-	pkg-config \
-	tar \
-	texinfo \
-	unzip \
-	wget \
+    autoconf \
+    automake \
+    curl \
+    git \
+    libtool \
+    libx11-dev \
+    libxt-dev \
+    locales-all \
+    make \
+    maven \
+    openjdk-8-jdk \
+    patch \
+    pkg-config \
+    tar \
+    texinfo \
+    unzip \
+    wget \
+    sudo \
  && wget https://services.gradle.org/distributions/gradle-3.3-bin.zip && unzip gradle-3.3-bin.zip \
  && mv gradle-3.3/ /usr/share/gradle \
  && rm -rf gradle-3.3-bin.zip \
- 
+
 # Download and build source code of elastic search
- && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v5.4.0 \
- && export PATH=$PATH:/usr/share/gradle/bin && gradle assemble \
+ && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v5.6.1 \
+ && export PATH=$PATH:/usr/share/gradle/bin && gradle assemble
+ RUN  cd $SOURCE_DIR && git clone https://github.com/java-native-access/jna.git && cd jna && git checkout 4.4.0 && ant \
  && cd $SOURCE_DIR/elasticsearch/distribution/tar/build/distributions/ \
- && tar -C /usr/share/ -xf elasticsearch-5.4.0-SNAPSHOT.tar.gz \
- && mv /usr/share/elasticsearch-5.4.0-SNAPSHOT /usr/share/elasticsearch \
- && mv /usr/share/elasticsearch/config/elasticsearch.yml /etc/ \
- && ln -s /etc/elasticsearch.yml /usr/share/elasticsearch/config/elasticsearch.yml \
- 
+ && tar -C /usr/share/ -xf elasticsearch-5.6.1-SNAPSHOT.tar.gz \
+ && mv /usr/share/elasticsearch-5.6.1-SNAPSHOT /usr/share/elasticsearch \
+ && cp $SOURCE_DIR/jna/build/jna.jar /usr/share/elasticsearch/lib/jna-4.4.0-1.jar \
+
+
+
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
     ant \
-	autoconf \
-	automake \
-	git \
-	libtool \
-	libx11-dev \
-	libxt-dev \
-	maven \
-	patch \
-	pkg-config \
-	unzip \
-	wget \
+    automake \
+    git \
+    maven \
+    patch \
+    pkg-config \
+    unzip \
+    wget \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* /usr/share/gradle /root/.gradle/* /tmp/elasticsearch
+ && apt-get clean && rm -rf /var/lib/apt/lists/* /usr/share/gradle /root/.gradle/* /tmp/elasticsearch \
+
+# Create elaticsearch user
+ && /usr/sbin/groupadd elasticsearch \
+ && /usr/sbin/useradd -g elasticsearch elasticsearch \
+ && usermod -aG sudo elasticsearch \
+ && chown elasticsearch:elasticsearch -R /usr/share/elasticsearch
 
 # Expose the default port
+USER elasticsearch
+
 EXPOSE 9200 9300
 
 ENV PATH=/usr/share/elasticsearch/bin:$PATH
@@ -88,3 +95,4 @@ ENV PATH=/usr/share/elasticsearch/bin:$PATH
 CMD ["elasticsearch"]
 
 # End of Dockerfile
+
