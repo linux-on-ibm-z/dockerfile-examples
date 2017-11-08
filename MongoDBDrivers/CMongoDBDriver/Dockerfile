@@ -1,4 +1,4 @@
-############### Dockerfile for C MongoDBDriver 1.8.0 ####################################
+############### Dockerfile for C MongoDBDriver 1.8.1 ####################################
 # 
 # To build C MongoBDriver image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -21,8 +21,8 @@ FROM  s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV PATH=/usr/local:$PATH
-ENV LD_LIBRARY_PATH=/usr/local/lib/
-ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+ENV LD_LIBRARY_PATH=/usr/local/lib
+ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
 
 WORKDIR "/root"
 
@@ -39,19 +39,17 @@ RUN apt-get update  \
       wget \
 	
 # Download and configure the C Driver 
- && wget -O mongo-c-driver-1.8.0.tar.gz  https://github.com/mongodb/mongo-c-driver/releases/download/1.8.0/mongo-c-driver-1.8.0.tar.gz  \
- && tar -xzf mongo-c-driver-1.8.0.tar.gz \
- && cd mongo-c-driver-1.8.0 \
+ && wget -O mongo-c-driver-1.8.1.tar.gz  https://github.com/mongodb/mongo-c-driver/releases/download/1.8.1/mongo-c-driver-1.8.1.tar.gz  \
+ && tar -xzf mongo-c-driver-1.8.1.tar.gz \
+ && cd mongo-c-driver-1.8.1 \
  && ./configure \
  && make && make install \
 
 #clean up the unwanted packages 
  && apt-get remove -y \
-	    autoconf \
-        automake \
-        make \
-        wget\
+       wget\
+		
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* 
+ && apt-get clean && rm -rf /root/mongo-c-driver-1.8.1.tar.gz /var/lib/apt/lists/* 
 
 # End of Dockerfile
