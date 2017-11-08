@@ -1,4 +1,4 @@
-########## Dockerfile for PM2 version 2.7.1 #########
+########## Dockerfile for PM2 version 2.7.2 #########
 #
 # This Dockerfile builds a basic installation of PM2.
 #
@@ -14,8 +14,8 @@
 #
 # Start PM2 using below command
 # docker run <container_name> -it -p <host_port>:<port> -v /<host>:/root/data <image-name> start /data/<filename.js>
-# e.g.  docker run --name pm2_test5521 -it -p 8080 -v /root:/root/data pm2_img start /root/data/app.js
-#
+# e.g. docker run --name <container_name> -d -p 8080:8080 -v /root:/root/data <image-name> pm2 start --no-daemon /root/data/app.js
+#	
 #
 # Official website: http://pm2.keymetrics.io/
 #
@@ -27,30 +27,30 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x 
-ENV PATH=$JAVA_HOME/bin:$PATH 
+ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x
+ENV PATH=$JAVA_HOME/bin:/usr/local/bin:$PATH
 
 # Install dependencies
 RUN  apt-get update  \
   && apt-get -y install curl \
-	 nodejs \
-	 npm  \
-	 openjdk-8-jdk \
+         nodejs \
+         npm  \
+         openjdk-8-jdk \
   && ln -s "$(which nodejs)" /usr/local/bin/node \
-  && npm install pm2@2.7.1 -g \
+  && npm install pm2@2.7.2 -g \
   && apt-get remove -y \
      curl \
-	 openjdk-8-jdk \
-					
-# Clean up the unwanted packages and clear the source directory 
+         openjdk-8-jdk \
+
+# Clean up the unwanted packages and clear the source directory
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
-  
+
 VOLUME /data
 EXPOSE 8080
 
-ENTRYPOINT pm2
+CMD pm2
 
 # End of Dockerfile
