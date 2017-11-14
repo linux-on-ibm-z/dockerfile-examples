@@ -1,4 +1,4 @@
-########## Dockerfile for Fluentd version 0.12.39 ###############################
+########## Dockerfile for Fluentd version 0.12.40 ###############################
 #
 # This Dockerfile builds a basic installation of Fluentd.
 #
@@ -13,7 +13,7 @@
 # docker run --name <container-name> -it <image_name> /bin/bash
 #
 # Start Fluentd process using below command 
-# docker run <container_name> -it -v /<host>:/<contaimer> <image-name> fluentd 
+# docker run <container_name> -it -v /<host>:/<contaimer> <image-name> fluentd <argument>
 # e.g. docker run --name fluentd -it -v /conf:/conf fluentd_img fluentd -c conf/fluent.conf
 #
 # Official website: https://www.fluentd.org/
@@ -27,8 +27,8 @@ FROM s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV SOURCE_DIR='/root'
-ENV GEM_HOME=/home/.gem/ruby
-ENV PATH=/home/.gem/ruby/bin:$PATH
+ENV GEM_HOME=/root/.gem/ruby
+ENV PATH=/root/.gem/ruby/bin:$PATH
 WORKDIR $SOURCE_DIR
 
 # Install dependencies
@@ -40,7 +40,7 @@ RUN apt-get update  \
          ruby-dev \
 		 
 # Install Fluentd
-  && gem install fluentd -v 0.12.39 \
+  && gem install fluentd -v 0.12.40 \
   && gem list fluentd \
  
 # Clean up the unwanted packages and clear the source directory 
