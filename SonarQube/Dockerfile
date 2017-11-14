@@ -1,4 +1,4 @@
-########## Dockerfile for SonarQube 6.5 #########
+########## Dockerfile for SonarQube 6.6 #########
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -36,12 +36,12 @@ RUN apt-get update -y && apt-get -y install \
 	
 # Download SonarQube
  && cd $SOURCE_DIR \
- && wget https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-6.5.zip \
- && unzip sonarqube-6.5.zip \
+ && wget https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-6.6.zip \
+ && unzip sonarqube-6.6.zip \
  && wget https://sonarsource.bintray.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.0.3.778-linux.zip \
  && unzip sonar-scanner-cli-3.0.3.778-linux.zip \
- && rm -rf sonarqube-6.5.zip sonar-scanner-cli-3.0.3.778-linux.zip \
- && cp -r $SOURCE_DIR/sonarqube-6.5 $SOURCE_DIR/sonarqube \
+ && rm -rf sonarqube-6.6.zip sonar-scanner-cli-3.0.3.778-linux.zip \
+ && cp -r $SOURCE_DIR/sonarqube-6.6 $SOURCE_DIR/sonarqube \
  && cp -r $SOURCE_DIR/sonarqube /opt \
 
 # Tidy and clean up
@@ -61,5 +61,5 @@ EXPOSE 9000
 VOLUME  ["/opt/sonarqube/data"]
 
 WORKDIR /opt/sonarqube/lib
-CMD ["java","-jar","sonar-application-6.5.jar"]
+CMD ["java","-jar","sonar-application-6.6.jar"]
 
