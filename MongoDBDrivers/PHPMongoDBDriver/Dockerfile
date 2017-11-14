@@ -1,4 +1,4 @@
-############### Dockerfile for PHP MongoDBDriver 1.2.9 ####################################
+############### Dockerfile for PHP MongoDBDriver 1.3.2 ####################################
 # 
 # To build PHP MongoDBDriver image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -27,7 +27,6 @@ RUN apt-get update  \
  && apt-get install -y \
 		autoconf \
 		gcc \
-    git \
 		make \
 		openssl \
 		php7.0 \
@@ -37,22 +36,19 @@ RUN apt-get update  \
 		tar \
 		wget \
 	
-# Download source code and Install PHP driver for MongoDB
- && git clone https://github.com/mongodb/mongo-php-driver.git \
- && cd mongo-php-driver/ \
- && git checkout 1.2.9 \
- && pecl install mongodb \
+# Install PHP driver for MongoDB
+ && pecl install mongodb-1.3.2 \
  
 # Enable PHP extension 
  && echo -e "\n; PHP driver for MongoDB\nextension=mongodb.so" | tee -a /etc/php/7.0/cli/php.ini \
 
  # Clean up the unwanted packages 
  && apt-get remove -y \
-    autoconf \
-	  gcc \
+        autoconf \
+	    gcc \
 		git \
-    make \
-    wget \
+        make \
+        wget \
 		
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* 
