@@ -1,4 +1,4 @@
-############################ Dockerfile for Grafana 4.5.2 ############################################
+############################ Dockerfile for Grafana 4.6.1 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -62,7 +62,7 @@ RUN apt-get update -y && apt-get install -y \
 
 # Get the Grafana Soure code and build Grafana backend
  && cd / && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
- && cd $GOPATH/src/github.com/grafana/grafana && git checkout v4.5.2 \
+ && cd $GOPATH/src/github.com/grafana/grafana && git checkout v4.6.1 \
  && cd ./vendor/github.com/klauspost/compress/gzip \
  && cp gunzip.go gunzip.go.copy \
  && cp gzip.go gzip.go.copy \
