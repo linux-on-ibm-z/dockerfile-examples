@@ -1,4 +1,4 @@
-################# Dockerfile for RabbitMQ version 3.6.12 ################################
+################# Dockerfile for RabbitMQ version 3.6.14 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -43,11 +43,11 @@ RUN apt-get update && apt-get install -y \
 
 # Download and install rabbitmq
  && mkdir $SOURCE_DIR && cd $SOURCE_DIR \
- && wget https://www.rabbitmq.com/releases/rabbitmq-server/v3.6.12/rabbitmq-server-3.6.12.tar.xz \
+ && wget https://www.rabbitmq.com/releases/rabbitmq-server/v3.6.14/rabbitmq-server-3.6.14.tar.xz \
  && git clone https://github.com/elixir-lang/elixir \
- && cd elixir && git checkout v1.3.4 && make && make install \
- && cd /opt && tar xf $SOURCE_DIR/rabbitmq-server-3.6.12.tar.xz \
- && cd rabbitmq-server-3.6.12 && make all && make install \
+ && cd elixir && git checkout v1.5.2 && make && make install \
+ && cd /opt && tar xf $SOURCE_DIR/rabbitmq-server-3.6.14.tar.xz \
+ && cd rabbitmq-server-3.6.14 && make all && make install \
  && mkdir -p /etc/rabbitmq \
  && echo "[{rabbit, [{loopback_users, []}]}]." | tee /etc/rabbitmq/rabbitmq.config \
  && rm -rf deps/rabbit/plugins && ln -s  $PWD/plugins deps/rabbit/plugins \
@@ -70,7 +70,7 @@ RUN apt-get update && apt-get install -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt/rabbitmq-server-3.6.12
+WORKDIR /opt/rabbitmq-server-3.6.14
 
 # Expose RabbitMQ management console port and RabbitMQ server port
 EXPOSE 15672 5672
