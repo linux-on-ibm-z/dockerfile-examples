@@ -1,4 +1,4 @@
-################# Dockerfile for Puppet-master version 5.3.2 ################
+################# Dockerfile for Puppet-master version 5.3.3 ################
 #
 # This Dockerfile builds a basic installation of Puppet-master.
 #
@@ -54,7 +54,7 @@ RUN	apt-get update && apt-get install -y \
 	&&	/usr/bin/gem install bundler rake-compiler \
 	
 # Install Puppet
-	&&	/usr/bin/gem install puppet -v 5.3.2 \
+	&&	/usr/bin/gem install puppet -v 5.3.3 \
 	
 # Locate the $confdir by command
 	&&	chmod 755 /usr/local/lib \
