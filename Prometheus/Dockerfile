@@ -1,4 +1,4 @@
-########## Dockerfile for Prometheus 1.8.0 #########
+########## Dockerfile for Prometheus 2.0.0 #########
 #
 # This Dockerfile builds Prometheus
 #
@@ -47,7 +47,7 @@ RUN apt-get update && apt-get install -y \
  && cd $GOPATH/src/github.com/prometheus \
  && git clone https://github.com/prometheus/prometheus.git \
  && cd prometheus \
- && git checkout v1.8.0 \
+ && git checkout v2.0.0 \
  && make build \
  && mkdir -p /prometheus && cp -p prometheus promtool /prometheus/ \
  && mkdir -p /etc/prometheus \
@@ -73,4 +73,4 @@ RUN apt-get update && apt-get install -y \
 EXPOSE 9090
 VOLUME [ "/prometheus" ]
 
-CMD prometheus -config.file=/etc/prometheus/prometheus.yml -web.console.libraries=/etc/prometheus/console_libraries -web.console.templates=/etc/prometheus/consoles
+CMD prometheus --config.file=/etc/prometheus/prometheus.yml --web.console.libraries=/etc/prometheus/console_libraries --web.console.templates=/etc/prometheus/consoles
