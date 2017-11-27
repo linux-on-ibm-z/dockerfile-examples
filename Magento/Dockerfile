@@ -1,4 +1,4 @@
-########## Dockerfile for Magento version 2.1.8 ######
+########## Dockerfile for Magento version 2.2.0 ######
 #
 # Magento is an open-source e-commerce platform written in PHP.
 #
@@ -36,31 +36,33 @@ RUN apt-get update -y && apt-get install -y \
     php7.0-intl \
     php7.0-zip \
     php7.0-gd  \
+    php7.0-soap \
 
-# Configure apache2	
+# Configure apache2
  && chmod 766 /etc/apache2/apache2.conf \
  && cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf1 \
- && cp echo -e "ServerName localhost" >> /etc/apache2/apache2.conf \
- && cp echo -e '<Directory "/var/www/html">' >> /etc/apache2/apache2.conf \
- && cp echo -e "AllowOverride  All" >> /etc/apache2/apache2.conf \
- && cp  echo -e "</Directory>" >> /etc/apache2/apache2.conf \
+ && echo "ServerName localhost" >> /etc/apache2/apache2.conf \
+ && echo '<Directory "/var/www/html">' >> /etc/apache2/apache2.conf \
+ && echo "AllowOverride  All" >> /etc/apache2/apache2.conf \
+ && echo "</Directory>" >> /etc/apache2/apache2.conf \
  && diff -u /etc/apache2/apache2.conf1 /etc/apache2/apache2.conf  ||true \
  && a2enmod rewrite \
 
-# Clone Magento source code 
+# Clone Magento source code
  &&  cd /var/www/html/ \
  && chmod -R a+w /var/www/html/ \
  && git clone https://github.com/magento/magento2.git \
  && cd magento2 \
- && git checkout 2.1.8 \
+ && git checkout 2.2.0 \
  && composer install \
- 
+
 # Start mysql server and create database for Magento
  && mkdir -p /var/lib/mysql/data \
  && /usr/sbin/mysqld --initialize --user=mysql --datadir=/var/lib/mysql/data \
  && sleep 60s && mkdir -p /var/run/mysqld \
  && chown mysql:mysql /var/run/mysqld \
  && cd /var/www/html/magento2 && find var vendor pub/static pub/media app/etc -type f -exec chmod g+w {} \; && find var vendor pub/static pub/media app/etc -type d -exec chmod g+ws {} \; && chown -R :www-data . && chmod u+x bin/magento \
+ && chmod g+wsx generated/ && chmod g+wsx generated/.htaccess \
  && service mysql start && sleep 15s && /usr/bin/mysql -e "create database magento" \
  && /usr/bin/mysql -e "create user 'user'@'localhost' " \
  && /usr/bin/mysql -e "grant all privileges on *.* to 'user'@'localhost'" \
@@ -77,7 +79,7 @@ RUN apt-get update -y && apt-get install -y \
  && apt autoremove -y \
  && apt-get clean \
  && rm -rf  /var/lib/apt/lists/*
-  
+
 # Create volume
 VOLUME /var/www/html
 
