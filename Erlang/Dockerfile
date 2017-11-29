@@ -1,4 +1,4 @@
-################## Dockerfile for Erlang version 19.3 ####################
+################## Dockerfile for Erlang version 20.0 ####################
 #
 # This Dockerfile builds a basic installation of Erlang.
 #
@@ -43,8 +43,8 @@ RUN apt-get update && apt-get install -y \
     wget \
 
 # Download and build the erlang
- && wget http://www.erlang.org/download/otp_src_19.3.tar.gz \
- && tar zxf otp_src_19.3.tar.gz && cd otp_src_19.3 \
+ && wget http://www.erlang.org/download/otp_src_20.0.tar.gz \
+ && tar zxf otp_src_20.0.tar.gz && cd otp_src_20.0 \
  && export ERL_TOP=$(pwd) && ./configure --prefix=/usr \
  && make && make install \
 
