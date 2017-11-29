@@ -1,4 +1,4 @@
-############### Dockerfile for C MongoDBDriver 1.8.1 ####################################
+############### Dockerfile for C MongoDBDriver 1.8.2 ####################################
 # 
 # To build C MongoBDriver image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -39,17 +39,17 @@ RUN apt-get update  \
       wget \
 	
 # Download and configure the C Driver 
- && wget -O mongo-c-driver-1.8.1.tar.gz  https://github.com/mongodb/mongo-c-driver/releases/download/1.8.1/mongo-c-driver-1.8.1.tar.gz  \
- && tar -xzf mongo-c-driver-1.8.1.tar.gz \
- && cd mongo-c-driver-1.8.1 \
+ && wget -O mongo-c-driver-1.8.2.tar.gz  https://github.com/mongodb/mongo-c-driver/releases/download/1.8.2/mongo-c-driver-1.8.2.tar.gz  \
+ && tar -xzf mongo-c-driver-1.8.2.tar.gz \
+ && cd mongo-c-driver-1.8.2 \
  && ./configure \
  && make && make install \
 
 #clean up the unwanted packages 
  && apt-get remove -y \
-       wget\
+       wget \
 		
  && apt autoremove -y \
- && apt-get clean && rm -rf /root/mongo-c-driver-1.8.1.tar.gz /var/lib/apt/lists/* 
+ && apt-get clean && rm -rf /root/mongo-c-driver-1.8.2.tar.gz /var/lib/apt/lists/* 
 
 # End of Dockerfile
