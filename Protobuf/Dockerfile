@@ -1,4 +1,4 @@
-####################### Dockerfile for Protobuf version 3.4.1 ##############
+####################### Dockerfile for Protobuf version 3.5.0 ##############
 #
 # Protocol Buffers is a method of serializing structured data.
 #
@@ -25,7 +25,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
-
+ 
 # Installing dependencies
 RUN apt-get update && apt-get install -y \
 	autoconf \
@@ -38,12 +38,24 @@ RUN apt-get update && apt-get install -y \
     make \ 
     tar \
     unzip \
-    wget \ 
+    wget \ 	
 
-# Downlaod and install protobuf 
+# Download and install protobuf 
  && git clone https://github.com/google/protobuf.git \
  && cd protobuf \
- && git checkout v3.4.1 \
+ && git checkout v3.5.0 \
+
+# Add code patch
+ && file=src/google/protobuf/stubs/atomicops_internals_generic_gcc.h \
+ && sed -i '148i inline Atomic64 Release_CompareAndSwap(volatile Atomic64* ptr, ' $file \
+ && sed -i '149i                                        Atomic64 old_value,' $file \
+ && sed -i '150i                                        Atomic64 new_value) {' $file \
+ && sed -i '151i  __atomic_compare_exchange_n(ptr, &old_value, new_value, false,' $file \
+ && sed -i '152i                              __ATOMIC_RELEASE, __ATOMIC_ACQUIRE);' $file \
+ && sed -i '153i return old_value;' $file \
+ && sed -i '154i }'  $file \
+
+# Build
  && ./autogen.sh \
  && ./configure \
  && make && make install \
