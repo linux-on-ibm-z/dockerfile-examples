@@ -47,14 +47,15 @@ RUN apt-get update && apt-get install -y \
 # Clone httpd from git
  && git clone https://github.com/apache/httpd.git && cd httpd && git checkout 2.4.29 \
  
-# Download and Install the dependency package apr from source
+# Download apr and apr-util source
  && cd $SOURCE_DIR/httpd/srclib && git clone https://github.com/apache/apr.git && cd apr \
- && ./buildconf && ./configure \
- && make && make install \
+ && git checkout 1.6.3 \
+ && cd $SOURCE_DIR/httpd/srclib && git clone https://github.com/apache/apr-util.git && cd apr-util \
+ && git checkout 1.6.1 \
  
 # Build and install httpd
  && cd $SOURCE_DIR/httpd && ./buildconf \
- && ./configure --prefix=/usr/local \
+ && ./configure --prefix=/usr/local --with-included-apr \
  && make && make install \
  
 # Clean up cache , source data and un-used packages
