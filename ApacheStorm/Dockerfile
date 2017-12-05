@@ -1,4 +1,4 @@
-########## Dockerfile for Apache Storm version 1.1.0 #########
+########## Dockerfile for Apache Storm version 1.1.1 #########
 #
 # This Dockerfile builds a basic installation of Apache Storm.
 #
@@ -74,13 +74,13 @@ RUN apt-get update  \
  && cd $SOURCE_DIR \
  && git clone https://github.com/apache/storm.git \
  && cd storm/ \
- && git checkout tags/v1.1.0 \
- && mvn clean install -DskipTests -fn \
+ && git checkout tags/v1.1.1 \
+ && mvn clean install -DskipTests \
   
 # Create binary distribution
  && cd storm-dist/binary && mvn package \
- && tar -zxf $SOURCE_DIR/storm/storm-dist/binary/target/apache-storm-1.1.0.tar.gz -C $SOURCE_DIR/ \
- && cp -r $SOURCE_DIR/apache-storm-1.1.0 /opt/storm \
+ && tar -zxf $SOURCE_DIR/storm/storm-dist/binary/target/apache-storm-1.1.1.tar.gz -C $SOURCE_DIR/ \
+ && cp -r $SOURCE_DIR/apache-storm-1.1.1 /opt/storm \
  
   
 # Clean up the unwanted packages and clear the source directory 
