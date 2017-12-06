@@ -1,4 +1,4 @@
-############################ Dockerfile for Grafana 4.6.1 ############################################
+############################ Dockerfile for Grafana 4.6.2 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -21,7 +21,7 @@ FROM s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV QT_QPA_PLATFORM=offscreen GOPATH=/opt
-ENV PATH=$PATH:/opt/yarn-v1.0.1/bin:$GOPATH/bin:/opt/ibm/node/bin:/usr/local/go/bin:/usr/share/grafana
+ENV PATH=$PATH:/opt/yarn-v1.3.2/bin:$GOPATH/bin:/opt/ibm/node/bin:/usr/local/go/bin:/usr/share/grafana
 
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
@@ -36,8 +36,8 @@ RUN apt-get update -y && apt-get install -y \
     unzip \
 	
 # Install Nodejs
- && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/nodejs/6.11.3.0/linux/s390x/ibm-6.11.3.0-node-v6.11.3-linux-s390x.bin \
- && chmod +x ibm-6.11.3.0-node-v6.11.3-linux-s390x.bin \
+ && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/nodejs/6.11.5.0/linux/s390x/ibm-6.11.5.0-node-v6.11.5-linux-s390x.bin \
+ && chmod +x ibm-6.11.5.0-node-v6.11.5-linux-s390x.bin \
  && echo "#Indicate whether the license agreement been accepted" >installer.properties \
  && echo  "#----------------------------------------------------" >> installer.properties \
  && echo "LICENSE_ACCEPTED=TRUE">> installer.properties \
@@ -50,7 +50,7 @@ RUN apt-get update -y && apt-get install -y \
  && echo "#Install" >> installer.properties \
  && echo "#-------" >> installer.properties \
  && echo "-fileOverwrite_/home/test/ibm/node/_node_installation/uninstall.lax=Yes" >> installer.properties \
- && ./ibm-6.11.3.0-node-v6.11.3-linux-s390x.bin -i silent \
+ && ./ibm-6.11.5.0-node-v6.11.5-linux-s390x.bin -i silent \
 
 # Install Golang
  && cd / && wget https://storage.googleapis.com/golang/go1.9.linux-s390x.tar.gz \
@@ -62,7 +62,7 @@ RUN apt-get update -y && apt-get install -y \
 
 # Get the Grafana Soure code and build Grafana backend
  && cd / && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
- && cd $GOPATH/src/github.com/grafana/grafana && git checkout v4.6.1 \
+ && cd $GOPATH/src/github.com/grafana/grafana && git checkout v4.6.2 \
  && cd ./vendor/github.com/klauspost/compress/gzip \
  && cp gunzip.go gunzip.go.copy \
  && cp gzip.go gzip.go.copy \
@@ -80,9 +80,9 @@ RUN apt-get update -y && apt-get install -y \
  && make build-go \
 
 # Install yarn
- && cd / && wget https://github.com/yarnpkg/yarn/releases/download/v1.0.1/yarn-v1.0.1.tar.gz \
- && tar -C /opt/ -xzf yarn-v1.0.1.tar.gz \
- && rm -rf /yarn-v1.0.1.tar.gz \
+ && cd / && wget https://github.com/yarnpkg/yarn/releases/download/v1.3.2/yarn-v1.3.2.tar.gz \
+ && tar -C /opt/ -xzf yarn-v1.3.2.tar.gz \
+ && rm -rf /yarn-v1.3.2.tar.gz \
 
 # Install grunt
  && cd $GOPATH/src/github.com/grafana/grafana \
@@ -106,7 +106,7 @@ RUN apt-get update -y && apt-get install -y \
     wget \
     unzip \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*  $GOPATH/src/github.com  /ibm-6.11.3.0-node-v6.11.3-linux-s390x.bin \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*  $GOPATH/src/github.com  /ibm-6.11.5.0-node-v6.11.5-linux-s390x.bin \
  && sh "/opt/Uninstall IBM SDK for Node.js (TM)"
  
 VOLUME ["/usr/share/grafana/conf","/usr/share/grafana/data"]
