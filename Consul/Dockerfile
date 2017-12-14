@@ -58,6 +58,7 @@ RUN apt-get update &&  apt-get install -y \
 
 # Apply the patch to add s390x support
  && cd $GOPATH/src/github.com/mitchellh/gox \
+ && git checkout v0.4.0 \
  && wget https://github.com/mitchellh/gox/pull/85.patch \
  && git config user.email "lozopensource@github.com" \
  && git config user.name "LoZ" \
