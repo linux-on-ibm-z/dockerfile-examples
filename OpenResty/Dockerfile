@@ -1,4 +1,4 @@
-########## Dockerfile for OpenResty version 1.11.2.5 #########
+########## Dockerfile for OpenResty version 1.13.6.1 #########
 #
 # This Dockerfile builds a basic installation of OpenResty.
 #
@@ -11,8 +11,10 @@
 # docker build -t <image_name> .
 #
 # To start OpenResty run the below command:
-# docker run --name <container_name> -v <host_path>:/usr/local/openresty -p <host_port>:80 <image> 
-# 
+# docker run -d --name <container_name> -p <host_port>:80 <image>
+#
+# Provide custom configuration file
+# docker run -d --name <container_name> -v <path_on_host>:/usr/local/openresty/nginx/conf/nginx.conf -p <host_port>:80 <image>
 # Reference :
 # https://openresty.org/
 #
@@ -61,22 +63,22 @@ RUN	apt-get update && apt-get -y install \
 	
 # Download the source code
 	&& cd $SOURCE_DIR \
-	&& wget https://openresty.org/download/openresty-1.11.2.5.tar.gz \
-	&& tar -xvf openresty-1.11.2.5.tar.gz \
+	&& wget https://openresty.org/download/openresty-1.13.6.1.tar.gz \
+	&& tar -xvf openresty-1.13.6.1.tar.gz \
 	
-# Comment out the below lines in file /<source_root>/openresty-1.11.2.5/configure
-	&& cd openresty-1.11.2.5 \
-	&& sed -i '633,672 s/^/#/' configure \
+# Comment out the below lines in file /<source_root>/openresty-1.13.6.1/configure
+	&& cd openresty-1.13.6.1 \
+	&& sed -i '641,680 s/^/#/' configure \
 	
 # Build and install OpenResty
-	&& rm -rf bundle/LuaJIT-2.1-20170808/ \
-	&& cp -r $SOURCE_DIR/LuaJIT $SOURCE_DIR/openresty-1.11.2.5/bundle/LuaJIT-2.1-20170808/ \
+	&& rm -rf bundle/LuaJIT-2.1-20171103/ \
+	&& cp -r $SOURCE_DIR/LuaJIT $SOURCE_DIR/openresty-1.13.6.1/bundle/LuaJIT-2.1-20171103/ \
 	&& ./configure --without-http_redis2_module --with-http_iconv_module --with-http_postgres_module  -j2 \
 	&& make -j2 \
 	&& make install \
 	
 # Configure Nginx module
-	&& cd build/nginx-1.11.2 \
+	&& cd build/nginx-1.13.6 \
 	&& ./configure \
 	&& make \
 	&& make install \
@@ -100,7 +102,7 @@ RUN	apt-get update && apt-get -y install \
 	
 EXPOSE 80
 
-VOLUME /usr/local/openresty
+VOLUME /data
 	
 CMD ["openresty", "-g", "daemon off;"]
 	
