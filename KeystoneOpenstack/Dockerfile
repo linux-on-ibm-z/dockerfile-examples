@@ -67,14 +67,15 @@ RUN	apt-get update && apt-get install -y \
 		tar \
 		wget \
 	&&	easy_install pip \
+	&&  pip install --upgrade setuptools \
 	&&	pip install \
-		cryptography==2.0.3 \
+		cryptography \
 		functools32 \
 		mod_wsgi \
 		pika==0.10.0 \
 		python-memcached \
 		python-openstackclient \
-		requests==2.10.0 \
+		requests \
 		
 # Configure and start MariaDB server
 	&&	mkdir -p  /var/log/mysql \
