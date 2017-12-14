@@ -1,4 +1,4 @@
-################## Dockerfile for WordPress version 4.8.3 ######################
+############## Dockerfile for WordPress version 4.9.1 ############################
 #
 # WordPress is an online, open source website creation tool written in PHP.
 #
@@ -42,7 +42,7 @@ RUN apt-get update -y && apt-get install -y \
 
 # Download Wordpress application into apache2 server
  && cd /var/www/html && git clone https://github.com/WordPress/WordPress.git \
- && cd WordPress && git checkout 4.8.3 \
+ && cd WordPress && git checkout 4.9.1 \
  && mv wp-config-sample.php wp-config.php \
  && sed -i 's/localhost/127.0.0.1/' wp-config.php \
  && sed -i 's/database_name_here/WORDPRESS/' wp-config.php \
