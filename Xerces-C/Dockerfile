@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y \
     libtool \
     make \
     locales \
+	tar \
 
 # Download and build Xerces-C
  && locale-gen en_US en_US.UTF-8 \
