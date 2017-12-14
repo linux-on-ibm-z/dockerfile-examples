@@ -1,4 +1,4 @@
-########################## Dockerfile for Go version 1.9 #######################
+########################## Dockerfile for Go version 1.9.2 #######################
 # This Dockerfile builds a basic installation of go and its configuration.
 #
 # Go is an open source programming language that makes it easy to build simple, reliable, and efficient software.
@@ -29,12 +29,12 @@ ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 RUN apt-get update && apt-get install -y \
     tar \
     wget \
- && mkdir -p /go && cd /go && wget https://storage.googleapis.com/golang/go1.9.linux-s390x.tar.gz \
- && chmod ugo+r go1.9.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.9.linux-s390x.tar.gz \
+ && mkdir -p /go && cd /go && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz \
+ && chmod ugo+r go1.9.2.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.9.2.linux-s390x.tar.gz \
 
 # Tidy up (Clear cache data)
- && rm -rf go1.9.linux-s390x.tar.gz \
+ && rm -rf go1.9.2.linux-s390x.tar.gz \
  && apt-get remove -y wget \
  && apt-get autoremove -y  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
