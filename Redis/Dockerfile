@@ -1,4 +1,4 @@
-########## Dockerfile for Redis version 4.0.2 #########
+########## Dockerfile for Redis version 4.0.6 #########
 #
 # This Dockerfile builds a basic installation of Redis.
 #
@@ -37,8 +37,8 @@ RUN apt-get update &&  apt-get install -y \
     tcl       \
     git       \
 
-# Clone redis repo and checkout 4.0.2 branch
-&& git clone --branch 4.0.2 https://github.com/antirez/redis.git \
+# Clone redis repo and checkout 4.0.6 branch
+&& git clone --branch 4.0.6 https://github.com/antirez/redis.git \
 && cd redis \
 
 # Build redis
