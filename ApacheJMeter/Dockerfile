@@ -31,19 +31,19 @@ WORKDIR $SOURCE_DIR
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
 ENV PATH=$JAVA_HOME/bin:$PATH
 
-# Install Subversion and dependencies
+# Install dependencies
 RUN apt-get update &&  apt-get install -y \
     ant \
     openjdk-8-jdk \
     openssl \
-    subversion \
+    git \
 	openjfx \
 
-# Download from SVN and build
- && svn co http://svn.apache.org/repos/asf/jmeter/tags/v3_2 \
- && cd $SOURCE_DIR/v3_2 && ant download_jars \
- && cd $SOURCE_DIR/v3_2 && ant \
- && cp -r $SOURCE_DIR/v3_2 /opt/apache-jmeter-3.2 \
+# Download from git and build
+ && git clone git://git.apache.org/jmeter.git \
+ && cd $SOURCE_DIR/jmeter && git checkout v3_2 \
+ && cd $SOURCE_DIR/jmeter && ant download_jars && ant \
+ && cp -r $SOURCE_DIR/jmeter /opt/apache-jmeter-3.2 \
 
 #Remove G1GC algorithm as it is unimplemented in OpenJDK zero
  && sed -i '93d' /opt/apache-jmeter-3.2/bin/jmeter \
@@ -52,7 +52,7 @@ RUN apt-get update &&  apt-get install -y \
  && rm -rf $SOURCE_DIR \
  && apt-get remove -y \
     ant \
-    subversion \
+    git \
  && apt-get autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
