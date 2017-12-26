@@ -77,8 +77,8 @@ RUN apt-get update -y && apt-get install -y\
  && java  -version \
 
 # Install go
- && cd $SOURCE_DIR && wget https://storage.googleapis.com/golang/go1.8.1.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.8.1.linux-s390x.tar.gz \
+ && cd $SOURCE_DIR && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.9.2.linux-s390x.tar.gz \
  && cd /usr/bin \
  && rm -rf s390x-linux-gnu-gcc \
  && ln gcc s390x-linux-gnu-gcc \
@@ -267,7 +267,7 @@ RUN apt-get update -y && apt-get install -y\
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean \
- && rm -rf $HOME/*
+ && rm -rf $HOME/* 
 
 # 8091: Couchbase Web console, REST/HTTP interface
 # 8092: Views, queries, XDCR
