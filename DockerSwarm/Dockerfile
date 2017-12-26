@@ -26,6 +26,7 @@
 #
 ##################################################################################
 
+
 # Base image
 FROM s390x/ubuntu:16.04
 
@@ -33,31 +34,37 @@ FROM s390x/ubuntu:16.04
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 # Set GOPATH environment varibale
-ENV GOPATH=/go
-ENV PATH=$PATH:$GOPATH/bin
+
+ENV GOPATH /go:/go/src/github.com/docker/swarm/Godeps/_workspace/
+ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH:$HOME/go/bin
 ENV SWARM_HOST :2375
 
 # Install dependencies
 RUN apt-get -y update && apt-get install -y \
-    git \
-    golang \
-               
+    git wget tar gcc \
+
+# Install go from source
+&& wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz \
+&& chmod ugo+r go1.9.2.linux-s390x.tar.gz \
+&& tar -C /usr/local -xzf go1.9.2.linux-s390x.tar.gz \
+
+
 # Get the dependency tools
- && go get github.com/tools/godep \
+&& go get github.com/tools/godep \
 
 # Build Docker Swarm
  && mkdir -p /go/src/github.com/docker \
  && cd / && git clone -b v1.2.8 https://github.com/docker/swarm.git /go/src/github.com/docker/swarm \
  && go install github.com/docker/swarm/ \
-
+ 
+ 
 # Tidy up (Clear cache data)
  && apt-get remove -y \
-	git \
-	golang \
+        git \
  && apt-get autoremove -y && apt-get clean \
  && rm -rf /go/src/github.com/docker/swarm \
  && rm -rf /var/lib/apt/lists/*
- 
+
 EXPOSE 2375
 
 VOLUME $HOME/.swarm
