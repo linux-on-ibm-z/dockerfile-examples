@@ -1,4 +1,4 @@
-############### Dockerfile for CouchDB version 2.1.0 ############
+############### Dockerfile for CouchDB version 2.1.1 ############
 #
 # CouchDB, is open source database software.
 #
@@ -56,7 +56,7 @@ RUN apt-get update && apt-get install -y \
 # Download and install CouchDB
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
- && git checkout 2.1.0 \
+ && git checkout 2.1.1 \
  && ./configure -c --disable-docs --disable-fauxton \
  && make  \
  && cp -r $SOURCE_DIR/couchdb /usr/share/couchdb \
