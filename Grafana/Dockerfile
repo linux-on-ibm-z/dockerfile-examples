@@ -53,11 +53,11 @@ RUN apt-get update -y && apt-get install -y \
  && ./ibm-6.11.5.0-node-v6.11.5-linux-s390x.bin -i silent \
 
 # Install Golang
- && cd / && wget https://storage.googleapis.com/golang/go1.9.linux-s390x.tar.gz \
- && chmod +x go1.9.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.9.linux-s390x.tar.gz \
+ && cd / && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz \
+ && chmod +x go1.9.2.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.9.2.linux-s390x.tar.gz \
  && go version \
- && rm -rf go1.9.linux-s390x.tar.gz \
+ && rm -rf go1.9.2.linux-s390x.tar.gz \
 
 
 # Get the Grafana Soure code and build Grafana backend
