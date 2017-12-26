@@ -36,11 +36,11 @@ RUN apt-get update && apt-get install -y \
     tar \
     wget \
 
-# Setup Go v1.9
- && wget https://storage.googleapis.com/golang/go1.9.linux-s390x.tar.gz \
- && chmod ugo+r go1.9.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.9.linux-s390x.tar.gz \
- && rm -rf /go1.9.linux-s390x.tar.gz \
+# Setup Go v1.9.2
+ && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz \
+ && chmod ugo+r go1.9.2.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.9.2.linux-s390x.tar.gz \
+ && rm -rf /go1.9.2.linux-s390x.tar.gz \
 
 # Download and build Prometheus
  && mkdir -p $GOPATH/src/github.com/prometheus \
