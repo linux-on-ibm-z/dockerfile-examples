@@ -55,7 +55,7 @@ RUN apt-get update && apt-get install -y \
 			call \
 			coverage==3.7.1 \
 			coveralls \
-			django \
+			'django<2.0' \
 			funcsigs \
 			futures \
 			httplib2 \
