@@ -48,9 +48,8 @@ RUN apt-get update && apt-get install -y \
 # Install go and donload beats source code
  && python -m easy_install pip \
  && python -m pip install appdirs pyparsing six packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv \
- && wget https://storage.googleapis.com/golang/go1.9.linux-s390x.tar.gz  \
- && tar xvf go1.9.linux-s390x.tar.gz \
- && ln -sf /usr/bin/gcc /usr/bin/s390x-linux-gnu-gcc \
+ && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz  \
+ && tar xvf go1.9.2.linux-s390x.tar.gz \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
@@ -93,17 +92,11 @@ RUN apt-get update && apt-get install -y \
  && ln -s /opt/beats/filebeat/filebeat /usr/bin/filebeat \
 
 # Tidy and clean up
- && rm -rf $SOURCE_DIR \
  && apt-get remove -y \
     acl \
-    gcc \
     git \
     libssh-dev \
     make \
-    openssl \
-    python  \
-    python-openssl \
-    python-setuptools \
     wget \
  && apt-get autoremove -y \
  && apt autoremove -y \
