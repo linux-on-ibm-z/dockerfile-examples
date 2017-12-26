@@ -1,4 +1,4 @@
-######################### Dockerfile for HAProxy version 1.7.8 ####################################################
+######################### Dockerfile for HAProxy version 1.8.1 ####################################################
 #
 # This Dockerfile builds a basic installation of HAProxy.
 #
@@ -33,15 +33,15 @@ RUN apt-get update && apt-get install -y \
     make \
 	tar \
 	wget \		
- && wget http://www.haproxy.org/download/1.7/src/haproxy-1.7.8.tar.gz \
- && tar xzvf haproxy-1.7.8.tar.gz \
- && cd haproxy-1.7.8 \
+ && wget http://www.haproxy.org/download/1.8/src/haproxy-1.8.1.tar.gz \
+ && tar xzvf haproxy-1.8.1.tar.gz \
+ && cd haproxy-1.8.1 \
  && make TARGET=linux26  \
  && make install \
  
 # Remove cache data and unused packages
  && apt-get remove -y wget && apt-get autoremove -y && apt-get clean \
- && rm -rf /root/haproxy-1.7.8.tar.gz /root/haproxy-1.7.8 \
+ && rm -rf /root/haproxy-1.8.1.tar.gz /root/haproxy-1.8.1 \
  && rm -rf /var/lib/apt/lists/*
 
 # Start HAProxy server
