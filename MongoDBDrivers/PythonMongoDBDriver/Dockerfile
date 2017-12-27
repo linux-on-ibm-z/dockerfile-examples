@@ -1,4 +1,4 @@
-############### Dockerfile for Python MongoDBDriver 3.4.0 ####################################
+############### Dockerfile for Python MongoDBDriver 3.6.0 ####################################
 # 
 # To build Python MongoBDriver image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -36,7 +36,7 @@ RUN apt-get update  \
 # Download and configure the python Driver 
  && git clone git://github.com/mongodb/mongo-python-driver.git pymongo \
  && cd pymongo \
- && git checkout 3.4.0 \
+ && git checkout 3.6.0 \
  && python setup.py install \
  
 #clean up the unwanted packages 
