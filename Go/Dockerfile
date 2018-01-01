@@ -22,22 +22,14 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-ENV GOPATH /go
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+ENV PATH=/usr/lib/go-1.9/bin:$PATH
 
 # Install dependencies and extract go binary
-RUN apt-get update && apt-get install -y \
-    tar \
-    wget \
- && mkdir -p /go && cd /go && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz \
- && chmod ugo+r go1.9.2.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.9.2.linux-s390x.tar.gz \
+RUN apt-get update && apt-get install -y golang-1.9 \
+    
 
 # Tidy up (Clear cache data)
- && rm -rf go1.9.2.linux-s390x.tar.gz \
- && apt-get remove -y wget \
- && apt-get autoremove -y  && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && apt-get autoremove -y && apt-get clean  
 
 # Dockerfile does not have a CMD statement as the image is intended to be
 # used as a base image for building an application. If desired it may also be run as
