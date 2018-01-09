@@ -1,4 +1,4 @@
-################ Dockerfile for Jenkins server version 2.46.3 ###################
+	################ Dockerfile for Jenkins server version 2.89.2 ###################
 #
 # This Dockerfile builds a basic installation of Jenkins server.
 #
@@ -25,13 +25,31 @@ MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/commun
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-	openjdk-8-jdk \
-	wget \
+        openjdk-8-jdk \
+        wget zip\
  && wget -q -O - https://pkg.jenkins.io/debian/jenkins-ci.org.key | apt-key add - \
  && sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list' \
- && apt-get update && echo "#!/bin/sh\nexit 0" > /usr/sbin/policy-rc.d \
- && apt-get install -y jenkins \
+ && apt-get update && apt-get install -y jenkins \
  
+# Build/Install Jenkins 
+ && service jenkins stop \
+ && rm -rf /var/cache/jenkins/war \
+ && cp /usr/share/jenkins/jenkins.war /tmp/ \
+ && cd /tmp \
+ && jar -xvf jenkins.war WEB-INF/lib/jna-4.2.1.jar \
+ && wget  http://repo1.maven.org/maven2/net/java/dev/jna/jna/4.5.0/jna-4.5.0.jar -O WEB-INF/lib/jna-4.5.0.jar \
+ && jar -uvf jenkins.war WEB-INF/lib/jna-4.5.0.jar \
+ && zip  -d jenkins.war WEB-INF/lib/jna-4.2.1.jar \
+ && jar -xvf jenkins.war META-INF/MANIFEST.MF \
+ && head -n 8  META-INF/MANIFEST.MF >META-INF/MANIFEST.MF_tmp \
+ && mv META-INF/MANIFEST.MF_tmp META-INF/MANIFEST.MF \
+ && jar -uvf jenkins.war META-INF/MANIFEST.MF  \
+ && jar -uvfm jenkins.war META-INF/MANIFEST.MF \
+ && zip -d jenkins.war META-INF/JENKINS.SF \
+ && zip -d jenkins.war META-INF/JENKINS.RSA \
+ && cp jenkins.war /usr/share/jenkins/jenkins.war \
+
+
 # Clean up Cache data and unused dependencies
  && apt-get remove -y wget \
  && apt-get autoremove -y && apt-get clean \
@@ -39,5 +57,5 @@ RUN apt-get update && apt-get install -y \
 
 EXPOSE 8080
 
-ENTRYPOINT service jenkins restart && tail -f /var/log/jenkins/jenkins.log
+CMD service jenkins start && tail -f /var/log/jenkins/jenkins.log
 # End of Dockerfile
