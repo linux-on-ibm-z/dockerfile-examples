@@ -1,4 +1,4 @@
-################### Dockerfile for Doxygen version 1.8.12 ##################
+################## Dockerfile for Doxygen version 1.8.14 ##################
 #
 # This Dockerfile builds a basic installation of Doxygen
 #
@@ -42,9 +42,8 @@ RUN apt-get update && apt-get install -y \
     python \
     qt-sdk \
  && git clone https://github.com/doxygen/doxygen.git \
- && cd doxygen && git checkout Release_1_8_12 \
- && sed -i 's/(int(e) for e in platform.python_version_tuple())/sys.version_info[:3]/g' doc/translator.py \
- && mkdir build && cd build \
+ && cd doxygen && git checkout Release_1_8_14 \
+  && mkdir build && cd build \
  && cmake -G "Unix Makefiles" -Dbuild_doc=NO -Dbuild_wizard=YES .. \
  && make && make install \
 
@@ -58,8 +57,8 @@ RUN apt-get update && apt-get install -y \
     qt-sdk \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /apt/* && rm -rf /usr/lib/debug/*
+ && apt-get clean && rm -rf /var/lib/apt/lists/*  \
+ && rm -rf /usr/lib/debug/*
 
 # This dockerfile does not have a CMD statement as the image is intended to be
 # used as a base for building an application. If desired it may also be run as
