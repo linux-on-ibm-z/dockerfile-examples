@@ -1,4 +1,4 @@
-############################ Dockerfile for Grafana 4.6.2 ############################################
+############################ Dockerfile for Grafana 4.6.3 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -21,7 +21,7 @@ FROM s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV QT_QPA_PLATFORM=offscreen GOPATH=/opt
-ENV PATH=$PATH:/opt/yarn-v1.3.2/bin:$GOPATH/bin:/opt/ibm/node/bin:/usr/local/go/bin:/usr/share/grafana
+ENV PATH=$PATH:/opt/yarn-v1.3.2/bin:$GOPATH/bin:/opt/ibm/node/bin:/usr/lib/go-1.9/bin:/usr/share/grafana
 
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
@@ -34,6 +34,7 @@ RUN apt-get update -y && apt-get install -y \
     python \
     wget \
     unzip \
+    golang-1.9 \
 	
 # Install Nodejs
  && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/nodejs/6.11.5.0/linux/s390x/ibm-6.11.5.0-node-v6.11.5-linux-s390x.bin \
@@ -52,17 +53,10 @@ RUN apt-get update -y && apt-get install -y \
  && echo "-fileOverwrite_/home/test/ibm/node/_node_installation/uninstall.lax=Yes" >> installer.properties \
  && ./ibm-6.11.5.0-node-v6.11.5-linux-s390x.bin -i silent \
 
-# Install Golang
- && cd / && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz \
- && chmod +x go1.9.2.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.9.2.linux-s390x.tar.gz \
- && go version \
- && rm -rf go1.9.2.linux-s390x.tar.gz \
-
 
 # Get the Grafana Soure code and build Grafana backend
  && cd / && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
- && cd $GOPATH/src/github.com/grafana/grafana && git checkout v4.6.2 \
+ && cd $GOPATH/src/github.com/grafana/grafana && git checkout v4.6.3 \
  && cd ./vendor/github.com/klauspost/compress/gzip \
  && cp gunzip.go gunzip.go.copy \
  && cp gzip.go gzip.go.copy \
