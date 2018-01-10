@@ -23,7 +23,7 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-ENV GOPATH=/go PATH=/usr/local/go/bin:$PATH:/go/bin:/prometheus
+ENV GOPATH=/go PATH=/usr/lib/go-1.9/bin:$PATH:/go/bin:/prometheus
 
 #Install depenedencies
 RUN apt-get update && apt-get install -y \
@@ -35,12 +35,8 @@ RUN apt-get update && apt-get install -y \
     make \
     tar \
     wget \
+	golang-1.9 \
 
-# Setup Go v1.9.2
- && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz \
- && chmod ugo+r go1.9.2.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.9.2.linux-s390x.tar.gz \
- && rm -rf /go1.9.2.linux-s390x.tar.gz \
 
 # Download and build Prometheus
  && mkdir -p $GOPATH/src/github.com/prometheus \
@@ -66,6 +62,7 @@ RUN apt-get update && apt-get install -y \
     g++ \
     make \
     wget \
+	golang-1.9 \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
