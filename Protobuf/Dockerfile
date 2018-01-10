@@ -1,4 +1,4 @@
-####################### Dockerfile for Protobuf version 3.5.0 ##############
+####################### Dockerfile for Protobuf version 3.5.1 ##############
 #
 # Protocol Buffers is a method of serializing structured data.
 #
@@ -43,7 +43,7 @@ RUN apt-get update && apt-get install -y \
 # Download and install protobuf 
  && git clone https://github.com/google/protobuf.git \
  && cd protobuf \
- && git checkout v3.5.0 \
+ && git checkout v3.5.1 \
 
 # Add code patch
  && file=src/google/protobuf/stubs/atomicops_internals_generic_gcc.h \
