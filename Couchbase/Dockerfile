@@ -65,6 +65,9 @@ RUN apt-get update -y && apt-get install -y\
     vim \
     wget \
     xsltproc \
+	golang-1.9 \
+ && export PATH=/usr/lib/go-1.9/bin:$PATH \
+ && go version \ 
  && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 40 \
  && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 40 \
  && update-alternatives --config gcc \
@@ -75,14 +78,6 @@ RUN apt-get update -y && apt-get install -y\
  && chmod +x ibm-java-sdk-8.0-4.2-s390x-archive.bin \
  && ./ibm-java-sdk-8.0-4.2-s390x-archive.bin -r installer.properties \
  && java  -version \
-
-# Install go
- && cd $SOURCE_DIR && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.9.2.linux-s390x.tar.gz \
- && cd /usr/bin \
- && rm -rf s390x-linux-gnu-gcc \
- && ln gcc s390x-linux-gnu-gcc \
- && go version \
 
 # Install Erlang
  && cd $SOURCE_DIR \
@@ -223,9 +218,9 @@ RUN apt-get update -y && apt-get install -y\
 # Install go tool yacc
  && cd $SOURCE_DIR && export GOPATH=$HOME/go \
  && go get -u golang.org/x/tools/cmd/goyacc \
- && cp $HOME/go/bin/goyacc /usr/local/go/pkg/tool/linux_s390x/ \
- && chown root:root /usr/local/go/pkg/tool/linux_s390x/goyacc \
- && ln -sf /usr/local/go/pkg/tool/linux_s390x/goyacc /usr/local/go/pkg/tool/linux_s390x/yacc \
+ && cp $HOME/go/bin/goyacc /usr/lib/go-1.9/pkg/tool/linux_s390x/ \
+ && chown root:root /usr/lib/go-1.9/pkg/tool/linux_s390x/goyacc \
+ && ln -s /usr/lib/go-1.9/pkg/tool/linux_s390x/goyacc /usr/lib/go-1.9/pkg/tool/linux_s390x/yacc \
 
 # Build the Couchbase
  && cd $SOURCE_DIR/couchbase/ && make \
