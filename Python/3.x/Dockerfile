@@ -1,4 +1,4 @@
-########## Dockerfile for Python-3.6.3 #########################################
+########## Dockerfile for Python-3.6.4 #########################################
 #
 # Python is an interactive high-level object-oriented language
 #
@@ -31,7 +31,6 @@ FROM s390x/ubuntu:16.04
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 RUN apt-get update && apt-get install -y \
-    bzip2 \
     g++ \
     gcc \
     libbz2-dev \ 
@@ -47,18 +46,17 @@ RUN apt-get update && apt-get install -y \
     xz-utils \ 
 
 # Download Python from the ftp site
- && wget https://www.python.org/ftp/python/3.6.3/Python-3.6.3.tar.xz \
- && tar -xvf Python-3.6.3.tar.xz \
+ && wget https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz \
+ && tar -xvf Python-3.6.4.tar.xz \
 
 # Build Python
- && cd Python-3.6.3 \
+ && cd Python-3.6.4 \
  && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
  && make \
  && make install \
 
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
-    bzip2 \
     g++ \
     gcc \
     make \
@@ -66,6 +64,6 @@ RUN apt-get update && apt-get install -y \
     xz-utils \ 
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /root/Python-3.6.3.tar.xz /root/Python-3.6.3
+ && rm -rf /root/Python-3.6.4.tar.xz /root/Python-3.6.4
 
 CMD python3 --version
