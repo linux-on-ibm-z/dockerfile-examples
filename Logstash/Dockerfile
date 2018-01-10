@@ -1,4 +1,4 @@
-############################ Dockerfile for Logstash version 5.6.1 ###################################################
+############################ Dockerfile for Logstash version 6.1.1 ###################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -32,14 +32,14 @@ RUN apt-get update && apt-get install -y \
     wget \
 
 # Download the logstash source from github and build it
- && wget https://artifacts.elastic.co/downloads/logstash/logstash-5.6.1.zip \
- && unzip -u logstash-5.6.1.zip \
+ && wget https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.zip \
+ && unzip -u logstash-6.1.1.zip \
  && wget https://github.com/jnr/jffi/archive/master.zip \
  && unzip master.zip && cd jffi-master && ant && cd .. \
- && mkdir logstash-5.6.1/vendor/jruby/lib/jni/s390x-Linux  \
- && cp jffi-master/build/jni/libjffi-1.2.so logstash-5.6.1/vendor/jruby/lib/jni/s390x-Linux/libjffi-1.2.so \
+ && mkdir logstash-6.1.1/vendor/jruby/lib/jni/s390x-Linux  \
+ && cp jffi-master/build/jni/libjffi-1.2.so logstash-6.1.1/vendor/jruby/lib/jni/s390x-Linux/libjffi-1.2.so \
  && cp -r /root/jffi-master  /usr/share \
- && cp -r /root/logstash-5.6.1 /usr/share/logstash \
+ && cp -r /root/logstash-6.1.1 /usr/share/logstash \
 
 # Cleanup Cache data , unused packages and source files
  && apt-get remove -y \
