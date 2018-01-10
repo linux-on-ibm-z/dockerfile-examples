@@ -1,4 +1,4 @@
-######################## Dockerfile for cAdvisor 0.27.2 #################################
+######################## Dockerfile for cAdvisor 0.28.3 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -26,6 +26,7 @@ FROM s390x/ubuntu:16.04
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV SOURCE_DIR=/tmp/source
+ENV PATH=/usr/lib/go-1.9/bin:$PATH
 WORKDIR $SOURCE_DIR
 
 # Set Environmental Variables
@@ -35,8 +36,9 @@ ENV PATH=/opt/gccgo/bin:$PATH:$GOPATH/bin
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     git \ 
-	golang \ 
+	golang-1.9 \ 
 	libseccomp-dev \
+	curl \
 	
 # Install godep tool
  && go get github.com/tools/godep \
@@ -45,7 +47,7 @@ RUN apt-get update && apt-get install -y \
  && mkdir -p $GOPATH/src/github.com/google && cd $GOPATH/src/github.com/google \
 
 # Checkout the code from repository
- && git clone https://github.com/google/cadvisor.git -b v0.27.2 \
+ && git clone https://github.com/google/cadvisor.git -b v0.28.3 \
  && cd cadvisor \
 
 # Change the work directory
