@@ -36,18 +36,13 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 # Set GOPATH environment varibale
 
 ENV GOPATH /go:/go/src/github.com/docker/swarm/Godeps/_workspace/
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH:$HOME/go/bin
+ENV PATH $GOPATH/bin:/usr/lib/go-1.9/bin:$PATH:$HOME/go/bin
 ENV SWARM_HOST :2375
+
 
 # Install dependencies
 RUN apt-get -y update && apt-get install -y \
-    git wget tar gcc \
-
-# Install go from source
-&& wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz \
-&& chmod ugo+r go1.9.2.linux-s390x.tar.gz \
-&& tar -C /usr/local -xzf go1.9.2.linux-s390x.tar.gz \
-
+    git wget tar gcc golang-1.9 \
 
 # Get the dependency tools
 && go get github.com/tools/godep \
