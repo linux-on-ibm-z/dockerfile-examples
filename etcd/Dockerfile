@@ -24,7 +24,7 @@ FROM s390x/ubuntu:16.04
 # Maintainer
 MAINTAINER LoZ Open Source Ecosystem
 
-ENV PATH=$PATH:/usr/local/go/bin GOPATH=/
+ENV PATH=$PATH:/usr/lib/go-1.9/bin GOPATH=/
 ENV ETCD_DATA_DIR=/data ETCD_UNSUPPORTED_ARCH=s390x
 
 # Install dependencies
@@ -34,12 +34,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     tar \
     wget \
-
-#Install Go1.9.2
- && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz \
- && chmod ugo+r go1.9.2.linux-s390x.tar.gz \
- && rm -rf /usr/local/go \
- && tar -C /usr/local -xzf go1.9.2.linux-s390x.tar.gz \
+    golang-1.9 \
 
 # Clone etcd source
  && mkdir -p /src/github.com/coreos \
@@ -62,7 +57,7 @@ RUN apt-get update && apt-get install -y \
     wget \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /go1.9.2.linux-s390x.tar.gz /src/github.com/coreos
+ && rm -rf /src/github.com/coreos
 
 WORKDIR /data
 VOLUME /data
