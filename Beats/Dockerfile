@@ -1,4 +1,4 @@
-#################### Dockerfile for Beats 5.6.3 #############################
+#################### Dockerfile for Beats 6.1.1 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -8,11 +8,11 @@
 # To create a container of Beats image run the below command:
 # docker run --name <container_name> -it  <image_name>
 #
-# The following modules are present in beats: heartbeat ,filebeat ,metricbeat , packetbeat, libbeat
-# docker run --name <container_name> -v /<host_path>:/root/templates -d <image_name> <beat_name> -e -path.config /root/templates -d "publish"
+# The following modules are present in beats: heartbeat ,filebeat ,metricbeat , packetbeat, libbeat, auditbeat
+# docker run --name <container_name> -e BEATSNAME=<beat_name> -d <image_name>
 #
 # To run a particular module like heartbeat run the following command:
-# docker run --name <container_name> -v /<host_path>:/root/templates -d <image_name> heartbeat -e -path.config /root/templates -d "publish"
+# docker run --name <container_name> -e BEATSNAME=heartbeat -d <image_name> 
 #
 ###########################################################################################################
 
@@ -25,8 +25,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 # Set environment variable
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
-ENV GOROOT=$SOURCE_DIR/go
-ENV PATH=$GOROOT/bin:$PATH
+ENV PATH=$PATH:/usr/lib/go-1.9/bin/
 ENV GOPATH=$SOURCE_DIR
 
 # Install dependencies
@@ -34,6 +33,7 @@ RUN apt-get update && apt-get install -y \
     acl \
     gcc \
     git \
+	golang-1.9 \
     libcap-dev \
     libpcap0.8-dev \
     libssh-dev \
@@ -48,24 +48,14 @@ RUN apt-get update && apt-get install -y \
 # Install go and donload beats source code
  && python -m easy_install pip \
  && python -m pip install appdirs pyparsing six packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv \
- && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz  \
- && tar xvf go1.9.2.linux-s390x.tar.gz \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
  && git clone https://github.com/elastic/beats.git  \
  && cd beats  \
- && git checkout v5.6.3  \
+ && git checkout v6.1.1  \
 
-# Updtae ipv4 and ipv6 source code to add support for s390x
- && sed -i "61d" $GOPATH/src/github.com/elastic/beats/vendor/golang.org/x/net/ipv4/gen.go  \
- && sed -i '60a case runtime.GOOS == "linux" && (runtime.GOARCH == "arm64" || runtime.GOARCH == "mips64" || runtime.GOARCH == "mips64le" || runtime.GOARCH == "ppc64" || runtime.GOARCH == "ppc64le" || runtime.GOARCH == "s390x"):' $GOPATH/src/github.com/elastic/beats/vendor/golang.org/x/net/ipv4/gen.go \
- && sed -i "61d" $GOPATH/src/github.com/elastic/beats/vendor/golang.org/x/net/ipv6/gen.go  \
- && sed -i '60a case runtime.GOOS == "linux" && (runtime.GOARCH == "arm64" || runtime.GOARCH == "mips64" || runtime.GOARCH == "mips64le" || runtime.GOARCH == "ppc64" || runtime.GOARCH == "ppc64le" || runtime.GOARCH == "s390x"):' $GOPATH/src/github.com/elastic/beats/vendor/golang.org/x/net/ipv6/gen.go \
- && cp $GOPATH/src/github.com/elastic/beats/vendor/golang.org/x/net/ipv6/zsys_linux_amd64.go $GOPATH/src/github.com/elastic/beats/vendor/golang.org/x/net/ipv6/zsys_linux_s390x.go \
- && cp $GOPATH/src/github.com/elastic/beats/vendor/golang.org/x/net/ipv4/zsys_linux_amd64.go $GOPATH/src/github.com/elastic/beats/vendor/golang.org/x/net/ipv4/zsys_linux_s390x.go \
- 
- # Building heartbeat
+# Building heartbeat
  && cd $GOPATH/src/github.com/elastic/beats/heartbeat  \
  && make  \
 
@@ -100,8 +90,13 @@ RUN apt-get update && apt-get install -y \
     wget \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && mkdir /root/templates && cd /opt/beats &&  cp -n **/*.yml **/*.template*.json /root/templates/
+ && apt-get clean 
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir /Beats \
+ && cd /opt/beats \
+ && cp -n **/*.yml /Beats
 
 # Create mount point for configuration files
-VOLUME /root/templates
+VOLUME /Beats
+
+CMD $BEATSNAME -e -path.config /Beats -d "publish"
