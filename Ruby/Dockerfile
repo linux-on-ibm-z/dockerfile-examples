@@ -1,4 +1,4 @@
-########## Dockerfile for Ruby version 2.4.2 #########
+########## Dockerfile for Ruby version 2.5.0 #########
 #
 # Ruby is a dynamic, open source programming language with a focus on simplicity and productivity.
 # It has an elegant syntax that is natural to read and easy to write.
@@ -11,10 +11,10 @@
 # docker run -it <image_name> /bin/bash
 #
 # Below is the command to use Ruby:
-# docker run --name <container_name> --rm=true -it <ruby image> ruby <argument>
+# docker run --name <container_name> --rm=true <ruby image> ruby <argument>
 #
 # For example to execute a test file using Ruby:
-# docker run --name <container_name> -v /home/test/test.rb:/home/test.rb --rm=true -it <ruby image> ruby /home/test.rb
+# docker run --name <container_name> -v /home/test/test.rb:/home/test.rb --rm=true <ruby image> ruby /home/test.rb
 #
 # ########################### Sample test.rb ######################################
 #
@@ -46,9 +46,9 @@ RUN apt-get update && apt-get install -y \
     openssl \
 
 # Install Ruby
- && wget http://cache.ruby-lang.org/pub/ruby/ruby-2.4.2.tar.gz \
- && tar -xvf ruby-2.4.2.tar.gz \
- && cd ruby-2.4.2 \
+ && wget http://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.0.tar.gz \
+ && tar -xvf ruby-2.5.0.tar.gz \
+ && cd ruby-2.5.0 \
  && ./configure \
  && make \
  && make install \
