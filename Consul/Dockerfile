@@ -65,6 +65,7 @@ RUN apt-get update &&  apt-get install -y \
  && git am 85.patch \
 # Reinstall gox tool
  && cd $GOPATH/src/github.com/mitchellh/ \
+ && go get github.com/mitchellh/iochan \
  && go install ./... \
  && cd $GOPATH/src/github.com/hashicorp/consul \
 
