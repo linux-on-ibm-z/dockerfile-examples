@@ -22,25 +22,26 @@ ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 
 # Install dependencies
-RUN apt-get update && apt-get install -y \
-    binutils \
-    binutils-dev \
-    build-essential \
-    bzip2 \
-    flex \
-    g++ \
-    gcc \
-    git \
-    glibc-source \
-    golang \
-    libssl-dev \
-    make \
-    scons \
-    subversion \
-    tar \
-    texinfo \
-    wget \
-    zlib1g-dev \
+RUN apt-get update &&  apt-get install -y \
+	wget \
+	tar \
+	make \
+	flex \
+	gcc-5 \
+	g++-5 \
+	zlib1g-dev \
+	git \
+	libssl-dev \
+	libmpc-dev \
+	binutils \
+	binutils-dev \
+	glibc-source \
+	build-essential \
+	bzip2 \
+	texinfo \
+	golang \
+	scons \
+ 
  && cd $SOURCE_DIR && git clone https://github.com/gcc-mirror/gcc \
  && cd gcc && git checkout gcc-5_3_0-release \
  && ./contrib/download_prerequisites \
@@ -76,8 +77,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     bzip2 \
     flex \
-    g++ \
-    gcc \
+    g++-5 \
+    gcc-5 \
     git \
     glibc-source \
     golang \
@@ -89,7 +90,7 @@ RUN apt-get update && apt-get install -y \
  && rm -rf $SOURCE_DIR /opt \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
+ && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
 VOLUME /data/db
 
