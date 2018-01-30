@@ -1,4 +1,4 @@
-############### Dockerfile for Perl MongoDBDriver 1.8.0 ####################################
+############### Dockerfile for Perl MongoDBDriver 1.8.1 ####################################
 # 
 # To build Perl MongoDBDriver image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
