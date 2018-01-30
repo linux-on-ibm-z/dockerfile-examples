@@ -1,4 +1,4 @@
-################ Dockerfile for Apache ZooKeeper version 3.4.10 ######################
+################ Dockerfile for Apache ZooKeeper version 3.4.11 ######################
 #
 # This Dockerfile builds a basic installation of Apache ZooKeeper.
 #
@@ -28,27 +28,27 @@ WORKDIR $SOURCE_DIR
 RUN apt-get update && apt-get install -y \
     ant \
     dh-autoreconf \
-    git \
+	git \
     libcppunit-dev \
     libcppunit-doc \
     libtool \
     make \
     openjdk-8-jdk \
-    patch \
+	tar \
     wget \
 
 # Download, build and install Apache ZooKeeper 
  && git clone https://github.com/apache/zookeeper \
+ && cd zookeeper \
+ && git checkout tags/release-3.4.11 \
+ &&	ant compile \
 
 # Build CPP unit test first
- && cd zookeeper \
- && git checkout tags/release-3.4.10 \
- && ant compile_jute  \
  && cd src/c \
  && ACLOCAL="aclocal -I /usr/share/aclocal" autoreconf -if \
- && wget https://issues.apache.org/jira/secure/attachment/12570030/mt_adaptor.c.patch \
- && patch src/mt_adaptor.c mt_adaptor.c.patch \
- &&  ./configure && make && make install \
+ && ./configure \
+ && make \
+ && make install \
  && make distclean \
  && cd ../.. \
 
@@ -64,12 +64,11 @@ RUN apt-get update && apt-get install -y \
  && apt-get remove -y \
     ant \
     dh-autoreconf \
-    git \
+	git \
     libcppunit-dev \
     libcppunit-doc \
     libtool \
     make \
-    patch \
     wget \
  && apt-get autoremove -y \
  && apt autoremove -y \
