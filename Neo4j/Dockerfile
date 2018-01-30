@@ -1,4 +1,4 @@
-########## Dockerfile for Neo4j version 3.3.0 ##################################
+########## Dockerfile for Neo4j version 3.3.1 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -16,7 +16,7 @@
 # docker run --name <container_name> -d -p <host-port>:<container-port> <image-name>
 #
 # Provide custom configuration file
-# docker run --name <container_name> -d -p <host-port>:<container-port> -v /<path_on_host>:/root/neo4j/conf/neo4j.conf <image-name> 
+# docker run --name <container_name> -d -p <host-port>:<container-port> -v /<path_on_host>/neo4j.conf:/root/neo4j/conf/neo4j.conf <image-name> 
 #  
 # Official website: https://neo4j.com/
 #
@@ -49,9 +49,9 @@ RUN  apt-get update  \
 
 # Download and unzip Neo4j pre build Binary
   && cd $SOURCE_DIR/ \
-  && wget https://neo4j.com/artifact.php?name=neo4j-community-3.3.0-unix.tar.gz \
-  && tar -xvzf artifact.php?name=neo4j-community-3.3.0-unix.tar.gz \
-  && mv neo4j-community-3.3.0 neo4j \
+  && wget https://neo4j.com/artifact.php?name=neo4j-community-3.3.1-unix.tar.gz \
+  && tar -xvzf artifact.php?name=neo4j-community-3.3.1-unix.tar.gz \
+  && mv neo4j-community-3.3.1 neo4j \
 
 # Clean up the unwanted packages and clear the source directory
   && apt-get remove -y \
@@ -59,9 +59,10 @@ RUN  apt-get update  \
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf $SOURCE_DIR/OpenJDK9_s390x_Linux_jdk-9.181.tar.gz $SOURCE_DIR/artifact.php?name=neo4j-community-3.3.0-unix.tar.gz /var/lib/apt/lists/*
+  && rm -rf $SOURCE_DIR/OpenJDK9_s390x_Linux_jdk-9.181.tar.gz $SOURCE_DIR/artifact.php?name=neo4j-community-3.3.1-unix.tar.gz /var/lib/apt/lists/*
 
-VOLUME /data
+# Define mount for backup of logs, data, conf & lib
+VOLUME ["$NEO4J_HOME/logs","$NEO4J_HOME/data","$NEO4J_HOME/conf","$NEO4J_HOME/lib"]
 
 # Port for Neo4j
 EXPOSE 7474 7473 6362 5000 6000 7000 5001 6001 2003 3637 1337
