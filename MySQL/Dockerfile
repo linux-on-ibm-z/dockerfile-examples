@@ -1,4 +1,4 @@
-############################ Dockerfile for MySQL version 5.7.20 ############################################
+############################ Dockerfile for MySQL version 5.7.21 ############################################
 #
 # This Dockerfile builds a basic installation of MySQL.
 #
