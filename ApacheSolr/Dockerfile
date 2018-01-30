@@ -1,4 +1,4 @@
-############### Dockerfile for Apache Solr version 7.0.1 #########################
+############### Dockerfile for Apache Solr version 7.2.0 #########################
 #
 # To build Apache Solr image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -19,6 +19,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x PATH=$JAVA_HOME/bin:$PATH
+ENV ANT_OPTS="-Xmx1024m -Xss1g"
 
 # Install dependencies
 RUN apt-get update &&   apt-get install -y \
@@ -30,14 +31,15 @@ RUN apt-get update &&   apt-get install -y \
     wget \
 
 # Download Solr and build it
- && wget http://archive.apache.org/dist/lucene/solr/7.0.1/solr-7.0.1-src.tgz \
- && tar zxvf solr-7.0.1-src.tgz  \
- && cd solr-7.0.1/solr \
+ && wget http://archive.apache.org/dist/lucene/solr/7.2.0/solr-7.2.0-src.tgz \
+ && tar zxvf solr-7.2.0-src.tgz  \
+ && cd solr-7.2.0/solr \
  && ant ivy-bootstrap \
+ && ant compile \
  && ant server \
- && cd  $SOURCE_DIR/solr-7.0.1/solr/bin  \
+ && cd  $SOURCE_DIR/solr-7.2.0/solr/bin  \
  && chmod a+x solr  \
- && cp -r $SOURCE_DIR/solr-7.0.1/solr /opt/ \
+ && cp -r $SOURCE_DIR/solr-7.2.0/solr /opt/ \
 
 # Tidy and clean up 
  && rm -rf $SOURCE_DIR \
