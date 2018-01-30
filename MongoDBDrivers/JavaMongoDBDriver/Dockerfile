@@ -1,4 +1,4 @@
-############### Dockerfile for Java MongoDBDriver 3.5.0 ####################################
+############### Dockerfile for Java MongoDBDriver 3.6.1 ####################################
 # 
 # To build Java MongoBDriver image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -33,7 +33,7 @@ RUN apt-get update  \
 # Download and configure the java Driver 
  && git clone https://github.com/mongodb/mongo-java-driver.git  \
  && cd mongo-java-driver \
- && git checkout r3.5.0 \
+ && git checkout r3.6.1 \
  && ./gradlew assemble \
  
 #clean up the unwanted packages 
