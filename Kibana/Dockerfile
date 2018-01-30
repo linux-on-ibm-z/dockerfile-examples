@@ -28,24 +28,19 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 WORKDIR "/root"
 
 # Set Environment Variable
-ENV PATH=/usr/share/node-v6.9.1/bin:/usr/share/kibana/bin:$PATH
-
+ENV PATH=/ibm/node/bin:/usr/share/kibana/bin:$PATH
 # Install the dependencies and NodeJS
 RUN apt-get update && apt-get install -y \
-    apache2 \
-    g++ \
-    gcc \
-    git \
-    make \
-    nodejs \
     openjdk-8-jdk \
-    python \
-    unzip \
     wget \
     tar \
- && wget https://nodejs.org/dist/v6.9.1/node-v6.9.1-linux-s390x.tar.gz \
- && tar xvzf node-v6.9.1-linux-s390x.tar.gz \
- && mv /root/node-v6.9.1-linux-s390x/ /usr/share/node-v6.9.1 \
+    unzip \
+ && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/nodejs/6.12.2.0/linux/s390x/ibm-6.12.2.0-node-v6.12.2-linux-s390x.bin \
+ && echo "LICENSE_ACCEPTED=TRUE\nUSER_INSTALL_DIR=/ibm/node\n-fileOverwrite_/ibm/node/_node_installation/uninstall.lax=Yes" > installer.properties \
+ && cat installer.properties \
+ && chmod +x ibm-6.12.2.0-node-v6.12.2-linux-s390x.bin \
+ && ./ibm-6.12.2.0-node-v6.12.2-linux-s390x.bin -f installer.properties -i silent \
+ && node -v \
 
 # Download and setup Kibana
  && cd /root/ && wget https://artifacts.elastic.co/downloads/kibana/kibana-5.6.1-linux-x86_64.tar.gz \
@@ -53,19 +48,17 @@ RUN apt-get update && apt-get install -y \
  && mv /root/kibana-5.6.1-linux-x86_64 kibana-5.6.1 \
  && cd /root/kibana-5.6.1 \
  && mv node node_old \
- &&     ln -s /usr/share/node-v6.9.1/bin/node node \
+ && ln -s /ibm/node node \
  && mkdir /etc/kibana \
  && cp config/kibana.yml /etc/kibana \
  && mv /root/kibana-5.6.1/ /usr/share/kibana \
 
 # Cleanup Cache data , unused packages and source files
  && apt-get remove -y \
-    git \
-    make \
     unzip \
     wget \
  && apt-get autoremove -y && apt-get clean \
- && rm -rf /root/kibana-5.6.1-linux-x86_64.tar.gz /root/node-v6.9.1-linux-s390x.tar.gz \
+ && rm -rf /root/kibana-5.6.1-linux-x86_64.tar.gz /root/node-v5.6.1-linux-s390x.tar.gz \
  && rm -rf /var/lib/apt/lists/*
 
 
@@ -75,3 +68,4 @@ EXPOSE 5601 80
 
 # Start Kibana service
 CMD ["kibana","-H","0.0.0.0"]
+
