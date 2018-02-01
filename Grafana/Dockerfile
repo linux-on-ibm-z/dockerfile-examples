@@ -37,8 +37,8 @@ RUN apt-get update -y && apt-get install -y \
     golang-1.9 \
 	
 # Install Nodejs
- && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/nodejs/6.11.5.0/linux/s390x/ibm-6.11.5.0-node-v6.11.5-linux-s390x.bin \
- && chmod +x ibm-6.11.5.0-node-v6.11.5-linux-s390x.bin \
+ && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/nodejs/8.9.4.0/linux/s390x/ibm-8.9.4.0-node-v8.9.4-linux-s390x.bin \
+ && chmod +x ibm-8.9.4.0-node-v8.9.4-linux-s390x.bin \
  && echo "#Indicate whether the license agreement been accepted" >installer.properties \
  && echo  "#----------------------------------------------------" >> installer.properties \
  && echo "LICENSE_ACCEPTED=TRUE">> installer.properties \
@@ -51,7 +51,7 @@ RUN apt-get update -y && apt-get install -y \
  && echo "#Install" >> installer.properties \
  && echo "#-------" >> installer.properties \
  && echo "-fileOverwrite_/home/test/ibm/node/_node_installation/uninstall.lax=Yes" >> installer.properties \
- && ./ibm-6.11.5.0-node-v6.11.5-linux-s390x.bin -i silent \
+ && ./ibm-8.9.4.0-node-v8.9.4-linux-s390x.bin -i silent \
 
 
 # Get the Grafana Soure code and build Grafana backend
