@@ -1,4 +1,4 @@
-############################# Dockerfile for Apache Tomcat 8.5.15 #####################################
+############################# Dockerfile for Apache Tomcat 8.5.16 #####################################
 #
 # This Dockerfile builds a basic installation of Apache Tomcat.
 #
@@ -27,48 +27,48 @@ MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/commun
 WORKDIR "/root"
 
 # Set the Environmental Variables
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x  
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
 ENV CATALINA_HOME=/opt/tomcat/
 ENV PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-	ant \
-	gcc \
-	git \
-	openjdk-8-jdk \
-	make \
-	tar \
-	wget \
+        ant \
+        gcc \
+        git \
+        openjdk-8-jdk \
+        make \
+        tar \
+        wget \
 
 # Clone and Install OpenSSL 1.0.2k
  && git clone https://github.com/openssl/openssl.git && cd openssl && git checkout OpenSSL_1_0_2k \
  && ./config --prefix=/usr --openssldir=/usr/local/openssl shared \
- && make && make install \ 
- 
+ && make && make install \
+
 # Clone Tomcat and build it.
  && cd /root && git clone https://github.com/apache/tomcat85.git \
- && cd tomcat85 && git checkout TOMCAT_8_5_15 \
+ && cd tomcat85 && git checkout TOMCAT_8_5_16 \
  && cp build.properties.default build.properties \
  && ant \
- && mkdir -p $CATALINA_HOME && mv /root/tomcat85/output/build/* $CATALINA_HOME \ 
+ && mkdir -p $CATALINA_HOME && mv /root/tomcat85/output/build/* $CATALINA_HOME \
 
 # Clean up source dir and unused packages/libraries
- && cd /root && rm -rfv apache-tomcat-8.0.35.tar.gz openssl tomcat-build-libs tomcat85  \
+ && cd /root && ls && rm -rf  openssl tomcat-build-libs tomcat85  \
  && apt-get remove -y \
     ant \
-	gcc \
-	git \
-	make \
-	wget \
+        gcc \
+        git \
+        make \
+        wget \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
- 
+
 # Port for Apache tomcat
 EXPOSE 8080
 
 # Start Apache Tomcat
-CMD $CATALINA_HOME/bin/startup.sh && tail -f /opt/tomcat/logs/localhost.*.log
+CMD $CATALINA_HOME/bin/startup.sh && tail -f /opt/tomcat/logs/catalina.out
 
 # End of Dockerfile
