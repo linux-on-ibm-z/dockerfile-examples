@@ -1,4 +1,4 @@
-############################# Dockerfile for Apache Tomcat 8.5.16 #####################################
+############################# Dockerfile for Apache Tomcat 8.5.24 #####################################
 #
 # This Dockerfile builds a basic installation of Apache Tomcat.
 #
@@ -48,7 +48,7 @@ RUN apt-get update && apt-get install -y \
 
 # Clone Tomcat and build it.
  && cd /root && git clone https://github.com/apache/tomcat85.git \
- && cd tomcat85 && git checkout TOMCAT_8_5_16 \
+ && cd tomcat85 && git checkout TOMCAT_8_5_24 \
  && cp build.properties.default build.properties \
  && ant \
  && mkdir -p $CATALINA_HOME && mv /root/tomcat85/output/build/* $CATALINA_HOME \
