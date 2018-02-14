@@ -1,4 +1,4 @@
-########## Dockerfile for PM2 version 2.9.1 #########
+########## Dockerfile for PM2 version 2.9.2 #########
 #
 # This Dockerfile builds a basic installation of PM2.
 #
@@ -26,20 +26,13 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x
-ENV PATH=$JAVA_HOME/bin:/usr/local/bin:$PATH
-
 # Install dependencies
 RUN  apt-get update  \
-  && apt-get -y install curl \
+  && apt-get -y install \
          nodejs \
          npm  \
-         openjdk-8-jdk \
   && ln -s "$(which nodejs)" /usr/local/bin/node \
-  && npm install pm2@2.9.1 -g \
-  && apt-get remove -y \
-     curl \
-     openjdk-8-jdk \
+  && npm install pm2@2.9.2 -g \
 
 # Clean up the unwanted packages and clear the source directory
   && apt-get autoremove -y \
