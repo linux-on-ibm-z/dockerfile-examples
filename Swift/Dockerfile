@@ -1,4 +1,4 @@
-########## Dockerfile for Swift version 4.0.2 ###################################################################
+########## Dockerfile for Swift version 4.0.3 ###################################################################
 #
 # Swift is a general-purpose, multi-paradigm, compiled programming language.
 # It makes writing and maintaining correct programs easier for the developer
@@ -58,13 +58,14 @@ RUN apt-get update && apt-get -y install \
 	python-dev \
 	sudo \
 	swig \
+	systemtap-sdt-dev \
 	texinfo \
 	tzdata \
 	uuid-dev \
  && apt-get clean \
 
 #  Install blocksruntime
- && git clone https://github.com/mackyle/blocksruntime && cd blocksruntime && ./buildlib && sudo env prefix=/usr ./installlib \ 
+ && git clone https://github.com/mackyle/blocksruntime && cd blocksruntime && ./buildlib && sudo env prefix=/usr ./installlib \
  && rm -rf /root/blocksruntime \
 
 #  Install gold linker
@@ -73,13 +74,13 @@ RUN apt-get update && apt-get -y install \
  && ./configure --prefix=/opt/binutils-2.27 --enable-gold \
  && make && sudo make install \
  && rm -rf /root/binutils-gdb \
-     
+
 #  Build llvm/clang
  && cd /root && mkdir llvm && cd llvm \
  && git clone https://github.com/linux-on-ibm-z/llvm.git  \
  && cd llvm && git checkout llvm-for-swift-3.1 && cd tools \
- && git clone https://github.com/linux-on-ibm-z/clang.git && cd clang \ 
- && git checkout clang-for-swift-3.1 && cd ../../projects \ 
+ && git clone https://github.com/linux-on-ibm-z/clang.git && cd clang \
+ && git checkout clang-for-swift-3.1 && cd ../../projects \
  && git clone https://github.com/linux-on-ibm-z/compiler-rt.git  \
  && cd compiler-rt && git checkout compiler-rt-for-swift-3.0 && cd ../../.. \
  && mkdir build && cd build \
@@ -89,23 +90,18 @@ RUN apt-get update && apt-get -y install \
           -DCURSES_INCLUDE_PATH=/usr/include \
           -DCURSES_LIBRARY=/usr/lib/s390x-linux-gnu/libncurses.so \
           -DCURSES_PANEL_LIBRARY=/usr/lib/s390x-linux-gnu/libpanel.so \
-          ../llvm \ 
- && make -j4 \ 
- && make install \ 
+          ../llvm \
+ && make -j4 \
+ && make install \
  && rm -rf /root/llvm /root/build \
- 
-# Clone and Install Swift 
- && cd /root && mkdir swift31 && cd swift31 \
- && git clone https://github.com/linux-on-ibm-z/swift.git \ 
+
+# Clone and Install Swift
+ && cd /root && mkdir swift4 && cd swift4 \
+ && git clone https://github.com/linux-on-ibm-z/swift.git \
  && cd swift \
- && git checkout swift-4.0.2-RELEASE-s390x \ 
- && ./utils/update-checkout --clone --scheme swift-4.0.2-RELEASE-s390x --config $PWD/utils/update-checkout-config-s390x.json \ 
- && rm -f ./utils/swift_build_support/__init__.pyc \ 
- && cd ../swift-corelibs-libdispatch \ 
- && git submodule init \ 
- && git submodule update --recursive \ 
- && cd ../swift \ 
- && mkdir $MYDESTDIR \ 
+ && git checkout swift-4.0.3-RELEASE-s390x \
+ && ./utils/update-checkout --clone --scheme swift-4.0.3-RELEASE-s390x --config $PWD/utils/update-checkout-config-s390x.json \
+ && mkdir $MYDESTDIR \
  && ./utils/build-script -j 2 -r \
         --foundation --xctest --llbuild --swiftpm --libdispatch -- \
         --verbose-build=1 \
@@ -113,9 +109,9 @@ RUN apt-get update && apt-get -y install \
         --swift-install-components='autolink-driver;compiler;clang-builtin-headers;stdlib;sdk-overlay;license' \
         --build-swift-static-stdlib=1 \
         --install-prefix=/usr \
-        --install-destdir=$MYDESTDIR \ 
- && rm -rf /swift31 /tmp/* /var/tmp/* /root/swift31 \
- 
+        --install-destdir=$MYDESTDIR \
+ && rm -rf /swift4 /tmp/* /var/tmp/* /root/swift4 \
+
 # Clean up unused packages and data
  && apt-get remove -y \
     autoconf \
