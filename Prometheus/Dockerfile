@@ -1,4 +1,4 @@
-########## Dockerfile for Prometheus 2.0.0 #########
+########## Dockerfile for Prometheus 2.1.0 #########
 #
 # This Dockerfile builds Prometheus
 #
@@ -43,7 +43,7 @@ RUN apt-get update && apt-get install -y \
  && cd $GOPATH/src/github.com/prometheus \
  && git clone https://github.com/prometheus/prometheus.git \
  && cd prometheus \
- && git checkout v2.0.0 \
+ && git checkout v2.1.0 \
  && make build \
  && mkdir -p /prometheus && cp -p prometheus promtool /prometheus/ \
  && mkdir -p /etc/prometheus \
