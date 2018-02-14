@@ -1,4 +1,4 @@
-#################### Dockerfile for Beats 6.1.1 #############################
+#################### Dockerfile for Beats 6.2.1 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -53,7 +53,7 @@ RUN apt-get update && apt-get install -y \
  && cd $GOPATH/src/github.com/elastic  \
  && git clone https://github.com/elastic/beats.git  \
  && cd beats  \
- && git checkout v6.1.1  \
+ && git checkout v6.2.1  \
 
 # Building heartbeat
  && cd $GOPATH/src/github.com/elastic/beats/heartbeat  \
@@ -90,7 +90,7 @@ RUN apt-get update && apt-get install -y \
     wget \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean 
+ && apt-get clean \
  && rm -rf /var/lib/apt/lists/* \
  && mkdir /Beats \
  && cd /opt/beats \
