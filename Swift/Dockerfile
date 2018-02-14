@@ -1,4 +1,4 @@
-########## Dockerfile for Swift version 3.1.1 ###################################################################
+########## Dockerfile for Swift version 4.0.2 ###################################################################
 #
 # Swift is a general-purpose, multi-paradigm, compiled programming language.
 # It makes writing and maintaining correct programs easier for the developer
@@ -98,8 +98,8 @@ RUN apt-get update && apt-get -y install \
  && cd /root && mkdir swift31 && cd swift31 \
  && git clone https://github.com/linux-on-ibm-z/swift.git \ 
  && cd swift \
- && git checkout swift-3.1.1-RELEASE-s390x \ 
- && ./utils/update-checkout --clone --scheme swift-3.1.1-RELEASE-s390x --config $PWD/utils/update-checkout-config-s390x.json \ 
+ && git checkout swift-4.0.2-RELEASE-s390x \ 
+ && ./utils/update-checkout --clone --scheme swift-4.0.2-RELEASE-s390x --config $PWD/utils/update-checkout-config-s390x.json \ 
  && rm -f ./utils/swift_build_support/__init__.pyc \ 
  && cd ../swift-corelibs-libdispatch \ 
  && git submodule init \ 
