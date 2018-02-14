@@ -1,4 +1,4 @@
-############## Dockerfile for Apache Zeppelin version 0.7.1 ###############
+############## Dockerfile for Apache Zeppelin version 0.7.3 ###############
 #
 # This Dockerfile builds a basic installation of Apache Zeppelin.
 #
@@ -9,12 +9,12 @@
 # docker build -t <image_name> .
 #
 # To start Apache Zeppelin run the below command:
-# docker run --name <container_name> -v <host_path>:/zeppelin -p <host_port>:8080 -d <image_name>  
+# docker run --name <container_name> -p <host_port>:8080 -d <image_name>  
 # 
 # We can view the Apache Zeppelin UI at http://<zeppelin-host-ip>:<port_number>
 #
 # Reference:
-# http://zeppelin.apache.org/docs/0.7.1/index.html
+# http://zeppelin.apache.org/docs/0.7.3/index.html
 #
 #################################################################################
 
@@ -78,7 +78,7 @@ RUN	apt-get update && apt-get -y install \
 # Download source
 	&&	git clone https://github.com/apache/zeppelin.git \
 	&&	cd zeppelin \
-	&&	git checkout v0.7.1 \
+	&&	git checkout v0.7.3 \
 	
 # Edit $SOURCE_DIR/zeppelin/zeppelin-web/pom.xml
 	&&	sed -i '47d' zeppelin-web/pom.xml \
@@ -107,8 +107,6 @@ RUN	apt-get update && apt-get -y install \
 	&& 	rm -rf /var/lib/apt/lists/*
 	
 EXPOSE 8080
-
-VOLUME /zeppelin
 
 WORKDIR /zeppelin
 
