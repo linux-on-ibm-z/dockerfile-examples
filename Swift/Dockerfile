@@ -63,18 +63,15 @@ RUN apt-get update && apt-get -y install \
 	tzdata \
 	uuid-dev \
  && apt-get clean \
-
 #  Install blocksruntime
  && git clone https://github.com/mackyle/blocksruntime && cd blocksruntime && ./buildlib && sudo env prefix=/usr ./installlib \
  && rm -rf /root/blocksruntime \
-
 #  Install gold linker
  && cd /root && git clone git://sourceware.org/git/binutils-gdb.git && cd binutils-gdb \
  && git checkout tags/binutils-2_27 \
  && ./configure --prefix=/opt/binutils-2.27 --enable-gold \
  && make && sudo make install \
  && rm -rf /root/binutils-gdb \
-
 #  Build llvm/clang
  && cd /root && mkdir llvm && cd llvm \
  && git clone https://github.com/linux-on-ibm-z/llvm.git  \
@@ -94,7 +91,6 @@ RUN apt-get update && apt-get -y install \
  && make -j4 \
  && make install \
  && rm -rf /root/llvm /root/build \
-
 # Clone and Install Swift
  && cd /root && mkdir swift4 && cd swift4 \
  && git clone https://github.com/linux-on-ibm-z/swift.git \
@@ -111,7 +107,6 @@ RUN apt-get update && apt-get -y install \
         --install-prefix=/usr \
         --install-destdir=$MYDESTDIR \
  && rm -rf /swift4 /tmp/* /var/tmp/* /root/swift4 \
-
 # Clean up unused packages and data
  && apt-get remove -y \
     autoconf \
