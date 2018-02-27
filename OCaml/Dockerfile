@@ -1,4 +1,4 @@
-##########  Dockerfile for OCaml 4.06.0 #####################
+##########  Dockerfile for OCaml 4.06.1 #####################
 #
 # OCaml is an industrial strength programming language supporting functional, 
 # imperative and object-oriented styles.
@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
 	make \
 		
 # Download the OCaml source tarball from OCaml site
- && git clone -b 4.06.0 https://github.com/ocaml/ocaml.git \
+ && git clone -b 4.06.1 https://github.com/ocaml/ocaml.git \
  &&	cd ocaml \
 
 # Configure the system
