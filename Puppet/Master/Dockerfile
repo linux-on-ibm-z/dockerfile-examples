@@ -1,4 +1,4 @@
-################# Dockerfile for Puppet-master version 5.3.3 ################
+################# Dockerfile for Puppet-master version 5.3.4 ####################
 #
 # This Dockerfile builds a basic installation of Puppet-master.
 #
@@ -13,12 +13,12 @@
 # docker run --name <container_name> -d <image> 
 #
 # To start Puppet with custom configuration , use:
-# docker run --name <container_name> -v <path_to_host>:/etc/puppetlabs/  -d <image>
+# docker run --name <container_name> -d <image>
 # 
 # Reference:
 # https://puppetlabs.com/
 #
-##################################################################################
+################################################################################
 
 # Base Image
 FROM s390x/ubuntu:16.04
@@ -54,7 +54,7 @@ RUN	apt-get update && apt-get install -y \
 	&&	/usr/bin/gem install bundler rake-compiler \
 	
 # Install Puppet
-	&&	/usr/bin/gem install puppet -v 5.3.3 \
+	&&	/usr/bin/gem install puppet -v 5.3.4 \
 	
 # Locate the $confdir by command
 	&&	chmod 755 /usr/local/lib \
