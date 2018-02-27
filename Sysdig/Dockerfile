@@ -1,4 +1,4 @@
-########## Dockerfile for Sysdig version 0.19.1 #########
+########## Dockerfile for Sysdig version 0.20.0 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -17,17 +17,17 @@
 #################################################################################
 #			-: Some instructions to be followed :-
 #
-#	1. copy /sysdig-0.19.1 from container to host:
-#		docker cp <container_id>:/sysdig-0.19.1 <path_on_host>
+#	1. copy /sysdig-0.20.0 from container to host:
+#		docker cp <container_id>:/sysdig-0.20.0 <path_on_host>
 #
 #	2. Insert sysdig driver module, perform below steps:
-#		cd <path_on_host>/sysdig-0.19.1 
+#		cd <path_on_host>/sysdig-0.20.0 
 #		/sbin/insmod sysdig-probe.ko
 #
 #	3. Install lua5.1 and lua5.1-dev on host
 #
 #	4. Set PATH variable
-#		export PATH=$PATH:<path_on_host>/sysdig-0.19.1/sysdig
+#		export PATH=$PATH:<path_on_host>/sysdig-0.20.0/sysdig
 #
 #	5. Run any sysdig command
 #
@@ -58,10 +58,10 @@ RUN apt-get update \
 	
 # Download source code
 	&& cd $SOURCEDIR \
-	&& wget https://github.com/draios/sysdig/archive/0.19.1.tar.gz \
-	&& tar -xvzf 0.19.1.tar.gz \
+	&& wget https://github.com/draios/sysdig/archive/0.20.0.tar.gz \
+	&& tar -xvzf 0.20.0.tar.gz \
 	&& VALUE=$(uname -r) \
-	&& cd sysdig-0.19.1 \
+	&& cd sysdig-0.20.0 \
 	&& mkdir build \
 
 # Configure Sysdig
@@ -75,9 +75,9 @@ RUN apt-get update \
 	&& make install \
 	
 # Copy important content from build
-	&& mkdir -p /sysdig-0.19.1 \
-	&& cp $SOURCEDIR/sysdig-0.19.1/build/driver/sysdig-probe.ko /sysdig-0.19.1 \
-	&& cp -r $SOURCEDIR/sysdig-0.19.1/build/userspace/sysdig /sysdig-0.19.1 \
+	&& mkdir -p /sysdig-0.20.0 \
+	&& cp $SOURCEDIR/sysdig-0.20.0/build/driver/sysdig-probe.ko /sysdig-0.20.0 \
+	&& cp -r $SOURCEDIR/sysdig-0.20.0/build/userspace/sysdig /sysdig-0.20.0 \
 	
 # Clean up cache data and remove dependencies which are not required
 	&&	apt-get -y remove \
@@ -95,6 +95,6 @@ RUN apt-get update \
 	&& 	apt-get clean \
 	&& 	rm -rf /var/lib/apt/lists/*
 	
-VOLUME /sysdig-0.19.1
+VOLUME /sysdig-0.20.0
 
 # End of Dockerfile
