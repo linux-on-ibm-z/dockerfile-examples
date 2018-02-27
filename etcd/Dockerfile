@@ -1,4 +1,4 @@
-################## Dockerfile for etcd 3.2.14 ####################
+################## Dockerfile for etcd 3.3.1 ####################
 #
 # This Dockerfile builds a basic installation of etcd.
 #
@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y \
  && rm -rf etcd \
  && git clone https://github.com/coreos/etcd \
  && cd etcd \
- && git checkout v3.2.14 \
+ && git checkout v3.3.1 \
  && mkdir -p /data \
 
 # Build
