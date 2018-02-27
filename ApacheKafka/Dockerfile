@@ -1,4 +1,4 @@
-########## dockerfile for Apache Kafka version 0.11.0.0 #########
+########## dockerfile for Apache Kafka version 1.0.0 #########
 #
 # This Dockerfile builds a basic installation of Apache Kafka.
 #
@@ -11,7 +11,7 @@
 # docker build -t <image_name> .
 #
 # To Start Apache Kafka run the below command:
-# docker run --name <container_name> -v <host_path>:/opt/kafka -d <image>
+# docker run --name <container_name>  -d <image>
 #
 # To check Apache kafka is running, Enter below command:
 # docker exec <container_id of kafka> <any kafka related command>
@@ -32,7 +32,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 
 ENV SOURCE_DIR=/tmp/source
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
-ENV PATH=$PATH:$SOURCE_DIR/gradle-3.5/bin:$JAVA_HOME/bin:/opt/kafka/
+ENV PATH=$PATH:$SOURCE_DIR/gradle-4.2/bin:$JAVA_HOME/bin:/opt/kafka/
 
 WORKDIR $SOURCE_DIR
 # Install dependencies
@@ -43,17 +43,17 @@ RUN	apt-get update && apt-get -y install \
 	wget \
 
 # Install Gradle
- &&	wget https://services.gradle.org/distributions/gradle-3.5-bin.zip \
- &&	unzip gradle-3.5-bin.zip \
+ &&	wget https://services.gradle.org/distributions/gradle-4.2-bin.zip \
+ &&	unzip gradle-4.2-bin.zip \
 
 # Download the source code
  &&	git clone https://github.com/apache/kafka \
  &&	cd kafka \
- &&	git checkout 0.11.0.0 \
+ &&	git checkout 1.0.0 \
 
 # Update build parameters
  &&	sed -i '/jvmArgs/ s/Xss2m/Xss256m/' build.gradle \
- &&	sed -i "s/5.0.1/5.7.2/g" gradle/dependencies.gradle \
+ 
 
 # Setup Gradle and build the jar files
  &&	gradle \
@@ -84,3 +84,5 @@ WORKDIR /opt/kafka/
 CMD bin/zookeeper-server-start.sh -daemon config/zookeeper.properties && sleep 20 && bin/kafka-server-start.sh config/server.properties
 
 # End of Dockerfile
+
+ 
