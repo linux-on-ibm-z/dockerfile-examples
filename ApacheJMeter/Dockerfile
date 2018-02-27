@@ -1,4 +1,4 @@
-######################## Dockerfile for Apache JMeter version 3.3 #########################################
+######################## Dockerfile for Apache JMeter version 4.0 #########################################
 #
 # This Dockerfile builds a basic installation of Apache JMeter.
 #
@@ -41,12 +41,12 @@ RUN apt-get update &&  apt-get install -y \
 
 # Download from git and build
  && git clone git://git.apache.org/jmeter.git \
- && cd $SOURCE_DIR/jmeter && git checkout v3_3 \
+ && cd $SOURCE_DIR/jmeter && git checkout v4_0 \
  && cd $SOURCE_DIR/jmeter && ant download_jars && ant \
- && cp -r $SOURCE_DIR/jmeter /opt/apache-jmeter-3.3 \
+ && cp -r $SOURCE_DIR/jmeter /opt/apache-jmeter-4.0 \
 
 #Remove G1GC algorithm as it is unimplemented in OpenJDK zero
- && sed -i '93d' /opt/apache-jmeter-3.3/bin/jmeter \
+ && sed -i '178d' /opt/apache-jmeter-4.0/bin/jmeter \
  
 # Clean the Cache data and remove source files and dependencies
  && rm -rf $SOURCE_DIR \
@@ -57,7 +57,7 @@ RUN apt-get update &&  apt-get install -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set Environment Variable for JMeter
-ENV PATH $PATH:/opt/apache-jmeter-3.3/bin
+ENV PATH $PATH:/opt/apache-jmeter-4.0/bin
 
 ENTRYPOINT ["jmeter","-n","-t"]
 
