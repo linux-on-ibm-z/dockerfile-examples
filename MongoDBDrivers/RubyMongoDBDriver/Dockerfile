@@ -1,4 +1,4 @@
-############### Dockerfile for Ruby MongoDBDriver 2.4.3 ####################################
+############### Dockerfile for Ruby MongoDBDriver 2.5.0 ####################################
 # 
 # To build Ruby MongoDBDriver image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -29,19 +29,19 @@ WORKDIR "/root"
 RUN apt-get update  \
  && apt-get install -y \
 		g++ \
-    gcc \
-    make \
-    ruby \
-    ruby-dev \
+        gcc \
+        make \
+        ruby \
+        ruby-dev \
 	
 # Install the mongo gem
- && gem install mongo -v 2.4.3 \
+ && gem install mongo -v 2.5.0 \
 
 # Clean up the unwanted packages 
  && apt-get remove -y \
-      g++ \
+        g++ \
 	    gcc \
-      make \
+        make \
 		
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* 
