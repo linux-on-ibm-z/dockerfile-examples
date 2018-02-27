@@ -1,4 +1,4 @@
-########## Dockerfile for SonarQube 6.7 #########
+########## Dockerfile for SonarQube 7.0 #########
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -33,15 +33,15 @@ RUN apt-get update -y && apt-get -y install \
     perl \
     unzip \
     wget \
-	
+
 # Download SonarQube
  && cd $SOURCE_DIR \
- && wget https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-6.7.zip \
- && unzip sonarqube-6.7.zip \
+ && wget https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-7.0.zip \
+ && unzip sonarqube-7.0.zip \
  && wget https://sonarsource.bintray.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.0.3.778-linux.zip \
  && unzip sonar-scanner-cli-3.0.3.778-linux.zip \
- && rm -rf sonarqube-6.7.zip sonar-scanner-cli-3.0.3.778-linux.zip \
- && cp -r $SOURCE_DIR/sonarqube-6.7 $SOURCE_DIR/sonarqube \
+ && rm -rf sonarqube-7.0.zip sonar-scanner-cli-3.0.3.778-linux.zip \
+ && cp -r $SOURCE_DIR/sonarqube-7.0 $SOURCE_DIR/sonarqube \
  && cp -r $SOURCE_DIR/sonarqube /opt \
 
 # Tidy and clean up
@@ -54,12 +54,11 @@ RUN apt-get update -y && apt-get -y install \
  && apt-get autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Expose port 
+# Expose port
 EXPOSE 9000
 
 # Add VOLUME
 VOLUME  ["/opt/sonarqube/data"]
 
 WORKDIR /opt/sonarqube/lib
-CMD ["java","-jar","sonar-application-6.7.jar"]
-
+CMD ["java","-jar","sonar-application-7.0.jar"]
