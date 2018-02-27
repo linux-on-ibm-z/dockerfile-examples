@@ -1,4 +1,4 @@
-############### Dockerfile for PHP MongoDBDriver 1.3.4 ####################################
+############### Dockerfile for PHP MongoDBDriver 1.4.0 ####################################
 # 
 # To build PHP MongoDBDriver image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -36,7 +36,7 @@ RUN apt-get update  \
 		
 	
 # Install PHP driver for MongoDB
- && pecl install mongodb-1.3.4 \
+ && pecl install mongodb-1.4.0 \
  
 # Enable PHP extension 
  && echo -e "\n; PHP driver for MongoDB\nextension=mongodb.so" | tee -a /etc/php/7.0/cli/php.ini \
