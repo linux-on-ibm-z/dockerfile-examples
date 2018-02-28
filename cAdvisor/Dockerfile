@@ -1,4 +1,4 @@
-######################## Dockerfile for cAdvisor 0.28.3 #################################
+######################## Dockerfile for cAdvisor 0.27.4 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -47,7 +47,7 @@ RUN apt-get update && apt-get install -y \
  && mkdir -p $GOPATH/src/github.com/google && cd $GOPATH/src/github.com/google \
 
 # Checkout the code from repository
- && git clone https://github.com/google/cadvisor.git -b v0.28.3 \
+ && git clone https://github.com/google/cadvisor.git -b v0.27.4 \
  && cd cadvisor \
 
 # Change the work directory
@@ -55,7 +55,7 @@ RUN apt-get update && apt-get install -y \
 
 # Edit `$GOPATH/src/github.com/google/cadvisor/Godeps/_workspace/src/github.com/klauspost/crc32/crc32.go` to add the following code to end of the file
  && echo " func updateCastagnoli(crc uint32, p []byte) uint32 { \n // only use slicing-by-8 when input is >= 16 Bytes \n if len(p) >= 16 { \n return updateSlicingBy8(crc, castagnoliTable8, p) \n }  \n return update(crc, castagnoliTable, p) \n } \n "  >> vendor/github.com/klauspost/crc32/crc32.go \
- && echo "func updateIEEE(crc uint32, p []byte) uint32 { \n // only use slicing-by-8 when input is >= 4KB \n  if len(p) >= 4096 { \n  iEEETable8Once.Do(func() { \n iEEETable8 = makeTable8(IEEE) \n }) \n return updateSlicingBy8(crc, iEEETable8, p) \n  } \n  return update(crc, IEEETable, p) \n  } \n " >> vendor/github.com/klauspost/crc32/crc32.go \
+ && echo "func updateIEEE(crc uint32, p []byte) uint32 { \n // only use slicing-by-8 when input is >= 16 Bytes \n  if len(p) >= 16 { \n  iEEETable8Once.Do(func() { \n iEEETable8 = makeTable8(IEEE) \n }) \n return updateSlicingBy8(crc, iEEETable8, p) \n  } \n  return update(crc, IEEETable, p) \n  } \n " >> vendor/github.com/klauspost/crc32/crc32.go \
 
 # Build cadvisor
  && cd $GOPATH/src/github.com/google/cadvisor \
