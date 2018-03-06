@@ -1,4 +1,4 @@
-########## Dockerfile for Consul - 1.0.1 #########
+########## Dockerfile for Consul - 1.0.6 #########
 # 
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter 
@@ -13,8 +13,8 @@
 # Below is the command to use Consul:
 # docker run --name <container_name> -it <image_name> consul <argument>
 #
-# Below is an example to display the installed Consul help :
-# docker run --name <container_name> -it <image_name> consul help
+# Use below command to start the Consul agent in development mode :
+# docker run --name consultest -d consul consul agent -dev
 #
 # Follow link to setup Consul cluster: https://www.consul.io/intro/getting-started/join.html
 #####################################################################
@@ -29,16 +29,14 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH $SOURCE_DIR
-ENV PATH=$PATH:$GOPATH/bin:$GOPATH/go/bin
-ENV GOROOT=$GOPATH/go
-ENV CC=gcc
-
+ENV PATH=/usr/lib/go-1.9/bin:$GOPATH/bin:$PATH
 
 # Installing dependencies for Consul
 RUN apt-get update &&  apt-get install -y \
     curl \
     gcc \
     git \
+	golang-1.9 \
     make \
     tar \
     unzip \
@@ -48,12 +46,10 @@ RUN apt-get update &&  apt-get install -y \
 
 # Clone go and consul
  && cd $SOURCE_DIR \
- && wget https://storage.googleapis.com/golang/go1.9.2.linux-s390x.tar.gz\
- && tar -xzf go1.9.2.linux-s390x.tar.gz \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/consul.git \
- && cd consul && git checkout tags/v1.0.1 \
+ && cd consul && git checkout tags/v1.0.6 \
  && go get github.com/mitchellh/gox \
 
 # Apply the patch to add s390x support
@@ -63,6 +59,7 @@ RUN apt-get update &&  apt-get install -y \
  && git config user.email "lozopensource@github.com" \
  && git config user.name "LoZ" \
  && git am 85.patch \
+ 
 # Reinstall gox tool
  && cd $GOPATH/src/github.com/mitchellh/ \
  && go get github.com/mitchellh/iochan \
