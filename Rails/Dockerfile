@@ -1,4 +1,4 @@
-################## Dockerfile for Rails version 5.1.4 ###################################
+################## Dockerfile for Rails version 5.1.5 ###################################
 #
 # Rails is a web application development framework written in the Ruby language.
 #  
@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y \
     ruby \
     ruby-dev \
     zlib1g-dev \
- && gem install rails -v 5.1.4 \
+ && gem install rails -v 5.1.5 \
 
 # Tidy up (Clear cache data)
  && apt-get remove -y \
