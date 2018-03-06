@@ -1,4 +1,4 @@
-############################# Dockerfile for Apache Tomcat 8.5.24 #####################################
+############################# Dockerfile for Apache Tomcat 8.5.28 #####################################
 #
 # This Dockerfile builds a basic installation of Apache Tomcat.
 #
@@ -41,14 +41,14 @@ RUN apt-get update && apt-get install -y \
         tar \
         wget \
 
-# Clone and Install OpenSSL 1.0.2k
- && git clone https://github.com/openssl/openssl.git && cd openssl && git checkout OpenSSL_1_0_2k \
+# Clone and Install OpenSSL 1.1.0
+ && git clone https://github.com/openssl/openssl.git && cd openssl && git checkout OpenSSL_1_1_0 \
  && ./config --prefix=/usr --openssldir=/usr/local/openssl shared \
  && make && make install \
 
 # Clone Tomcat and build it.
  && cd /root && git clone https://github.com/apache/tomcat85.git \
- && cd tomcat85 && git checkout TOMCAT_8_5_24 \
+ && cd tomcat85 && git checkout TOMCAT_8_5_28 \
  && cp build.properties.default build.properties \
  && ant \
  && mkdir -p $CATALINA_HOME && mv /root/tomcat85/output/build/* $CATALINA_HOME \
