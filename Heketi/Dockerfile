@@ -1,4 +1,4 @@
-##################### Dockerfile for Heketi 5.0.1 ########################
+##################### Dockerfile for Heketi 6.0.0 ########################
 #
 # This Dockerfile builds a basic installation of heketi.
 #
@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y \
  && mkdir -p /etc/heketi /var/lib/heketi $GOPATH/bin /etc/heketi \
  && git clone https://github.com/heketi/heketi.git $GOPATH/src/github.com/heketi/heketi \
  && cd $GOPATH/src/github.com/heketi/heketi \
- && git checkout v5.0.1 \
+ && git checkout v6.0.0 \
  && echo $GOPATH/bin \
  && go version \
  && curl https://glide.sh/get | sh \
