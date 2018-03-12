@@ -45,12 +45,12 @@ RUN apt-get update && apt-get install -y \
 	wget \
 
 # Clone httpd from git
- && git clone https://github.com/apache/httpd.git && cd httpd && git checkout 2.4.29 \
+ && git clone git://github.com/apache/httpd.git && cd httpd && git checkout 2.4.29 \
  
 # Download apr and apr-util source
- && cd $SOURCE_DIR/httpd/srclib && git clone https://github.com/apache/apr.git && cd apr \
+ && cd $SOURCE_DIR/httpd/srclib && git clone git://github.com/apache/apr.git && cd apr \
  && git checkout 1.6.3 \
- && cd $SOURCE_DIR/httpd/srclib && git clone https://github.com/apache/apr-util.git && cd apr-util \
+ && cd $SOURCE_DIR/httpd/srclib && git clone git://github.com/apache/apr-util.git && cd apr-util \
  && git checkout 1.6.1 \
  
 # Build and install httpd
