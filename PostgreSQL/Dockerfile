@@ -1,4 +1,4 @@
-########## Dockerfile for PostgreSQL 10.1 #########
+######### Dockerfile for PostgreSQL 10.1 #########
 #
 # PostgreSQL is an open source relational database management system ( DBMS ) developed by a worldwide team of volunteers.
 #
@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y \
 
 # Clone PostgreSQL and build it
 RUN cd $SOURCE_DIR \
-&& git clone https://github.com/postgres/postgres.git \
+&& git clone git://github.com/postgres/postgres.git \
 && cd postgres/ \
 && git checkout REL_10_1 \
 && ./configure \
@@ -80,4 +80,3 @@ ENV PATH $PATH:/usr/local/pgsql/bin
 CMD ["postmaster", "-D", "/usr/local/pgsql/data", "-c", "config_file=/usr/local/pgsql/data/postgresql.conf"]
 
 # End of Dockerfile
-
