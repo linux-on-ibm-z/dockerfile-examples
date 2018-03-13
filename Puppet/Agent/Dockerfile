@@ -1,4 +1,4 @@
-########## Dockerfile for Puppet-agent version 5.3.4 #########
+########## Dockerfile for Puppet-agent version 5.4.0 #########
 #
 # This Dockerfile builds a basic installation of Puppet-agent.
 #
@@ -76,7 +76,7 @@ RUN	apt-get update && apt-get install -y \
 	&&	/usr/bin/gem install bundler rake-compiler \
 	
 # Install Puppet
-	&&	/usr/bin/gem install puppet -v 5.3.4 \
+	&&	/usr/bin/gem install puppet -v 5.4.0 \
 	
 # Locate the $confdir by command
 	&&	chmod 755 /usr/local/lib \
