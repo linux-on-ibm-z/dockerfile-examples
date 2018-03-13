@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y \
     make \
 
 # Clone and build XMLSec
- && git clone https://github.com/lsh123/xmlsec.git && cd xmlsec && git checkout xmlsec-1_2_25 \
+ && git clone git://github.com/lsh123/xmlsec.git && cd xmlsec && git checkout xmlsec-1_2_25 \
  && ./autogen.sh && make && make install \
 
 # Clean up cache data and remove dependencies that are not required
