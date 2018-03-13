@@ -42,12 +42,12 @@ RUN apt-get update && apt-get install -y \
         wget \
 
 # Clone and Install OpenSSL 1.1.0
- && git clone https://github.com/openssl/openssl.git && cd openssl && git checkout OpenSSL_1_1_0 \
+ && git clone git://github.com/openssl/openssl.git && cd openssl && git checkout OpenSSL_1_1_0 \
  && ./config --prefix=/usr --openssldir=/usr/local/openssl shared \
  && make && make install \
 
 # Clone Tomcat and build it.
- && cd /root && git clone https://github.com/apache/tomcat85.git \
+ && cd /root && git clone git://github.com/apache/tomcat85.git \
  && cd tomcat85 && git checkout TOMCAT_8_5_28 \
  && cp build.properties.default build.properties \
  && ant \
