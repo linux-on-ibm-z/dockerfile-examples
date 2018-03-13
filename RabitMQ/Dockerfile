@@ -44,7 +44,7 @@ RUN apt-get update && apt-get install -y \
 # Download and install rabbitmq
  && mkdir $SOURCE_DIR && cd $SOURCE_DIR \
  && wget https://www.rabbitmq.com/releases/rabbitmq-server/v3.6.14/rabbitmq-server-3.6.14.tar.xz \
- && git clone https://github.com/elixir-lang/elixir \
+ && git clone git://github.com/elixir-lang/elixir \
  && cd elixir && git checkout v1.5.2 && make && make install \
  && cd /opt && tar xf $SOURCE_DIR/rabbitmq-server-3.6.14.tar.xz \
  && cd rabbitmq-server-3.6.14 && make all && make install \
