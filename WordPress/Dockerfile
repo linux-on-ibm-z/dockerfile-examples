@@ -41,7 +41,7 @@ RUN apt-get update -y && apt-get install -y \
  && sed -i "s/$line/$line_new/g" /etc/apache2/sites-available/000-default.conf \
 
 # Download Wordpress application into apache2 server
- && cd /var/www/html && git clone https://github.com/WordPress/WordPress.git \
+ && cd /var/www/html && git clone git://github.com/WordPress/WordPress.git \
  && cd WordPress && git checkout 4.9.4 \
  && mv wp-config-sample.php wp-config.php \
  && sed -i 's/localhost/127.0.0.1/' wp-config.php \
