@@ -53,7 +53,7 @@ RUN apt-get update && apt-get install -y \
  && cd server-mariadb-10.2.13 \
 
 ##Get MariaDB Connector C code from git
- && cd $SOURCE_DIR && git clone https://github.com/MariaDB/mariadb-connector-c.git \
+ && cd $SOURCE_DIR && git clone git://github.com/MariaDB/mariadb-connector-c.git \
  && cd mariadb-connector-c && git checkout v3.0.2 \
  && cp -r $SOURCE_DIR/mariadb-connector-c/* $SOURCE_DIR/server-mariadb-10.2.13/libmariadb/ \
 
