@@ -65,7 +65,7 @@ RUN apt-get update -y && apt-get -y install \
     unixodbc-dev \
 
 # Download PHP
- && cd /root && git clone https://github.com/php/php-src.git \
+ && cd /root && git clone git://github.com/php/php-src.git \
  && cd php-src && git checkout tags/php-7.1.2 \
  && ln -sf /usr/lib/s390x-linux-gnu/libldap.so /usr/lib/libldap.so \
  && ln -sf /usr/lib/s390x-linux-gnu/liblber.so /usr/lib/liblber.so \
