@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y \
  && pip install pbr virtualenv cryptography \
  
 # Clone and install Python Ceilometerclient
- && git clone https://github.com/openstack/python-ceilometerclient.git \
+ && git clone git://github.com/openstack/python-ceilometerclient.git \
  && cd python-ceilometerclient \
  && git checkout 2.9.0 \
  && pip install -r requirements.txt \
