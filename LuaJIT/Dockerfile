@@ -34,7 +34,7 @@ RUN  apt-get update  \
 	 git \
 	 make  \
   && cd $SOURCE_DIR \
-  && git clone https://github.com/linux-on-ibm-z/LuaJIT.git \
+  && git clone git://github.com/linux-on-ibm-z/LuaJIT.git \
   && cd $SOURCE_DIR/LuaJIT/ \
   && git checkout v2.1 \
   && make \
