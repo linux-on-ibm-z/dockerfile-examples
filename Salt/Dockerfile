@@ -72,7 +72,7 @@ RUN apt-get update && apt-get install -y \
 			tornado \
 		 
 # Clone the repository and install SaltStack
-&& 	git clone https://github.com/saltstack/salt \
+&& 	git clone git://github.com/saltstack/salt \
 && 	cd salt \
 && 	git checkout v2017.7.2 \
 && 	pip install -e . \
