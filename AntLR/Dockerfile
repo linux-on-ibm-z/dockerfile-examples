@@ -43,10 +43,8 @@ RUN apt-get update && apt-get install -y \
  && tail -n +3 installer.properties.java | tee installer.properties \
  && chmod +x ibm-java-sdk-8.0-4.10-s390x-archive.bin \
  && ./ibm-java-sdk-8.0-4.10-s390x-archive.bin -r installer.properties \
- && git clone https://github.com/antlr/antlr4.git \
+ && git clone git://github.com/antlr/antlr4.git \
  && cd antlr4 && git checkout 4.7 \
- && sed -i '/Array.Reverse/i \
-if(BitConverter.IsLittleEndian)' runtime/CSharp/runtime/CSharp/Antlr4.Runtime/Atn/ATNDeserializer.cs \
  && mvn install -DskipTests \
  && cp tool/target/antlr4-4.7.jar /usr/share/java/ \
  && cp tool/target/antlr4-4.7-sources.jar /usr/share/java/ \
