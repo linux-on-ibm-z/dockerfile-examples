@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y \
     libxml2-utils \
     python \
     qt-sdk \
- && git clone https://github.com/doxygen/doxygen.git \
+ && git clone git://github.com/doxygen/doxygen.git \
  && cd doxygen && git checkout Release_1_8_14 \
   && mkdir build && cd build \
  && cmake -G "Unix Makefiles" -Dbuild_doc=NO -Dbuild_wizard=YES .. \
