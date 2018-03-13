@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y \
 # Download and build Prometheus
  && mkdir -p $GOPATH/src/github.com/prometheus \
  && cd $GOPATH/src/github.com/prometheus \
- && git clone https://github.com/prometheus/prometheus.git \
+ && git clone git://github.com/prometheus/prometheus.git \
  && cd prometheus \
  && git checkout v2.1.0 \
  && make build \
