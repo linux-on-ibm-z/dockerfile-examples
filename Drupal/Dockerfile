@@ -1,4 +1,4 @@
-########## Dockerfile for Drupal version 8.4.4 #########
+########## Dockerfile for Drupal version 8.4.5 #########
 #
 # This Dockerfile builds a basic installation of Drupal.
 #
@@ -11,7 +11,7 @@
 # docker build -t <image_name> .
 #
 # To start Drupal run the below command:
-# docker run --name <container_name> -v <host_path>:/var/www/html -p <host_port>:80 -p <host_port>:3306 -d <image_name>  
+# docker run --name <container_name> -p <host_port>:80 -p <host_port>:3306 -d <image_name>  
 # 
 # We can view the Drupal UI at http://<drupal-host-ip>:<port_number>
 #
@@ -81,12 +81,12 @@ RUN	apt-get update && apt-get -y install \
 # Download and install Drupal
 	&&	mkdir -p $SOURCE_DIR \
 	&&	cd $SOURCE_DIR \
-	&&	wget https://ftp.drupal.org/files/projects/drupal-8.4.4.tar.gz \
-	&&	tar -xvf drupal-8.4.4.tar.gz \
+	&&	wget https://ftp.drupal.org/files/projects/drupal-8.4.5.tar.gz \
+	&&	tar -xvf drupal-8.4.5.tar.gz \
 	&&	mkdir -p /var/www/html/Drupal \
-	&&	mv drupal-8.4.4/* drupal-8.4.4/.htaccess drupal-8.4.4/.csslintrc \
-		drupal-8.4.4/.editorconfig drupal-8.4.4/.eslintignore drupal-8.4.4/.eslintrc.json \
-		drupal-8.4.4/.gitattributes /var/www/html/Drupal \
+	&&	mv drupal-8.4.5/* drupal-8.4.5/.htaccess drupal-8.4.5/.csslintrc \
+		drupal-8.4.5/.editorconfig drupal-8.4.5/.eslintignore drupal-8.4.5/.eslintrc.json \
+		drupal-8.4.5/.gitattributes /var/www/html/Drupal \
 	&&	cd /var/www/html/Drupal \
 	&& 	composer install \
 	
