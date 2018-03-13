@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y \
     wget \
 
 # Download, build and install Apache ZooKeeper 
- && git clone https://github.com/apache/zookeeper \
+ && git clone git://github.com/apache/zookeeper \
  && cd zookeeper \
  && git checkout tags/release-3.4.11 \
  &&	ant compile \
