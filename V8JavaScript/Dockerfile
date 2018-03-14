@@ -11,7 +11,7 @@
 # docker build -t <image_name> .
 #
 # To Start V8_JavaScript run the below command:
-# docker run --name <container_name> -v <path_on_host>:/v8 -d <image> 
+# docker run --name <container_name> -d <image> 
 # 
 # Reference:
 # https://github.com/v8/v8/wiki
