@@ -1,4 +1,4 @@
-########## Dockerfile for Salt version 2017.7.2 #########
+########## Dockerfile for Salt version 2017.7.4 #########
 #
 # This Dockerfile builds a basic installation of Salt.
 #
@@ -74,7 +74,7 @@ RUN apt-get update && apt-get install -y \
 # Clone the repository and install SaltStack
 && 	git clone git://github.com/saltstack/salt \
 && 	cd salt \
-&& 	git checkout v2017.7.2 \
+&& 	git checkout v2017.7.4 \
 && 	pip install -e . \
 
 # Configure SaltStack to run self-contained version
