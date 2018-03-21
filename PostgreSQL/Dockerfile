@@ -1,4 +1,4 @@
-######### Dockerfile for PostgreSQL 10.1 #########
+######### Dockerfile for PostgreSQL 10.3 #########
 #
 # PostgreSQL is an open source relational database management system ( DBMS ) developed by a worldwide team of volunteers.
 #
@@ -47,7 +47,7 @@ RUN apt-get update && apt-get install -y \
 RUN cd $SOURCE_DIR \
 && git clone git://github.com/postgres/postgres.git \
 && cd postgres/ \
-&& git checkout REL_10_1 \
+&& git checkout REL_10_3 \
 && ./configure \
 && make \
 && make install \
