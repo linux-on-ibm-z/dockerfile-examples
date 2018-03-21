@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
 	make \
 		
 # Download the OCaml source tarball from OCaml site
- && git clone -b 4.06.1 https://github.com/ocaml/ocaml.git \
+ && git clone -b 4.06.1 git://github.com/ocaml/ocaml.git \
  &&	cd ocaml \
 
 # Configure the system
