@@ -1,4 +1,4 @@
-########## Dockerfile for Mule version 3.8.4 #########
+########## Dockerfile for Mule version 3.8.4 ####################################
 #
 # This Dockerfile builds a basic installation of Mule.
 #
@@ -6,13 +6,17 @@
 # APIs and devices, you can use Mule to intelligently manage message-routing, data mapping, orchestration, reliability, security and scalability between nodes. 
 # Mule applications accept and process messages through several Lego-block-like message processors plugged together in what we call a flow.
 #
-# To build this image, from the directory containing this Dockerfile
-# (assuming that the file is named Dockerfile):
+# To build this image, from the directory containing this Dockerfile :
+# (assuming that the file is named Dockerfile)
 # docker build -t <image_name> .
 #
 # Start mule server using below command:
-# docker run <container_name> -d -p <host-port>:<container-port> -v /<host>:/<container> mule  <commands>
-# e.g. docker run --name Mule -d -p 8081:7777 -v /root:/root/ mule_img mule start 
+# (assuming that docker image is again commited with copying Java Service Wrapper binary into folder $MULE_HOME/lib/boot/exec)
+# docker run --name <container_name> -d -p <host-port>:<container-port> mule  <commands>
+# e.g. docker run --name Mule -d -p 8081:7777  mule_img mule start 
+#
+# To provide custom configuration for Mule server use below command:
+# docker run --name <container_name> -d -p <port>:7777 -v /host_path/conf:/opt/mule/conf <image-name>
 #
 # Official website: https://developer.mulesoft.com/
 #
@@ -56,24 +60,25 @@ RUN  apt-get update  \
   && cp -r $SOURCE_DIR/mule-standalone-3.8.4 /opt/mule \
 
   && apt-get remove -y \
-          gcc \
-          git \
-          make \
-          maven \
-          unzip \
-          wget \
+         gcc \
+         git \
+         make \
+         maven \
+         unzip \
+         wget \
 
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf $SOURCE_DIR/mule $SOURCE_DIR/target /var/lib/apt/lists/* /root/.m2
+  && rm -rf $SOURCE_DIR/mule $SOURCE_DIR/mule-standalone-3.8.4 $SOURCE_DIR/conf $SOURCE_DIR/target /var/lib/apt/lists/* /root/.m2
 
-VOLUME /data
+# Define mount points.
+VOLUME ["/opt/mule/logs", "/opt/mule/conf", "/opt/mule/apps", "/opt/mule/domains"]
 
-# Default port mule server
-EXPOSE 7777 
+# Default port mule, JMX, http port
+EXPOSE 7777 1099 8081
 
-# Set the Entrypoint
-CMD ["mule"]
+# Start mule server
+CMD ["mule","console"]
 
 # End of Dockerfile
