@@ -9,11 +9,10 @@
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
 #
-# To start  run the below command
-# docker run --name <container_name> -v <host_path>:/var/www/html -p <host_port>:80 -p <host_port>:3306 -d <image>
-#
-# We can complete SugarCRM installation at http://<Sugar-host-ip>:<port_number>/Sugar/install.php
-#
+# Start container & Complete SugarCRM installation at http://<Sugar-host-ip>:<port_number>/Sugar/install.php
+# docker run -d --name <container_name> -p <host_port>:80 -p <host_port>:3306 <image>
+# e.g. docker run -d --name Sugar -p 88:80 -p 3307:3306 sugar
+# 
 # Official website: https://www.sugarcrm.com/
 #
 ###################################################################################
@@ -29,27 +28,27 @@ ENV DEBIAN_FRONTEND noninteractive
 # Install dependencies
 RUN  apt-get update  \
   && apt-get install -y  \ 
-			apache2 \
-			curl \
-			libapache2-mod-php7.0 \
-			mysql-server \
-			php7.0 \
-            php7.0-mysql \
-            php7.0-mcrypt \
-            php7.0-cli \
-            php7.0-common \
-            php7.0-curl \
-            php7.0-dev \
-			php7.0-gd \
-			php7.0-imap \
-			php7.0-mbstring \
-			php7.0-xml \
-			php7.0-zip \
-			unzip \
-			wget \
+		apache2 \
+		curl \
+		libapache2-mod-php7.0 \
+		mysql-server \
+		php7.0 \
+        php7.0-mysql \
+        php7.0-mcrypt \
+        php7.0-cli \
+       	php7.0-common \
+        php7.0-curl \
+        php7.0-dev \
+		php7.0-gd \
+		php7.0-imap \
+		php7.0-mbstring \
+		php7.0-xml \
+		php7.0-zip \
+		unzip \
+		wget \
 
 # Modifying Apache configuration file
-	&&	cd /etc/apache2 \
+    &&	cd /etc/apache2 \
 	&&	chmod 755 apache2.conf \
 	&&	echo "AddType application/x-httpd-php .php" >> apache2.conf \
 	&&	echo "ServerName localhost" >> apache2.conf \
@@ -78,16 +77,16 @@ RUN  apt-get update  \
 	
 # Clean up of unused packages
     &&  apt-get remove -y \
-              curl  \
-              unzip \
-              wget \
+            curl  \
+            unzip \
+            wget \
 			  
     && apt-get autoremove -y \
     && apt autoremove -y \
     && apt-get clean \
     && rm -rf  /var/lib/apt/lists/* /var/www/html/SugarCE-6.5.26.zip 
   
-# Create volume
+# Define mount point
 VOLUME /var/www/html
 
 # Expose ports for mysql and apache2
