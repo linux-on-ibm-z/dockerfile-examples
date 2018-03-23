@@ -11,9 +11,9 @@
 # To simply run the resultant image, and provide a bash shell:
 # docker run --name <container-name> -it <image_name> /bin/bash
 #
-# Start htop using below command
-# docker run <container_name> -it -v /<host>:/root/data <image-name> htop 
-# e.g. docker run --name htop -it -v /root:/root/data htop_img htop
+# Run htop inside a container using below command : 
+# docker run --name <container_name> -it <image-name> 
+# e.g. docker run --name htoptest -it htop
 #
 # Official website: https://hisham.hm/htop/
 #
@@ -58,8 +58,6 @@ RUN apt-get update  \
   && apt autoremove -y \
   && apt-get clean \
   && rm -rf  $SOURCE_DIR/htop-2.0.2.tar.gz $SOURCE_DIR/htop-2.0.2 /var/lib/apt/lists/*
-
-VOLUME /data
 
 # Start htop
 CMD htop
