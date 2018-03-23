@@ -9,11 +9,12 @@
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
 #
-# To simply run the resultant image, and provide a bash shell:
-# docker run -it  -v <host_dir>:/data <image_name> /bin/bash
+# To simply check the resultant image and LuaJIT version, use the command:
+# docker run  --name <container_name> -it <image_name> luajit -v
 #
-# Below command start the container & print the version of installed LuaJIT.
-# e.g.docker run --name luajit -it -v /root:/root/data luajit_img luajit -v
+# To use LuaJIT image from command line, use following command:
+# docker run --name <container_name> -v <Lua_source_file_path_in_host>:<Lua_source_file_path_in_container> -it <image_name> /bin/bash
+# For ex. docker run --name luajit_test -v /root/test/luajit:/root -it luajit /bin/bash
 #
 # Official website: http://luajit.org
 #
@@ -51,7 +52,6 @@ RUN  apt-get update  \
   && apt-get clean \
   && rm -rf $SOURCE_DIR/LuaJIT /var/lib/apt/lists/*
 
-VOLUME /data  
 CMD ["luajit"]
 
 # End of Dockerfile
