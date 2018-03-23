@@ -12,9 +12,9 @@
 # To simply run the resultant image, and provide a bash shell:
 # docker run --name <container-name> -it <image_name> /bin/bash
 #
-# Displays a short help screen of iptraf using below command :
-# docker run <container_name> -it -v /<host>:/<container> <image-name> iptraf <option>
-# e.g. docker run --name iptraf -it -v /root:/root/ iptraf_img  iptraf -h
+# Run iptraf inside a container using below command : 
+# docker run --name <container_name> -it <image-name> 
+# e.g. docker run --name iptraf_test -it iptraf
 #
 # Official website: http://iptraf.seul.org/
 #
@@ -58,8 +58,6 @@ RUN apt-get update  \
  && apt autoremove -y \
  && apt-get clean \
  && rm -rf $SOURCE_DIR/iptraf-3.0.0.tar.gz  $SOURCE_DIR/iptraf-3.0.0 /var/lib/apt/lists/* 
-  
-VOLUME /data
 
 # Start of iptraf service
 CMD ["iptraf"]
