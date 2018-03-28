@@ -1,4 +1,4 @@
-########## Dockerfile for Fluentd version 1.1.0 ###############################
+########## Dockerfile for Fluentd version 1.1.1 ###############################
 #
 # This Dockerfile builds a basic installation of Fluentd.
 #
@@ -9,13 +9,14 @@
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
 #
-# To simply run the resultant image, and provide a bash shell:
-# docker run --name <container-name> -it <image_name> /bin/bash
-#
-# Start Fluentd process using below command 
-# docker run <container_name> -it -v /<host>:/<contaimer> <image-name> fluentd <argument>
-# e.g. docker run --name fluentd -it -v /conf:/conf fluentd_img fluentd -c conf/fluent.conf
-#
+# Start Fluentd process using below command :
+# docker run --name <container_name> -d -p <host-port>:24224 <image-name>
+# e.g. docker run --name fluentd_test -d -p 24224:24224 fluentd
+# 
+# To provide custom configuration for fluentd use below command:
+# docker run --name <container_name> -d -p <host-port>:24224 -v /<host_path>/:/etc/fluent <image-name> fluentd <argument>
+# e.g. docker run --name fluentd_test -d -p 24224:24224 -v /root/test/fluentd/:/etc/fluent/ fluentd fluentd -c /etc/fluent/fluent.conf
+# 
 # Official website: https://www.fluentd.org/
 #
 ##############################################################################
@@ -38,9 +39,13 @@ RUN apt-get update  \
          ruby-dev \
 		 
 # Install Fluentd
-  && gem install fluentd -v 1.1.0 \
+  && gem install fluentd -v 1.1.1 \
   && gem list fluentd \
  
+# Setup/Install a config directory
+  && fluentd -s /etc/fluent \
+  && mkdir -p /fluentd/log \
+  
 # Clean up the unwanted packages and clear the source directory 
   && apt-get remove -y \
          gcc \
@@ -48,14 +53,9 @@ RUN apt-get update  \
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /var/lib/apt/lists/*  
 
-# Setup/Install a config directory
-  && fluentd -s conf \
-  && cp -a ./* /etc/fluent/
-
-VOLUME /conf
-
+# Define port 
 EXPOSE 24224 
 
 # Start Fluentd process
