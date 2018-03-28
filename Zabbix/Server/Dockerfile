@@ -1,4 +1,4 @@
-########## Dockerfile for Zabbix-server version 3.4.6 #########
+########## Dockerfile for Zabbix-server version 3.4.7 #########
 #
 # This Dockerfile builds a basic installation of Zabbix-server.
 #
@@ -68,9 +68,9 @@ RUN	apt-get update && apt-get install -y mysql-server \
 	
 # Download and install Zabbix server
 	&&	cd $SOURCE_DIR \
-	&&	wget http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/3.4.6/zabbix-3.4.6.tar.gz/download -O zabbix-3.4.6.tar.gz \
-	&&	tar -xvf zabbix-3.4.6.tar.gz \
-	&&	cd zabbix-3.4.6/ \
+	&&	wget https://excellmedia.dl.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/3.4.7/zabbix-3.4.7.tar.gz \
+	&&	tar -xvf zabbix-3.4.7.tar.gz \
+	&&	cd zabbix-3.4.7/ \
 	&&	./configure --enable-server --with-mysql --enable-ipv6 --with-net-snmp --with-libcurl --with-libxml2 \
 	&&	make \
 	&&	make install \
@@ -80,7 +80,7 @@ RUN	apt-get update && apt-get install -y mysql-server \
 	&&	/usr/sbin/useradd -g zabbix zabbix \
 
 # Installing Zabbix web interface	
-	&&	cd /zabbix-3.4.6/frontends/php/ \
+	&&	cd /zabbix-3.4.7/frontends/php/ \
 	&&	mkdir -p /var/www/html/zabbix \
 	&&	cp -rf * /var/www/html/zabbix/ \
 	&&	cd /var/www/html/zabbix \
@@ -95,7 +95,7 @@ RUN	apt-get update && apt-get install -y mysql-server \
 	&& 	/usr/bin/mysql -e "create user 'zabbix'@'localhost'" \
 	&&	/usr/bin/mysql -e "grant all privileges on zabbix.* to 'zabbix'@'localhost'" \
 	
-	&&	cd /zabbix-3.4.6/database/mysql \
+	&&	cd /zabbix-3.4.7/database/mysql \
 	&&	mysql -uzabbix zabbix < schema.sql \
 	&&	mysql -uzabbix zabbix < images.sql \
 	&&	mysql -uzabbix zabbix < data.sql \
@@ -118,7 +118,7 @@ RUN	apt-get update && apt-get install -y mysql-server \
 			vim \
 			wget \
 	&& 	apt autoremove -y && apt-get clean \
-	&&	rm -rf /zabbix-3.4.6.tar.gz && rm -rf /var/lib/apt/lists/* 
+	&&	rm -rf /zabbix-3.4.7.tar.gz && rm -rf /var/lib/apt/lists/* 
 	
 EXPOSE 80
 
