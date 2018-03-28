@@ -1,4 +1,4 @@
-########## Dockerfile for Hibernate version 5.2.12 #########
+########## Dockerfile for Hibernate version 5.2.15 #########
 #
 # This Dockerfile builds a basic installation of Hibernate.
 #
@@ -17,7 +17,7 @@
 # docker cp <container_id>:/hibernate <path_on_host>
 #
 # Reference:
-# https://github.com/hibernate/hibernate-orm/tree/5.2.12
+# https://github.com/hibernate/hibernate-orm/tree/5.2.15
 #
 ##################################################################################
 
@@ -51,7 +51,7 @@ RUN     apt-get update && apt-get -y install \
         &&      cd $SOURCE_DIR \
         &&      git clone git://github.com/hibernate/hibernate-orm.git \
         &&      cd hibernate-orm \
-        &&      git checkout 5.2.12 \
+        &&      git checkout 5.2.15 \
 
 # Build Hibernate
         &&      mkdir -p $HOME/.gem/jruby/1.9 \
