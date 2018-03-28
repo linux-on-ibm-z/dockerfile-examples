@@ -1,4 +1,4 @@
-############################### Dockerfile for Elasticsearch version 5.6.1 ##################################
+############################### Dockerfile for Elasticsearch version 6.2.2 ##################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -13,7 +13,7 @@
 # docker run --name <container_name> -p 9200:9200 -d <image_name>
 #
 # Start Elastic search with configurtion file
-# For ex. docker run --name <container_name> -v <path_on_host>/elasticsearch.yml:/etc/elasticsearch.yml -p <port>:9200 -d <image_name>
+# For ex. docker run --name <container_name> -v <path_on_host>/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -p <port>:9200 -d <image_name>
 #
 ##############################################################################################################
 
@@ -25,10 +25,12 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 
 # Set Environment Variables
 
-ENV LANG="en_US.UTF-8" JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8" JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x  _JAVA_OPTIONS="-Xmx10g" SOURCE_DIR="/tmp/"
+ENV LANG="en_US.UTF-8" JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8" _JAVA_OPTIONS="-Xmx10g" SOURCE_DIR="/tmp/"
+ENV JAVA_HOME=/usr/share/jdk-9+181
+ENV PATH=$JAVA_HOME/bin:$PATH
 WORKDIR $SOURCE_DIR
 
-# Install Dependencies and gradle
+# Install Dependencies
 RUN apt-get update &&  apt-get install -y \
     ant \
     autoconf \
@@ -41,7 +43,6 @@ RUN apt-get update &&  apt-get install -y \
     locales-all \
     make \
     maven \
-    openjdk-8-jdk \
     patch \
     pkg-config \
     tar \
@@ -49,20 +50,18 @@ RUN apt-get update &&  apt-get install -y \
     unzip \
     wget \
     sudo \
- && wget https://services.gradle.org/distributions/gradle-3.3-bin.zip && unzip gradle-3.3-bin.zip \
- && mv gradle-3.3/ /usr/share/gradle \
- && rm -rf gradle-3.3-bin.zip \
 
+# Download AdoptJDK
+ && cd $SOURCE_DIR \
+ && wget https://github.com/AdoptOpenJDK/openjdk9-releases/releases/download/jdk-9%2B181/OpenJDK9_s390x_Linux_jdk-9.181.tar.gz \
+ && tar -C /usr/share/ -xvf OpenJDK9_s390x_Linux_jdk-9.181.tar.gz \ 
+	
 # Download and build source code of elastic search
- && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v5.6.1 \
- && export PATH=$PATH:/usr/share/gradle/bin && gradle assemble
- RUN  cd $SOURCE_DIR && git clone https://github.com/java-native-access/jna.git && cd jna && git checkout 4.4.0 && ant \
+ && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v6.2.2 \
+ && ./gradlew assemble \
  && cd $SOURCE_DIR/elasticsearch/distribution/tar/build/distributions/ \
- && tar -C /usr/share/ -xf elasticsearch-5.6.1-SNAPSHOT.tar.gz \
- && mv /usr/share/elasticsearch-5.6.1-SNAPSHOT /usr/share/elasticsearch \
- && cp $SOURCE_DIR/jna/build/jna.jar /usr/share/elasticsearch/lib/jna-4.4.0-1.jar \
-
-
+ && tar -C /usr/share/ -xf elasticsearch-6.2.2-SNAPSHOT.tar.gz \
+ && mv /usr/share/elasticsearch-6.2.2-SNAPSHOT /usr/share/elasticsearch \
 
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
@@ -76,7 +75,7 @@ RUN apt-get update &&  apt-get install -y \
     wget \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* /usr/share/gradle /root/.gradle/* /tmp/elasticsearch \
+ && apt-get clean && rm -rf /var/lib/apt/lists/* /root/.gradle/* /tmp/elasticsearch \
 
 # Create elaticsearch user
  && /usr/sbin/groupadd elasticsearch \
@@ -95,4 +94,3 @@ ENV PATH=/usr/share/elasticsearch/bin:$PATH
 CMD ["elasticsearch"]
 
 # End of Dockerfile
-
