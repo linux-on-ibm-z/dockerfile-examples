@@ -1,4 +1,4 @@
-################# Dockerfile for WildFly (JBoss) version 11.0.0 #############
+################# Dockerfile for WildFly (JBoss) version 12.0.0 #############
 #
 # This Dockerfile builds a basic installation of WildFly.
 #
@@ -45,10 +45,10 @@ RUN apt-get update && apt-get install -y \
     tar \
     wget \
  && git clone https://github.com/wildfly/wildfly.git \
- && cd wildfly && git checkout 11.0.0.Final \
+ && cd wildfly && git checkout 12.0.0.Final \
  && mvn install -DskipTests \
  && mkdir -p /opt/jboss/wildfly \
- && cp -a ./dist/target/wildfly-11.0.0.Final/* /opt/jboss/wildfly \
+ && cp -a ./dist/target/wildfly-12.0.0.Final/* /opt/jboss/wildfly \
 
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
