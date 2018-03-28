@@ -1,4 +1,4 @@
-############################### Dockerfile for Kibana version 5.6.1 ##########################################
+############################### Dockerfile for Kibana version 6.2.2 ##########################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -43,22 +43,22 @@ RUN apt-get update && apt-get install -y \
  && node -v \
 
 # Download and setup Kibana
- && cd /root/ && wget https://artifacts.elastic.co/downloads/kibana/kibana-5.6.1-linux-x86_64.tar.gz \
- && tar xvf kibana-5.6.1-linux-x86_64.tar.gz \
- && mv /root/kibana-5.6.1-linux-x86_64 kibana-5.6.1 \
- && cd /root/kibana-5.6.1 \
+ && cd /root/ && wget https://artifacts.elastic.co/downloads/kibana/kibana-6.2.2-linux-x86_64.tar.gz \
+ && tar xvf kibana-6.2.2-linux-x86_64.tar.gz \
+ && mv /root/kibana-6.2.2-linux-x86_64 kibana-6.2.2 \
+ && cd /root/kibana-6.2.2 \
  && mv node node_old \
  && ln -s /ibm/node node \
  && mkdir /etc/kibana \
  && cp config/kibana.yml /etc/kibana \
- && mv /root/kibana-5.6.1/ /usr/share/kibana \
+ && mv /root/kibana-6.2.2/ /usr/share/kibana \
 
 # Cleanup Cache data , unused packages and source files
  && apt-get remove -y \
     unzip \
     wget \
  && apt-get autoremove -y && apt-get clean \
- && rm -rf /root/kibana-5.6.1-linux-x86_64.tar.gz /root/node-v5.6.1-linux-s390x.tar.gz \
+ && rm -rf /root/kibana-6.2.2-linux-x86_64.tar.gz /root/node-v6.2.2-linux-s390x.tar.gz \
  && rm -rf /var/lib/apt/lists/*
 
 
@@ -68,4 +68,3 @@ EXPOSE 5601 80
 
 # Start Kibana service
 CMD ["kibana","-H","0.0.0.0"]
-
