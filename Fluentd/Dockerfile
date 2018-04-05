@@ -1,4 +1,4 @@
-########## Dockerfile for Fluentd version 1.1.1 ###############################
+########## Dockerfile for Fluentd version 1.1.2 ###############################
 #
 # This Dockerfile builds a basic installation of Fluentd.
 #
@@ -39,7 +39,7 @@ RUN apt-get update  \
          ruby-dev \
 		 
 # Install Fluentd
-  && gem install fluentd -v 1.1.1 \
+  && gem install fluentd -v 1.1.2 \
   && gem list fluentd \
  
 # Setup/Install a config directory
