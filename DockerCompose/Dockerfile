@@ -1,4 +1,4 @@
-################ Dockerfile for Docker Compose version 1.19.0 ####################
+################ Dockerfile for Docker Compose version 1.20.1 ####################
 #
 # This Dockerfile builds a basic installation of Docker Compose.
 #
@@ -21,15 +21,13 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-
 # Install dependencies and Docker Compose
 RUN apt-get update && apt-get install -y \
     python-pip \
  && pip install --upgrade pip \
- && pip install docker-compose==1.19.0 \
+ && pip install docker-compose==1.20.1 \
  
 # Clean up unused packages and data
- && apt-get remove -y python-pip \
  && apt-get autoremove -y && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
