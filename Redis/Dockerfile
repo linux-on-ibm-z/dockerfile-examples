@@ -1,4 +1,4 @@
-########## Dockerfile for Redis version 4.0.8 #########
+########## Dockerfile for Redis version 4.0.9 #########
 #
 # This Dockerfile builds a basic installation of Redis.
 #
@@ -16,7 +16,7 @@
 # docker run --name <container_name> -it <image_name> /bin/bash
 #
 # To start redis server run below command.
-# docker run --name <container_name>  -v /home/redis.conf:/home/redis.conf --rm=true -d redis redis-server /home/redis.conf
+# docker run --name <container_name>  -v /home/redis.conf:/home/redis.conf --rm=true -d <image_name> redis-server /home/redis.conf
 #
 #####################################################################
 
@@ -37,10 +37,10 @@ RUN apt-get update &&  apt-get install -y \
     tcl       \
     git       \
 
-# Clone redis repo and checkout 4.0.8 branch
+# Clone redis repo and checkout 4.0.9 branch
 && git clone https://github.com/antirez/redis.git \
 && cd redis \
-&& git checkout 4.0.8 \
+&& git checkout 4.0.9 \
 
 # Build redis
 && make distclean \
