@@ -1,4 +1,4 @@
-########## Dockerfile for PM2 version 2.10.1 #########
+########## Dockerfile for PM2 version 2.10.2 #########
 #
 # This Dockerfile builds a basic installation of PM2.
 #
@@ -32,7 +32,7 @@ RUN  apt-get update  \
          nodejs \
          npm  \
   && ln -s "$(which nodejs)" /usr/local/bin/node \
-  && npm install pm2@2.10.1 -g \
+  && npm install pm2@2.10.2 -g \
 
 # Clean up the unwanted packages and clear the source directory
   && apt-get autoremove -y \
