@@ -1,4 +1,4 @@
-########## Dockerfile for Apache flume-1.7 ##########
+########## Dockerfile for Apache flume-1.8 ##########
 #
 # Apache Flume is a distributed, reliable, and available service for
 # efficiently collecting, aggregating, and moving large amounts of log data.
@@ -48,7 +48,7 @@ WORKDIR "/root"
 
 # Path configuration for apache flume
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x M2_HOME=/usr/share/maven MAVEN_OPTS="-Xms1024m -Xmx1024m -XX:MaxPermSize=1024m"
-ENV PATH=$PATH:$JAVA_HOME:$JAVA_HOME/bin:$M2_HOME/bin:/usr/share/apache-flume-1.7.0/bin
+ENV PATH=$PATH:$JAVA_HOME:$JAVA_HOME/bin:$M2_HOME/bin:/usr/share/apache-flume-1.8.0/bin
 
 # Install dependencies for Apache Flume
 RUN apt-get update && apt-get install -y \
@@ -62,13 +62,12 @@ RUN apt-get update && apt-get install -y \
     wget \
      
 # Build Apache Flume
- && git clone -b flume-1.7 https://github.com/apache/flume.git  \
+ && git clone -b flume-1.8 https://github.com/apache/flume.git  \
  && cd flume \
- && sed -i '1334s/1.1.0/1.1.2/' pom.xml \
  && mvn install -DskipTests -Drat.numUnapprovedLicenses=100 \
 
 # Copy it to /usr/share
- && cp -Rf /root/flume/flume-ng-dist/target/apache-flume-1.7.0-bin/apache-flume-1.7.0-bin /usr/share/apache-flume-1.7.0 \
+ && cp -Rf /root/flume/flume-ng-dist/target/apache-flume-1.8.0-bin/apache-flume-1.8.0-bin /usr/share/apache-flume-1.8.0 \
 
 # Clean up the unwanted packages and clear the source directory 
  && apt-get remove -y \
