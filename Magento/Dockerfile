@@ -1,4 +1,4 @@
-########## Dockerfile for Magento version 2.2.2 ######
+########## Dockerfile for Magento version 2.2.3 ######
 #
 # Magento is an open-source e-commerce platform written in PHP.
 #
@@ -56,7 +56,7 @@ RUN apt-get update -y && apt-get install -y \
  && chmod -R a+w /var/www/html/ \
  && git clone https://github.com/magento/magento2.git \
  && cd magento2 \
- && git checkout 2.2.2 \
+ && git checkout 2.2.3 \
  && composer install \
 
 # Start mysql server and create database for Magento
