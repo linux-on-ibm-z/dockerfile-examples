@@ -1,4 +1,4 @@
-########## Dockerfile for Ruby version 2.5.0 #########
+########## Dockerfile for Ruby version 2.5.1 #########
 #
 # Ruby is a dynamic, open source programming language with a focus on simplicity and productivity.
 # It has an elegant syntax that is natural to read and easy to write.
@@ -46,9 +46,9 @@ RUN apt-get update && apt-get install -y \
     openssl \
 
 # Install Ruby
- && wget http://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.0.tar.gz \
- && tar -xvf ruby-2.5.0.tar.gz \
- && cd ruby-2.5.0 \
+ && wget http://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.1.tar.gz \
+ && tar -xvf ruby-2.5.1.tar.gz \
+ && cd ruby-2.5.1 \
  && ./configure \
  && make \
  && make install \
