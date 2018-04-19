@@ -1,4 +1,7 @@
-########## Dockerfile for Prometheus 2.1.0 #########
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Prometheus 2.2.1 #########
 #
 # This Dockerfile builds Prometheus
 #
@@ -23,7 +26,7 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-ENV GOPATH=/go PATH=/usr/lib/go-1.9/bin:$PATH:/go/bin:/prometheus
+ENV GOPATH=/go PATH=/usr/lib/go-1.10/bin:$PATH:/go/bin:/prometheus
 
 #Install depenedencies
 RUN apt-get update && apt-get install -y \
@@ -35,7 +38,7 @@ RUN apt-get update && apt-get install -y \
     make \
     tar \
     wget \
-	golang-1.9 \
+	golang-1.10 \
 
 
 # Download and build Prometheus
@@ -43,7 +46,7 @@ RUN apt-get update && apt-get install -y \
  && cd $GOPATH/src/github.com/prometheus \
  && git clone git://github.com/prometheus/prometheus.git \
  && cd prometheus \
- && git checkout v2.1.0 \
+ && git checkout v2.2.1 \
  && make build \
  && mkdir -p /prometheus && cp -p prometheus promtool /prometheus/ \
  && mkdir -p /etc/prometheus \
@@ -62,7 +65,7 @@ RUN apt-get update && apt-get install -y \
     g++ \
     make \
     wget \
-	golang-1.9 \
+	golang-1.10 \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
