@@ -1,4 +1,7 @@
-#################### Dockerfile for Antlr version 4.7 ################################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+#################### Dockerfile for Antlr version 4.7.1 ################################
 #
 # This Dockerfile builds a basic installation of Antlr.
 #
@@ -24,7 +27,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 WORKDIR "/tmp"
 
 # Set CLASSPATH
-ENV CLASSPATH /usr/share/java/antlr4-runtime-4.7.jar
+ENV CLASSPATH /usr/share/java/antlr4-runtime-4.7.1.jar
 ENV JAVA_HOME /opt/ibm/java 
 ENV PATH $JAVA_HOME/bin:$PATH 
 ENV MAVEN_OPTS "-Xmx1G" 
@@ -44,13 +47,13 @@ RUN apt-get update && apt-get install -y \
  && chmod +x ibm-java-sdk-8.0-4.10-s390x-archive.bin \
  && ./ibm-java-sdk-8.0-4.10-s390x-archive.bin -r installer.properties \
  && git clone git://github.com/antlr/antlr4.git \
- && cd antlr4 && git checkout 4.7 \
+ && cd antlr4 && git checkout 4.7.1 \
  && mvn install -DskipTests \
- && cp tool/target/antlr4-4.7.jar /usr/share/java/ \
- && cp tool/target/antlr4-4.7-sources.jar /usr/share/java/ \
- && cp tool/target/antlr4-4.7-complete.jar /usr/share/java/ \
- && cp antlr4-maven-plugin/target/antlr4-maven-plugin-4.7.jar /usr/share/java/ \
- && cp runtime/Java/target/antlr4-runtime-4.7.jar /usr/share/java/ \
+ && cp tool/target/antlr4-4.7.1.jar /usr/share/java/ \
+ && cp tool/target/antlr4-4.7.1-sources.jar /usr/share/java/ \
+ && cp tool/target/antlr4-4.7.1-complete.jar /usr/share/java/ \
+ && cp antlr4-maven-plugin/target/antlr4-maven-plugin-4.7.1.jar /usr/share/java/ \
+ && cp runtime/Java/target/antlr4-runtime-4.7.1.jar /usr/share/java/ \
  && apt-get remove -y \
         git \
         wget \
