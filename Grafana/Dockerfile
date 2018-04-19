@@ -1,4 +1,7 @@
-############################ Dockerfile for Grafana 4.6.3 ############################################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############################ Dockerfile for Grafana 5.0.4 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -56,7 +59,7 @@ RUN apt-get update -y && apt-get install -y \
 
 # Get the Grafana Soure code and build Grafana backend
  && cd / && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
- && cd $GOPATH/src/github.com/grafana/grafana && git checkout v4.6.3 \
+ && cd $GOPATH/src/github.com/grafana/grafana && git checkout v5.0.4 \
  && cd ./vendor/github.com/klauspost/compress/gzip \
  && cp gunzip.go gunzip.go.copy \
  && cp gzip.go gzip.go.copy \
@@ -67,8 +70,8 @@ RUN apt-get update -y && apt-get install -y \
  && sed -i "17 i \\\t\"hash/crc32\"" gunzip.go \
 
 # Edit the file vendor/github.com/klauspost/compress/gzip/gzip.go
- && sed -i '14d ' gzip.go \
- && sed -i "14 i \\\t\"hash/crc32\"" gzip.go \
+ && sed -i '13d ' gzip.go \
+ && sed -i "13 i \\\t\"hash/crc32\"" gzip.go \
  && cd $GOPATH/src/github.com/grafana/grafana \
  && make deps-go \
  && make build-go \
