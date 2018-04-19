@@ -1,4 +1,7 @@
-########## Dockerfile for Apigility version 1.4.1 ###############
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Apigility version 1.4.2 ###############
 #
 # This Dockerfile builds a basic installation of Apigility.
 #
@@ -12,7 +15,7 @@
 # docker build -t <image_name> .
 #
 # To start Apigility run the below command:
-# docker run --name <container_name> -v <host_path>:/apigility -p <host_port>:8080 -d <image_name>  
+# docker run --name <container_name> -p <host_port>:8080 -d <image_name>  
 # 
 # We can view the Apigility UI at http://<Apigility-host-ip>:<port_number>
 #
@@ -27,7 +30,7 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-ENV SOURCE_DIR=/tmp/source PATH=$PATH:/usr/local/php/bin
+ENV SOURCE_DIR=/tmp/source
 
 # Install dependencies
 RUN	apt-get update && apt-get -y install \
@@ -44,26 +47,14 @@ RUN	apt-get update && apt-get -y install \
 		pkg-config \
 		tar \
 		wget \
-		
-# Download PHP	
-	&&	mkdir -p $SOURCE_DIR \
-	&&	cd $SOURCE_DIR \
-	&&	wget http://www.php.net/distributions/php-5.6.8.tar.gz \
-	&&	tar xvzf php-5.6.8.tar.gz \
-
-# Configure PHP with Openssl
-	&& 	cd php-5.6.8/ \
-	&&	./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php --with-mysql --with-openssl \
-
-# Install PHP
-	&&	make \
-	&&	make install \
+		php \
 	
 # Get the source for Apigility
+	&&	mkdir -p $SOURCE_DIR \
 	&&	cd $SOURCE_DIR \
 	&&	git clone https://github.com/zfcampus/zf-apigility-skeleton.git \
 	&&	cd zf-apigility-skeleton/ \
-	&&	git checkout 1.4.1 \
+	&&	git checkout 1.4.2 \
 
 # Install composer
 	&&	curl -s https://getcomposer.org/installer | php -- \
@@ -97,6 +88,6 @@ EXPOSE 8080
 
 WORKDIR /apigility
 
-CMD php -S $(hostname -i):8080 -t public /apigility/public/index.php
+CMD php -S $(hostname -i):8080 -t public -f /apigility/public/index.php
 
 # End of Dockerfile
