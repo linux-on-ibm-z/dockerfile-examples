@@ -1,4 +1,7 @@
-########## Dockerfile for Htop version 2.0.2 ###############################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Htop version 2.2.0 ###############################
 #
 # This Dockerfile builds a basic installation of Htop.
 #
@@ -38,12 +41,13 @@ RUN apt-get update  \
 		 make \
 		 tar \
 		 wget \
+		 python \
 		 
 # Download and build source code of htop
   && cd $SOURCE_DIR \
-  && wget https://hisham.hm/htop/releases/2.0.2/htop-2.0.2.tar.gz \
-  && tar xvzf htop-2.0.2.tar.gz \
-  && cd $SOURCE_DIR/htop-2.0.2/ \
+  && wget https://hisham.hm/htop/releases/2.2.0/htop-2.2.0.tar.gz \
+  && tar xvzf htop-2.2.0.tar.gz \
+  && cd $SOURCE_DIR/htop-2.2.0/ \
   && ./configure \
   && make \
   && make check \
@@ -57,7 +61,7 @@ RUN apt-get update  \
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf  $SOURCE_DIR/htop-2.0.2.tar.gz $SOURCE_DIR/htop-2.0.2 /var/lib/apt/lists/*
+  && rm -rf  $SOURCE_DIR/htop-2.2.0.tar.gz $SOURCE_DIR/htop-2.2.0 /var/lib/apt/lists/*
 
 # Start htop
 CMD htop
