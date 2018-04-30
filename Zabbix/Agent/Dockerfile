@@ -1,4 +1,7 @@
-########## Dockerfile for Zabbix-Agent version 3.4.7 ####################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Zabbix-Agent version 3.4.8 ####################
 #
 # This Dockerfile builds a basic installation of Zabbix-Agent.
 #
@@ -48,11 +51,11 @@ RUN	apt-get update && apt-get -y install \
 		libpcre3-dev \
 
 # Download Zabbix agent
-	&& wget https://excellmedia.dl.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/3.4.7/zabbix-3.4.7.tar.gz \
-	&& tar -xvf zabbix-3.4.7.tar.gz \
+	&& wget https://excellmedia.dl.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/3.4.8/zabbix-3.4.8.tar.gz \
+	&& tar -xvf zabbix-3.4.8.tar.gz \
 
 # Install Zabbix agent
-	&& cd $SOURCE_DIR/zabbix-3.4.7 \
+	&& cd $SOURCE_DIR/zabbix-3.4.8 \
 	&& ./configure --enable-agent \
 	&& make \
 	&& make install \
