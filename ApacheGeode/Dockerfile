@@ -1,4 +1,7 @@
-########## Dockerfile for Apache Geode version 1.3.0 #####################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Apache Geode version 1.4.0 #####################
 #
 # This Dockerfile builds a basic installation of Apache Geode.
 #
@@ -105,11 +108,11 @@ RUN     apt-get update && apt-get -y install \
         &&      cd $SOURCE_DIR \
         &&      git clone https://github.com/apache/incubator-geode.git \
         &&      cd incubator-geode/ \
-        &&      git checkout rel/v1.3.0 \
+        &&      git checkout rel/v1.4.0 \
 # Build Apache Geode source
     && mkdir -p $HOME/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protoc/3.0.0 \
     && cp /usr/local/bin/protoc $HOME/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protoc/3.0.0/protoc-3.0.0-linux-s390x_64.exe \
-    &&  sed -i '45d' ./geode-protobuf/build.gradle \
+    &&  sed -i '37d' ./geode-protobuf-messages/build.gradle \
         &&      sed -i "44iorg.gradle.jvmargs = -Xss1g" 'gradle.properties' \
         &&      ./gradlew build installDist -x test \
 # Copy default config file
