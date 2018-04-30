@@ -1,4 +1,7 @@
-############################ Dockerfile for Logstash version 6.2.2 ###################################################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############################ Dockerfile for Logstash version 6.2.4 ###################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -33,11 +36,11 @@ RUN apt-get update && apt-get install -y \
     wget \
 
 # Download the logstash source from github and build it
- && wget https://artifacts.elastic.co/downloads/logstash/logstash-6.2.2.zip \
- && unzip -u logstash-6.2.2.zip \
+ && wget https://artifacts.elastic.co/downloads/logstash/logstash-6.2.4.zip \
+ && unzip -u logstash-6.2.4.zip \
  && wget https://github.com/jnr/jffi/archive/jffi-1.2.16.zip \
  && unzip -u jffi-1.2.16.zip  && cd jffi-jffi-1.2.16 && ant && cd .. \
- && cp -r /root/logstash-6.2.2 /usr/share/logstash \
+ && cp -r /root/logstash-6.2.4 /usr/share/logstash \
 
 # Cleanup Cache data , unused packages and source files
  && apt-get remove -y \
@@ -46,8 +49,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     wget \
  && apt-get autoremove -y && apt-get clean \
- && rm -rf /root/logstash-6.2.2 \
- && rm /root/logstash-6.2.2.zip \
+ && rm -rf /root/logstash-6.2.4 \
+ && rm /root/logstash-6.2.4.zip \
  && rm /root/jffi-1.2.16.zip \
  && rm -rf /var/lib/apt/lists/*
 
