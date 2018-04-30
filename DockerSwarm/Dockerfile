@@ -1,3 +1,6 @@
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
 ################ Dockerfile for Docker Swarm version 1.2.8 ####################
 #
 # This Dockerfile builds a basic installation of Docker Swarm.
@@ -36,13 +39,13 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 # Set GOPATH environment varibale
 
 ENV GOPATH /go:/go/src/github.com/docker/swarm/Godeps/_workspace/
-ENV PATH $GOPATH/bin:/usr/lib/go-1.9/bin:$PATH:$HOME/go/bin
+ENV PATH $GOPATH/bin:/usr/lib/go-1.10/bin:$PATH:$HOME/go/bin
 ENV SWARM_HOST :2375
 
 
 # Install dependencies
 RUN apt-get -y update && apt-get install -y \
-    git wget tar gcc golang-1.9 \
+    git wget tar gcc golang-1.10 \
 
 # Get the dependency tools
 && go get github.com/tools/godep \
