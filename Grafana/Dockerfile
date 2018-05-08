@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 5.0.4 ############################################
+############################ Dockerfile for Grafana 5.1.0 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -24,7 +24,7 @@ FROM s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV QT_QPA_PLATFORM=offscreen GOPATH=/opt
-ENV PATH=$PATH:/opt/yarn-v1.3.2/bin:$GOPATH/bin:/opt/ibm/node/bin:/usr/lib/go-1.9/bin:/usr/share/grafana
+ENV PATH=$PATH:/opt/yarn-v1.3.2/bin:$GOPATH/bin:/opt/ibm/node/bin:/usr/lib/go-1.10/bin:/usr/share/grafana
 
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
@@ -37,7 +37,7 @@ RUN apt-get update -y && apt-get install -y \
     python \
     wget \
     unzip \
-    golang-1.9 \
+    golang-1.10 \
 	
 # Install Nodejs
  && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/nodejs/8.9.4.0/linux/s390x/ibm-8.9.4.0-node-v8.9.4-linux-s390x.bin \
@@ -59,20 +59,7 @@ RUN apt-get update -y && apt-get install -y \
 
 # Get the Grafana Soure code and build Grafana backend
  && cd / && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
- && cd $GOPATH/src/github.com/grafana/grafana && git checkout v5.0.4 \
- && cd ./vendor/github.com/klauspost/compress/gzip \
- && cp gunzip.go gunzip.go.copy \
- && cp gzip.go gzip.go.copy \
-
-
-# Edit the file vendor/github.com/klauspost/compress/gzip/gunzip.go
- && sed -i '17d ' gunzip.go \
- && sed -i "17 i \\\t\"hash/crc32\"" gunzip.go \
-
-# Edit the file vendor/github.com/klauspost/compress/gzip/gzip.go
- && sed -i '13d ' gzip.go \
- && sed -i "13 i \\\t\"hash/crc32\"" gzip.go \
- && cd $GOPATH/src/github.com/grafana/grafana \
+ && cd $GOPATH/src/github.com/grafana/grafana && git checkout v5.1.0 \
  && make deps-go \
  && make build-go \
 
