@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for etcd 3.3.3 ####################
+################## Dockerfile for etcd 3.3.4 ####################
 #
 # This Dockerfile builds a basic installation of etcd.
 #
@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y \
  && rm -rf etcd \
  && git clone git://github.com/coreos/etcd \
  && cd etcd \
- && git checkout v3.3.3 \
+ && git checkout v3.3.4 \
  && mkdir -p /data \
 
 # Build
