@@ -1,4 +1,7 @@
-########## Dockerfile for Keystone version 11.0.3 #########
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Keystone version 13.0.0 #########
 #
 # This Dockerfile builds a basic installation of Keystone.
 #
@@ -61,7 +64,6 @@ RUN	apt-get update && apt-get install -y \
 		python-lxml \
 		python-mysqldb \
 		python-pkgconfig  \
-		python-psycopg2 \
 		python-setuptools \
 		scons \
 		tar \
@@ -96,9 +98,9 @@ RUN	apt-get update && apt-get install -y \
 	&&	cd $SOURCE_DIR \
 	&&	git clone https://github.com/openstack/keystone.git \
 	&&	cd keystone/ \
-	&&	git checkout 11.0.3 \
-	&&	pip install -r requirements.txt \
-	&&	pip install -r test-requirements.txt  \
+	&&	git checkout 13.0.0 \
+	&&	pip install --ignore-installed -r requirements.txt \
+	&&	pip install --ignore-installed -r test-requirements.txt  \
 	&&	python setup.py install \
 	
 # Configure Keystone
