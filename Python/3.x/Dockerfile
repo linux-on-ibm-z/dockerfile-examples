@@ -1,4 +1,7 @@
-########## Dockerfile for Python-3.6.4 #########################################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Python-3.6.5 #########################################
 #
 # Python is an interactive high-level object-oriented language
 #
@@ -46,11 +49,11 @@ RUN apt-get update && apt-get install -y \
     xz-utils \ 
 
 # Download Python from the ftp site
- && wget https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz \
- && tar -xvf Python-3.6.4.tar.xz \
+ && wget https://www.python.org/ftp/python/3.6.5/Python-3.6.5.tar.xz \
+ && tar -xvf Python-3.6.5.tar.xz \
 
 # Build Python
- && cd Python-3.6.4 \
+ && cd Python-3.6.5 \
  && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
  && make \
  && make install \
@@ -64,6 +67,6 @@ RUN apt-get update && apt-get install -y \
     xz-utils \ 
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /root/Python-3.6.4.tar.xz /root/Python-3.6.4
+ && rm -rf /root/Python-3.6.5.tar.xz /root/Python-3.6.5
 
 CMD python3 --version
