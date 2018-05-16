@@ -1,4 +1,7 @@
-########## Dockerfile for Terraform - 0.11.5 #########
+# © Copyright IBM Corporation 2018
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Terraform - 0.11.7 #########
 # 
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -26,7 +29,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 ENV SOURCE_DIR=/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH $SOURCE_DIR
-ENV PATH=$GOPATH/bin:/usr/lib/go-1.9/bin:$PATH
+ENV PATH=$GOPATH/bin:/usr/lib/go-1.10/bin:$PATH
 
 # Installing dependencies for Terraform
 RUN apt-get update &&  apt-get install -y \
@@ -34,30 +37,15 @@ RUN apt-get update &&  apt-get install -y \
     make \
     zip  \
 	wget \
-    golang-1.9 \
+    golang-1.10 \
 
 # Clone Terraform Source Code
  && cd $SOURCE_DIR \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/terraform.git \
- && cd terraform && git checkout v0.11.5 \
- && make vet && go get github.com/mitchellh/gox \
-
-# Apply the patch to add s390x support
- && cd $GOPATH/src/github.com/mitchellh/gox \
- && git checkout v0.4.0 \
- && wget https://github.com/mitchellh/gox/pull/85.patch \
- && git config user.email "lozopensource@github.com" \
- && git config user.name "LoZ" \
- && git am 85.patch \
- 
-# Reinstall gox tool
- && cd $GOPATH/src/github.com/mitchellh/ \
- && go get github.com/mitchellh/iochan \
- && go install ./... \
- && cd $GOPATH/src/github.com/hashicorp/terraform/ \
- && make fmt \
+ && cd terraform && git checkout v0.11.7 \
+ && make \
 
 # Build Terraform
  && XC_OS=linux XC_ARCH=s390x make bin \
