@@ -1,4 +1,7 @@
-############################### Dockerfile for Kibana version 6.2.2 ##########################################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############################### Dockerfile for Kibana version 6.2.4 ##########################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -31,34 +34,28 @@ WORKDIR "/root"
 ENV PATH=/ibm/node/bin:/usr/share/kibana/bin:$PATH
 # Install the dependencies and NodeJS
 RUN apt-get update && apt-get install -y \
-    openjdk-8-jdk \
     wget \
     tar \
-    unzip \
- && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/nodejs/6.12.2.0/linux/s390x/ibm-6.12.2.0-node-v6.12.2-linux-s390x.bin \
- && echo "LICENSE_ACCEPTED=TRUE\nUSER_INSTALL_DIR=/ibm/node\n-fileOverwrite_/ibm/node/_node_installation/uninstall.lax=Yes" > installer.properties \
- && cat installer.properties \
- && chmod +x ibm-6.12.2.0-node-v6.12.2-linux-s390x.bin \
- && ./ibm-6.12.2.0-node-v6.12.2-linux-s390x.bin -f installer.properties -i silent \
- && node -v \
+ && wget https://nodejs.org/dist/v6.6.0/node-v6.6.0-linux-s390x.tar.gz \
+ && tar -xvzf node-v6.6.0-linux-s390x.tar.gz \
 
 # Download and setup Kibana
- && cd /root/ && wget https://artifacts.elastic.co/downloads/kibana/kibana-6.2.2-linux-x86_64.tar.gz \
- && tar xvf kibana-6.2.2-linux-x86_64.tar.gz \
- && mv /root/kibana-6.2.2-linux-x86_64 kibana-6.2.2 \
- && cd /root/kibana-6.2.2 \
+ && cd /root/ && wget https://artifacts.elastic.co/downloads/kibana/kibana-6.2.4-linux-x86_64.tar.gz \
+ && tar xvf kibana-6.2.4-linux-x86_64.tar.gz \
+ && mv /root/kibana-6.2.4-linux-x86_64 kibana-6.2.4 \
+ && cd /root/kibana-6.2.4 \
  && mv node node_old \
- && ln -s /ibm/node node \
+ && ln -s /root/node-v6.6.0-linux-s390x node \
  && mkdir /etc/kibana \
  && cp config/kibana.yml /etc/kibana \
- && mv /root/kibana-6.2.2/ /usr/share/kibana \
+ && mv /root/kibana-6.2.4/ /usr/share/kibana \
 
 # Cleanup Cache data , unused packages and source files
  && apt-get remove -y \
     unzip \
     wget \
  && apt-get autoremove -y && apt-get clean \
- && rm -rf /root/kibana-6.2.2-linux-x86_64.tar.gz /root/node-v6.2.2-linux-s390x.tar.gz \
+ && rm -rf /root/kibana-6.2.4-linux-x86_64.tar.gz /root/node-v6.2.4-linux-s390x.tar.gz \
  && rm -rf /var/lib/apt/lists/*
 
 
