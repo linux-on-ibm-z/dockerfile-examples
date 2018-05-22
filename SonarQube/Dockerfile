@@ -1,4 +1,7 @@
-########## Dockerfile for SonarQube 7.0 #########
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for SonarQube 7.1 #########
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -36,12 +39,12 @@ RUN apt-get update -y && apt-get -y install \
 
 # Download SonarQube
  && cd $SOURCE_DIR \
- && wget https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-7.0.zip \
- && unzip sonarqube-7.0.zip \
+ && wget https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-7.1.zip \
+ && unzip sonarqube-7.1.zip \
  && wget https://sonarsource.bintray.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.0.3.778-linux.zip \
  && unzip sonar-scanner-cli-3.0.3.778-linux.zip \
- && rm -rf sonarqube-7.0.zip sonar-scanner-cli-3.0.3.778-linux.zip \
- && cp -r $SOURCE_DIR/sonarqube-7.0 $SOURCE_DIR/sonarqube \
+ && rm -rf sonarqube-7.1.zip sonar-scanner-cli-3.0.3.778-linux.zip \
+ && cp -r $SOURCE_DIR/sonarqube-7.1 $SOURCE_DIR/sonarqube \
  && cp -r $SOURCE_DIR/sonarqube /opt \
 
 # Tidy and clean up
@@ -61,4 +64,4 @@ EXPOSE 9000
 VOLUME  ["/opt/sonarqube/data"]
 
 WORKDIR /opt/sonarqube/lib
-CMD ["java","-jar","sonar-application-7.0.jar"]
+CMD ["java","-jar","sonar-application-7.1.jar"]
