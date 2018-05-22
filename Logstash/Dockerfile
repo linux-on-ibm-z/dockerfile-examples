@@ -23,18 +23,22 @@ FROM s390x/ubuntu:16.04
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 WORKDIR "/root"
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x/jre
+ENV JAVA_HOME=/root/jdk8u162-b12_openj9-0.8.0/ 
+ENV PATH=$JAVA_HOME/bin:$PATH
 ENV LD_LIBRARY_PATH=/root/jffi-jffi-1.2.16/build/jni/:$LD_LIBRARY_PATH
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     ant \
     gcc \
     make \
-    openjdk-8-jdk \
     tar \
     unzip \
     wget \
 
+# Download OpenJDK8 with Eclipse OpenJ9
+ && wget https://github.com/AdoptOpenJDK/openjdk8-openj9-releases/releases/download/jdk8u162-b12_openj9-0.8.0/OpenJDK8-OPENJ9_s390x_Linux_jdk8u162-b12_openj9-0.8.0.tar.gz \
+ && tar -xvf OpenJDK8-OPENJ9_s390x_Linux_jdk8u162-b12_openj9-0.8.0.tar.gz \
+	
 # Download the logstash source from github and build it
  && wget https://artifacts.elastic.co/downloads/logstash/logstash-6.2.4.zip \
  && unzip -u logstash-6.2.4.zip \
