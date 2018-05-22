@@ -1,4 +1,7 @@
-############################### Dockerfile for Elasticsearch version 6.2.2 ##################################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############################### Dockerfile for Elasticsearch version 6.2.4 ##################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -57,11 +60,12 @@ RUN apt-get update &&  apt-get install -y \
  && tar -C /usr/share/ -xvf OpenJDK9_s390x_Linux_jdk-9.181.tar.gz \ 
 	
 # Download and build source code of elastic search
- && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v6.2.2 \
+ && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v6.2.4 \
+ && sed -i '244a m.put("s390x", new Arch(0x80000016, 0xFFFFFFFF, 1, 190, 11, 354, 348));' $SOURCE_DIR/elasticsearch/server/src/main/java/org/elasticsearch/bootstrap/SystemCallFilter.java \
  && ./gradlew assemble \
  && cd $SOURCE_DIR/elasticsearch/distribution/tar/build/distributions/ \
- && tar -C /usr/share/ -xf elasticsearch-6.2.2-SNAPSHOT.tar.gz \
- && mv /usr/share/elasticsearch-6.2.2-SNAPSHOT /usr/share/elasticsearch \
+ && tar -C /usr/share/ -xf elasticsearch-6.2.4-SNAPSHOT.tar.gz \
+ && mv /usr/share/elasticsearch-6.2.4-SNAPSHOT /usr/share/elasticsearch \
 
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
