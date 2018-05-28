@@ -1,4 +1,4 @@
-	################ Dockerfile for Jenkins server version 2.107.3 ###################
+################ Dockerfile for Jenkins server version 2.107.3 ###################
 #
 # This Dockerfile builds a basic installation of Jenkins server.
 #
