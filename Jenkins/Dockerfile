@@ -1,4 +1,4 @@
-	################ Dockerfile for Jenkins server version 2.89.2 ###################
+	################ Dockerfile for Jenkins server version 2.107.3 ###################
 #
 # This Dockerfile builds a basic installation of Jenkins server.
 #
@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y \
  && jar -uvf jenkins.war WEB-INF/lib/jna-4.5.0.jar \
  && zip  -d jenkins.war WEB-INF/lib/jna-4.2.1.jar \
  && jar -xvf jenkins.war META-INF/MANIFEST.MF \
- && head -n 8  META-INF/MANIFEST.MF >META-INF/MANIFEST.MF_tmp \
+ && head -n 10  META-INF/MANIFEST.MF >META-INF/MANIFEST.MF_tmp \
  && mv META-INF/MANIFEST.MF_tmp META-INF/MANIFEST.MF \
  && jar -uvf jenkins.war META-INF/MANIFEST.MF  \
  && jar -uvfm jenkins.war META-INF/MANIFEST.MF \
