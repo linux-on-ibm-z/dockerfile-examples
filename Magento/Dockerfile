@@ -1,4 +1,7 @@
-########## Dockerfile for Magento version 2.2.3 ######
+# © Copyright IBM Corporation 2017, 2018
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########################### Dockerfile for Magento version 2.2.4 ##############################
 #
 # Magento is an open-source e-commerce platform written in PHP.
 #
@@ -11,7 +14,7 @@
 #
 # We can view the Magento UI at http://<Magento-host-ip>:<port_number>/magento2/setup
 #
-##################################################################################
+###############################################################################################
 
 # Base Image
 FROM s390x/ubuntu:16.04
@@ -23,8 +26,8 @@ ENV DEBIAN_FRONTEND noninteractive
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
     wget \
-	tar \
-	curl \
+    tar \
+    curl \
     apache2 \
     composer \
     libapache2-mod-php7.0 \
@@ -40,6 +43,7 @@ RUN apt-get update -y && apt-get install -y \
     php7.0-zip \
     php7.0-gd  \
     php7.0-soap \
+    php7.0-bcmath \
 
 # Configure apache2
  && chmod 766 /etc/apache2/apache2.conf \
@@ -56,7 +60,7 @@ RUN apt-get update -y && apt-get install -y \
  && chmod -R a+w /var/www/html/ \
  && git clone https://github.com/magento/magento2.git \
  && cd magento2 \
- && git checkout 2.2.3 \
+ && git checkout 2.2.4 \
  && composer install \
 
 # Start mysql server and create database for Magento
