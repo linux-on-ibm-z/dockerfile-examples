@@ -1,4 +1,7 @@
-#################### Dockerfile for Beats 6.2.2 #############################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+#################### Dockerfile for Beats 6.2.4 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -53,7 +56,7 @@ RUN apt-get update && apt-get install -y \
  && cd $GOPATH/src/github.com/elastic  \
  && git clone https://github.com/elastic/beats.git  \
  && cd beats  \
- && git checkout v6.2.2  \
+ && git checkout v6.2.4  \
 
 # Building heartbeat
  && cd $GOPATH/src/github.com/elastic/beats/heartbeat  \
@@ -74,12 +77,17 @@ RUN apt-get update && apt-get install -y \
 # Building libbeat
  && cd $GOPATH/src/github.com/elastic/beats/libbeat  \
  && make  \
+ 
+# Building auditbeat
+ && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
+ && make \
  && cp -r $GOPATH/src/github.com/elastic/beats /opt/beats \
  && ln -s /opt/beats/heartbeat/heartbeat /usr/bin/heartbeat \
  && ln -s /opt/beats/packetbeat/packetbeat /usr/bin/packetbeat \
  && ln -s /opt/beats/libbeat/libbeat /usr/bin/libbeat \
  && ln -s /opt/beats/metricbeat/metricbeat /usr/bin/metricbeat \
  && ln -s /opt/beats/filebeat/filebeat /usr/bin/filebeat \
+ && ln -s /opt/beats/auditbeat/auditbeat /usr/bin/auditbeat \
 
 # Tidy and clean up
  && apt-get remove -y \
