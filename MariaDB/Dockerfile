@@ -69,7 +69,7 @@ RUN apt-get update && apt-get install -y \
 
 ##Build, configure, install 
  && BUILD/autorun.sh \
- && ./configure --WITH_SAFEMALLOC=ON --with-debug \
+ && ./configure \
  && make \
  && make install \
  && groupadd -r mysql && useradd -r -g mysql mysql \
