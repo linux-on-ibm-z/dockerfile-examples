@@ -1,4 +1,7 @@
-############################### Dockerfile for GlusterFS version 3.12.3 ##################################
+# © Copyright IBM Corporation 2018
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############################### Dockerfile for GlusterFS version 4.0.2 ##################################
 #
 # This Dockerfile builds a basic installation of GlusterFS.
 #
@@ -60,9 +63,11 @@ RUN apt-get update && apt-get install -y  make \
 # Build GlusterFS from source
  && git clone https://github.com/gluster/glusterfs \
  && cd glusterfs \
- && git checkout v3.12.3 \
+ && git checkout v4.0.2 \
  && ./autogen.sh \
  && ./configure --enable-gnfs \
+ && sed -i '40d' xlators/performance/io-threads/src/io-threads.h \
+ && sed -i '40i #define IOT_THREAD_STACK_SIZE   ((size_t)(512*1024))' xlators/performance/io-threads/src/io-threads.h \
  && make \
  && make install \
  && ldconfig \
@@ -81,6 +86,6 @@ RUN apt-get update && apt-get install -y  make \
 EXPOSE 2222 111 245 443 24007 2049 8080 6010 6011 6012 38465 38466 38468 38469 49152 49153 49154 49156 49157 49158 49159 49160 49161 49162
 
 # Start the Gluster daemon
-CMD ["glusterd"]
+ENTRYPOINT /usr/local/sbin/glusterd && tail -f /dev/null
 
 # End of Dockerfile
