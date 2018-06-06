@@ -1,4 +1,7 @@
-############################# Dockerfile for Marathon 1.5.6 #####################################
+# © Copyright IBM Corporation 2017, 2018
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############################# Dockerfile for Marathon 1.6.352 #####################################
 #
 # This Dockerfile builds a basic installation of Marathon.
 #
@@ -55,8 +58,8 @@ RUN apt-get update && apt-get install -y \
         python-virtualenv \
 # Install sbt
  && mkdir source_root && cd source_root \
- && wget https://dl.bintray.com/sbt/native-packages/sbt/0.13.11/sbt-0.13.11.tgz \
- && tar -zxf sbt-0.13.11.tgz \
+ && wget https://github.com/sbt/sbt/releases/download/v1.1.1/sbt-1.1.1.tgz \
+ && tar -zxf sbt-1.1.1.tgz \
 # Clone Mesos
  && git clone https://github.com/apache/mesos \
  && cd mesos && git checkout 1.5.0 \
@@ -86,7 +89,9 @@ RUN apt-get update && apt-get install -y \
  && ../configure && make && make install \
 # clone and install Marathon
  && cd /tmp/source_root && git clone https://github.com/mesosphere/marathon.git \
- && cd marathon && git checkout v1.5.6 \
+ && cd marathon && git checkout v1.6.352 \
+ && sed -i -e 's/1.1.0/1.1.1/g' project/build.properties \
+ && sed -i -e 's/2.12.4/2.12.6/g' build.sbt \
  && sbt stage \
  && cp -r /tmp/source_root/mesos/build/3rdparty/zookeeper-3.4.8 /usr/share/ \
  && cp -r /tmp/source_root/marathon /usr/share \
