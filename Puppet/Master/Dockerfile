@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for Puppet-master version 5.5.0 ####################
+################# Dockerfile for Puppet-master version 5.5.1 ####################
 #
 # This Dockerfile builds a basic installation of Puppet-master.
 #
@@ -57,7 +57,7 @@ RUN	apt-get update && apt-get install -y \
 	&&	/usr/bin/gem install bundler rake-compiler \
 	
 # Install Puppet
-	&&	/usr/bin/gem install puppet -v 5.5.0 \
+	&&	/usr/bin/gem install puppet -v 5.5.1 \
 	
 # Locate the $confdir by command
 	&&	chmod 755 /usr/local/lib \
