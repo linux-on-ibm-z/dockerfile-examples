@@ -36,8 +36,8 @@ ENV PATH=/ibm/node/bin:/usr/share/kibana/bin:$PATH
 RUN apt-get update && apt-get install -y \
     wget \
     tar \
- && wget https://nodejs.org/dist/v6.6.0/node-v6.6.0-linux-s390x.tar.gz \
- && tar -xvzf node-v6.6.0-linux-s390x.tar.gz \
+ && wget https://nodejs.org/dist/v8.9.4/node-v8.9.4-linux-s390x.tar.gz \
+ && tar xvf node-v8.9.4-linux-s390x.tar.gz \
 
 # Download and setup Kibana
  && cd /root/ && wget https://artifacts.elastic.co/downloads/kibana/kibana-6.2.4-linux-x86_64.tar.gz \
@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y \
  && mv /root/kibana-6.2.4-linux-x86_64 kibana-6.2.4 \
  && cd /root/kibana-6.2.4 \
  && mv node node_old \
- && ln -s /root/node-v6.6.0-linux-s390x node \
+ && ln -s /root/node-v8.9.4-linux-s390x node \
  && mkdir /etc/kibana \
  && cp config/kibana.yml /etc/kibana \
  && mv /root/kibana-6.2.4/ /usr/share/kibana \
