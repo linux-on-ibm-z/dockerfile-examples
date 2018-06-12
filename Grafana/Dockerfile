@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 5.1.0 ############################################
+############################ Dockerfile for Grafana 5.1.3 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -32,7 +32,6 @@ RUN apt-get update -y && apt-get install -y \
     gcc \
     git \
     make \
-    openjdk-8-jdk \
     phantomjs \
     python \
     wget \
@@ -40,26 +39,14 @@ RUN apt-get update -y && apt-get install -y \
     golang-1.10 \
 	
 # Install Nodejs
- && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/nodejs/8.9.4.0/linux/s390x/ibm-8.9.4.0-node-v8.9.4-linux-s390x.bin \
- && chmod +x ibm-8.9.4.0-node-v8.9.4-linux-s390x.bin \
- && echo "#Indicate whether the license agreement been accepted" >installer.properties \
- && echo  "#----------------------------------------------------" >> installer.properties \
- && echo "LICENSE_ACCEPTED=TRUE">> installer.properties \
- && echo "#Choose Install Folder" >> installer.properties \
- && echo "#---------------------" >> installer.properties \
- && echo "USER_INSTALL_DIR=/opt/ibm/node" >> installer.properties \
- && echo "#Choose Link Location" >> installer.properties \
- && echo "#--------------------" >> installer.properties \
- && echo "USER_SHORTCUTS=/opt" >> installer.properties \
- && echo "#Install" >> installer.properties \
- && echo "#-------" >> installer.properties \
- && echo "-fileOverwrite_/home/test/ibm/node/_node_installation/uninstall.lax=Yes" >> installer.properties \
- && ./ibm-8.9.4.0-node-v8.9.4-linux-s390x.bin -i silent \
-
+ && cd / && wget http://nodejs.org/dist/v8.9.0/node-v8.9.0-linux-s390x.tar.gz \
+ && chmod ugo+r node-v8.9.0-linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf node-v8.9.0-linux-s390x.tar.gz \
+ && export PATH=$PATH:/usr/local/node-v8.9.0-linux-s390x/bin \
 
 # Get the Grafana Soure code and build Grafana backend
  && cd / && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
- && cd $GOPATH/src/github.com/grafana/grafana && git checkout v5.1.0 \
+ && cd $GOPATH/src/github.com/grafana/grafana && git checkout v5.1.3 \
  && make deps-go \
  && make build-go \
 
@@ -90,9 +77,8 @@ RUN apt-get update -y && apt-get install -y \
     wget \
     unzip \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*  $GOPATH/src/github.com  /ibm-6.11.5.0-node-v6.11.5-linux-s390x.bin \
- && sh "/opt/Uninstall IBM SDK for Node.js (TM)"
- 
+ && apt-get clean && rm -rf /var/lib/apt/lists/*  $GOPATH/src/github.com  /node-v8.9.0-linux-s390x
+
 VOLUME ["/usr/share/grafana/conf","/usr/share/grafana/data"]
 
 EXPOSE 3000
