@@ -1,4 +1,7 @@
-########## Dockerfile for OpenResty version 1.13.6.1 #########
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for OpenResty version 1.13.6.2 #########
 #
 # This Dockerfile builds a basic installation of OpenResty.
 #
@@ -63,16 +66,16 @@ RUN	apt-get update && apt-get -y install \
 	
 # Download the source code
 	&& cd $SOURCE_DIR \
-	&& wget https://openresty.org/download/openresty-1.13.6.1.tar.gz \
-	&& tar -xvf openresty-1.13.6.1.tar.gz \
+	&& wget https://openresty.org/download/openresty-1.13.6.2.tar.gz \
+	&& tar -xvf openresty-1.13.6.2.tar.gz \
 	
-# Comment out the below lines in file /<source_root>/openresty-1.13.6.1/configure
-	&& cd openresty-1.13.6.1 \
-	&& sed -i '641,680 s/^/#/' configure \
+# Comment out the below lines in file /<source_root>/openresty-1.13.6.2/configure
+	&& cd openresty-1.13.6.2 \
+	&& sed -i '655,698 s/^/#/' configure \
 	
 # Build and install OpenResty
-	&& rm -rf bundle/LuaJIT-2.1-20171103/ \
-	&& cp -r $SOURCE_DIR/LuaJIT $SOURCE_DIR/openresty-1.13.6.1/bundle/LuaJIT-2.1-20171103/ \
+	&& rm -rf bundle/LuaJIT-2.1-20180420/ \
+	&& cp -r $SOURCE_DIR/LuaJIT $SOURCE_DIR/openresty-1.13.6.2/bundle/LuaJIT-2.1-20180420/ \
 	&& ./configure --without-http_redis2_module --with-http_iconv_module --with-http_postgres_module  -j2 \
 	&& make -j2 \
 	&& make install \
