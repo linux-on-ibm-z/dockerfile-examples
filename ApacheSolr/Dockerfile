@@ -1,4 +1,7 @@
-############### Dockerfile for Apache Solr version 7.2.1 #########################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############### Dockerfile for Apache Solr version 7.3.1 #########################
 #
 # To build Apache Solr image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -31,15 +34,15 @@ RUN apt-get update &&   apt-get install -y \
     wget \
 
 # Download Solr and build it
- && wget http://archive.apache.org/dist/lucene/solr/7.2.1/solr-7.2.1-src.tgz \
- && tar zxvf solr-7.2.1-src.tgz  \
- && cd solr-7.2.1/solr \
+ && wget http://archive.apache.org/dist/lucene/solr/7.3.1/solr-7.3.1-src.tgz \
+ && tar zxvf solr-7.3.1-src.tgz  \
+ && cd solr-7.3.1/solr \
  && ant ivy-bootstrap \
  && ant compile \
  && ant server \
- && cd  $SOURCE_DIR/solr-7.2.1/solr/bin  \
+ && cd  $SOURCE_DIR/solr-7.3.1/solr/bin  \
  && chmod a+x solr  \
- && cp -r $SOURCE_DIR/solr-7.2.1/solr /opt/ \
+ && cp -r $SOURCE_DIR/solr-7.3.1/solr /opt/ \
 
 # Tidy and clean up 
  && rm -rf $SOURCE_DIR \
