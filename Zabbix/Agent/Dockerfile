@@ -1,12 +1,12 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-Agent version 3.4.8 ####################
+########## Dockerfile for Zabbix-Agent version 3.4.10 ####################
 #
 # This Dockerfile builds a basic installation of Zabbix-Agent.
 #
 # Zabbix is an enterprise-class open source distributed monitoring solution.
-# Zabbix is software that monitors numerous parameters of a network and the health and integrity of servers. 
+# Zabbix is software that monitors numerous parameters of a network and the health and integrity of servers.
 # Zabbix uses a flexible notification mechanism that allows users to configure e-mail based alerts for virtually any event.
 #
 # To build this image, from the directory containing this Dockerfile
@@ -14,8 +14,8 @@
 # docker build -t <image_name> .
 #
 # To Start Zabbix agent run the below command:
-# docker run --name <container_name> -d <image>  
-# 
+# docker run --name <container_name> -d <image>
+#
 # Test by using the following url:
 # docker exec <container_ID> zabbix_get -s <host_ip> -k "agent.version"
 #
@@ -51,11 +51,11 @@ RUN	apt-get update && apt-get -y install \
 		libpcre3-dev \
 
 # Download Zabbix agent
-	&& wget https://excellmedia.dl.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/3.4.8/zabbix-3.4.8.tar.gz \
-	&& tar -xvf zabbix-3.4.8.tar.gz \
+	&& wget https://excellmedia.dl.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/3.4.10/zabbix-3.4.10.tar.gz \
+	&& tar -xvf zabbix-3.4.10.tar.gz \
 
 # Install Zabbix agent
-	&& cd $SOURCE_DIR/zabbix-3.4.8 \
+	&& cd $SOURCE_DIR/zabbix-3.4.10\
 	&& ./configure --enable-agent \
 	&& make \
 	&& make install \
@@ -75,7 +75,7 @@ RUN	apt-get update && apt-get -y install \
 	&& 	apt-get clean \
 	&& 	rm -rf /var/lib/apt/lists/*
 
-# change user to zabbix	
+# change user to zabbix
 USER zabbix
 
 # Start Zabbix agent
