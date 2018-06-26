@@ -31,13 +31,14 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 WORKDIR "/root"
 
 # Set Environment Variable
-ENV PATH=/ibm/node/bin:/usr/share/kibana/bin:$PATH
+ENV PATH=/usr/share/kibana/bin:$PATH
+
 # Install the dependencies and NodeJS
 RUN apt-get update && apt-get install -y \
     wget \
     tar \
- && wget https://nodejs.org/dist/v8.9.4/node-v8.9.4-linux-s390x.tar.gz \
- && tar xvf node-v8.9.4-linux-s390x.tar.gz \
+ && wget https://nodejs.org/dist/v6.6.0/node-v6.6.0-linux-s390x.tar.gz \
+ && tar xvf node-v6.6.0-linux-s390x.tar.gz \
 
 # Download and setup Kibana
  && cd /root/ && wget https://artifacts.elastic.co/downloads/kibana/kibana-6.2.4-linux-x86_64.tar.gz \
@@ -45,12 +46,12 @@ RUN apt-get update && apt-get install -y \
  && mv /root/kibana-6.2.4-linux-x86_64 kibana-6.2.4 \
  && cd /root/kibana-6.2.4 \
  && mv node node_old \
- && ln -s /root/node-v8.9.4-linux-s390x node \
+ && ln -s /root/node-v6.6.0-linux-s390x node \
  && mkdir /etc/kibana \
  && cp config/kibana.yml /etc/kibana \
  && mv /root/kibana-6.2.4/ /usr/share/kibana \
 
-# Cleanup Cache data , unused packages and source files
+# Cleanup Cache data, unused packages and source files
  && apt-get remove -y \
     unzip \
     wget \
@@ -60,8 +61,7 @@ RUN apt-get update && apt-get install -y \
 
 
 # Expose 5601 port used by Kibana
-# Expose 80 port used by apache
-EXPOSE 5601 80
+EXPOSE 5601 
 
 # Start Kibana service
 CMD ["kibana","-H","0.0.0.0"]
