@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## dockerfile for Apache Kafka version 1.0.0 #########
+########## dockerfile for Apache Kafka version 1.1.0 #########
 #
 # This Dockerfile builds a basic installation of Apache Kafka.
 #
@@ -52,7 +52,7 @@ RUN	apt-get update && apt-get -y install \
 # Download the source code
  &&	git clone git://github.com/apache/kafka \
  &&	cd kafka \
- &&	git checkout 1.0.0 \
+ &&	git checkout 1.1.0 \
 
 # Update build parameters
  &&	sed -i '/jvmArgs/ s/Xss2m/Xss256m/' build.gradle \
