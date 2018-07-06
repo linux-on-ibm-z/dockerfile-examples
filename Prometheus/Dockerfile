@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Prometheus 2.2.1 #########
+########## Dockerfile for Prometheus 2.3.1 #########
 #
 # This Dockerfile builds Prometheus
 #
@@ -46,7 +46,7 @@ RUN apt-get update && apt-get install -y \
  && cd $GOPATH/src/github.com/prometheus \
  && git clone git://github.com/prometheus/prometheus.git \
  && cd prometheus \
- && git checkout v2.2.1 \
+ && git checkout v2.3.1 \
  && make build \
  && mkdir -p /prometheus && cp -p prometheus promtool /prometheus/ \
  && mkdir -p /etc/prometheus \
