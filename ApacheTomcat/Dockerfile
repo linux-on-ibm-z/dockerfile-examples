@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################# Dockerfile for Apache Tomcat 8.5.29 #####################################
+############################# Dockerfile for Apache Tomcat 8.5.31 #####################################
 #
 # This Dockerfile builds a basic installation of Apache Tomcat.
 #
@@ -51,7 +51,7 @@ RUN apt-get update && apt-get install -y \
 
 # Clone Tomcat and build it.
  && cd /root && git clone git://github.com/apache/tomcat85.git \
- && cd tomcat85 && git checkout TOMCAT_8_5_29 \
+ && cd tomcat85 && git checkout TOMCAT_8_5_31 \
  && cp build.properties.default build.properties \
  && ant \
  && mkdir -p $CATALINA_HOME && mv /root/tomcat85/output/build/* $CATALINA_HOME \
