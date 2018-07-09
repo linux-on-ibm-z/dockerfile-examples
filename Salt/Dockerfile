@@ -1,4 +1,7 @@
-########## Dockerfile for Salt version 2017.7.4 #########
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Salt version 2018.3.2 #########
 #
 # This Dockerfile builds a basic installation of Salt.
 #
@@ -10,6 +13,7 @@
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
+
 #
 # To start container from image & start an application in production mode
 # docker run -v <host_path>:/etc/salt -v <host_dir>:/data -d <image>
@@ -69,28 +73,31 @@ RUN apt-get update && apt-get install -y \
 			PyYAML \
 			pyzmq \
 			six \
-			tornado \
+			'tornado<5.0' \
 		 
 # Clone the repository and install SaltStack
 && 	git clone git://github.com/saltstack/salt \
 && 	cd salt \
-&& 	git checkout v2017.7.4 \
+&& 	git checkout v2018.3.2 \
 && 	pip install -e . \
 
 # Configure SaltStack to run self-contained version
 && 	cd $SOURCE_DIR \
-&&	mkdir -p etc/salt/ \
+&&	mkdir -p /etc/salt/pki/master \
+&&	mkdir -p /etc/salt/pki/minion \
 && 	cp ./salt/conf/master ./salt/conf/minion etc/salt/ \
 && 	cd etc/salt/ \
 
 # Edit config file master
 &&	sed -i 's/#user: root/user: root/g' master \
 && 	sed -i 's,#root_dir: /,'"root_dir: $SOURCE_DIR"',' master \
+&&	sed -i 's,#pki_dir: /etc/salt/pki/master,'"pki_dir: /etc/salt/pki/master"',' master \
 
 # Edit config file minion
 &&	sed -i 's/#master: salt/master: localhost/g' minion \
 &&	sed -i 's/#user: root/user: root/g' minion \
 &&	sed -i 's,#root_dir: /,'"root_dir: $SOURCE_DIR"',' minion \
+&&  sed -i 's,#pki_dir: /etc/salt/pki/minion,'"pki_dir: /etc/salt/pki/minion"',' minion \
 
 # Clean up cache data and remove dependencies which are not required
 &&	apt-get remove -y \
