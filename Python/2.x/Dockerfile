@@ -1,4 +1,7 @@
-########## Dockerfile for Python-2.7.14 #########################################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Python-2.7.15 #########################################
 #
 # Python is an interactive high-level object-oriented language
 #
@@ -54,13 +57,10 @@ RUN apt-get update && apt-get install -y \
 	gdb \
 
 # Download Python from the ftp site
- && wget https://www.python.org/ftp/python/2.7.14/Python-2.7.14.tar.xz \
- && tar -xvf Python-2.7.14.tar.xz \
-
+ && wget https://www.python.org/ftp/python/2.7.15/Python-2.7.15.tar.xz \
+ && tar -xvf Python-2.7.15.tar.xz \
+ 
 # Build Python
- && cd Python-2.7.14 \
- && wget https://github.com/python/cpython/pull/3912/commits/ab35adc682ec51800aa19a77de9947c6aaa50f41.diff \
- && cat ab35adc682ec51800aa19a77de9947c6aaa50f41.diff | patch -p1 \
  && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
  && make \
  && make install \
@@ -77,6 +77,6 @@ RUN apt-get update && apt-get install -y \
     xz-utils \ 
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /root/Python-2.7.13.tar.xz /root/Python-2.7.13
+ && rm -rf /root/Python-2.7.15.tar.xz /root/Python-2.7.15
 
 CMD python --version
