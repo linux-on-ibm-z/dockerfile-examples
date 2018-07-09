@@ -1,9 +1,12 @@
-##################### Dockerfile for Heketi 6.0.0 ########################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+##################### Dockerfile for Heketi 7.0.0########################
 #
 # This Dockerfile builds a basic installation of heketi.
 #
 # Heketi is RESTful based volume management framework for GlusterFS
-# 
+#
 # docker build -t <image_name> .
 #
 # Server Setup :
@@ -27,19 +30,21 @@ FROM s390x/ubuntu:16.04
 MAINTAINER LoZ Open Source Ecosystem
 
 ENV GOPATH=/build
-ENV PATH=$PATH:/usr/lib/go-1.9/bin:$GOPATH/bin
+ENV PATH=$PATH:/usr/lib/go-1.10/bin:$GOPATH/bin
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     git  \
-    golang-1.9 \
+    golang-1.10 \
     curl \
+    python \
+    mercurial \
 
 # Clone heketi source
  && mkdir -p /etc/heketi /var/lib/heketi $GOPATH/bin /etc/heketi \
  && git clone https://github.com/heketi/heketi.git $GOPATH/src/github.com/heketi/heketi \
  && cd $GOPATH/src/github.com/heketi/heketi \
- && git checkout v6.0.0 \
+ && git checkout v7.0.0\
  && echo $GOPATH/bin \
  && go version \
  && curl https://glide.sh/get | sh \
