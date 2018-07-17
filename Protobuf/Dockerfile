@@ -1,4 +1,7 @@
-####################### Dockerfile for Protobuf version 3.5.1 ##############
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+####################### Dockerfile for Protobuf version 3.6.0 ##############
 #
 # Protocol Buffers is a method of serializing structured data.
 #
@@ -12,7 +15,7 @@
 # Below is the command to use protobuf:
 # docker run --rm --name <container name> -it <protobuf_image> protoc <argument>
 #
-# Below is an example to display protobuf help options: 
+# Below is an example to display protobuf help options:
 # docker run --rm --name <container name> -it <protobuf_image> protoc --help
 #
 #############################################################################
@@ -25,7 +28,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
- 
+
 # Installing dependencies
 RUN apt-get update && apt-get install -y \
 	autoconf \
@@ -35,33 +38,24 @@ RUN apt-get update && apt-get install -y \
 	g++ \
 	git \
     libtool \
-    make \ 
+    make \
     tar \
     unzip \
-    wget \ 	
-
-# Download and install protobuf 
- && git clone https://github.com/google/protobuf.git \
+    wget \
+	
+# Download and install protobuf
+ && git clone git://github.com/google/protobuf.git \
  && cd protobuf \
- && git checkout v3.5.1 \
-
-# Add code patch
- && file=src/google/protobuf/stubs/atomicops_internals_generic_gcc.h \
- && sed -i '148i inline Atomic64 Release_CompareAndSwap(volatile Atomic64* ptr, ' $file \
- && sed -i '149i                                        Atomic64 old_value,' $file \
- && sed -i '150i                                        Atomic64 new_value) {' $file \
- && sed -i '151i  __atomic_compare_exchange_n(ptr, &old_value, new_value, false,' $file \
- && sed -i '152i                              __ATOMIC_RELEASE, __ATOMIC_ACQUIRE);' $file \
- && sed -i '153i return old_value;' $file \
- && sed -i '154i }'  $file \
-
+ && git checkout v3.6.0 \
+ && git config --global url."git://github.com/".insteadOf "https://github.com/" \
+ && git submodule update --init --recursive \
+ 
 # Build
  && ./autogen.sh \
  && ./configure \
- && make && make install \
+ && make && make install && ldconfig \
  && rm -rf $SOURCE_DIR \
-
-# Tidy and clean up 
+# Tidy and clean up
  && apt-get remove -y \
 	autoconf \
 	automake \
@@ -70,11 +64,11 @@ RUN apt-get update && apt-get install -y \
 	g++ \
 	git \
     libtool \
-    make \ 
+    make \
     unzip \
     wget \
  && apt-get autoremove -y && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* 
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
