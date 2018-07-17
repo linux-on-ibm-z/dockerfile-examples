@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for RabbitMQ version 3.7.5 ################################
+################# Dockerfile for RabbitMQ version 3.7.7 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -64,15 +64,15 @@ RUN apt-get update && apt-get install -y \
 	
 # Download and install rabbitmq
  && mkdir $SOURCE_DIR && cd $SOURCE_DIR \
- && wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/3.7.5/rabbitmq-server-3.7.5.tar.xz \
+ && wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/3.7.7/rabbitmq-server-3.7.7.tar.xz \
  && git clone git://github.com/elixir-lang/elixir \
  && cd elixir && git checkout v1.6.1 && make && make install \
  && cd ../ && git clone git://github.com/hexpm/hex.git \
- && cd hex &&  git checkout v0.17.7 && mix install \
+ && cd hex &&  git checkout v0.17.8 && mix install \
  
- && cd /opt && tar xf $SOURCE_DIR/rabbitmq-server-3.7.5.tar.xz \
- && cp $SOURCE_DIR/hex/_build/dev/lib/hex/ebin/*  rabbitmq-server-3.7.5/deps/.mix/archives/hex-0.17.7/hex-0.17.7/ebin/ \
- && cd rabbitmq-server-3.7.5  && make && make install \
+ && cd /opt && tar xf $SOURCE_DIR/rabbitmq-server-3.7.7.tar.xz \
+ && cp $SOURCE_DIR/hex/_build/dev/lib/hex/ebin/*  rabbitmq-server-3.7.7/deps/.mix/archives/hex-0.17.8/hex-0.17.8/ebin/ \
+ && cd rabbitmq-server-3.7.7  && make && make install \
  && mkdir -p /etc/rabbitmq \
  && echo "[{rabbit, [{loopback_users, []}]}]." | tee /etc/rabbitmq/rabbitmq.config \
  && rm -rf deps/rabbit/plugins && ln -s  $PWD/plugins deps/rabbit/plugins \
@@ -96,7 +96,7 @@ RUN apt-get update && apt-get install -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt/rabbitmq-server-3.7.5
+WORKDIR /opt/rabbitmq-server-3.7.7
 
 # Expose RabbitMQ management console port and RabbitMQ server port
 EXPOSE 15672 5672
