@@ -1,4 +1,7 @@
-################################ Dockerfile for Scala version 2.12.4 #############################################################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+################################ Dockerfile for Scala version 2.12.6 #############################################################
 # This Dockerfile builds a basic installation of Scala.
 #
 # To build this image, from the directory containing this Dockerfile
@@ -24,14 +27,14 @@ RUN apt-get update && apt-get install -y \
     openjdk-8-jdk \
 	wget \
 # Install Scala    
- && wget http://www.scala-lang.org/files/archive/scala-2.12.4.deb \
- && dpkg -i scala-2.12.4.deb \
+ && wget http://www.scala-lang.org/files/archive/scala-2.12.6.deb \
+ && dpkg -i scala-2.12.6.deb \
  
 # Clean up data and unused packages
  && apt-get remove -y wget \
  && apt-get autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /root/scala-2.12.4.deb
+ && rm -rf /root/scala-2.12.6.deb
 
 CMD ["scala","-version"]
 
