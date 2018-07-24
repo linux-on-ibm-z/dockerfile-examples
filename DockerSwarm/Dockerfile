@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Docker Swarm version 1.2.8 ####################
+################ Dockerfile for Docker Swarm version 1.2.9 ####################
 #
 # This Dockerfile builds a basic installation of Docker Swarm.
 #
@@ -52,7 +52,7 @@ RUN apt-get -y update && apt-get install -y \
 
 # Build Docker Swarm
  && mkdir -p /go/src/github.com/docker \
- && cd / && git clone -b v1.2.8 https://github.com/docker/swarm.git /go/src/github.com/docker/swarm \
+ && cd / && git clone -b v1.2.9 https://github.com/docker/swarm.git /go/src/github.com/docker/swarm \
  && go install github.com/docker/swarm/ \
  
  
