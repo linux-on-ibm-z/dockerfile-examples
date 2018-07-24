@@ -1,4 +1,7 @@
-################ Dockerfile for Apache ZooKeeper version 3.4.11 ######################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+################ Dockerfile for Apache ZooKeeper version 3.4.13 ######################
 #
 # This Dockerfile builds a basic installation of Apache ZooKeeper.
 #
@@ -40,7 +43,7 @@ RUN apt-get update && apt-get install -y \
 # Download, build and install Apache ZooKeeper 
  && git clone git://github.com/apache/zookeeper \
  && cd zookeeper \
- && git checkout tags/release-3.4.11 \
+ && git checkout tags/release-3.4.13 \
  &&	ant compile \
 
 # Build CPP unit test first
