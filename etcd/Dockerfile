@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for etcd 3.3.7 ####################
+################## Dockerfile for etcd 3.3.8 ####################
 #
 # This Dockerfile builds a basic installation of etcd.
 #
@@ -15,7 +15,7 @@
 # To start a container with etcd image.
 # docker run --name <container_name> -p 2379:2379 -p 2380:2380 -p 4001:4001 -p 7001:7001 -it <image_name> /bin/bash
 #
-# Use below command to use help option for etcd
+# Use below command to use etcd
 # docker run  --name <container_name> -v <host_path_dir>:/data -p 2379:2379 -p 2380:2380 -p 4001:4001 -p 7001:7001 -d <image_name>
 #
 #
@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y \
  && rm -rf etcd \
  && git clone git://github.com/coreos/etcd \
  && cd etcd \
- && git checkout v3.3.7 \
+ && git checkout v3.3.8 \
  && mkdir -p /data \
 
 # Build
