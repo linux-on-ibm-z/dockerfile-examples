@@ -9,8 +9,8 @@
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
 #
-# To start Mysql service using this image, use following command:
-# docker run --name <container name> -p <port>:3306 -d <image name>
+# To start Mysql service using this image, use following command and set required environment variables :
+# docker run --name <container name> -e MYSQL_USER=<username> -e MYSQL_PASSWORD=<password> -e MYSQL_DATABASE=<database> -p <port>:3306 -d <image name>
 #
 ##################################################################################################################
 
@@ -20,19 +20,24 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-# Set default password for mysql-server installation.
-RUN echo mysql-server mysql-server/root_password password root | debconf-set-selections \
- && echo mysql-server mysql-server/root_password_again password root | debconf-set-selections
+ENV DEBIAN_FRONTEND noninteractive
 
 # Install mysql-server with dependencies and clean up cache data.
 RUN apt-get update && apt-get -y install \
 	mysql-server \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
+ && apt-get clean && rm -rf /var/lib/apt/lists/* \
+
+# Configure mysql database (kindly check comment section above)
+	&& chmod 644 /etc/mysql/mysql.conf.d/mysqld.cnf \
+	&& sed -i "s/127.0.0.1/0.0.0.0/" /etc/mysql/mysql.conf.d/mysqld.cnf 
 
 # Expose the default port
 EXPOSE 3306
 
-# Start mysql server and tail error log 
-ENTRYPOINT service mysql start && tail -f /var/log/mysql/error.log
+COPY docker-entrypoint.sh /usr/local/bin
 
-# End of Dockerfile
+# Start mysql server
+CMD ["sh","/usr/local/bin/docker-entrypoint.sh"]
+
+#End of Dockerfile
+
