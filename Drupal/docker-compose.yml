@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  db:
+    container_name: MySQL
+    build: ../MySQL
+    ports:
+     - "3306:3306"
+    restart: always
+    environment:
+             - MYSQL_DATABASE=drupal
+             - MYSQL_USER=drupal
+             - MYSQL_PASSWORD=drupal    
+
+
+
+  drupal:
+    container_name: Drupal
+    build: .
+    volumes:
+      - /var/www/html/
+    ports:
+      - "8080:80"
+    restart: always
+    links:
+      - db:mysql
+
