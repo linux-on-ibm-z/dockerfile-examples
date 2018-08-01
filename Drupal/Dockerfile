@@ -1,3 +1,5 @@
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 ########## Dockerfile for Drupal version 8.4.5 #########
 #
 # This Dockerfile builds a basic installation of Drupal.
@@ -19,24 +21,7 @@
 # https://www.drupal.org/docs/8/install/
 #
 ##################################################################################
-#	-: Configure Database :-
-#
-#	1.Create a new database for your site. (Change the username and databasename.)
-#		mysql -u username -p -e "CREATE DATABASE databasename CHARACTER SET utf8 COLLATE utf8_general_ci";
-#
-#	2.Create the user and set the permissions using the following command:
-#		mysql -e "CREATE USER username@localhost IDENTIFIED BY 'password';"
-#
-#		mysql -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES ON databasename.* TO 'username'@'localhost' IDENTIFIED BY 'password';"
-#
-#	NOTE:-
-#		In this case:
-#	    	'databasename' is the name of your database
-#	    	'username' is the username of your MySQL user account
-#	    	'localhost' is the host where Drupal is installed
-#	    	'password' is the password required for that username
-#
-##################################################################################
+
 
 # Base Image
 FROM s390x/ubuntu:16.04
@@ -52,7 +37,6 @@ RUN	apt-get update && apt-get -y install \
 		composer \
 		curl \
 		libapache2-mod-php \
-		mysql-server \
 		php \
 		php7.0-xml \
 		php7.0-gd \
@@ -97,14 +81,7 @@ RUN	apt-get update && apt-get -y install \
 	&&	cp sites/default/default.settings.php sites/default/settings.php \
 	&&	chmod a+w sites/default/settings.php \
 	
-# Configure mysql database (kindly check comment section above)
-	&&	service mysql start \
-	&&	sleep 10 \
-	&&	mysql -e "CREATE USER drupal@localhost IDENTIFIED BY 'drupal';" \
-	&&	mysql -e "CREATE DATABASE drupal CHARACTER SET utf8 COLLATE utf8_general_ci;" \
-	&&	mysql -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, \
-			CREATE TEMPORARY TABLES ON drupal.* TO 'drupal'@'localhost' IDENTIFIED BY 'drupal';" \
-	
+
 # Clean up cache data and remove dependencies which are not required
 	&&	apt-get -y remove \
 		composer \
@@ -116,10 +93,11 @@ RUN	apt-get update && apt-get -y install \
 	&& 	apt-get clean \
 	&& 	rm -rf /var/lib/apt/lists/*
 	
-EXPOSE 80 3306
+EXPOSE 80
 
 VOLUME /var/www/html
 
-CMD service mysql start && apachectl -D FOREGROUND
+CMD apachectl -D FOREGROUND
 	
 # End of Dockerfile
+
