@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################### Dockerfile for Ansible 2.6.1 ##################################
+################### Dockerfile for Ansible ##################################
 #
 # This Dockerfile builds a basic installation of Ansible.
 #
