@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Docker Compose version 1.21.2 ####################
+################ Dockerfile for Docker Compose version 1.22.0 ####################
 #
 # This Dockerfile builds a basic installation of Docker Compose.
 #
@@ -27,7 +27,7 @@ MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/commun
 # Install dependencies and Docker Compose
 RUN apt-get update && apt-get install -y \
     python-pip \
- && pip install docker-compose==1.21.2 \
+ && pip install docker-compose==1.22.0 \
  
 # Clean up unused packages and data
  && apt-get autoremove -y && apt-get clean \
