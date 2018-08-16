@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################### Dockerfile for HAProxy version 1.8.12 #####################################################
+######################### Dockerfile for HAProxy version 1.8.13 #####################################################
 #
 # This Dockerfile builds a basic installation of HAProxy.
 #
@@ -36,15 +36,15 @@ RUN apt-get update && apt-get install -y \
     make \
 	tar \
 	wget \		
- && wget http://www.haproxy.org/download/1.8/src/haproxy-1.8.12.tar.gz \
- && tar xzvf haproxy-1.8.12.tar.gz \
- && cd haproxy-1.8.12 \
+ && wget http://www.haproxy.org/download/1.8/src/haproxy-1.8.13.tar.gz \
+ && tar xzvf haproxy-1.8.13.tar.gz \
+ && cd haproxy-1.8.13 \
  && make TARGET=linux26  \
  && make install \
  
 # Remove cache data and unused packages
  && apt-get remove -y wget && apt-get autoremove -y && apt-get clean \
- && rm -rf /root/haproxy-1.8.12.tar.gz /root/haproxy-1.8.12 \
+ && rm -rf /root/haproxy-1.8.13.tar.gz /root/haproxy-1.8.13 \
  && rm -rf /var/lib/apt/lists/*
 
 # Start HAProxy server
