@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-####################### Dockerfile for Protobuf version 3.6.0 ##############
+####################### Dockerfile for Protobuf version 3.6.1 ##############
 #
 # Protocol Buffers is a method of serializing structured data.
 #
@@ -46,7 +46,7 @@ RUN apt-get update && apt-get install -y \
 # Download and install protobuf
  && git clone git://github.com/google/protobuf.git \
  && cd protobuf \
- && git checkout v3.6.0 \
+ && git checkout v3.6.1 \
  && git config --global url."git://github.com/".insteadOf "https://github.com/" \
  && git submodule update --init --recursive \
  
