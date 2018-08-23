@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################# Dockerfile for Apache Tomcat 8.5.31 #####################################
+############################# Dockerfile for Apache Tomcat #####################################
 #
 # This Dockerfile builds a basic installation of Apache Tomcat.
 #
@@ -27,43 +27,25 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-WORKDIR "/root"
+ENV WORKDIR /root
 
 # Set the Environmental Variables
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
-ENV CATALINA_HOME=/opt/tomcat/
-ENV PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin
+ENV PATH=$PATH:$JAVA_HOME/bin
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-        ant \
-        gcc \
-        git \
         openjdk-8-jdk \
-        make \
         tar \
         wget \
 
-# Clone and Install OpenSSL 1.1.0
- && git clone git://github.com/openssl/openssl.git && cd openssl && git checkout OpenSSL_1_1_0 \
- && ./config --prefix=/usr --openssldir=/usr/local/openssl shared \
- && make && make install \
-
-# Clone Tomcat and build it.
- && cd /root && git clone git://github.com/apache/tomcat85.git \
- && cd tomcat85 && git checkout TOMCAT_8_5_31 \
- && cp build.properties.default build.properties \
- && ant \
- && mkdir -p $CATALINA_HOME && mv /root/tomcat85/output/build/* $CATALINA_HOME \
+# download binary 
+ && cd $WORKDIR && wget http://www-us.apache.org/dist/tomcat/tomcat-8/v8.5.32/bin/apache-tomcat-8.5.32.tar.gz \
+ && tar -xvzf apache-tomcat-8.5.32.tar.gz \
+ 
 
 # Clean up source dir and unused packages/libraries
- && cd /root && ls && rm -rf  openssl tomcat-build-libs tomcat85  \
- && apt-get remove -y \
-    ant \
-        gcc \
-        git \
-        make \
-        wget \
+ && cd $WORKDIR && ls && rm -rf apache-tomcat-8.5.32.tar.gz  \ 
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -72,6 +54,6 @@ RUN apt-get update && apt-get install -y \
 EXPOSE 8080
 
 # Start Apache Tomcat
-CMD $CATALINA_HOME/bin/startup.sh && tail -f /opt/tomcat/logs/catalina.out
+CMD $WORKDIR/apache-tomcat-8.5.32/bin/startup.sh && tail -f $WORKDIR/apache-tomcat-8.5.32/logs/catalina.out
 
 # End of Dockerfile
