@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Apache ZooKeeper version 3.4.13 ######################
+################ Dockerfile for Apache ZooKeeper ######################
 #
 # This Dockerfile builds a basic installation of Apache ZooKeeper.
 #
@@ -24,55 +24,26 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-ENV SOURCE_DIR=/tmp/source  PATH=$PATH:/opt/zookeeper/bin
-WORKDIR $SOURCE_DIR
+# Set Environment varibles
+ENV WORKDIR /root
+ENV PATH $PATH:$WORKDIR/zookeeper-3.4.13/bin
 
 # Install the build dependencies
 RUN apt-get update && apt-get install -y \
-    ant \
-    dh-autoreconf \
-	git \
-    libcppunit-dev \
-    libcppunit-doc \
-    libtool \
-    make \
     openjdk-8-jdk \
 	tar \
     wget \
 
-# Download, build and install Apache ZooKeeper 
- && git clone git://github.com/apache/zookeeper \
- && cd zookeeper \
- && git checkout tags/release-3.4.13 \
- &&	ant compile \
-
-# Build CPP unit test first
- && cd src/c \
- && ACLOCAL="aclocal -I /usr/share/aclocal" autoreconf -if \
- && ./configure \
- && make \
- && make install \
- && make distclean \
- && cd ../.. \
-
-# Build Apache ZooKeeper source code
- && ant jar \
+# Install Apache ZooKeeper
+ && cd $WORKDIR
+ && wget http://www-eu.apache.org/dist/zookeeper/zookeeper-3.4.13/zookeeper-3.4.13.tar.gz \
+ && tar -xzvf zookeeper-3.4.13.tar.gz \
 
 # Copy default config file 
+ && cd zookeeper-3.4.13 \
  && cp conf/zoo_sample.cfg conf/zoo.cfg \
- && cp -r $SOURCE_DIR/zookeeper /opt/zookeeper \
  
-# Clean up of unused packages and source directory.
- && rm -rf $SOURCE_DIR \
- && apt-get remove -y \
-    ant \
-    dh-autoreconf \
-	git \
-    libcppunit-dev \
-    libcppunit-doc \
-    libtool \
-    make \
-    wget \
+# Clean up of unused packages and source directory.  	    
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
