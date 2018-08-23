@@ -1,4 +1,4 @@
-######################## Dockerfile for Apache JMeter version 4.0 #########################################
+######################## Dockerfile for Apache JMeter #########################################
 #
 # This Dockerfile builds a basic installation of Apache JMeter.
 #
@@ -11,7 +11,7 @@
 # docker build -t <image_name> .
 #
 # To create a container of Apache JMeter image run the below command:
-# docker run --name <container_name> -it  <image_name>
+# docker run --name <container_name> -it <image_name>
 #
 # To test a JMX file use the following command:
 # docker run --rm=true -v /path/to/JMX_file/filename.jmx:/filename.jmx jmeter_imagename /filename.jmx
@@ -24,41 +24,31 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-ENV SOURCE_DIR=/root
-WORKDIR $SOURCE_DIR
-
 # Set Environment varibles
+ENV WORKDIR=/root
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
 ENV PATH=$JAVA_HOME/bin:$PATH
 
 # Install dependencies
-RUN apt-get update &&  apt-get install -y \
-    ant \
-    openjdk-8-jdk \
-    openssl \
-    git \
-	openjfx \
+RUN apt-get update && apt-get install -y \
+    openjdk-8-jdk \    
+    tar \    
+    wget \
 
 # Download from git and build
- && git clone git://git.apache.org/jmeter.git \
- && cd $SOURCE_DIR/jmeter && git checkout v4_0 \
- && cd $SOURCE_DIR/jmeter && ant download_jars && ant \
- && cp -r $SOURCE_DIR/jmeter /opt/apache-jmeter-4.0 \
+ && cd $WORKDIR \
+ && wget http://apache.mirror.colo-serv.net//jmeter/binaries/apache-jmeter-4.0.tgz \
+ && tar -xvzf apache-jmeter-4.0.tgz \
 
 #Remove G1GC algorithm as it is unimplemented in OpenJDK zero
- && sed -i '178d' /opt/apache-jmeter-4.0/bin/jmeter \
+ && sed -i '178d' $WORKDIR/apache-jmeter-4.0/bin/jmeter \
  
-# Clean the Cache data and remove source files and dependencies
- && rm -rf $SOURCE_DIR \
- && apt-get remove -y \
-    ant \
-    git \
+# Clean the Cache data and remove source files and dependencies   
  && apt-get autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set Environment Variable for JMeter
-ENV PATH $PATH:/opt/apache-jmeter-4.0/bin
-
+ENV PATH $PATH:$WORKDIR/apache-jmeter-4.0/bin
 ENTRYPOINT ["jmeter","-n","-t"]
 
 # End Of Dockerfile
