@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Apache ZooKeeper ######################
+################ Dockerfile for Apache ZooKeeper version 3.4.13 ######################
 #
 # This Dockerfile builds a basic installation of Apache ZooKeeper.
 #
