@@ -34,7 +34,7 @@ ENV SOURCE_DIR=/tmp/source JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x \
         LANG="en_US.UTF-8" JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8" \
         _JAVA_OPTIONS=-Xmx2048m JVM_ARGS="-Xms2048m -Xmx2048m"
 
-# Build Protobuf-3.5.1
+# Build Protobuf-3.6.1
 # Installing dependencies
 RUN apt-get update && apt-get install -y \
     tar \
@@ -54,20 +54,9 @@ RUN apt-get update && apt-get install -y \
 # Download and install protobuf
  && git clone https://github.com/google/protobuf.git \
  && cd protobuf \
- && git checkout v3.5.1 \
-
-
-# Add code patch
-
- && file2=src/google/protobuf/stubs/atomicops_internals_generic_gcc.h \
- && sed -i '148i inline Atomic64 Release_CompareAndSwap(volatile Atomic64* ptr,' $file2 \
- && sed -i '149i                                        Atomic64 old_value,' $file2 \
- && sed -i '150i                                        Atomic64 new_value) {' $file2 \
- && sed -i '151i   __atomic_compare_exchange_n(ptr, &old_value, new_value, false,' $file2 \
- && sed -i '152i                              __ATOMIC_RELEASE, __ATOMIC_ACQUIRE);' $file2 \
- && sed -i '153i  return old_value;' $file2 \
- && sed -i '154i }' $file2 \
-
+ && git checkout v3.6.1 \
+ && git config --global url."git://github.com/".insteadOf "https://github.com/"  \
+ && git submodule update --init --recursive \
 
   # Generate and then run the configuration
  && ./autogen.sh \
@@ -90,8 +79,9 @@ RUN     apt-get update && apt-get -y install \
         &&      cd incubator-geode/ \
         &&      git checkout rel/v1.6.0 \
 # Build Apache Geode source
-    && mkdir -p $HOME/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protoc/3.5.1 \
-    && cp /usr/local/bin/protoc $HOME/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protoc/3.5.1/protoc-3.5.1-linux-s390x_64.exe \
+    && sed -i "s/3.5.1/3.6.1/g" $SOURCE_DIR/incubator-geode/gradle/dependency-versions.properties \
+    && mkdir -p $HOME/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protoc/3.6.1 \
+    && cp /usr/local/bin/protoc $HOME/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protoc/3.6.1/protoc-3.6.1-linux-s390x_64.exe \
     &&  sed -i '37d' ./geode-protobuf-messages/build.gradle \
         &&      sed -i "44iorg.gradle.jvmargs = -Xss1g" 'gradle.properties' \
         &&      ./gradlew build installDist -x test \
