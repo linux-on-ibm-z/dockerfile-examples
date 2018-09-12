@@ -1,4 +1,7 @@
-########## Dockerfile for Swift version 4.0.3 ###################################################################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Swift version 4.1.2 ###################################################################
 #
 # Swift is a general-purpose, multi-paradigm, compiled programming language.
 # It makes writing and maintaining correct programs easier for the developer
@@ -29,57 +32,61 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-WORKDIR "/root"
 
 #  Build swift
+ENV WORKDIR=/root
 ENV MYDESTDIR=/usr/share/swift
 ENV PATH=$MYDESTDIR/usr/bin:/opt/llvm/bin:/opt/binutils-2.27/bin:$PATH
+ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
 RUN apt-get update && apt-get -y install \
 	autoconf \
-	bison \
-	cmake \
-	flex \
+	libtool \
 	git \
+	cmake \
+	ninja-build \
+	python \
+	python-dev \
+	python3-dev \
+	uuid-dev \
+	libicu-dev \	 
 	icu-devtools \
 	libbsd-dev \
-	libcurl4-openssl-dev \
 	libedit-dev \
-	libicu-dev \
-	libncurses5-dev \
-	libpython-dev \
-	libsqlite3-dev \
-	libtool \
 	libxml2-dev \
-	ninja-build \
-	pkg-config \
-	python \
-	python3-dev \
-	python-dev \
-	sudo \
+	libsqlite3-dev \
 	swig \
-	systemtap-sdt-dev \
-	texinfo \
+	libpython-dev \
+	libncurses5-dev \
+	pkg-config \
+	libcurl4-openssl-dev \
+	systemtap-sdt-dev \	
 	tzdata \
-	uuid-dev \
- && apt-get clean \
+    bison \
+	flex \
+	texinfo	\
+	wget \
+ 
 #  Install blocksruntime
- && git clone https://github.com/mackyle/blocksruntime && cd blocksruntime && ./buildlib && sudo env prefix=/usr ./installlib \
- && rm -rf /root/blocksruntime \
+ && cd $WORKDIR && git clone https://github.com/mackyle/blocksruntime && cd blocksruntime && ./buildlib && env prefix=/usr ./installlib \  
+
 #  Install gold linker
- && cd /root && git clone git://sourceware.org/git/binutils-gdb.git && cd binutils-gdb \
+ && cd $WORKDIR \
+ && git clone git://sourceware.org/git/binutils-gdb.git && cd binutils-gdb \
  && git checkout tags/binutils-2_27 \
  && ./configure --prefix=/opt/binutils-2.27 --enable-gold \
- && make && sudo make install \
- && rm -rf /root/binutils-gdb \
+ && make && make install \
+ 
+     
 #  Build llvm/clang
- && cd /root && mkdir llvm && cd llvm \
- && git clone https://github.com/linux-on-ibm-z/llvm.git  \
- && cd llvm && git checkout llvm-for-swift-3.1 && cd tools \
- && git clone https://github.com/linux-on-ibm-z/clang.git && cd clang \
- && git checkout clang-for-swift-3.1 && cd ../../projects \
- && git clone https://github.com/linux-on-ibm-z/compiler-rt.git  \
- && cd compiler-rt && git checkout compiler-rt-for-swift-3.0 && cd ../../.. \
+ && cd $WORKDIR && mkdir llvm && cd llvm \
+ && git clone https://git.llvm.org/git/llvm.git  \
+ && cd llvm && git checkout release_40 \
+ && cd tools \
+ && git clone https://git.llvm.org/git/clang.git && cd clang \ 
+ && git checkout release_40 && cd ../../projects \ 
+ && git clone https://git.llvm.org/git/compiler-rt.git  \
+ && cd compiler-rt && git checkout release_40 && cd ../../..  \
  && mkdir build && cd build \
  && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/llvm \
           -DPYTHON_INCLUDE_DIR=/usr/include/python2.7 \
@@ -88,31 +95,40 @@ RUN apt-get update && apt-get -y install \
           -DCURSES_LIBRARY=/usr/lib/s390x-linux-gnu/libncurses.so \
           -DCURSES_PANEL_LIBRARY=/usr/lib/s390x-linux-gnu/libpanel.so \
           ../llvm \
- && make -j4 \
- && make install \
- && rm -rf /root/llvm /root/build \
-# Clone and Install Swift
- && cd /root && mkdir swift4 && cd swift4 \
- && git clone https://github.com/linux-on-ibm-z/swift.git \
+ && make -j4 \ 
+ && make install \  
+
+# Install libedit
+ && cd $WORKDIR  \
+ && wget http://thrysoee.dk/editline/libedit-20170329-3.1.tar.gz \
+ && tar zxf libedit-20170329-3.1.tar.gz \
+ && cd libedit-20170329-3.1 \
+ && ./configure && make && make install &&  cd .. \
+ && ln -s /usr/local/lib/libedit.so.0.0.56 /usr/local/lib/libedit.so.2 \
+ 
+  
+# Clone and Install Swift 
+ && cd $WORKDIR && mkdir swift4 && cd swift4 \
+ && git clone https://github.com/linux-on-ibm-z/swift.git \ 
  && cd swift \
- && git checkout swift-4.0.3-RELEASE-s390x \
- && ./utils/update-checkout --clone --scheme swift-4.0.3-RELEASE-s390x --config $PWD/utils/update-checkout-config-s390x.json \
- && mkdir $MYDESTDIR \
+ && git checkout swift-4.1.2-s390x \ 
+ && ./utils/update-checkout --clone --scheme swift-4.1.2-s390x --config $PWD/utils/update-checkout-config-s390x.json \  
  && ./utils/build-script -j 2 -r \
-        --foundation --xctest --llbuild --swiftpm --libdispatch -- \
-        --verbose-build=1 \
-        --install-swift --install-foundation --install-xctest --install-llbuild --install-swiftpm --install-libdispatch \
-        --swift-install-components='autolink-driver;compiler;clang-builtin-headers;stdlib;sdk-overlay;license' \
-        --build-swift-static-stdlib=1 \
-        --install-prefix=/usr \
-        --install-destdir=$MYDESTDIR \
- && rm -rf /swift4 /tmp/* /var/tmp/* /root/swift4 \
+    --lldb --foundation --xctest --llbuild --swiftpm --libdispatch -- \
+    --verbose-build=1 \
+    --install-swift --install-foundation --install-xctest --install-llbuild --install-swiftpm --install-libdispatch --install-lldb \
+    --swift-install-components='autolink-driver;compiler;clang-builtin-headers;stdlib;sdk-overlay;license' \
+    --build-swift-static-stdlib=1 \
+    --install-prefix=/usr \
+    --install-destdir=$MYDESTDIR \
+ 
+ && cd $MYDESTDIR \
+ 
 # Clean up unused packages and data
  && apt-get remove -y \
     autoconf \
 	cmake \
-	git  \
- && apt-get autoremove -y \
- && rm -rf /var/lib/apt/lists/*
+	git
+
 
 CMD ["swiftc" , "--version"]
