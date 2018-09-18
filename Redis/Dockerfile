@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Redis version 4.0.10 #########
+########## Dockerfile for Redis version 4.0.11 #########
 #
 # This Dockerfile builds a basic installation of Redis.
 #
@@ -40,10 +40,10 @@ RUN apt-get update &&  apt-get install -y \
     tcl       \
     git       \
 
-# Clone redis repo and checkout 4.0.10 branch
+# Clone redis repo and checkout 4.0.11 branch
 && git clone https://github.com/antirez/redis.git \
 && cd redis \
-&& git checkout 4.0.10 \
+&& git checkout 4.0.11 \
 
 # Build redis
 && make distclean \
