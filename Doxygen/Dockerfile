@@ -1,3 +1,6 @@
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
 ################## Dockerfile for Doxygen version 1.8.14 ##################
 #
 # This Dockerfile builds a basic installation of Doxygen
