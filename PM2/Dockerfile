@@ -1,4 +1,7 @@
-########## Dockerfile for PM2 version 2.10.2 #########
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for PM2 latest version #########
 #
 # This Dockerfile builds a basic installation of PM2.
 #
@@ -15,7 +18,7 @@
 # Start PM2 using below command
 # docker run <container_name> -d -p <host_port>:<port> -v /<host_path_to_app>:/<container_path_to_app> <image-name> pm2 start <filename.js>
 # e.g. docker run --name <container_name> -d -p 8080:8080 -v /root/test/pm2:/root <image-name> pm2 start --no-daemon /root/app.js
-#	
+#
 # Official website: http://pm2.keymetrics.io/
 #
 ###################################################################################
@@ -26,13 +29,20 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
+ENV SOURCE_DIR=/tmp/source
+ENV PATH=$SOURCE_DIR/nodejs/bin:$PATH
+WORKDIR $SOURCE_DIR
+
 # Install dependencies
 RUN  apt-get update  \
   && apt-get -y install \
-         nodejs \
-         npm  \
-  && ln -s "$(which nodejs)" /usr/local/bin/node \
-  && npm install pm2@2.10.2 -g \
+         wget \
+         tar  \
+  && wget https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-s390x.tar.gz \
+  && tar -xvf node-v8.11.3-linux-s390x.tar.gz \
+  && mv node-v8.11.3-linux-s390x nodejs \
+  && npm install pm2 -g \
+
 
 # Clean up the unwanted packages and clear the source directory
   && apt-get autoremove -y \
@@ -46,3 +56,4 @@ EXPOSE 8080
 CMD pm2
 
 # End of Dockerfile
+
