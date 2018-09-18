@@ -1,3 +1,6 @@
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
 ########## Dockerfile for Snappy-java version 1.1.7 #########
 #
 # This Dockerfile builds a basic installation of Snappy-java.
