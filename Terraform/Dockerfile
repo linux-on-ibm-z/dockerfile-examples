@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Terraform - 0.11.7 #########
+########## Dockerfile for Terraform - 0.11.8 ########################
 # 
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -44,8 +44,8 @@ RUN apt-get update &&  apt-get install -y \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/terraform.git \
- && cd terraform && git checkout v0.11.7 \
- && make \
+ && cd terraform && git checkout v0.11.8 \
+ && make tools \
 
 # Build Terraform
  && XC_OS=linux XC_ARCH=s390x make bin \
