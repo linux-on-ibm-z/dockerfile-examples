@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######### Dockerfile for PostgreSQL 10.4 #########
+######### Dockerfile for PostgreSQL 10.5 #########
 #
 # PostgreSQL is an open source relational database management system ( DBMS ) developed by a worldwide team of volunteers.
 #
@@ -50,7 +50,7 @@ RUN apt-get update && apt-get install -y \
 RUN cd $SOURCE_DIR \
 && git clone git://github.com/postgres/postgres.git \
 && cd postgres/ \
-&& git checkout REL_10_4 \
+&& git checkout REL_10_5 \
 && ./configure \
 && make \
 && make install \
