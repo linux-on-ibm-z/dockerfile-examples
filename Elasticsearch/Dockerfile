@@ -59,7 +59,7 @@ RUN apt-get update &&  apt-get install -y \
  && wget https://github.com/AdoptOpenJDK/openjdk9-nightly/releases/download/jdk-9%2B181-20180523/OpenJDK9_s390x_Linux_20180523.tar.gz \
  && tar -C /usr/share/ -xvf OpenJDK9_s390x_Linux_20180523.tar.gz \ 
 	
-# Download and build source code of elastic search
+# Download and build source code of elastic search without seccomp
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v6.2.4 \
  && ./gradlew assemble \
  && cd $SOURCE_DIR/elasticsearch/distribution/tar/build/distributions/ \
