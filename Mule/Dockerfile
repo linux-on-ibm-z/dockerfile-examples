@@ -1,9 +1,9 @@
-########## Dockerfile for Mule version 3.8.4 ####################################
+########## Dockerfile for Mule version 3.9.1 ####################################
 #
 # This Dockerfile builds a basic installation of Mule.
 #
-# Mule is a lightweight integration platform that allows you to connect anything anywhere. Rather than creating point-to-point integrations between systems, services, 
-# APIs and devices, you can use Mule to intelligently manage message-routing, data mapping, orchestration, reliability, security and scalability between nodes. 
+# Mule is a lightweight integration platform that allows you to connect anything anywhere. Rather than creating point-to-point integrations between systems, services,
+# APIs and devices, you can use Mule to intelligently manage message-routing, data mapping, orchestration, reliability, security and scalability between nodes.
 # Mule applications accept and process messages through several Lego-block-like message processors plugged together in what we call a flow.
 #
 # To build this image, from the directory containing this Dockerfile :
@@ -13,7 +13,7 @@
 # Start mule server using below command:
 # (assuming that docker image is again commited with copying Java Service Wrapper binary into folder $MULE_HOME/lib/boot/exec)
 # docker run --name <container_name> -d -p <host-port>:<container-port> mule  <commands>
-# e.g. docker run --name Mule -d -p 8081:7777  mule_img mule start 
+# e.g. docker run --name Mule -d -p 8081:7777  mule_img mule start
 #
 # To provide custom configuration for Mule server use below command:
 # docker run --name <container_name> -d -p <port>:7777 -v /host_path/conf:/opt/mule/conf <image-name>
@@ -52,12 +52,12 @@ RUN  apt-get update  \
   && cd $SOURCE_DIR/ \
   && git clone https://github.com/linux-on-ibm-z/mule.git \
   && cd $SOURCE_DIR/mule/ \
-  && git checkout mule-3.8.4-s390x \
+  && git checkout mule-3.9.1-s390x \
   && cd $SOURCE_DIR/mule/transports/ssl \
   && keytool -selfcert -alias Test -genkey -keystore myStore.keystore -keyalg RSA -validity 1 \
   && cd $SOURCE_DIR/mule/ &&  mvn clean install -Pdistributions -DskipTests -fn \
-  && tar -xvf $SOURCE_DIR/mule/distributions/standalone/target/mule-standalone-3.8.4.tar.gz -C $SOURCE_DIR \
-  && cp -r $SOURCE_DIR/mule-standalone-3.8.4 /opt/mule \
+  && tar -xvf $SOURCE_DIR/mule/distributions/standalone/target/mule-standalone-3.9.1.tar.gz -C $SOURCE_DIR \
+  && cp -r $SOURCE_DIR/mule-standalone-3.9.1 /opt/mule \
 
   && apt-get remove -y \
          gcc \
@@ -70,7 +70,7 @@ RUN  apt-get update  \
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf $SOURCE_DIR/mule $SOURCE_DIR/mule-standalone-3.8.4 $SOURCE_DIR/conf $SOURCE_DIR/target /var/lib/apt/lists/* /root/.m2
+  && rm -rf $SOURCE_DIR/mule $SOURCE_DIR/mule-standalone-3.9.1 $SOURCE_DIR/conf $SOURCE_DIR/target /var/lib/apt/lists/* /root/.m2
 
 # Define mount points.
 VOLUME ["/opt/mule/logs", "/opt/mule/conf", "/opt/mule/apps", "/opt/mule/domains"]
