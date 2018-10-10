@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################### Dockerfile for Elasticsearch version 6.2.4 ##################################
+############################### Dockerfile for Elasticsearch version 6.4.2 ##################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -15,8 +15,8 @@
 # Start Elasticsearch container using the below command
 # docker run --name <container_name> -p 9200:9200 -d <image_name>
 #
-# Start Elastic search with configurtion file
-# For ex. docker run --name <container_name> -v <path_on_host>/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -p <port>:9200 -d <image_name>
+# Start Elastic search with configuration file
+# For ex. docker run --name <container_name> -v <path_on_host>/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -                                    p <port>:9200 -d <image_name>
 #
 ##############################################################################################################
 
@@ -29,7 +29,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 # Set Environment Variables
 
 ENV LANG="en_US.UTF-8" JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8" _JAVA_OPTIONS="-Xmx10g" SOURCE_DIR="/tmp/"
-ENV JAVA_HOME=/usr/share/jdk-9+181
+ENV JAVA_HOME=/usr/share/jdk-10.0.2+13
 ENV PATH=$JAVA_HOME/bin:$PATH
 WORKDIR $SOURCE_DIR
 
@@ -54,17 +54,19 @@ RUN apt-get update &&  apt-get install -y \
     wget \
     sudo \
 
-# Download AdoptJDK
+# Download AdoptJDK10
  && cd $SOURCE_DIR \
- && wget https://github.com/AdoptOpenJDK/openjdk9-nightly/releases/download/jdk-9%2B181-20180523/OpenJDK9_s390x_Linux_20180523.tar.gz \
- && tar -C /usr/share/ -xvf OpenJDK9_s390x_Linux_20180523.tar.gz \ 
-	
-# Download and build source code of elastic search without seccomp
- && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v6.2.4 \
+ && wget https://github.com/AdoptOpenJDK/openjdk10-releases/releases/download/jdk-10.0.2%2B13/OpenJDK10_s390x_Linux_jdk-10.0.2.13.tar.gz \
+ && tar -C /usr/share/ -xzvf OpenJDK10_s390x_Linux_jdk-10.0.2.13.tar.gz \
+
+# Download and build source code of elastic search
+ && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v6.4.2 \
+ && sed -i '$ d' $SOURCE_DIR/elasticsearch/distribution/src/config/jvm.options \
+ && echo "xpack.ml.enabled: false" >> $SOURCE_DIR/elasticsearch/distribution/src/config/elasticsearch.yml \
  && ./gradlew assemble \
- && cd $SOURCE_DIR/elasticsearch/distribution/tar/build/distributions/ \
- && tar -C /usr/share/ -xf elasticsearch-6.2.4-SNAPSHOT.tar.gz \
- && mv /usr/share/elasticsearch-6.2.4-SNAPSHOT /usr/share/elasticsearch \
+ && cd $SOURCE_DIR/elasticsearch/distribution/archives/tar/build/distributions/ \
+ && tar -C /usr/share/ -xf elasticsearch-6.4.2-SNAPSHOT.tar.gz \
+ && mv /usr/share/elasticsearch-6.4.2-SNAPSHOT /usr/share/elasticsearch \
 
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
