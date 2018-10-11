@@ -30,7 +30,7 @@ FROM s390x/ubuntu:16.04
 MAINTAINER LoZ Open Source Ecosystem
 
 ENV GOPATH=/build
-ENV PATH=$PATH:/usr/lib/go-1.10/bin:$GOPATH/bin
+ENV PATH=$PATH:/usr/lib/go-1.10/bin:$GOPATH/bin:$GOPATH/src/github.com/heketi/heketi/linux-s390x
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -39,15 +39,21 @@ RUN apt-get update && apt-get install -y \
     curl \
     python \
     mercurial \
+	wget \
+	tar \
 
 # Clone heketi source
  && mkdir -p /etc/heketi /var/lib/heketi $GOPATH/bin /etc/heketi \
  && git clone https://github.com/heketi/heketi.git $GOPATH/src/github.com/heketi/heketi \
  && cd $GOPATH/src/github.com/heketi/heketi \
- && git checkout v7.0.0\
+ && git checkout v7.0.0 \
  && echo $GOPATH/bin \
  && go version \
- && curl https://glide.sh/get | sh \
+ && wget https://github.com/Masterminds/glide/releases/download/v0.13.1/glide-v0.13.1-linux-s390x.tar.gz \
+ &&	tar -xvf glide-v0.13.1-linux-s390x.tar.gz \
+ && glide --version \
+ 
+
 
 # Build Heketi
  && make \
