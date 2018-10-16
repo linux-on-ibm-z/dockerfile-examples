@@ -1,4 +1,4 @@
-################### Dockerfile for Xerces-C version 3.2.1 #####################
+################### Dockerfile for Xerces-C version 3.2.2 #####################
 #
 # Xerces is Apache's collection of software libraries for parsing, validating, serializing and manipulating XML.
 #
@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y \
  && update-locale LANG=$LANG \
  && update-locale LANG=$LANGUAGE \
  && git clone git://github.com/apache/xerces-c.git \
- && cd xerces-c && git checkout Xerces-C_3_2_1 \
+ && cd xerces-c && git checkout Xerces-C_3_2_2 \
  && ./reconf && ./configure \
  && make && make install \
 
