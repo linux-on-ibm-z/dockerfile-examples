@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################### Dockerfile for Heketi 7.0.0########################
+##################### Dockerfile for Heketi 8.0.0########################
 #
 # This Dockerfile builds a basic installation of heketi.
 #
@@ -46,7 +46,7 @@ RUN apt-get update && apt-get install -y \
  && mkdir -p /etc/heketi /var/lib/heketi $GOPATH/bin /etc/heketi \
  && git clone https://github.com/heketi/heketi.git $GOPATH/src/github.com/heketi/heketi \
  && cd $GOPATH/src/github.com/heketi/heketi \
- && git checkout v7.0.0 \
+ && git checkout v8.0.0 \
  && echo $GOPATH/bin \
  && go version \
  && wget https://github.com/Masterminds/glide/releases/download/v0.13.1/glide-v0.13.1-linux-s390x.tar.gz \
