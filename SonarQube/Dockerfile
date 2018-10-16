@@ -39,9 +39,9 @@ RUN apt-get update -y && apt-get -y install \
 
 # Download SonarQube
  && cd $SOURCE_DIR \
- && wget https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-7.3.zip \
+ && wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-7.3.zip \
  && unzip sonarqube-7.3.zip \
- && wget https://sonarsource.bintray.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.2.0.1227-linux.zip \
+ && wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.2.0.1227-linux.zip \
  && unzip sonar-scanner-cli-3.2.0.1227-linux.zip \
  && rm -rf sonarqube-7.3.zip sonar-scanner-cli-3.2.0.1227-linux.zip \
  && cp -r $SOURCE_DIR/sonarqube-7.3 $SOURCE_DIR/sonarqube \
