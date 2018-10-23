@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############## Dockerfile for WordPress version 4.9.7 ############################
+############## Dockerfile for WordPress version 4.9.8 ############################
 #
 # WordPress is an online, open source website creation tool written in PHP.
 #
@@ -45,7 +45,7 @@ RUN apt-get update -y && apt-get install -y \
 
 # Download Wordpress application into apache2 server
  && cd /var/www/html && git clone git://github.com/WordPress/WordPress.git \
- && cd WordPress && git checkout 4.9.7 \
+ && cd WordPress && git checkout 4.9.8 \
  && mv wp-config-sample.php wp-config.php \
  && sed -i 's/localhost/127.0.0.1/' wp-config.php \
  && sed -i 's/database_name_here/WORDPRESS/' wp-config.php \
