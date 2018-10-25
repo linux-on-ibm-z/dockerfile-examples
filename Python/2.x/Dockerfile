@@ -61,6 +61,7 @@ RUN apt-get update && apt-get install -y \
  && tar -xvf Python-2.7.15.tar.xz \
  
 # Build Python
+ && cd Python-2.7.15 \
  && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
  && make \
  && make install \
