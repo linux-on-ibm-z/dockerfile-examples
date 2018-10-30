@@ -1,4 +1,4 @@
-########## Dockerfile for Apache Mesos version 1.5.0 #########
+########## Dockerfile for Apache Mesos version 1.7.0 #########
 #
 # This Dockerfile builds a basic installation of Apache Mesos.
 #
@@ -12,9 +12,9 @@
 # To simply run the resultant image, and provide a bash shell:
 # docker run --name <container-name> -it <image_name> /bin/bash
 #
-# Start Master of Apacahe Mesos using below command :
+# Start Master of Apache Mesos using below command :
 # docker run --name <container_name> -d -p <host-port>:5050 <image-name> mesos-master.sh --ip=<ip-address> --work_dir=/var/lib/mesos --log_dir=/var/log/mesos
-# e.g. docker run --name mesos -d -p 5055:5050 mesos:1.5.0 mesos-master.sh --ip=0.0.0.0 --work_dir=/var/lib/mesos --log_dir=/var/log/mesos
+# e.g. docker run --name mesos -d -p 5055:5050 mesos:1.7.0 mesos-master.sh --ip=0.0.0.0 --work_dir=/var/lib/mesos --log_dir=/var/log/mesos
 #
 # Start Agent of Apache Mesos using below command :
 # docker run --name <container_name> -d <image-name> mesos-agent.sh --master=<ip address of master>:<port of master> --work_dir=/var/lib/mesos --log_dir=/var/log/mesos --launcher=posix
@@ -66,9 +66,25 @@ RUN apt-get update  \
   && cd $SOURCE_DIR \
   && git clone https://github.com/apache/mesos \
   && cd $SOURCE_DIR/mesos/ \
-  && git checkout 1.5.0 \
-  && sed -i '134i \          \<maxmemory>512m</maxmemory>' src/java/mesos.pom.in \
-# Add patch
+  && git checkout 1.7.0 \
+  
+# Bundling gRPC-1.11.0  
+  && cd 3rdparty/ \
+  && git clone -b v1.11.0 https://github.com/grpc/grpc.git grpc-1.11.0 \
+  && cd grpc-1.11.0/ \
+  && git submodule update --init third_party/cares \
+  && cd ../ \
+  && tar zcvf grpc-1.11.0.tar.gz --exclude .git grpc-1.11.0 \
+  && rm -rf grpc-1.11.0 \
+  
+  && cd $SOURCE_DIR/mesos/ \
+  && sed -i '87i \          \<maxmemory>512m</maxmemory>' src/java/mesos.pom.in \
+
+# Add patch for updated gRPC version
+  && sed -i -e 's/1.10.0/1.11.0/g' 3rdparty/versions.am \
+  && sed -i -e 's/1.10.0/1.11.0/g' src/python/native_common/ext_modules.py.in \
+  
+# Add patch for protobuf
   && echo "diff --git a/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h b/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h" >> 3rdparty/protobuf-3.5.0.patch \
   && echo "index 0b0b06c..075c406 100644" >> 3rdparty/protobuf-3.5.0.patch \
   && echo "--- a/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h" >> 3rdparty/protobuf-3.5.0.patch \
@@ -96,11 +112,13 @@ RUN apt-get update  \
 # Edit the Files
   && mkdir -p /opt/mesos/src \
   && mkdir -p /opt/mesos/src/.libs \
+  && mkdir -p /opt/mesos/3rdparty \
 
   && cp -a $SOURCE_DIR/mesos/build/bin /opt/mesos \
   && cp -a $SOURCE_DIR/mesos/build/src/master /opt/mesos/src \
   && cp -a $SOURCE_DIR/mesos/build/src/slave /opt/mesos/src \
   && cp $SOURCE_DIR/mesos/build/src/.libs/* /opt/mesos/src/.libs/ \
+  && cp -r $SOURCE_DIR/mesos/build/3rdparty/* /opt/mesos/3rdparty/ \
   && cp -a $SOURCE_DIR/mesos/src/webui /opt/mesos/src \
   && find $SOURCE_DIR/mesos/build/src/ -maxdepth 1 -type f -exec cp {} /opt/mesos/src \; \
 
