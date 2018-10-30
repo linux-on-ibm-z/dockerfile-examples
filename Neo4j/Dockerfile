@@ -1,4 +1,7 @@
-########## Dockerfile for Neo4j version 3.3.3 ##################################
+# © Copyright IBM Corporation 2018.
+# LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
+
+########## Dockerfile for Neo4j version 3.4.9 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -31,7 +34,7 @@ MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/commun
 ENV SOURCE_DIR='/root'
 
 ENV NEO4J_HOME=$SOURCE_DIR/neo4j
-ENV JAVA_HOME=$SOURCE_DIR/jdk-9+181
+ENV JAVA_HOME=$SOURCE_DIR/jdk-9.0.4+11
 ENV PATH=$PATH:$NEO4J_HOME/bin:$JAVA_HOME/bin
 
 WORKDIR $SOURCE_DIR
@@ -44,14 +47,14 @@ RUN  apt-get update  \
 
 # Download adoptopenjdk
   && cd $SOURCE_DIR/ \
-  && wget https://github.com/AdoptOpenJDK/openjdk9-releases/releases/download/jdk-9%2B181/OpenJDK9_s390x_Linux_jdk-9.181.tar.gz \
-  && tar -xvzf OpenJDK9_s390x_Linux_jdk-9.181.tar.gz \
+  && wget https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk-9.0.4%2B11/OpenJDK9U-jdk_s390x_linux_hotspot_9.0.4_11.tar.gz \
+  && tar -zxvf OpenJDK9U-jdk_s390x_linux_hotspot_9.0.4_11.tar.gz \
 
 # Download and unzip Neo4j pre build Binary
   && cd $SOURCE_DIR/ \
-  && wget https://neo4j.com/artifact.php?name=neo4j-community-3.3.3-unix.tar.gz \
-  && tar -xvzf artifact.php?name=neo4j-community-3.3.3-unix.tar.gz \
-  && mv neo4j-community-3.3.3 neo4j \
+  && wget https://neo4j.com/artifact.php?name=neo4j-community-3.4.9-unix.tar.gz \
+  && tar -xvzf artifact.php?name=neo4j-community-3.4.9-unix.tar.gz \
+  && mv neo4j-community-3.4.9 neo4j \
 
 # Clean up the unwanted packages and clear the source directory
   && apt-get remove -y \
@@ -59,7 +62,7 @@ RUN  apt-get update  \
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf $SOURCE_DIR/OpenJDK9_s390x_Linux_jdk-9.181.tar.gz $SOURCE_DIR/artifact.php?name=neo4j-community-3.3.3-unix.tar.gz /var/lib/apt/lists/*
+  && rm -rf $SOURCE_DIR/OpenJDK9U-jdk_s390x_linux_hotspot_9.0.4_11.tar.gz $SOURCE_DIR/artifact.php?name=neo4j-community-3.4.9-unix.tar.gz /var/lib/apt/lists/*
 
 # Define mount for backup of logs, data, conf & lib
 VOLUME ["$NEO4J_HOME/logs","$NEO4J_HOME/data","$NEO4J_HOME/conf","$NEO4J_HOME/lib"]
