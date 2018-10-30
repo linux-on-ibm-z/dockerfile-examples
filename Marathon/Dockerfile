@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################# Dockerfile for Marathon 1.6.352 #####################################
+############################# Dockerfile for Marathon 1.7.50 #####################################
 #
 # This Dockerfile builds a basic installation of Marathon.
 #
@@ -28,7 +28,8 @@ MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/commun
 WORKDIR "/tmp"
 
 # Set the Environmental Variables
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x 
+ENV JAVA_TOOL_OPTIONS='-Xmx2048M'
 ENV PATH=$PATH:$JAVA_HOME/bin:/tmp/source_root/sbt/bin:/usr/share/zookeeper-3.4.8/bin:/usr/share/marathon/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
 
@@ -62,9 +63,19 @@ RUN apt-get update && apt-get install -y \
  && tar -zxf sbt-1.1.1.tgz \
 # Clone Mesos
  && git clone https://github.com/apache/mesos \
- && cd mesos && git checkout 1.5.0 \
- && sed -i '134i \          \<maxmemory>512m</maxmemory>' src/java/mesos.pom.in \
-# Add patch
+ && cd mesos && git checkout 1.7.0 \
+ && cd 3rdparty/ \
+ && git clone -b v1.11.0 https://github.com/grpc/grpc.git grpc-1.11.0 \
+ && cd grpc-1.11.0/ \
+ && git submodule update --init third_party/cares \
+ && cd ../ \
+ && tar zcvf grpc-1.11.0.tar.gz --exclude .git grpc-1.11.0 \
+ && rm -rf grpc-1.11.0 \
+ && cd ../ \
+# Add patch 
+ && sed -i -e 's/1.10.0/1.11.0/g' 3rdparty/versions.am \
+ && sed -i -e 's/1.10.0/1.11.0/g' src/python/native_common/ext_modules.py.in \
+ && sed -i '87i \          \<maxmemory>512m</maxmemory>' src/java/mesos.pom.in \
  && echo "diff --git a/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h b/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h" >> 3rdparty/protobuf-3.5.0.patch \
  && echo "index 0b0b06c..075c406 100644" >> 3rdparty/protobuf-3.5.0.patch \
  && echo "--- a/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h" >> 3rdparty/protobuf-3.5.0.patch \
@@ -89,7 +100,7 @@ RUN apt-get update && apt-get install -y \
  && ../configure && make && make install \
 # clone and install Marathon
  && cd /tmp/source_root && git clone https://github.com/mesosphere/marathon.git \
- && cd marathon && git checkout v1.6.352 \
+ && cd marathon && git checkout v1.7.50 \
  && sed -i -e 's/1.1.0/1.1.1/g' project/build.properties \
  && sed -i -e 's/2.12.4/2.12.6/g' build.sbt \
  && sbt stage \
@@ -97,7 +108,6 @@ RUN apt-get update && apt-get install -y \
  && cp -r /tmp/source_root/marathon /usr/share \
 # Clean up source dir and unused packages/libraries
  && apt-get remove -y \
-        git \
         patch \
         wget \
         maven \
@@ -105,7 +115,7 @@ RUN apt-get update && apt-get install -y \
         automake \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /root/.m2 && rm -rf /tmp/source_root
+ && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /root/.m2 && rm -rf /tmp/source_root/m*
 
 # Port for Marathon
 EXPOSE 8080
