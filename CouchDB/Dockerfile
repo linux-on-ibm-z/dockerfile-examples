@@ -1,4 +1,4 @@
-############### Dockerfile for CouchDB version 2.1.1 ############
+############### Dockerfile for CouchDB version 2.2.0 ############
 #
 # CouchDB, is open source database software.
 #
@@ -26,41 +26,32 @@ WORKDIR $SOURCE_DIR
 ENV PATH=$PATH:/usr/share/couchdb/dev  LD_LIBRARY_PATH=/usr/lib
 
 # Install following build dependencies
-RUN apt-get update && apt-get install -y \
-    autoconf \
-    autoconf2.13 \
-    automake \
-    build-essential \
+RUN apt-get update && apt-get install -y libicu55 \
     erlang \
     erlang-dev \
-    g++ \
-    gcc \
-    git \
-    libicu-dev \
-    libcurl4-openssl-dev \
-    libncurses5-dev \
-    libicu55 \
-    libssl-dev \
-    libmozjs185-1.0 \
-    libmozjs185-dev  \
-    make \
-    ncurses-base \
-    openssl \
-    pkg-config curl  \
-    python \
     rebar \
-    unixodbc \
-    unixodbc-dev \
-    wget \
-    tar \
+    ncurses-base \
+    gcc \
+    python \
+    git wget tar \
+    make autoconf2.13 \
+    automake autoconf g++ \
+    libmozjs185-1.0 libmozjs185-dev  \
+    openssl libicu-dev \
+    libcurl4-openssl-dev \
+    build-essential unixodbc \
+    libncurses5-dev libncursesw5-dev fop \
+    libncurses5-dev unixodbc-dev \
+    libssl-dev pkg-config \
+    curl python-pip \
+ && pip install nose requests hypothesis \
 # Download and install CouchDB
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
- && git checkout 2.1.1 \
+ && git checkout 2.2.0 \
  && ./configure -c --disable-docs --disable-fauxton \
  && make  \
  && cp -r $SOURCE_DIR/couchdb /usr/share/couchdb \
-
 # Tidy and clean up
  && rm -rf $SOURCE_DIR \
  && apt-get remove -y \
@@ -80,7 +71,7 @@ RUN apt-get update && apt-get install -y \
     wget \
  && apt-get autoremove -y && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
- 
+
 # Expose ports
 EXPOSE 15984 25984 35984
 
