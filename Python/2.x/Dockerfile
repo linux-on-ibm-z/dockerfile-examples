@@ -30,6 +30,8 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
+ARG PYTHON_VER=2.7.15
+
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
@@ -38,8 +40,11 @@ RUN apt-get update && apt-get install -y \
     curl \
     g++ \
     gcc \
+	gdb \
     libbz2-dev \ 
     libc6-dev \
+	libdb-dev \
+	libdb1-compat \
     libgdbm-dev \ 
     libncurses5-dev \
     libreadline6-dev \
@@ -48,24 +53,18 @@ RUN apt-get update && apt-get install -y \
     make \
     patch \
     tar \
+	tk8.5-dev \
     wget \
     xz-utils \ 
-	zlib1g-dev \
-	libdb1-compat \
-	libdb-dev \
-	tk8.5-dev \
-	gdb \
-
+	zlib1g-dev \	
 # Download Python from the ftp site
- && wget https://www.python.org/ftp/python/2.7.15/Python-2.7.15.tar.xz \
- && tar -xvf Python-2.7.15.tar.xz \
- 
+ && wget https://www.python.org/ftp/python/${PYTHON_VER}/Python-${PYTHON_VER}.tar.xz \
+ && tar -xf Python-${PYTHON_VER}.tar.xz \
 # Build Python
- && cd Python-2.7.15 \
+ && cd Python-${PYTHON_VER} \
  && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
  && make \
  && make install \
-
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
     bzip2 \
@@ -78,6 +77,6 @@ RUN apt-get update && apt-get install -y \
     xz-utils \ 
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /root/Python-2.7.15.tar.xz /root/Python-2.7.15
+ && rm -rf /root/Python-${PYTHON_VER}.tar.xz /root/Python-${PYTHON_VER}
 
 CMD python --version
