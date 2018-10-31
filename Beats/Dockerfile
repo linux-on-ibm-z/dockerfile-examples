@@ -15,8 +15,10 @@
 # docker run --name <container_name> -e BEATSNAME=<beat_name> -d <image_name>
 #
 # To run a particular module like heartbeat run the following command:
-# docker run --name <container_name> -e BEATSNAME=heartbeat -d <image_name> 
+# docker run --name <container_name> -e BEATSNAME=heartbeat -d <image_name>
 #
+# Note : To run auditbeat use options : --cap-add=AUDIT_CONTROL --cap-add=AUDIT_READ --pid=host to docker run 
+# docker run --cap-add=AUDIT_CONTROL --cap-add=AUDIT_READ --pid=host --name <container_name> -e BEATSNAME=auditbeat -d <image_name>
 ###########################################################################################################
 
 # Base image
@@ -36,7 +38,7 @@ RUN apt-get update && apt-get install -y \
     acl \
     gcc \
     git \
-	golang-1.9 \
+    golang-1.9 \
     libcap-dev \
     libpcap0.8-dev \
     libssh-dev \
@@ -47,7 +49,6 @@ RUN apt-get update && apt-get install -y \
     python-setuptools \
     tar \
     wget \
-
 # Install go and donload beats source code
  && python -m easy_install pip \
  && python -m pip install appdirs pyparsing six packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv \
@@ -57,28 +58,40 @@ RUN apt-get update && apt-get install -y \
  && git clone https://github.com/elastic/beats.git  \
  && cd beats  \
  && git checkout v6.2.4  \
-
 # Building heartbeat
  && cd $GOPATH/src/github.com/elastic/beats/heartbeat  \
  && make  \
-
 # Building filebeat
  && cd $GOPATH/src/github.com/elastic/beats/filebeat  \
  && make  \
-
 # Building packetbeat
  && cd $GOPATH/src/github.com/elastic/beats/packetbeat  \
  && make  \
-
 # Building metricbeat
  && cd $GOPATH/src/github.com/elastic/beats/metricbeat \
  && make  \
-
 # Building libbeat
  && cd $GOPATH/src/github.com/elastic/beats/libbeat  \
- && make  \
- 
+ && make \
 # Building auditbeat
+ && sed -i '32i var \(' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/audit.go \
+ && sed -i '33i\\tbyteOrder = GetEndian\(\)' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/audit.go \
+ && sed -i '34i \)' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/audit.go \
+ && sed -i 's/binary.LittleEndian/byteOrder/g' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/audit.go \
+ && sed -i '20d' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/netlink.go \
+ && sed -i 's/^\tbinary.LittleEndian/\tbyteOrder/g' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/netlink.go \
+ && sed -i 's/binary.LittleEndian/GetEndian\(\)/g' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/netlink.go \
+ && sed -i '7i\\t\"github.com/elastic/go-libaudit\"' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/rule/binary.go \
+ && sed -i '17s/binary.LittleEndian/libaudit.GetEndian\(\)/g' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/rule/binary.go \
+ && echo  "package libaudit\n\nimport (" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
+ && echo  "\t\"encoding/binary\"\n\t\"unsafe\"\n)" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
+ && echo  "func GetEndian() binary.ByteOrder {" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
+ && echo  "\tvar i int32 = 0x1" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
+ && echo  "\tv := (*[4]byte)(unsafe.Pointer(&i))" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
+ && echo  "\tif v[0] == 0 {" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
+ && echo  "\t\treturn binary.BigEndian" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
+ && echo  "\t} else {" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
+ && echo  "\t\treturn binary.LittleEndian\n\t}\n}" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
  && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
  && make \
  && cp -r $GOPATH/src/github.com/elastic/beats /opt/beats \
@@ -88,7 +101,6 @@ RUN apt-get update && apt-get install -y \
  && ln -s /opt/beats/metricbeat/metricbeat /usr/bin/metricbeat \
  && ln -s /opt/beats/filebeat/filebeat /usr/bin/filebeat \
  && ln -s /opt/beats/auditbeat/auditbeat /usr/bin/auditbeat \
-
 # Tidy and clean up
  && apt-get remove -y \
     acl \
@@ -99,7 +111,7 @@ RUN apt-get update && apt-get install -y \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean \
- && rm -rf /var/lib/apt/lists/* \
+ && rm -rf /var/lib/apt/lists/* $SOURCE_DIR \
  && mkdir /Beats \
  && cd /opt/beats \
  && cp -n **/*.yml /Beats
