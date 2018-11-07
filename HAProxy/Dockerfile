@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################### Dockerfile for HAProxy version 1.8.13 #####################################################
+######################### Dockerfile for HAProxy version 1.8.14 #####################################################
 #
 # This Dockerfile builds a basic installation of HAProxy.
 #
@@ -25,6 +25,8 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
+ARG HAPROXY_VER=1.8.14
+
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
@@ -34,17 +36,16 @@ WORKDIR "/root"
 RUN apt-get update && apt-get install -y \
     gcc \
     make \
-	tar \
-	wget \		
- && wget http://www.haproxy.org/download/1.8/src/haproxy-1.8.13.tar.gz \
- && tar xzvf haproxy-1.8.13.tar.gz \
- && cd haproxy-1.8.13 \
+    tar \
+    wget \
+ && wget http://www.haproxy.org/download/1.8/src/haproxy-${HAPROXY_VER}.tar.gz \
+ && tar xzvf haproxy-${HAPROXY_VER}.tar.gz \
+ && cd haproxy-${HAPROXY_VER} \
  && make TARGET=linux26  \
  && make install \
- 
 # Remove cache data and unused packages
  && apt-get remove -y wget && apt-get autoremove -y && apt-get clean \
- && rm -rf /root/haproxy-1.8.13.tar.gz /root/haproxy-1.8.13 \
+ && rm -rf /root/haproxy-${HAPROXY_VER}.tar.gz /root/haproxy-${HAPROXY_VER} \
  && rm -rf /var/lib/apt/lists/*
 
 # Start HAProxy server
