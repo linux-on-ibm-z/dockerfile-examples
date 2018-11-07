@@ -1,4 +1,4 @@
-########## Linux on z Systems Dockerfile for Cassandra version 2.2.3 #########
+########## Linux on z Systems Dockerfile for Cassandra version 3.11.3 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -58,13 +58,14 @@ RUN apt-get update && apt-get install -y \
 && tar -xvf apache-ant-1.9.4-bin.tar.gz \
 && git clone https://github.com/java-native-access/jna.git \
 && cd jna \
+&& git checkout 4.2.2 \
 && ant \
 
-# Build and install Apache Cassandra 3.10
+# Build and install Apache Cassandra 3.11.3
 && cd $SOURCE_DIR \
 && git clone https://github.com/apache/cassandra.git \
 && cd cassandra \
-&& git checkout cassandra-3.10 \
+&& git checkout cassandra-3.11.3 \
 && sed  -i ' s/Xss256k/Xss32m/' build.xml conf/jvm.options \
 && touch ant.log \
 && nohup ant 2<&1 | tee ant.log \
