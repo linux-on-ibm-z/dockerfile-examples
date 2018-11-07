@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################### Dockerfile for GlusterFS version 4.0.2 ##################################
+############################### Dockerfile for GlusterFS version 4.1.5 ##################################
 #
 # This Dockerfile builds a basic installation of GlusterFS.
 #
@@ -59,15 +59,17 @@ RUN apt-get update && apt-get install -y  make \
 	libxml2-utils \
 	thin-provisioning-tools \
 	bc \
+	uuid-dev \
+	
 
 # Build GlusterFS from source
  && git clone https://github.com/gluster/glusterfs \
  && cd glusterfs \
- && git checkout v4.0.2 \
+ && git checkout v4.1.5 \
  && ./autogen.sh \
  && ./configure --enable-gnfs \
- && sed -i '40d' xlators/performance/io-threads/src/io-threads.h \
- && sed -i '40i #define IOT_THREAD_STACK_SIZE   ((size_t)(512*1024))' xlators/performance/io-threads/src/io-threads.h \
+ && sed -i '39d' xlators/performance/io-threads/src/io-threads.h \
+ && sed -i '39i #define IOT_THREAD_STACK_SIZE   ((size_t)(512*1024))' xlators/performance/io-threads/src/io-threads.h \
  && make \
  && make install \
  && ldconfig \
