@@ -42,6 +42,7 @@ RUN apt-get update && apt-get install -y \
 		libssl-dev \ 
 		libtool \
 		libxslt1-dev \
+		libzmq3-dev \
 		make \
 		openssl \
 		python \
@@ -52,8 +53,7 @@ RUN apt-get update && apt-get install -y \
 		tar \
 		unzip \
 		wget \
-	&&	easy_install pip \
-	
+	&&	easy_install pip \	
 # Install required packages using pip
 	&&	pip install \
 			call \
@@ -73,21 +73,18 @@ RUN apt-get update && apt-get install -y \
 			PyYAML \
 			pyzmq \
 			six \
-			'tornado<5.0' \
-		 
+			'tornado<5.0' \		 
 # Clone the repository and install SaltStack
 && 	git clone git://github.com/saltstack/salt \
 && 	cd salt \
 && 	git checkout v2018.3.2 \
 && 	pip install -e . \
-
 # Configure SaltStack to run self-contained version
 && 	cd $SOURCE_DIR \
 &&	mkdir -p /etc/salt/pki/master \
 &&	mkdir -p /etc/salt/pki/minion \
 && 	cp ./salt/conf/master ./salt/conf/minion etc/salt/ \
 && 	cd etc/salt/ \
-
 # Edit config file master
 &&	sed -i 's/#user: root/user: root/g' master \
 && 	sed -i 's,#root_dir: /,'"root_dir: $SOURCE_DIR"',' master \
@@ -98,7 +95,6 @@ RUN apt-get update && apt-get install -y \
 &&	sed -i 's/#user: root/user: root/g' minion \
 &&	sed -i 's,#root_dir: /,'"root_dir: $SOURCE_DIR"',' minion \
 &&  sed -i 's,#pki_dir: /etc/salt/pki/minion,'"pki_dir: /etc/salt/pki/minion"',' minion \
-
 # Clean up cache data and remove dependencies which are not required
 &&	apt-get remove -y \
 			bzip2 \
