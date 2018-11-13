@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)	
 	
-	################ Dockerfile for Jenkins ###################
+	################ Dockerfile for Jenkins server version ###################
 #
 # This Dockerfile builds a basic installation of Jenkins server.
 #
@@ -22,23 +22,21 @@
 
 # Base Image
 FROM s390x/ubuntu:16.04
-
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
-
+# Set Environment Variables
+ENV JAVA_HOME=/usr/share/jdk8u192-b12_openj9-0.11.0
+ENV PATH=$JAVA_HOME/bin:$PATH
 # Install dependencies
-RUN apt-get update && apt-get install -y \
-        openjdk-8-jdk \
-        wget \
- 
+RUN apt-get update &&  apt-get install -y tar wget libfontconfig1 \
+# Download AdoptJDK8
+&& wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u192-b12_openj9-0.11.0/OpenJDK8U-jdk_s390x_linux_openj9_8u192b12_openj9-0.11.0.tar.gz \
+&& tar -C /usr/share/ -xzvf OpenJDK8U-jdk_s390x_linux_openj9_8u192b12_openj9-0.11.0.tar.gz \
 # Install Jenkins 
- && wget http://mirrors.jenkins.io/war/latest/jenkins.war \
-
+&& wget http://mirrors.jenkins.io/war/latest/jenkins.war \
 # Clean up Cache data and unused dependencies
- && apt-get remove -y wget \
- && apt-get autoremove -y && apt-get clean \
-
+&& apt-get remove -y wget \
+&& apt-get autoremove -y && apt-get clean \
 EXPOSE 8080
-
 CMD java -jar jenkins.war && tail -f /var/log/jenkins/jenkins.log
 # End of Dockerfile
