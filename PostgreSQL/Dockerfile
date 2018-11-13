@@ -33,19 +33,15 @@ RUN apt-get update && apt-get install -y \
     flex \
     git \
     gcc \
-    libreadline6 \
-    libreadline6-dev \
+    libreadline-dev \
     make \
     wget \
     zlib1g-dev \
-
-
 && groupadd -r postgres \
 && useradd -r -m -g postgres postgres \
 && mkdir /usr/local/pgsql && chmod -R 777 /usr/local/pgsql \
 && mkdir -p /usr/local/pgsql/data \
 && chown postgres:postgres /usr/local/pgsql/data
-
 # Clone PostgreSQL and build it
 RUN cd $SOURCE_DIR \
 && git clone git://github.com/postgres/postgres.git \
@@ -54,7 +50,6 @@ RUN cd $SOURCE_DIR \
 && ./configure \
 && make \
 && make install \
-
 # Tidy and clean up
 && rm -rf $SOURCE_DIR \
 && apt-get remove -y \
