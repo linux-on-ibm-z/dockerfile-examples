@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Joomla version 3.8.12 ######
+########## Dockerfile for Joomla version 3.9.0 ######
 #
 # Joomla is an online, open source website creation tool written in PHP.
 #
@@ -50,13 +50,13 @@ RUN apt-get update -y && apt-get install -y \
  && diff -u /etc/apache2/apache2.conf1 /etc/apache2/apache2.conf  ||true \
  && a2enmod rewrite \
 
-# Start mysql server and create database for Magento
+# Download and install Joomla
  &&  cd /var/www/html/ \
  && chmod -R a+w /var/www/html/ \
  && mkdir Joomla \
  && cd Joomla \
- && wget https://github.com/joomla/joomla-cms/releases/download/3.8.12/Joomla_3.8.12-Stable-Full_Package.zip \
- && unzip Joomla_3.8.12-Stable-Full_Package.zip  \
+ && wget https://github.com/joomla/joomla-cms/releases/download/3.9.0/Joomla_3.9.0-Stable-Full_Package.zip \
+ && unzip Joomla_3.9.0-Stable-Full_Package.zip  \
  && chmod a+w /var/www/html/Joomla/ \
  && mv installation/configuration.php-dist installation/configuration.php \
 
@@ -81,7 +81,7 @@ RUN apt-get update -y && apt-get install -y \
  && apt autoremove -y \
  && apt-get clean \
  && rm -rf  /var/lib/apt/lists/* \
- && rm  /var/www/html/Joomla/Joomla_3.8.12-Stable-Full_Package.zip
+ && rm  /var/www/html/Joomla/Joomla_3.9.0-Stable-Full_Package.zip
 # Create volume
 VOLUME /var/www/html
 
