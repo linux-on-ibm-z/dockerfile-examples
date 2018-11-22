@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y \
     wget \
 
 # Install Apache ZooKeeper
- && cd $WORKDIR
+ && cd $WORKDIR \
  && wget http://www-eu.apache.org/dist/zookeeper/zookeeper-3.4.13/zookeeper-3.4.13.tar.gz \
  && tar -xzvf zookeeper-3.4.13.tar.gz \
 
