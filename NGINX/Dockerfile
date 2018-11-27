@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################# Dockerfile for NGINX 1.14.0 #####################################################
+################################# Dockerfile for NGINX 1.14.1 #####################################################
 #
 # This Dockerfile builds a basic installation of NGINX.
 # NGINX is a free, open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server.
@@ -34,9 +34,9 @@ RUN apt-get update && apt-get install -y \
 	openssl \
 	tar \
 	wget \	
- && wget http://nginx.org/download/nginx-1.14.0.tar.gz \
- && tar xvf nginx-1.14.0.tar.gz \
- && cd nginx-1.14.0 \
+ && wget http://nginx.org/download/nginx-1.14.1.tar.gz \
+ && tar xvf nginx-1.14.1.tar.gz \
+ && cd nginx-1.14.1 \
  && ./configure \
  && make  \
  && make install  \
@@ -46,7 +46,7 @@ RUN apt-get update && apt-get install -y \
 	make \
 	wget \
  && apt-get autoremove -y && apt-get clean \
- && rm -rf /root/nginx-1.14.0.tar.gz  /root/nginx-1.14.0 \
+ && rm -rf /root/nginx-1.14.1.tar.gz  /root/nginx-1.14.1 \
  && rm -rf /var/lib/apt/lists/*
 
 # Add VOLUMEs to allow backup error logs, configuration and server directory content
