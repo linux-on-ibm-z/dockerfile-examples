@@ -18,7 +18,7 @@
 # docker run --name <container_name> -d <image>
 #
 # Reference:
-# http://geode.incubator.apache.org/
+# http://geode.apache.org/
 #
 ##################################################################################
 
@@ -75,18 +75,18 @@ RUN     apt-get update && apt-get -y install \
 # Get the Geode source
         &&      mkdir -p $SOURCE_DIR \
         &&      cd $SOURCE_DIR \
-        &&      git clone https://github.com/apache/incubator-geode.git \
-        &&      cd incubator-geode/ \
+        &&      git clone https://github.com/apache/geode.git \
+        &&      cd geode/ \
         &&      git checkout rel/v1.6.0 \
 # Build Apache Geode source
-    && sed -i "s/3.5.1/3.6.1/g" $SOURCE_DIR/incubator-geode/gradle/dependency-versions.properties \
+    && sed -i "s/3.5.1/3.6.1/g" $SOURCE_DIR/geode/gradle/dependency-versions.properties \
     && mkdir -p $HOME/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protoc/3.6.1 \
     && cp /usr/local/bin/protoc $HOME/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protoc/3.6.1/protoc-3.6.1-linux-s390x_64.exe \
     &&  sed -i '37d' ./geode-protobuf-messages/build.gradle \
         &&      sed -i "44iorg.gradle.jvmargs = -Xss1g" 'gradle.properties' \
         &&      ./gradlew build installDist -x test \
 # Copy default config file
-        &&      mv $SOURCE_DIR/incubator-geode /geode \
+        &&      mv $SOURCE_DIR/geode /geode \
 # Clean up cache data and remove dependencies which are not required
         && apt-get remove -y \
                 autoconf \
