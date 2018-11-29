@@ -3,7 +3,7 @@ version: '3'
 services:
   db:
     container_name: MySQL
-    build: ../MySQL
+    build: ../MySQL/5.x
     ports:
      - "3306:3306"
     restart: always
