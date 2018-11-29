@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
 
 # Download from git and build
  && cd $WORKDIR \
- && wget http://apache.mirror.colo-serv.net//jmeter/binaries/apache-jmeter-4.0.tgz \
+ && wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-4.0.tgz \
  && tar -xvzf apache-jmeter-4.0.tgz \
 
 #Remove G1GC algorithm as it is unimplemented in OpenJDK zero
