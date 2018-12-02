@@ -10,7 +10,7 @@
 # docker build -t <image_name> .
 #
 # To start Mysql service using this image, use following command and set required environment variables :
-# docker run --name <container name> -e MYSQL_USER=<username> -e MYSQL_PASSWORD=<password> -e MYSQL_DATABASE=<database> -p <port>:3306 -d <image name>
+# docker run --name <container name> -p <port>:3306 -d <image name>
 #
 ##################################################################################################################
 
@@ -33,11 +33,8 @@ RUN apt-get update && apt-get -y install \
 
 # Expose the default port
 EXPOSE 3306
+VOLUME /var/lib/mysql
+# START MYSQL SERVER
+CMD service mysql start && tail -f /var/log/mysql/error.log
 
-COPY docker-entrypoint.sh /usr/local/bin
-
-# Start mysql server
-CMD ["sh","/usr/local/bin/docker-entrypoint.sh"]
-
-#End of Dockerfile
-
+#END OF DOCKERFILE
