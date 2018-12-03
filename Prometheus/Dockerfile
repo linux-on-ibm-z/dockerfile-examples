@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Prometheus 2.4.3 #########
+########## Dockerfile for Prometheus 2.5.0 #########
 #
 # This Dockerfile builds Prometheus
 #
@@ -22,6 +22,8 @@
 
 # Base Image
 FROM s390x/ubuntu:16.04
+
+ARG PROMETHEUS_VER=2.5.0
 
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -46,7 +48,7 @@ RUN apt-get update && apt-get install -y \
  && cd $GOPATH/src/github.com/prometheus \
  && git clone git://github.com/prometheus/prometheus.git \
  && cd prometheus \
- && git checkout v2.4.3 \
+ && git checkout v${PROMETHEUS_VER} \
  && make build \
  && mkdir -p /prometheus && cp -p prometheus promtool /prometheus/ \
  && mkdir -p /etc/prometheus \
