@@ -53,12 +53,10 @@ RUN apt-get update &&  apt-get install -y \
     unzip \
     wget \
     sudo \
-
 # Download AdoptJDK10
  && cd $SOURCE_DIR \
- && wget https://github.com/AdoptOpenJDK/openjdk10-releases/releases/download/jdk-10.0.2%2B13/OpenJDK10_s390x_Linux_jdk-10.0.2.13.tar.gz \
- && tar -C /usr/share/ -xzvf OpenJDK10_s390x_Linux_jdk-10.0.2.13.tar.gz \
-
+ && wget https://github.com/AdoptOpenJDK/openjdk10-binaries/releases/download/jdk10u-2018-09-29-10-32/OpenJDK10U_s390x_linux_hotspot_2018-09-29-10-32.tar.gz \
+ && tar -C /usr/share/ -xzvf OpenJDK10U_s390x_linux_hotspot_2018-09-29-10-32.tar.gz \
 # Download and build source code of elastic search
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v6.4.2 \
  && sed -i '$ d' $SOURCE_DIR/elasticsearch/distribution/src/config/jvm.options \
@@ -67,7 +65,6 @@ RUN apt-get update &&  apt-get install -y \
  && cd $SOURCE_DIR/elasticsearch/distribution/archives/tar/build/distributions/ \
  && tar -C /usr/share/ -xf elasticsearch-6.4.2-SNAPSHOT.tar.gz \
  && mv /usr/share/elasticsearch-6.4.2-SNAPSHOT /usr/share/elasticsearch \
-
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
     ant \
@@ -81,7 +78,6 @@ RUN apt-get update &&  apt-get install -y \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* /root/.gradle/* /tmp/elasticsearch \
-
 # Create elaticsearch user
  && /usr/sbin/groupadd elasticsearch \
  && /usr/sbin/useradd -g elasticsearch elasticsearch \
