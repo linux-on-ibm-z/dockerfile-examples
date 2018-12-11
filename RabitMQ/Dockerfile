@@ -57,7 +57,7 @@ RUN apt-get update && apt-get install -y \
  
 # Download and build Erlang
  && wget http://www.erlang.org/download/otp_src_21.0.tar.gz \
- && tar zxf otp_src_20.0.tar.gz && cd otp_src_21.0 \
+ && tar zxf otp_src_21.0.tar.gz && cd otp_src_21.0 \
  && export ERL_TOP=$(pwd) && ./configure --prefix=/usr \
  && make && make install \
 
