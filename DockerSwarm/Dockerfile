@@ -33,6 +33,8 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
+ARG SWARM_VER=v1.2.9
+
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
@@ -52,7 +54,7 @@ RUN apt-get -y update && apt-get install -y \
 
 # Build Docker Swarm
  && mkdir -p /go/src/github.com/docker \
- && cd / && git clone -b v1.2.9 https://github.com/docker/swarm.git /go/src/github.com/docker/swarm \
+ && cd / && git clone -b ${SWARM_VER} https://github.com/docker/swarm.git /go/src/github.com/docker/swarm \
  && go install github.com/docker/swarm/ \
  
  
