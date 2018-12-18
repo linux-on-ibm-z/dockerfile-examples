@@ -1,4 +1,7 @@
-########## Dockerfile for Consul - 1.0.6 #########
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Consul - 1.4.0 #########
 # 
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter 
@@ -22,6 +25,8 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
+ARG CONSUL_VER=1.4.0
+
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
@@ -29,48 +34,34 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH $SOURCE_DIR
-ENV PATH=/usr/lib/go-1.9/bin:$GOPATH/bin:$PATH
+ENV PATH=$GOPATH/go/bin:$GOPATH/bin:$PATH
 
 # Installing dependencies for Consul
 RUN apt-get update &&  apt-get install -y \
     curl \
     gcc \
     git \
-	golang-1.9 \
     make \
     tar \
     unzip \
     vim \
     wget \
     zip \
-
-# Clone go and consul
+# Install go and get source code of consul
  && cd $SOURCE_DIR \
+ && wget https://storage.googleapis.com/golang/go1.11.1.linux-s390x.tar.gz \
+ && tar -xzf go1.11.1.linux-s390x.tar.gz \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/consul.git \
- && cd consul && git checkout tags/v1.0.6 \
- && go get github.com/mitchellh/gox \
-
-# Apply the patch to add s390x support
- && cd $GOPATH/src/github.com/mitchellh/gox \
- && git checkout v0.4.0 \
- && wget https://github.com/mitchellh/gox/pull/85.patch \
- && git config user.email "lozopensource@github.com" \
- && git config user.name "LoZ" \
- && git am 85.patch \
- 
-# Reinstall gox tool
- && cd $GOPATH/src/github.com/mitchellh/ \
- && go get github.com/mitchellh/iochan \
- && go install ./... \
- && cd $GOPATH/src/github.com/hashicorp/consul \
-
+ && cd consul && git checkout tags/v${CONSUL_VER} \
+ && go get -u github.com/SAP/go-hdb/... \
+ && mv $GOPATH/src/github.com/hashicorp/consul/vendor/github.com/SAP/go-hdb $GOPATH/src/github.com/hashicorp/consul/vendor/github.com/SAP/go-hdb_bkp \
+ && cp -r $GOPATH/src/github.com/SAP/go-hdb $GOPATH/src/github.com/hashicorp/consul/vendor/github.com/SAP/ \
 # Build consul
- && gox -os=linux -arch=s390x -output=s390x/consul \
- && cp $GOPATH/src/github.com/hashicorp/consul/s390x/consul /usr/local/bin \
+ && make dev \
+ && cp $GOPATH/bin/consul /usr/local/bin \
  && mkdir -p /consul/data \
-
 # Tidy and clean up
  && rm -rf $SOURCE_DIR \
  && apt-get remove -y \
