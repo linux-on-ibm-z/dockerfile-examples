@@ -34,6 +34,8 @@ RUN apt-get update && apt-get install -y \
 	openssl \
 	tar \
 	wget \	
+	zlib1g \
+	zlib1g-dev \
  && wget http://nginx.org/download/nginx-1.14.1.tar.gz \
  && tar xvf nginx-1.14.1.tar.gz \
  && cd nginx-1.14.1 \
