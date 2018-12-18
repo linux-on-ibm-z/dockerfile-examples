@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 6.4.2 ###################################################
+############################ Dockerfile for Logstash version 6.5.0 ###################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -19,13 +19,15 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
+ARG LOGSTASH_VER=6.5.0
+
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 WORKDIR "/root"
 ENV JAVA_HOME=/root/jdk8u192-b03/ 
 ENV PATH=$JAVA_HOME/bin:$PATH
-ENV LD_LIBRARY_PATH=/root/jffi-jffi-1.2.16/build/jni/:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/root/jffi-jffi-1.2.18/build/jni/:$LD_LIBRARY_PATH
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     ant \
@@ -40,11 +42,11 @@ RUN apt-get update && apt-get install -y \
  && tar -xf OpenJDK8U_s390x_linux_openj9_2018-09-30-17-14.tar.gz \
 	
 # Download the logstash source from github and build it
- && wget https://artifacts.elastic.co/downloads/logstash/logstash-6.4.2.zip \
- && unzip -u logstash-6.4.2.zip \
- && wget https://github.com/jnr/jffi/archive/jffi-1.2.16.zip \
- && unzip -u jffi-1.2.16.zip  && cd jffi-jffi-1.2.16 && ant && cd .. \
- && cp -r /root/logstash-6.4.2 /usr/share/logstash \
+ && wget https://artifacts.elastic.co/downloads/logstash/logstash-${LOGSTASH_VER}.zip \
+ && unzip -u logstash-${LOGSTASH_VER}.zip \
+ && wget https://github.com/jnr/jffi/archive/jffi-1.2.18.zip \
+ && unzip -u jffi-1.2.18.zip  && cd jffi-jffi-1.2.18 && ant && cd .. \
+ && cp -r /root/logstash-${LOGSTASH_VER} /usr/share/logstash \
 
 # Cleanup Cache data , unused packages and source files
  && apt-get remove -y \
@@ -53,9 +55,9 @@ RUN apt-get update && apt-get install -y \
     unzip \
     wget \
  && apt-get autoremove -y && apt-get clean \
- && rm -rf /root/logstash-6.4.2 \
- && rm /root/logstash-6.4.2.zip \
- && rm /root/jffi-1.2.16.zip \
+ && rm -rf /root/logstash-${LOGSTASH_VER} \
+ && rm /root/logstash-${LOGSTASH_VER}.zip \
+ && rm /root/jffi-1.2.18.zip \
  && rm -rf /var/lib/apt/lists/*
 
 # Define mountable directory
