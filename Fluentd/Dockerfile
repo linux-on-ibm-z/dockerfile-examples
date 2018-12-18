@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Fluentd version 1.3.0 ###############################
+########## Dockerfile for Fluentd version 1.3.2 ###############################
 #
 # This Dockerfile builds a basic installation of Fluentd.
 #
@@ -40,15 +40,12 @@ RUN apt-get update  \
          make \
          ruby \
          ruby-dev \
-		 
 # Install Fluentd
-  && gem install fluentd -v 1.3.0 \
+  && gem install fluentd -v 1.3.2 \
   && gem list fluentd \
- 
 # Setup/Install a config directory
   && fluentd -s /etc/fluent \
   && mkdir -p /fluentd/log \
-  
 # Clean up the unwanted packages and clear the source directory 
   && apt-get remove -y \
          gcc \
