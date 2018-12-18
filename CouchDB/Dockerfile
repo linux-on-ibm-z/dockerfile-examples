@@ -1,4 +1,7 @@
-############### Dockerfile for CouchDB version 2.2.0 ############
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############### Dockerfile for CouchDB version 2.3.0 ############
 #
 # CouchDB, is open source database software.
 #
@@ -26,36 +29,31 @@ WORKDIR $SOURCE_DIR
 ENV PATH=$PATH:/usr/share/couchdb/dev  LD_LIBRARY_PATH=/usr/lib
 
 # Install following build dependencies
-RUN apt-get update && apt-get install -y libicu55 \
-    erlang \
-    erlang-dev \
-    rebar \
-    ncurses-base \
-    gcc \
-    python \
-    git wget tar \
-    make autoconf2.13 \
-    automake autoconf g++ \
-    libmozjs185-1.0 libmozjs185-dev  \
-    openssl libicu-dev \
-    libcurl4-openssl-dev \
-    build-essential unixodbc \
-    libncurses5-dev libncursesw5-dev fop \
-    libncurses5-dev unixodbc-dev \
-    libssl-dev pkg-config \
-    curl python-pip \
- && pip install nose requests hypothesis \
+RUN apt-get update && apt-get install -y build-essential \
+	pkg-config \
+	erlang erlang-dev erlang-reltool \
+	gcc g++ \
+	python3 python3-pip python3-venv \
+	curl \
+	git \
+	patch \
+	wget \
+	tar \
+	make \
+	autoconf automake autoconf \
+	libmozjs185-dev libicu-dev libcurl4-openssl-dev \
+ 
 # Download and install CouchDB
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
- && git checkout 2.2.0 \
+ && git checkout 2.3.0 \
  && ./configure -c --disable-docs --disable-fauxton \
  && make  \
  && cp -r $SOURCE_DIR/couchdb /usr/share/couchdb \
+ 
 # Tidy and clean up
  && rm -rf $SOURCE_DIR \
  && apt-get remove -y \
-    autoconf2.13 \
     automake \
     autoconf \
     build-essential \
@@ -64,10 +62,7 @@ RUN apt-get update && apt-get install -y libicu55 \
     git \
     g++ \
     make \
-    openssl \
     pkg-config \
-    unixodbc \
-    unixodbc-dev \
     wget \
  && apt-get autoremove -y && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
