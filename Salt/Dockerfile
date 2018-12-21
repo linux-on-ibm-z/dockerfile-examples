@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Salt version 2018.3.2 #########
+################### Dockerfile for Salt version 2018.3.3 ##################################
 #
 # This Dockerfile builds a basic installation of Salt.
 #
@@ -13,7 +13,7 @@
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
-
+#
 #
 # To start container from image & start an application in production mode
 # docker run -v <host_path>:/etc/salt -v <host_dir>:/data -d <image>
@@ -47,37 +47,28 @@ RUN apt-get update && apt-get install -y \
 		openssl \
 		python \
 		python-dev \
-		python-ldap \
-		python-lxml \
-		python-setuptools \ 
+		python-setuptools \
 		tar \
 		unzip \
 		wget \
 	&&	easy_install pip \	
 # Install required packages using pip
 	&&	pip install \
-			call \
-			coverage==3.7.1 \
-			coveralls \
-			'django<2.0' \
-			funcsigs \
-			futures \
-			httplib2 \
-			jinja2 \
-			msgpack-python \
-			paramiko \ 
-			passlib \
-			patch \
-			psutil \
-			pycrypto \
-			PyYAML \
 			pyzmq \
-			six \
-			'tornado<5.0' \		 
+			PyYAML \
+			pycrypto \
+			msgpack-python \
+			jinja2 \
+			psutil \
+			futures \
+			tornado \
+			'pyOpenSSL>=0.14' \
+			'six>=1.10.0' \		 
 # Clone the repository and install SaltStack
 && 	git clone git://github.com/saltstack/salt \
 && 	cd salt \
-&& 	git checkout v2018.3.2 \
+&& 	git checkout v2018.3.3 \
+&& 	pip install -r requirements/dev_python27.txt \
 && 	pip install -e . \
 # Configure SaltStack to run self-contained version
 && 	cd $SOURCE_DIR \
