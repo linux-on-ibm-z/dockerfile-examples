@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Keystone version 13.0.0 #########
+########## Dockerfile for Keystone version 14.0.1 #########
 #
 # This Dockerfile builds a basic installation of Keystone.
 #
@@ -68,9 +68,12 @@ RUN	apt-get update && apt-get install -y \
 		scons \
 		tar \
 		wget \
+		python3-dev \
+		libsasl2-dev \
 	&&	easy_install pip \
 	&&  pip install --upgrade setuptools \
 	&&	pip install \
+		tox \
 		cryptography \
 		functools32 \
 		mod_wsgi \
@@ -98,10 +101,11 @@ RUN	apt-get update && apt-get install -y \
 	&&	cd $SOURCE_DIR \
 	&&	git clone https://github.com/openstack/keystone.git \
 	&&	cd keystone/ \
-	&&	git checkout 13.0.0 \
+	&&	git checkout 14.0.1 \
 	&&	pip install --ignore-installed -r requirements.txt \
 	&&	pip install --ignore-installed -r test-requirements.txt  \
 	&&	python setup.py install \
+	&&  tox -egenconfig \
 	
 # Configure Keystone
 	&&	cp -r etc/ /etc/keystone \
@@ -110,8 +114,8 @@ RUN	apt-get update && apt-get install -y \
 	&&	mv logging.conf.sample logging.conf \
 	
 # Edit keystone.conf file as shown below
-	&&	sed -i "714i connection = mysql://keystone:keystone@127.0.0.1/keystone" /etc/keystone/keystone.conf \
-	&&	sed -i "2834i provider = fernet" /etc/keystone/keystone.conf \
+	&&	sed -i "742i connection = mysql://keystone:keystone@127.0.0.1/keystone" /etc/keystone/keystone.conf \
+	&&	sed -i "2828i provider = fernet" /etc/keystone/keystone.conf \
 
 # Populate Keystone database
 	&&	keystone-manage db_sync \
