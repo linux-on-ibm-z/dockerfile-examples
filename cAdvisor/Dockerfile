@@ -1,4 +1,7 @@
-######################## Dockerfile for cAdvisor 0.27.4 #################################
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+######################## Dockerfile for cAdvisor 0.31.0 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -22,21 +25,23 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
+ARG CADVISIOR_VER=0.31.0
+
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV SOURCE_DIR=/tmp/source
-ENV PATH=/usr/lib/go-1.9/bin:$PATH
+ENV PATH=/usr/lib/go-1.10/bin:$PATH
 WORKDIR $SOURCE_DIR
 
 # Set Environmental Variables
 ENV GOPATH=$SOURCE_DIR
-ENV PATH=/opt/gccgo/bin:$PATH:$GOPATH/bin
+ENV PATH=$PATH:$GOPATH/bin
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     git \ 
-	golang-1.9 \ 
+	golang-1.10 \ 
 	libseccomp-dev \
 	curl \
 	
@@ -47,7 +52,7 @@ RUN apt-get update && apt-get install -y \
  && mkdir -p $GOPATH/src/github.com/google && cd $GOPATH/src/github.com/google \
 
 # Checkout the code from repository
- && git clone https://github.com/google/cadvisor.git -b v0.27.4 \
+ && git clone https://github.com/google/cadvisor.git -b v$CADVISIOR_VER \
  && cd cadvisor \
 
 # Change the work directory
@@ -61,7 +66,7 @@ RUN apt-get update && apt-get install -y \
  && cd $GOPATH/src/github.com/google/cadvisor \
  && godep go build . \
  && cp $GOPATH/src/github.com/google/cadvisor/cadvisor /usr/bin \
- && rm -rf $SOURCE_DIR \
+ && cd && rm -rf $SOURCE_DIR \
  && apt-get remove -y git && apt-get autoremove -y && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
