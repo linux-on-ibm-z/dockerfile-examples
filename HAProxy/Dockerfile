@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################### Dockerfile for HAProxy version 1.8.14 #####################################################
+######################### Dockerfile for HAProxy version 1.9.0 #####################################################
 #
 # This Dockerfile builds a basic installation of HAProxy.
 #
@@ -25,7 +25,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG HAPROXY_VER=1.8.14
+ARG HAPROXY_VER=1.9.0
 
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y \
     make \
     tar \
     wget \
- && wget http://www.haproxy.org/download/1.8/src/haproxy-${HAPROXY_VER}.tar.gz \
+ && wget http://www.haproxy.org/download/1.9/src/haproxy-${HAPROXY_VER}.tar.gz \
  && tar xzvf haproxy-${HAPROXY_VER}.tar.gz \
  && cd haproxy-${HAPROXY_VER} \
  && make TARGET=linux26  \
