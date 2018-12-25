@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 5.3.2 ############################################
+############################ Dockerfile for Grafana 5.4.2 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -46,7 +46,7 @@ RUN apt-get update -y && apt-get install -y \
 
 # Get the Grafana Soure code and build Grafana backend
  && cd / && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
- && cd $GOPATH/src/github.com/grafana/grafana && git checkout v5.3.2 \
+ && cd $GOPATH/src/github.com/grafana/grafana && git checkout v5.4.2 \
  && make deps-go \
  && make build-go \
 
