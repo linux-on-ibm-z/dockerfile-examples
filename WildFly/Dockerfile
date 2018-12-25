@@ -1,4 +1,7 @@
-################# Dockerfile for WildFly (JBoss) version 12.0.0 #############
+# © Copyright IBM Corporation 2017, 2018.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+################# Dockerfile for WildFly (JBoss) version 14.0.1 ##########################
 #
 # This Dockerfile builds a basic installation of WildFly.
 #
@@ -14,7 +17,7 @@
 # Use below command to start WildFly in domain mode :
 #    docker run --name <container_name> -p <port_number>:8080 -p <port_number>:9990 -it <image_name> domain.sh -b 0.0.0.0 -bmanagement 0.0.0.0
 #
-# To view the web console open the link  http://<wildfly-ip>:<port_number_8080>
+# To view the web console open the link  http://<wildfly-ip>:8080
 #
 ##############################################################################
 
@@ -25,30 +28,31 @@ FROM s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 ENV DEBIAN_FRONTEND noninteractive
 
+ARG WILDFLY_VER=14.0.1.Final
 
-ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x
-ENV PATH=$PATH:$JAVA_HOME/bin
+ENV JAVA_HOME=/opt/jdk-11+28
 ENV PWD=`pwd`
 ENV SOURCE_DIR=/tmp/source
 ENV JBOSS_HOME=/opt/jboss/wildfly
 WORKDIR $SOURCE_DIR
 
-ENV PATH=$PATH:$JBOSS_HOME/bin
-ENV MAVEN_OPTS="-Xmx1024m"
+ENV PATH=$JAVA_HOME/bin:$JBOSS_HOME/bin:$PATH
 
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     git \
     maven \
-    openjdk-8-jdk \
     tar \
     wget \
+ && mkdir -p /opt \
+ && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jdk_s390x_linux_hotspot_11_28.tar.gz \
+ && tar -xf OpenJDK11-jdk_s390x_linux_hotspot_11_28.tar.gz -C /opt \
  && git clone https://github.com/wildfly/wildfly.git \
- && cd wildfly && git checkout 12.0.0.Final \
+ && cd wildfly && git checkout ${WILDFLY_VER}\
  && mvn install -DskipTests \
  && mkdir -p /opt/jboss/wildfly \
- && cp -a ./dist/target/wildfly-12.0.0.Final/* /opt/jboss/wildfly \
+ && cp -a ./dist/target/wildfly-${WILDFLY_VER}/* /opt/jboss/wildfly \
 
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
