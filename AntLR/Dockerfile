@@ -41,11 +41,11 @@ RUN apt-get update && apt-get install -y \
 		ant \
 		patch \
  && ln -s `which nodejs` /usr/local/bin/node \
- && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.4.10/linux/s390x/ibm-java-sdk-8.0-4.10-s390x-archive.bin \
+ && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.26/linux/s390x/ibm-java-s390x-sdk-8.0-5.26.bin \
  && wget https://raw.githubusercontent.com/zos-spark/scala-workbench/master/files/installer.properties.java \
  && tail -n +3 installer.properties.java | tee installer.properties \
- && chmod +x ibm-java-sdk-8.0-4.10-s390x-archive.bin \
- && ./ibm-java-sdk-8.0-4.10-s390x-archive.bin -r installer.properties \
+ && chmod +x ibm-java-s390x-sdk-8.0-5.26.bin \
+ && ./ibm-java-s390x-sdk-8.0-5.26.bin -r installer.properties \
  && git clone git://github.com/antlr/antlr4.git \
  && cd antlr4 && git checkout 4.7.1 \
  && mvn install -DskipTests \
