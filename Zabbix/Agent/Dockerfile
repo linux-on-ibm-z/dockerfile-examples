@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-Agent version 4.0.0 ####################
+########## Dockerfile for Zabbix-Agent version 4.0.2 ####################
 #
 # This Dockerfile builds a basic installation of Zabbix-Agent.
 #
@@ -34,6 +34,8 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
+ARG ZBX_AGENT_VER=4.0.2
+
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
@@ -49,21 +51,17 @@ RUN	apt-get update && apt-get -y install \
 		tar \
 		wget \
 		libpcre3-dev \
-
 # Download Zabbix agent
-	&& wget https://excellmedia.dl.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/4.0.0/zabbix-4.0.0.tar.gz  \
-	&& tar -xf zabbix-4.0.0.tar.gz \
-
+	&& wget https://excellmedia.dl.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/${ZBX_AGENT_VER}/zabbix-${ZBX_AGENT_VER}.tar.gz  \
+	&& tar -xf zabbix-${ZBX_AGENT_VER}.tar.gz \
 # Install Zabbix agent
-	&& cd $SOURCE_DIR/zabbix-4.0.0\
+	&& cd $SOURCE_DIR/zabbix-${ZBX_AGENT_VER}\
 	&& ./configure --enable-agent \
 	&& make \
 	&& make install \
-
 # Create a 'zabbix' user required to start Zabbix agent daemon
 	&& /usr/sbin/groupadd zabbix \
-	&& /usr/sbin/useradd -g zabbix zabbix \
-	
+	&& /usr/sbin/useradd -g zabbix zabbix \	
 # Clean up cache data and remove dependencies which are not required
 	&&	apt-get -y remove \
 		gcc \
