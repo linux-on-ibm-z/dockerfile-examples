@@ -41,12 +41,10 @@ RUN apt-get update &&  apt-get install -y \
 	wget \
     tar \
 	gcc \
-
 # Install Go
- && wget https://storage.googleapis.com/golang/go1.11.2.linux-s390x.tar.gz \
- && chmod ugo+r go1.11.2.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.11.2.linux-s390x.tar.gz \
- 
+ && wget https://storage.googleapis.com/golang/go1.11.4.linux-s390x.tar.gz \
+ && chmod ugo+r go1.11.4.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.11.4.linux-s390x.tar.gz \ 
 # Clone Terraform Source Code
  && cd $SOURCE_DIR \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
@@ -54,10 +52,8 @@ RUN apt-get update &&  apt-get install -y \
  && git clone https://github.com/hashicorp/terraform.git \
  && cd terraform && git checkout v${TERRAFORM_VER} \
  && make tools \
-
 # Build Terraform
  && XC_OS=linux XC_ARCH=s390x make bin \
-
 # Tidy and clean up
  && apt-get remove -y \
     git \
