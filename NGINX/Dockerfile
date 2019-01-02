@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################# Dockerfile for NGINX 1.14.1 #####################################################
+################################# Dockerfile for NGINX 1.14.2 #####################################################
 #
 # This Dockerfile builds a basic installation of NGINX.
 # NGINX is a free, open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server.
@@ -9,9 +9,6 @@
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
-
-# To create container of NGINX image run the below command
-# docker run --name <container name> -d <nginximage>
 #
 # To create container of NGINX image run the below command
 # docker run --name <container name> -p <port_number>:80 -d <nginximage>
@@ -19,6 +16,8 @@
 ###############################################################################################################
 # Base image
 FROM s390x/ubuntu:16.04
+
+ARG NGINX_VER=1.14.2
 
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -36,19 +35,18 @@ RUN apt-get update && apt-get install -y \
 	wget \	
 	zlib1g \
 	zlib1g-dev \
- && wget http://nginx.org/download/nginx-1.14.1.tar.gz \
- && tar xvf nginx-1.14.1.tar.gz \
- && cd nginx-1.14.1 \
+ && wget http://nginx.org/download/nginx-${NGINX_VER}.tar.gz \
+ && tar xvf nginx-${NGINX_VER}.tar.gz \
+ && cd nginx-${NGINX_VER} \
  && ./configure \
  && make  \
  && make install  \
- 
-# Clean up Cache data , unused packages and source files 
+# Clean up Cache data, unused packages and source files 
  && apt-get remove -y \
 	make \
 	wget \
  && apt-get autoremove -y && apt-get clean \
- && rm -rf /root/nginx-1.14.1.tar.gz  /root/nginx-1.14.1 \
+ && rm -rf /root/nginx-${NGINX_VER}.tar.gz  /root/nginx-${NGINX_VER} \
  && rm -rf /var/lib/apt/lists/*
 
 # Add VOLUMEs to allow backup error logs, configuration and server directory content
