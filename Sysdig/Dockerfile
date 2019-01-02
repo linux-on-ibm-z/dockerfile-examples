@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Sysdig version 0.21.0 #########
+########## Dockerfile for Sysdig version 0.24.1 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -12,35 +12,23 @@
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
 #
-# To start container from image & start an application in production mode
-# docker run --name <container_name> -d <image>  
+# To run sysdig in a Docker container use below command
+#  docker run -it --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v 
+#   /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro -v /usr:/host/usr:ro --name <container_name> <image_name>
 # 
 # The official website
 # https://www.sysdig.org/
-#################################################################################
-#			-: Some instructions to be followed :-
-#
-#	1. copy /sysdig-0.21.0 from container to host:
-#		docker cp <container_id>:/sysdig-0.21.0 <path_on_host>
-#
-#	2. Insert sysdig driver module, perform below steps:
-#		cd <path_on_host>/sysdig-0.21.0 
-#		/sbin/insmod sysdig-probe.ko
-#
-#	3. Install lua5.1 and lua5.1-dev on host
-#
-#	4. Set PATH variable
-#		export PATH=$PATH:<path_on_host>/sysdig-0.21.0/sysdig
-#
-#	5. Run any sysdig command
-#
 ##################################################################################
 
 # Base Image
 FROM s390x/ubuntu:16.04
 
+ARG SYSDIG_VER=0.24.1
+
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+LABEL RUN="docker run -i -t --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro -v /usr:/host/usr:ro --name NAME IMAGE"
 
 ENV SOURCEDIR=/tmp/source
 
@@ -52,36 +40,29 @@ RUN apt-get update \
 		cmake \
 		gcc \
 		g++ \
+		libelf-dev \
 		linux-headers-$(uname -r) \
 		lua5.1 \
 		lua5.1-dev \
 		patch \
 		tar \
-		wget \	
-	
+		wget \		
 # Download source code
 	&& cd $SOURCEDIR \
-	&& wget https://github.com/draios/sysdig/archive/0.21.0.tar.gz \
-	&& tar -xvzf 0.21.0.tar.gz \
-	&& VALUE=$(uname -r) \
-	&& cd sysdig-0.21.0 \
+	&& wget https://github.com/draios/sysdig/archive/${SYSDIG_VER}.tar.gz \
+	&& tar -xvzf ${SYSDIG_VER}.tar.gz \
+	&& cd sysdig-${SYSDIG_VER} \
 	&& mkdir build \
-
 # Configure Sysdig
 	&& cd build \
 	&& cmake -DUSE_BUNDLED_LUAJIT=OFF .. \
-	&& sed -i "s@\$(shell uname -r)@$VALUE@" driver/Makefile.dkms \
-	&& ln -s /usr/src/*$VALUE /lib/modules/$VALUE/build \
-
 # Build and Install Sysdig
 	&& make \
-	&& make install \
-	
+	&& make install \	
 # Copy important content from build
-	&& mkdir -p /sysdig-0.21.0 \
-	&& cp $SOURCEDIR/sysdig-0.21.0/build/driver/sysdig-probe.ko /sysdig-0.21.0 \
-	&& cp -r $SOURCEDIR/sysdig-0.21.0/build/userspace/sysdig /sysdig-0.21.0 \
-	
+	&& mkdir -p /opt/sysdig \
+	&& cp $SOURCEDIR/sysdig-0.24.1/build/driver/sysdig-probe.ko /opt/sysdig \
+	&& cp -r $SOURCEDIR/sysdig-0.24.1/build/userspace/sysdig /opt/sysdig \
 # Clean up cache data and remove dependencies which are not required
 	&&	apt-get -y remove \
 		cmake \
@@ -98,6 +79,8 @@ RUN apt-get update \
 	&& 	apt-get clean \
 	&& 	rm -rf /var/lib/apt/lists/*
 	
-VOLUME /sysdig-0.21.0
+WORKDIR /opt/sysdig
+	
+CMD ["bash"]
 
 # End of Dockerfile
