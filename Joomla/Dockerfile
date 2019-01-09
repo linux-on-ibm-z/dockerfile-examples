@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Joomla version 3.9.0 ######
+########## Dockerfile for Joomla version 3.9.1 ######
 #
 # Joomla is an online, open source website creation tool written in PHP.
 #
@@ -22,6 +22,8 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 ENV DEBIAN_FRONTEND noninteractive
+
+ARG JOOMLA_VER=3.9.1
 
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
@@ -55,8 +57,8 @@ RUN apt-get update -y && apt-get install -y \
  && chmod -R a+w /var/www/html/ \
  && mkdir Joomla \
  && cd Joomla \
- && wget https://github.com/joomla/joomla-cms/releases/download/3.9.0/Joomla_3.9.0-Stable-Full_Package.zip \
- && unzip Joomla_3.9.0-Stable-Full_Package.zip  \
+ && wget https://github.com/joomla/joomla-cms/releases/download/${JOOMLA_VER}/Joomla_${JOOMLA_VER}-Stable-Full_Package.zip \
+ && unzip Joomla_${JOOMLA_VER}-Stable-Full_Package.zip  \
  && chmod a+w /var/www/html/Joomla/ \
  && mv installation/configuration.php-dist installation/configuration.php \
 
@@ -81,7 +83,7 @@ RUN apt-get update -y && apt-get install -y \
  && apt autoremove -y \
  && apt-get clean \
  && rm -rf  /var/lib/apt/lists/* \
- && rm  /var/www/html/Joomla/Joomla_3.9.0-Stable-Full_Package.zip
+ && rm  /var/www/html/Joomla/Joomla_${JOOMLA_VER}-Stable-Full_Package.zip
 # Create volume
 VOLUME /var/www/html
 
