@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ################## Dockerfile for etcd 3.3.8 ####################
@@ -24,6 +24,8 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
+ARG ETCD_VER=v3.3.8
+
 # Maintainer
 MAINTAINER LoZ Open Source Ecosystem
 
@@ -43,9 +45,9 @@ RUN apt-get update && apt-get install -y \
  && mkdir -p /src/github.com/coreos \
  && cd /src/github.com/coreos \
  && rm -rf etcd \
- && git clone git://github.com/coreos/etcd \
+ && git clone http://github.com/coreos/etcd \
  && cd etcd \
- && git checkout v3.3.8 \
+ && git checkout ${ETCD_VER} \
  && mkdir -p /data \
 
 # Build
