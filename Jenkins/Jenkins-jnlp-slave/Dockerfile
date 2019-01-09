@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Jenkins jnlp Slave ###################
+################ Dockerfile for Jenkins JNLP Slave ###################
 #
 # This Dockerfile builds an image for Jenkins slave node.
 #
@@ -33,9 +33,14 @@ ARG gid=1000
 
 # Set Environment Variables
 ENV HOME /home/${user}
+ENV JAVA_HOME=/usr/share/jdk8u192-b12_openj9-0.11.0
+ENV PATH=$JAVA_HOME/bin:$PATH
 
 # Install dependencies
-RUN apt-get update && apt-get install -y openjdk-8-jdk curl wget
+RUN apt-get update &&  apt-get install -y tar wget libfontconfig1 curl \
+# Download AdoptJDK8
+&& wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u192-b12_openj9-0.11.0/OpenJDK8U-jdk_s390x_linux_openj9_8u192b12_openj9-0.11.0.tar.gz \
+&& tar -C /usr/share/ -xzvf OpenJDK8U-jdk_s390x_linux_openj9_8u192b12_openj9-0.11.0.tar.gz
 
 RUN groupadd -g ${gid} ${group}
 RUN useradd -c "Jenkins user" -d $HOME -u ${uid} -g ${gid} -m ${user}
@@ -64,4 +69,3 @@ WORKDIR /home/${user}
 ENTRYPOINT ["/usr/local/bin/jenkins-slave"]
 
 # End of Dockerfile
-
