@@ -1,4 +1,7 @@
-############### Dockerfile for Docker Distribution version v2.6.2 #################
+# © Copyright IBM Corporation 2017, 2019.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############### Dockerfile for Docker Distribution version v2.7.0 #################
 #
 # This Dockerfile builds a basic installation of Docker Distribution.
 #
@@ -19,30 +22,34 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
+ARG DOCKER_DISTRIBUTION_VER=2.7.0
+
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV GOPATH /go
 ENV DISTRIBUTION_DIR /go/src/github.com/docker/distribution
-ENV PATH $PATH:$GOPATH/bin
+ENV PATH=$PATH:/usr/share:/usr/lib/go-1.10/bin
 
 # Install dependencies 
 RUN apt-get update && apt-get install -y \
     git \
-    golang \
+    golang-1.10 \
     make \
 
 # Download and build source code of Docker Distribution
  && git clone https://github.com/docker/distribution.git $GOPATH/src/github.com/docker/distribution \
- && cd $GOPATH/src/github.com/docker/distribution && git checkout v2.6.2 \
- && make PREFIX=$GOPATH clean binaries \
+ && cd $GOPATH/src/github.com/docker/distribution && git checkout v${DOCKER_DISTRIBUTION_VER} \
+ && make clean binaries \
  && mkdir -p /etc/docker/registry \
  && cp $DISTRIBUTION_DIR/cmd/registry/config-dev.yml /etc/docker/registry/config.yml \
-
+ && cp -r $DISTRIBUTION_DIR/bin/registry /usr/share/registry \
+ 
+ 
 # Tidy up (Clear cache data)
  && apt-get remove -y \
     git \
-	golang \
+	golang-1.10 \
 	make \
  && apt-get autoremove -y \
  && apt-get clean \
