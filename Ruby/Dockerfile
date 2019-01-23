@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018
+# © Copyright IBM Corporation 2017, 2019
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Ruby version 2.5.3 #########
+########## Dockerfile for Ruby version 2.6.0 #########
 #
 # Ruby is a dynamic, open source programming language with a focus on simplicity and productivity.
 # It has an elegant syntax that is natural to read and easy to write.
@@ -30,6 +30,8 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
+ARG RUBY_VER=2.6.0
+
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
@@ -47,15 +49,13 @@ RUN apt-get update && apt-get install -y \
     bison \
     flex \
     openssl \
-
 # Install Ruby
- && wget http://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.3.tar.gz \
- && tar -xvf ruby-2.5.3.tar.gz \
- && cd ruby-2.5.3 \
+ && wget http://cache.ruby-lang.org/pub/ruby/2.6/ruby-${RUBY_VER}.tar.gz \
+ && tar -xvf ruby-${RUBY_VER}.tar.gz \
+ && cd ruby-${RUBY_VER} \
  && ./configure \
  && make \
- && make install \
- 
+ && make install \ 
 # Tidy up (Clear cache data)
  && rm -rf $SOURCE_DIR \
  && apt-get remove -y \
