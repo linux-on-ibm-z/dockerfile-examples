@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Mariadb Server version 10.3.10 #########
+########## Dockerfile for Mariadb Server version 10.3.12 #########
 #
 # This Dockerfile builds a basic installation of Mariadb Server.
 #
@@ -22,6 +22,8 @@
 
 # Base Image
 FROM s390x/ubuntu:16.04
+
+ARG MARIADB_VER=10.3.12
 
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -51,17 +53,17 @@ RUN apt-get update && apt-get install -y \
 	hostname \
 
 ##Get MariaDB code from Git
- && cd $SOURCE_DIR && wget https://github.com/MariaDB/server/archive/mariadb-10.3.10.tar.gz \
- && tar xzf mariadb-10.3.10.tar.gz \
- && cd server-mariadb-10.3.10 \
+ && cd $SOURCE_DIR && wget https://github.com/MariaDB/server/archive/mariadb-${MARIADB_VER}.tar.gz \
+ && tar xzf mariadb-${MARIADB_VER}.tar.gz \
+ && cd server-mariadb-${MARIADB_VER} \
 
 ##Get MariaDB Connector C code from git
  && cd $SOURCE_DIR && git clone git://github.com/MariaDB/mariadb-connector-c.git \
  && cd mariadb-connector-c && git checkout v3.0.2 \
- && cp -r $SOURCE_DIR/mariadb-connector-c/* $SOURCE_DIR/server-mariadb-10.3.10/libmariadb/ \
+ && cp -r $SOURCE_DIR/mariadb-connector-c/* $SOURCE_DIR/server-mariadb-${MARIADB_VER}/libmariadb/ \
 
 ## Make changes to file to fix openssl related issue
- && cd $SOURCE_DIR/server-mariadb-10.3.10 \
+ && cd $SOURCE_DIR/server-mariadb-${MARIADB_VER} \
  && sed -i '231d' libmariadb/include/mariadb_com.h \
  && sed -i '231 a\#define SERVER_STATUS_IN_TRANS_READONLY       8192' libmariadb/include/mariadb_com.h \
  && sed -i '231 a\#define SERVER_SESSION_STATE_CHANGED      16384' libmariadb/include/mariadb_com.h \
@@ -91,7 +93,7 @@ RUN apt-get update && apt-get install -y \
     wget \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf $SOURCE_DIR/server-mariadb-10.3.10  $SOURCE_DIR/mariadb-10.3.10.tar.gz $SOURCE_DIR/mariadb-connector-c \ 
+ && rm -rf $SOURCE_DIR/server-mariadb-${MARIADB_VER}  $SOURCE_DIR/mariadb-${MARIADB_VER}.tar.gz $SOURCE_DIR/mariadb-connector-c \ 
 
 # Expose MariaDB default port
 EXPOSE 3306
