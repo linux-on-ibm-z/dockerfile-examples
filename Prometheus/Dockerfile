@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Prometheus 2.5.0 #########
+########## Dockerfile for Prometheus 2.6.0 #########
 #
 # This Dockerfile builds Prometheus
 #
@@ -17,61 +17,41 @@
 # docker run --name <container name> -p <host_port>:9090 -d <image name>
 #
 # Start container with custom config file
-# docker run --name <container name> -p <host_port>:9090 -v <path_on_host>/prometheus.yaml:/etc/prometheus/prometheus.yml -d <image name>
+# docker run --name <container name> -p <host_port>:9090 -v <path_on_host>/prometheus.yml:/etc/prometheus/prometheus.yml -d <image name>
 ##########################################################################################################
 
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG PROMETHEUS_VER=2.5.0
+ARG PROMETHEUS_VER=2.6.0
 
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-ENV GOPATH=/go PATH=/usr/lib/go-1.10/bin:$PATH:/go/bin:/prometheus
+ENV PATH=/usr/local/go/bin:$PATH:/prometheus
 
 #Install depenedencies
 RUN apt-get update && apt-get install -y \
-    cmake \
-    curl \
-    gcc \
-    git \
-    g++ \
-    make \
     tar \
     wget \
-	golang-1.10 \
-
-
-# Download and build Prometheus
- && mkdir -p $GOPATH/src/github.com/prometheus \
- && cd $GOPATH/src/github.com/prometheus \
- && git clone git://github.com/prometheus/prometheus.git \
- && cd prometheus \
- && git checkout v${PROMETHEUS_VER} \
- && make build \
- && mkdir -p /prometheus && cp -p prometheus promtool /prometheus/ \
- && mkdir -p /etc/prometheus \
- && cp -p documentation/examples/prometheus.yml /etc/prometheus/prometheus.yml \
+#Install Golang
+ && wget https://dl.google.com/go/go1.11.4.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf  go1.11.4.linux-s390x.tar.gz \
+ && rm go1.11.4.linux-s390x.tar.gz && go version \
+# Download Prometheus
+ && wget https://github.com/prometheus/prometheus/releases/download/v${PROMETHEUS_VER}/prometheus-${PROMETHEUS_VER}.linux-s390x.tar.gz \
+ && tar -xzf prometheus-${PROMETHEUS_VER}.linux-s390x.tar.gz \
+ && mkdir -p /prometheus && mkdir -p /etc/prometheus \
+ && cd prometheus-${PROMETHEUS_VER}.linux-s390x/ \
+ && cp -p prometheus promtool /prometheus/ \
+ && cp -p prometheus.yml /etc/prometheus/prometheus.yml \
  && chmod +x /etc/prometheus/prometheus.yml \
  && cp -Rf console_libraries /etc/prometheus/ \
  && cp -Rf consoles /etc/prometheus/ \
- && rm -rf /go/src/github.com \
-
 # Clean up unwanted packages
- && apt-get remove -y \
-    cmake \
-    curl \
-    gcc \
-    git \
-    g++ \
-    make \
-    wget \
-	golang-1.10 \
- && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
+ && apt autoremove -y
 
-#Export port 9090
+#Export port
 EXPOSE 9090
 VOLUME [ "/prometheus" ]
 
