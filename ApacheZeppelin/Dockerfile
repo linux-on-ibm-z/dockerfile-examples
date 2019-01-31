@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############## Dockerfile for Apache Zeppelin version 0.8.0 ###############
@@ -72,8 +72,9 @@ RUN	apt-get update && apt-get -y install \
 		r-base-dev \
 		libcurl4-gnutls-dev \
 		libssl-dev \
-	&&	pip install numpy \
-	&&	pip install matplotlib \
+	&&  pip install --upgrade pip \
+	&&	python -m pip install numpy \
+	&&	python -m pip install matplotlib \
 	
 # Install R related packages (Optional)
 	&&	R -e "install.packages('knitr', repos='http://cran.us.r-project.org')" \
