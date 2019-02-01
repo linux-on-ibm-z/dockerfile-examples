@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for TensorFlow version 1.8.0 #########
+########## Dockerfile for TensorFlow version 1.12.0 #########
 #
 # This Dockerfile builds a basic installation of TensorFlow.
 #
@@ -16,7 +16,8 @@
 #
 # To start container from image & start an application in production mode
 # docker run --name <container_name> -d <image>
-#
+# docker run --name <container_name> -it -p 8888:8888 <image>
+
 # To copy TensorFlow wheel file :
 # docker cp <container_id>:/tensorflow_wheel <path_on_host>
 #
@@ -36,15 +37,13 @@ FROM s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV SOURCE_DIR=/tmp/source
-ENV PATH=$PATH:$SOURCE_DIR/bazel/output/ TF_NEED_JEMALLOC=1 TF_NEED_GCP=0 \
-                TF_NEED_HDFS=0 TF_NEED_S3=0 TF_NEED_KAFKA=0 TF_NEED_CUDA=0 \
-                TF_ENABLE_XLA=0 TF_NEED_GDR=0 TF_NEED_VERBS=0 TF_NEED_MPI=0 \
-                TF_NEED_OPENCL_SYCL=0 TF_SET_ANDROID_WORKSPACE=0 \
-                PYTHON_BIN_PATH=/usr/bin/python2
-
+ENV PATH=$PATH:$SOURCE_DIR/bazel/output/ TF_NEED_IGNITE=0 TF_NEED_GCP=0 \
+                TF_NEED_CUDA=0 TF_ENABLE_XLA=0 TF_NEED_GDR=0 TF_NEED_VERBS=0 TF_NEED_MPI=0 \
+                TF_NEED_OPENCL_SYCL=0 TF_SET_ANDROID_WORKSPACE=0 TF_NEED_GCP=0 TF_CUDA_CLANG=0 TF_NEED_ROCM=0 \
+                PYTHON_BIN_PATH=/usr/bin/python2 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
 # Install dependencies
 RUN       apt-get update && apt-get install -y \
-        pkg-config \
+                                pkg-config \
                                 zip \
                                 g++ \
                                 zlib1g-dev \
@@ -72,22 +71,27 @@ RUN       apt-get update && apt-get install -y \
                                 python-sklearn \
                                 python-numpy \
                                 patch \
-                &&         easy_install pip==18.0 \
-                &&         pip install \
-                    wheel \
+                                libhdf5-dev \
+                                libssl-dev \
+                &&     pip install \
+                                wheel \
                                 backports.weakref \
                                 portpicker \
                                 futures \
                                 grpc \
                                 enum34 \
                 &&  pip install numpy==1.13.3 \
+		        &&  pip install keras_applications==1.0.5 --no-deps \
+		        &&  pip install keras_preprocessing==1.0.3 --no-deps \
+		        &&  pip install keras \
+		        &&  pip install grpcio \
 # Build Bazel
                 &&         mkdir -p $SOURCE_DIR \
                 &&         cd $SOURCE_DIR \
                 &&         mkdir bazel \
                 &&         cd bazel \
-                &&         wget https://github.com/bazelbuild/bazel/releases/download/0.12.0/bazel-0.12.0-dist.zip \
-                &&         unzip bazel-0.12.0-dist.zip \
+                &&         wget https://github.com/bazelbuild/bazel/releases/download/0.15.0/bazel-0.15.0-dist.zip \
+                &&         unzip bazel-0.15.0-dist.zip \
                 &&         chmod -R +w . \
 # Add patch to resolve java oom issue
                 &&         sed -i '117d' scripts/bootstrap/compile.sh \
@@ -97,7 +101,7 @@ RUN       apt-get update && apt-get install -y \
                 &&         cd $SOURCE_DIR \
                 &&         git clone https://github.com/linux-on-ibm-z/tensorflow \
                 &&         cd tensorflow \
-                &&         git checkout v1.8.0-s390x \
+                &&         git checkout v1.12.0-s390x \
 # Configure (without GPU support)
                 &&         yes "" | ./configure \
 # Build TensorFlow
@@ -106,24 +110,12 @@ RUN       apt-get update && apt-get install -y \
                 &&         cd $SOURCE_DIR/tensorflow \
                 &&         mkdir -p /tensorflow_wheel \
                 &&         bazel-bin/tensorflow/tools/pip_package/build_pip_package /tensorflow_wheel \
-				
-# Clean up cache data and remove dependencies which are not required
                 &&         apt-get -y remove \
-                                autoconf \
-                                automake \
                                 bzip2 \
-                                curl \
-                                g++ \
                                 git \
-                                glibc* \
-                                libtool \
                                 make \
                                 maven \
-                                openjdk-8-jdk \
-                                pkg-config \
-                                swig \
                                 unzip \
-                                vim \
                                 wget \
                                 zip \
                 &&         apt-get autoremove -y \
@@ -131,7 +123,7 @@ RUN       apt-get update && apt-get install -y \
                 &&         rm -rf $SOURCE_DIR \
                 &&         rm -rf /root/.cache/ \
                 &&         apt-get clean \
-                &&         rm -rf /var/lib/apt/lists/*
+                &&         rm -rf /var/lib/apt/lists/*				
 
 VOLUME /tensorflow_wheel
 
