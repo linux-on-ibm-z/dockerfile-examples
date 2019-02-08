@@ -71,7 +71,7 @@ RUN  apt-get update  \
  
 # Download and build source code of Sugar
     &&  chown -R www-data:www-data /var/www/html/ && chmod -R a+w /var/www/html/ && cd /var/www/html/ \
-	&&  wget https://excellmedia.dl.sourceforge.net/project/sugarcrm/1%20-%20SugarCRM%206.5.X/SugarCommunityEdition-6.5.X/SugarCE-6.5.26.zip \
+	&&  wget https://downloads.sourceforge.net/project/sugarcrm/OldFiles/1%20-%20SugarCRM%206.5.X/SugarCommunityEdition-6.5.X/SugarCE-6.5.26.zip \
     &&  unzip SugarCE-6.5.26.zip \
     &&  mv SugarCE-Full-6.5.26 Sugar && chmod -R a+w Sugar \
 	
