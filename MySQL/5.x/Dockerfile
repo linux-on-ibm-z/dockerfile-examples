@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for MySQL version 5.7.24 ############################################
+############################ Dockerfile for MySQL  ############################################
 #
 # This Dockerfile builds a basic installation of MySQL.
 #
