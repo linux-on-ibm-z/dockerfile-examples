@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2018.
+# © Copyright IBM Corporation 2018, 2019.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 3.4.9 ##################################
+########## Dockerfile for Neo4j version 3.5.2 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -52,9 +52,9 @@ RUN  apt-get update  \
 
 # Download and unzip Neo4j pre build Binary
   && cd $SOURCE_DIR/ \
-  && wget https://neo4j.com/artifact.php?name=neo4j-community-3.4.9-unix.tar.gz \
-  && tar -xvzf artifact.php?name=neo4j-community-3.4.9-unix.tar.gz \
-  && mv neo4j-community-3.4.9 neo4j \
+  && wget https://neo4j.com/artifact.php?name=neo4j-community-3.5.2-unix.tar.gz \
+  && tar -xvzf artifact.php?name=neo4j-community-3.5.2-unix.tar.gz \
+  && mv neo4j-community-3.5.2 neo4j \
 
 # Clean up the unwanted packages and clear the source directory
   && apt-get remove -y \
@@ -62,7 +62,7 @@ RUN  apt-get update  \
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf $SOURCE_DIR/OpenJDK9U-jdk_s390x_linux_hotspot_9.0.4_11.tar.gz $SOURCE_DIR/artifact.php?name=neo4j-community-3.4.9-unix.tar.gz /var/lib/apt/lists/*
+  && rm -rf $SOURCE_DIR/OpenJDK9U-jdk_s390x_linux_hotspot_9.0.4_11.tar.gz $SOURCE_DIR/artifact.php?name=neo4j-community-3.5.2-unix.tar.gz /var/lib/apt/lists/*
 
 # Define mount for backup of logs, data, conf & lib
 VOLUME ["$NEO4J_HOME/logs","$NEO4J_HOME/data","$NEO4J_HOME/conf","$NEO4J_HOME/lib"]
