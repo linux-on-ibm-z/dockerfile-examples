@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################### Dockerfile for Kibana version 6.5.0 ##########################################
+############################### Dockerfile for Kibana version 6.6.0 ##########################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -25,7 +25,7 @@
 
 FROM s390x/ubuntu:16.04
 
-ARG KIBANA_VER=6.5.0
+ARG KIBANA_VER=6.6.0
 
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -39,31 +39,29 @@ ENV PATH=/usr/share/kibana/bin:$PATH
 RUN apt-get update && apt-get install -y \
     wget \
     tar \
- && wget https://nodejs.org/dist/v8.11.4/node-v8.11.4-linux-s390x.tar.gz \
- && tar xvf node-v8.11.4-linux-s390x.tar.gz \
-
+ && wget https://nodejs.org/dist/v10.14.1/node-v10.14.1-linux-s390x.tar.gz \
+ && tar xvf node-v10.14.1-linux-s390x.tar.gz \
 # Download and setup Kibana
  && cd /root/ && wget https://artifacts.elastic.co/downloads/kibana/kibana-${KIBANA_VER}-linux-x86_64.tar.gz \
  && tar xvf kibana-${KIBANA_VER}-linux-x86_64.tar.gz \
  && mv /root/kibana-${KIBANA_VER}-linux-x86_64 kibana-${KIBANA_VER} \
  && cd /root/kibana-${KIBANA_VER} \
  && mv node node_old \
- && ln -s /root/node-v8.11.4-linux-s390x node \
+ && ln -s /root/node-v10.14.1linux-s390x node \
  && mkdir /etc/kibana \
  && cp config/kibana.yml /etc/kibana \
  && mv /root/kibana-${KIBANA_VER}/ /usr/share/kibana \
-
 # Cleanup Cache data, unused packages and source files
  && apt-get remove -y \
     unzip \
     wget \
  && apt-get autoremove -y && apt-get clean \
- && rm -rf /root/kibana-${KIBANA_VER}-linux-x86_64.tar.gz /root/node-v8.11.4-linux-s390x.tar.gz \
+ && rm -rf /root/kibana-${KIBANA_VER}-linux-x86_64.tar.gz /root/node-v10.14.1-linux-s390x.tar.gz \
  && rm -rf /var/lib/apt/lists/*
 
 
 # Expose 5601 port used by Kibana
-EXPOSE 5601 
+EXPOSE 5601
 
 # Start Kibana service
 CMD ["kibana","-H","0.0.0.0"]
