@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2018
+# © Copyright IBM Corporation 2018, 2019
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################### Dockerfile for GlusterFS version 4.1.5 ##################################
+##################################### Dockerfile for GlusterFS version 5.3 ##########################################
 #
 # This Dockerfile builds a basic installation of GlusterFS.
 #
@@ -12,64 +12,66 @@
 # Start GlusterFS container using the below command
 # docker run --name <container_name> --privileged=true -d <image_name>
 #
-##############################################################################################################
+###########################################################################################################
 
 # Base Image
 FROM  s390x/ubuntu:16.04
+
+ARG GLUSTERFS_VER=5.3
 
 # The Author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 # Set Environment Variables
-
 ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" SOURCE_DIR="/tmp/"
 
 WORKDIR $SOURCE_DIR
 
 # Install Dependencies
-RUN apt-get update && apt-get install -y  make \
-    automake \
+RUN apt-get update && apt-get install -y  attr \
 	autoconf \
-	libtool \
-	flex \
+	automake \
+	bc \
 	bison \
-	pkg-config \
-	libssl-dev \
-	libxml2-dev \
-	python-dev \
+	dbench \
+	flex \
+	git \
+	libacl1-dev \
 	libaio-dev \
+	libcmocka-dev \
+	libglib2.0-dev \
 	libibverbs-dev \
+	liblvm2-dev \
 	librdmacm-dev \
 	libreadline-dev \
-	liblvm2-dev \
-	libglib2.0-dev \
-	liburcu-dev \
-	libcmocka-dev \
 	libsqlite3-dev \
-	libacl1-dev \
-	wget \
-	tar \
-	dbench \
-	git \
-	xfsprogs \
-	attr \
-	nfs-common \
-	yajl-tools \
-	sqlite3 \
+	libssl-dev \
+	libtool \
+	liburcu-dev \
+	libxml2-dev \
 	libxml2-utils \
+	make \
+	net-tools \
+	nfs-common \
+	pkg-config\
+	python3-dev \
+	python3-pyxattr \
+	sqlite3 \
+	tar \
 	thin-provisioning-tools \
-	bc \
 	uuid-dev \
-	
+	vim-common \
+	wget \
+	xfsprogs \
+	yajl-tools \
 
 # Build GlusterFS from source
- && git clone https://github.com/gluster/glusterfs \
+ && git clone https://github.com/gluster/glusterfs -b v$GLUSTERFS_VER\
  && cd glusterfs \
- && git checkout v4.1.5 \
  && ./autogen.sh \
  && ./configure --enable-gnfs \
- && sed -i '39d' xlators/performance/io-threads/src/io-threads.h \
- && sed -i '39i #define IOT_THREAD_STACK_SIZE   ((size_t)(512*1024))' xlators/performance/io-threads/src/io-threads.h \
+ && sed -i '37d' xlators/performance/io-threads/src/io-threads.h \
+ && sed -i '37i #define IOT_THREAD_STACK_SIZE   ((size_t)(512*1024))' xlators/performance/io-threads/src/io-threads.h \
  && make \
  && make install \
  && ldconfig \
