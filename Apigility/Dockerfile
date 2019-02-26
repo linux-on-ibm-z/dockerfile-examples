@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2018, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apigility version 1.5.1 ###############
+########## Dockerfile for Apigility version 1.5.2 ###############
 #
 # This Dockerfile builds a basic installation of Apigility.
 #
@@ -56,7 +56,7 @@ RUN	apt-get update && apt-get -y install \
 	&&	cd $SOURCE_DIR \
 	&&	git clone https://github.com/zfcampus/zf-apigility-skeleton.git \
 	&&	cd zf-apigility-skeleton/ \
-	&&	git checkout 1.5.1 \
+	&&	git checkout 1.5.2 \
 
 # Install composer
 	&&	curl -s https://getcomposer.org/installer | php -- \
