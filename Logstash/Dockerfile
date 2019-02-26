@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 6.5.0 ###################################################
+############################ Dockerfile for Logstash version 6.6.0 ###################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -19,13 +19,13 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG LOGSTASH_VER=6.5.0
+ARG LOGSTASH_VER=6.6.0
 
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 WORKDIR "/root"
-ENV JAVA_HOME=/root/jdk8u192-b03/ 
+ENV JAVA_HOME=/root/jdk8u202-b08/
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV LD_LIBRARY_PATH=/root/jffi-jffi-1.2.18/build/jni/:$LD_LIBRARY_PATH
 # Install dependencies
@@ -38,9 +38,9 @@ RUN apt-get update && apt-get install -y \
     wget \
 
 # Download OpenJDK8 with Eclipse OpenJ9
- && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u-2018-09-30-17-14/OpenJDK8U_s390x_linux_openj9_2018-09-30-17-14.tar.gz \
- && tar -xf OpenJDK8U_s390x_linux_openj9_2018-09-30-17-14.tar.gz \
-	
+ && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u202-b08_openj9-0.12.1/OpenJDK8U-jdk_s390x_linux_openj9_8u202b08_openj9-0.12.1.tar.gz \
+ && tar -xf OpenJDK8U-jdk_s390x_linux_openj9_8u202b08_openj9-0.12.1.tar.gz \
+
 # Download the logstash source from github and build it
  && wget https://artifacts.elastic.co/downloads/logstash/logstash-${LOGSTASH_VER}.zip \
  && unzip -u logstash-${LOGSTASH_VER}.zip \
