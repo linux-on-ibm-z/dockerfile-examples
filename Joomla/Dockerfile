@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Joomla version 3.9.1 ######
+########## Dockerfile for Joomla version 3.9.3 ######
 #
 # Joomla is an online, open source website creation tool written in PHP.
 #
@@ -23,7 +23,7 @@ FROM s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG JOOMLA_VER=3.9.1
+ARG JOOMLA_VER=3.9.3
 
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
@@ -72,7 +72,7 @@ RUN apt-get update -y && apt-get install -y \
  && /usr/bin/mysql -e "grant all privileges on *.* to 'user'@'localhost'" \
 
 # Create a script to start apache2 and mysql
- && echo 'service apache2 start && /usr/bin/mysqld_safe --user=mysql' > /start.sh \
+ && echo 'chown -R mysql:mysql /var/lib/mysql /var/run/mysqld && service apache2 start && /usr/bin/mysqld_safe --user=mysql' > /start.sh \
 
 # Clean up of unused packages
  && apt-get remove -y \
