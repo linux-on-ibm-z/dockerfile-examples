@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ##################### Dockerfile for Couchbase version 5.1.0 ###################################################
@@ -73,11 +73,11 @@ RUN apt-get update -y && apt-get install -y\
  && go version \
  && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 40 \
  && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 40 \
- && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.26/linux/s390x/ibm-java-sdk-8.0-5.26-s390x-archive.bin \
+ && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.27/linux/s390x/ibm-java-sdk-8.0-5.27-s390x-archive.bin \
  && wget https://raw.githubusercontent.com/zos-spark/scala-workbench/master/files/installer.properties.java \
  && tail -n +3 installer.properties.java | tee installer.properties \
- && chmod +x ibm-java-sdk-8.0-5.26-s390x-archive.bin \
- && ./ibm-java-sdk-8.0-5.26-s390x-archive.bin -r installer.properties \
+ && chmod +x ibm-java-sdk-8.0-5.27-s390x-archive.bin \
+ && ./ibm-java-sdk-8.0-5.27-s390x-archive.bin -r installer.properties \
  && java  -version \
 
 # Install json
