@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for Apache ActiveMQ version 5.15.6 ###################
+################# Dockerfile for Apache ActiveMQ version 5.15.8 ###################
 #
 # This Dockerfile builds a basic installation of Apache ActiveMQ.
 #
@@ -14,17 +14,22 @@
 #
 # Run the ActiveMQ Message Broker using below command:
 # docker run --name <container_name> -d -p <port>:8161 <image-name>
-# e.g. docker run --name activemq -d -p 8161:8161 activemq:5.15.6
+# e.g. docker run --name activemq -d -p 8161:8161 activemq:5.15.8
 #
 # To provide custom configuration for Activemq use below command:
 #  docker run --name <container_name> -d -p <port>:8161 -v /<host_path>/conf:/opt/activemq/conf <image-name>
 # 
+# Note: login Credential are
+#       Login: admin
+#       Password: admin
 # Official website: http://activemq.apache.org/
 #
 ###################################################################################
 
 # Base Image
 FROM s390x/ubuntu:16.04
+
+ARG APACHE_AMQ_VER=5.15.8
 
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -39,20 +44,18 @@ WORKDIR $SOURCE_DIR
 RUN apt-get update && apt-get install -y \
 	openjdk-8-jdk \
 	tar \
-	wget \
-	        
+	wget \	        
 # Download and build source code of Apache ActiveMQ
   && cd $SOURCE_DIR \
-  && wget http://archive.apache.org/dist/activemq/5.15.6/apache-activemq-5.15.6-bin.tar.gz \
-  && tar -xzvf apache-activemq-5.15.6-bin.tar.gz \
+  && wget http://archive.apache.org/dist/activemq/${APACHE_AMQ_VER}/apache-activemq-${APACHE_AMQ_VER}-bin.tar.gz \
+  && tar -xzvf apache-activemq-${APACHE_AMQ_VER}-bin.tar.gz \
   && mkdir -p /opt/activemq \
-  && cp -a $SOURCE_DIR/apache-activemq-5.15.6/* /opt/activemq \
-  
+  && cp -a $SOURCE_DIR/apache-activemq-${APACHE_AMQ_VER}/* /opt/activemq \  
 # Clean up the unwanted packages and clear the source directory 
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf $SOURCE_DIR/activemq $SOURCE_DIR/apache-activemq-5.15.6 /var/lib/apt/lists/* /root/.m2 
+  && rm -rf $SOURCE_DIR/activemq $SOURCE_DIR/apache-activemq-${APACHE_AMQ_VER} /var/lib/apt/lists/* /root/.m2 
 
 # Define mount point having important data like pid, log & db info 
 VOLUME ["/opt/activemq/data"]
