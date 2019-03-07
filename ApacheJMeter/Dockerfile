@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for Apache JMeter version 4.0 #########################################
+######################## Dockerfile for Apache JMeter version 5.1 #########################################
 #
 # This Dockerfile builds a basic installation of Apache JMeter.
 #
@@ -12,9 +12,6 @@
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
-#
-# To create a container of Apache JMeter image run the below command:
-# docker run --name <container_name> -it <image_name>
 #
 # To test a JMX file use the following command:
 # docker run --rm=true -v /path/to/JMX_file/filename.jmx:/filename.jmx jmeter_imagename /filename.jmx
@@ -40,18 +37,18 @@ RUN apt-get update && apt-get install -y \
 
 # Download from git and build
  && cd $WORKDIR \
- && wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-4.0.tgz \
- && tar -xvzf apache-jmeter-4.0.tgz \
+ && wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.1.tgz \
+ && tar -xvzf apache-jmeter-5.1.tgz \
 
 #Remove G1GC algorithm as it is unimplemented in OpenJDK zero
- && sed -i '178d' $WORKDIR/apache-jmeter-4.0/bin/jmeter \
+ && sed -i '178d' $WORKDIR/apache-jmeter-5.1/bin/jmeter \
  
 # Clean the Cache data and remove source files and dependencies   
  && apt-get autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set Environment Variable for JMeter
-ENV PATH $PATH:$WORKDIR/apache-jmeter-4.0/bin
+ENV PATH $PATH:$WORKDIR/apache-jmeter-5.1/bin
 ENTRYPOINT ["jmeter","-n","-t"]
 
 # End Of Dockerfile
