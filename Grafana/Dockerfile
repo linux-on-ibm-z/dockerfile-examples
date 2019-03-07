@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 5.4.2 ############################################
+############################ Dockerfile for Grafana 5.4.3 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -20,11 +20,13 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
+ARG GRAFANA_VER=5.4.3
+
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV QT_QPA_PLATFORM=offscreen GOPATH=/opt
-ENV PATH=$PATH:/opt/yarn-v1.3.2/bin:$GOPATH/bin:/opt/ibm/node/bin:/usr/lib/go-1.10/bin:/usr/share/grafana/bin/linux-s390x
+ENV PATH=$PATH:/usr/local/node-v8.15.0-linux-s390x/bin:/usr/local/go/bin:/usr/share/grafana/bin/linux-s390x
 
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
@@ -36,36 +38,29 @@ RUN apt-get update -y && apt-get install -y \
     python \
     wget \
     unzip \
-    golang-1.10 \
-
+# Install go
+ && cd $GOPATH \
+ && wget https://storage.googleapis.com/golang/go1.11.4.linux-s390x.tar.gz \
+ && chmod ugo+r go1.11.4.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.11.4.linux-s390x.tar.gz \
 # Install Nodejs
- && cd / && wget http://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-s390x.tar.xz \
- && chmod ugo+r node-v8.11.3-linux-s390x.tar.xz \
- && tar -C /usr/local -xf node-v8.11.3-linux-s390x.tar.xz \
- && export PATH=$PATH:/usr/local/node-v8.11.3-linux-s390x/bin \
-
+ && cd $GOPATH \
+ && wget https://nodejs.org/dist/v8.15.0/node-v8.15.0-linux-s390x.tar.xz \
+ && chmod ugo+r node-v8.15.0-linux-s390x.tar.xz \
+ && tar -C /usr/local -xf node-v8.15.0-linux-s390x.tar.xz \
 # Get the Grafana Soure code and build Grafana backend
- && cd / && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
- && cd $GOPATH/src/github.com/grafana/grafana && git checkout v5.4.2 \
+ && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
+ && cd $GOPATH/src/github.com/grafana/grafana && git checkout v${GRAFANA_VER} \
  && make deps-go \
  && make build-go \
-
 # Install yarn
- && cd / && wget https://github.com/yarnpkg/yarn/releases/download/v1.3.2/yarn-v1.3.2.tar.gz \
- && tar -C /opt/ -xzf yarn-v1.3.2.tar.gz \
- && rm -rf /yarn-v1.3.2.tar.gz \
-
-# Install grunt
- && cd $GOPATH/src/github.com/grafana/grafana \
- && npm install grunt \
-
+ && npm install -g yarn \
 # Build frontend
+ && cd $GOPATH/src/github.com/grafana/grafana \
  && make deps-js \
  && make build-js \
-
 # Copy it to /usr/share
  && cp -Rf $GOPATH/src/github.com/grafana/grafana /usr/share/ \
-
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
     build-essential \
@@ -77,7 +72,7 @@ RUN apt-get update -y && apt-get install -y \
     wget \
     unzip \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*  $GOPATH/src/github.com  /node-v8.11.3-linux-s390x
+ && apt-get clean && rm -rf /var/lib/apt/lists/* $GOPATH/src/github.com $GOPATH/node-v8.15.0-linux-s390x.tar.xz $GOPATH/go1.11.4.linux-s390x.tar.gz
 
 VOLUME ["/usr/share/grafana/conf","/usr/share/grafana/data"]
 
@@ -85,3 +80,4 @@ EXPOSE 3000
 WORKDIR "/usr/share/grafana/"
 
 ENTRYPOINT grafana-server start
+# End of Dockerfile
