@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 7.5 ##############################
+################################ Dockerfile for SonarQube 7.6 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -27,7 +27,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
-ARG SONARQUBE_VER=7.5
+ARG SONARQUBE_VER=7.6
 ENV PATH /usr/lib/jvm/java-1.8.0-openjdk-s390x/bin:$PATH
 
 # Install dependencies
