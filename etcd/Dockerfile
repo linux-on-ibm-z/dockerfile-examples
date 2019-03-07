@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for etcd 3.3.11 ####################
+################## Dockerfile for etcd 3.3.12 ####################
 #
 # This Dockerfile builds a basic installation of etcd.
 #
@@ -24,12 +24,12 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG ETCD_VER=v3.3.11
+ARG ETCD_VER=v3.3.12
 
 # Maintainer
 MAINTAINER LoZ Open Source Ecosystem
 
-ENV PATH=$PATH:/usr/lib/go-1.9/bin GOPATH=/
+ENV PATH=$PATH:/usr/lib/go-1.10/bin GOPATH=/
 ENV ETCD_DATA_DIR=/data ETCD_UNSUPPORTED_ARCH=s390x
 
 # Install dependencies
@@ -39,8 +39,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     tar \
     wget \
-    golang-1.9 \
-
+    golang-1.10 \
 # Clone etcd source
  && mkdir -p /src/github.com/coreos \
  && cd /src/github.com/coreos \
@@ -49,11 +48,9 @@ RUN apt-get update && apt-get install -y \
  && cd etcd \
  && git checkout ${ETCD_VER} \
  && mkdir -p /data \
-
 # Build
  && ./build \
  && cd bin && cp -rf etcd etcdctl /usr/bin/ \
-
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
     curl \
