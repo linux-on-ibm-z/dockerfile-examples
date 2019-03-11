@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2018, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ########## Dockerfile for Apache Storm version 1.2.2 #########
@@ -87,8 +87,9 @@ RUN apt-get update  \
 # Install rvm and nvm
  && cd $HOME \
  && command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - \
+ && command curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import - \
  && curl -L https://get.rvm.io | bash -s stable --autolibs=enabled && . $HOME/.profile \
- && wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | bash && source $HOME/.bashrc \
+ && wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | bash && . $HOME/.bashrc \
 
 # Download and build source code of Apache Storm
  && cd $SOURCE_DIR \
