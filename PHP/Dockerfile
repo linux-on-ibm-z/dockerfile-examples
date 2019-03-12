@@ -1,4 +1,7 @@
-########## Dockerfile for PHP 7.2.1 #########
+# © Copyright IBM Corporation 2017, 2019.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############################# Dockerfile for PHP 7.3.2 ###############################
 #
 # This Dockerfile builds a basic installation of PHP
 #
@@ -66,22 +69,14 @@ RUN apt-get update -y && apt-get -y install \
 
 # Download PHP
  && cd /root && git clone git://github.com/php/php-src.git \
- && cd php-src && git checkout tags/php-7.2.1 \
+ && cd php-src && git checkout tags/php-7.3.2 \
+ && sed -i "1832,1832 s/size_t/unsigned int/g" ext/phar/util.c \
  && ln -sf /usr/lib/s390x-linux-gnu/libldap.so /usr/lib/libldap.so \
  && ln -sf /usr/lib/s390x-linux-gnu/liblber.so /usr/lib/liblber.so \
  && ln -sf /usr/include/s390x-linux-gnu/gmp.h /usr/include/gmp.h \
 
  # apply patch
  && sed -i '531,531 s/short int/int/' ext/mbstring/oniguruma/src/regint.h \
- && sed -i '1630,1630 s/zend_long/php_socket_t/' ext/standard/streamsfuncs.c \
- && sed -i '109,109 s/short ignore_user_abort/zend_bool ignore_user_abort/' main/php_globals.h \
- && sed -i '778, 778 s/status_word)/(int)status_word)/' ext/pcntl/pcntl.c \
- && sed -i '796,796  s/status_word)/(int)status_word)/' ext/pcntl/pcntl.c  \
- && sed -i '814,814  s/status_word)/(int)status_word)/' ext/pcntl/pcntl.c  \
- && sed -i '831,831  s/status_word)/(int)status_word)/' ext/pcntl/pcntl.c  \
- && sed -i '850,850  s/status_word)/(int)status_word)/' ext/pcntl/pcntl.c  \
- && sed -i '867,868  s/status_word)/(int)status_word)/' ext/pcntl/pcntl.c  \
- && sed -i '885,886  s/status_word)/(int)status_word)/' ext/pcntl/pcntl.c \
  
 # Configure and Install PHP
  && cd /root/php-src \
@@ -127,5 +122,4 @@ RUN apt-get update -y && apt-get -y install \
  && rm -rf /root/php-src
 
  CMD php -v
-
 
