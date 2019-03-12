@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for Apache Http Server version 2.4.35 #####################
+################# Dockerfile for Apache Http Server version 2.4.38 #####################
 #
 # This Dockerfile builds a basic installation of Apache Http Server.
 #
@@ -24,6 +24,8 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
+ARG APACHE_HTTP_VER=2.4.38
+
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
@@ -43,24 +45,20 @@ RUN apt-get update && apt-get install -y \
 	libxml2 \
 	make \
 	openssl \
-	python \
+	python \	
 	tar \
 	wget \
-
 # Clone httpd from git
- && git clone git://github.com/apache/httpd.git && cd httpd && git checkout 2.4.35 \
- 
+ && git clone git://github.com/apache/httpd.git && cd httpd && git checkout ${APACHE_HTTP_VER} \ 
 # Download apr and apr-util source
  && cd $SOURCE_DIR/httpd/srclib && git clone git://github.com/apache/apr.git && cd apr \
  && git checkout 1.6.5 \
  && cd $SOURCE_DIR/httpd/srclib && git clone git://github.com/apache/apr-util.git && cd apr-util \
- && git checkout 1.6.1 \
- 
+ && git checkout 1.6.1 \ 
 # Build and install httpd
  && cd $SOURCE_DIR/httpd && ./buildconf \
  && ./configure --prefix=/usr/local --with-included-apr \
- && make && make install \
- 
+ && make && make install \ 
 # Clean up cache , source data and un-used packages
  && apt-get remove -y \
     autoconf \
