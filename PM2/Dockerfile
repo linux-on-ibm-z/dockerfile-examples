@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for PM2 latest version #########
+######################### Dockerfile for PM2 latest version ##############################
 #
 # This Dockerfile builds a basic installation of PM2.
 #
@@ -38,12 +38,10 @@ RUN  apt-get update  \
   && apt-get -y install \
          wget \
          tar  \
-  && wget https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-s390x.tar.gz \
-  && tar -xvf node-v8.11.3-linux-s390x.tar.gz \
-  && mv node-v8.11.3-linux-s390x nodejs \
+  && wget https://nodejs.org/dist/v8.15.1/node-v8.15.1-linux-s390x.tar.gz \
+  && tar -xvf node-v8.15.1-linux-s390x.tar.gz \
+  && mv node-v8.15.1-linux-s390x nodejs \
   && npm install pm2 -g \
-
-
 # Clean up the unwanted packages and clear the source directory
   && apt-get autoremove -y \
   && apt autoremove -y \
@@ -56,4 +54,3 @@ EXPOSE 8080
 CMD pm2
 
 # End of Dockerfile
-
