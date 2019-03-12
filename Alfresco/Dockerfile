@@ -136,7 +136,7 @@ RUN	apt-get update && apt-get -y install \
 	
 # Build and Install Alfresco
 	&&	cd 5.2.g/root/ \
-	&&	mvn clean install -DskipTests -fn \
+	&&	mvn clean install -DskipTests \
 	
 # Copy alfresco.war to /opt/tomcat/webapps
 	&&	cd /opt/tomcat \
