@@ -1,3 +1,5 @@
+# © Copyright IBM Corporation 2017, 2019.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0) 
 ########## Dockerfile for Alfresco version 5.2 #####################
 #
 # This Dockerfile builds a basic installation of Alfresco.
@@ -74,9 +76,9 @@ RUN	apt-get update && apt-get -y install \
 	
 # Build and Install Apache Tomcat
 	&&	cd $SOURCE_DIR \
-	&&	git clone https://github.com/apache/tomcat85.git \
-	&&	cd tomcat85/ \
-	&&	git checkout TOMCAT_8_5_16 \
+	&&	git clone https://github.com/apache/tomcat.git \
+	&&	cd tomcat/ \
+	&&	git checkout 8.5.16 \
 	&&	cp build.properties.default build.properties \
 	&&	ant \
 	
@@ -84,7 +86,7 @@ RUN	apt-get update && apt-get -y install \
 	&&	groupadd tomcat \
 	&&	useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat \
 	&&	mkdir /opt/tomcat \
-	&&	cp -R $SOURCE_DIR/tomcat85/output/build/* /opt/tomcat/ \
+	&&	cp -R $SOURCE_DIR/tomcat/output/build/* /opt/tomcat/ \
 	&&	cd /opt/tomcat \
 	&&	chgrp -R tomcat /opt/tomcat \
 	&&	chmod -R g+r conf \
