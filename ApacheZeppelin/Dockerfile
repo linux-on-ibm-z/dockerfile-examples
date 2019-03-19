@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############## Dockerfile for Apache Zeppelin version 0.8.0 ###############
+############## Dockerfile for Apache Zeppelin version 0.8.1 ###############
 #
 # This Dockerfile builds a basic installation of Apache Zeppelin.
 #
@@ -17,7 +17,7 @@
 # We can view the Apache Zeppelin UI at http://<zeppelin-host-ip>:<port_number>
 #
 # Reference:
-# http://zeppelin.apache.org/docs/0.8.0/index.html
+# http://zeppelin.apache.org/docs/0.8.1/index.html
 #
 #################################################################################
 
@@ -26,6 +26,8 @@ FROM s390x/ubuntu:16.04
 
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
+ARG ZEPPELIN_VER=0.8.1
 
 ENV SOURCE_DIR=/tmp/source MAVEN_OPTS="-Xmx2g -XX:MaxPermSize=1024m" \
 	JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x \
@@ -112,7 +114,7 @@ RUN	apt-get update && apt-get -y install \
 	&&  cd $SOURCE_DIR \
 	&&	git clone https://github.com/apache/zeppelin.git \
 	&&	cd zeppelin \
-	&&	git checkout v0.8.0 \
+	&&	git checkout v${ZEPPELIN_VER} \
 	
 # Edit $SOURCE_DIR/zeppelin/zeppelin-web/.bowerrc and pom.xml
  	&&	sed -i 's/"json": "bower.json"/"json": "bower.json",/g' zeppelin-web/.bowerrc \
