@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Consul - 1.4.0 #########
+###################### Dockerfile for Consul - 1.4.3 ########################
 # 
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter 
@@ -25,7 +25,7 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG CONSUL_VER=1.4.0
+ARG CONSUL_VER=1.4.3
 
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -43,14 +43,12 @@ RUN apt-get update &&  apt-get install -y \
     git \
     make \
     tar \
-    unzip \
-    vim \
     wget \
-    zip \
+
 # Install go and get source code of consul
  && cd $SOURCE_DIR \
- && wget https://storage.googleapis.com/golang/go1.11.1.linux-s390x.tar.gz \
- && tar -xzf go1.11.1.linux-s390x.tar.gz \
+ && wget https://storage.googleapis.com/golang/go1.11.4.linux-s390x.tar.gz \
+ && tar -xzf go1.11.4.linux-s390x.tar.gz \ 
  && mkdir -p $GOPATH/src/github.com/hashicorp \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/consul.git \
@@ -58,7 +56,9 @@ RUN apt-get update &&  apt-get install -y \
  && go get -u github.com/SAP/go-hdb/... \
  && mv $GOPATH/src/github.com/hashicorp/consul/vendor/github.com/SAP/go-hdb $GOPATH/src/github.com/hashicorp/consul/vendor/github.com/SAP/go-hdb_bkp \
  && cp -r $GOPATH/src/github.com/SAP/go-hdb $GOPATH/src/github.com/hashicorp/consul/vendor/github.com/SAP/ \
+ 
 # Build consul
+ && make tools \
  && make dev \
  && cp $GOPATH/bin/consul /usr/local/bin \
  && mkdir -p /consul/data \
@@ -68,9 +68,7 @@ RUN apt-get update &&  apt-get install -y \
    curl \
    git \
    gcc \
-   vim \
    wget \
-   zip \
  && apt-get autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
