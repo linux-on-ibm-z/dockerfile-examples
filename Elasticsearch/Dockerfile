@@ -30,7 +30,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 
 # Set Environment Variables
 
-ENV LANG="en_US.UTF-8" JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8" _JAVA_OPTIONS="-Xmx10g" SOURCE_DIR="/tmp/"
+ENV LANG="en_US.UTF-8" JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8" JAVA_OPTIONS="-Xmx5g" JAVA_OPTS="-Xmx5g" SOURCE_DIR="/tmp/"
 ENV JAVA_HOME=/usr/share/jdk-11.0.2+7
 ENV PATH=$JAVA_HOME/bin:$PATH
 WORKDIR $SOURCE_DIR
