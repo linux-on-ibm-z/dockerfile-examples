@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Redis version 5.0.3 #########
+########## Dockerfile for Redis version 5.0.4 #########
 #
 # This Dockerfile builds a basic installation of Redis.
 #
@@ -26,7 +26,7 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG REDIS_VER=5.0.3
+ARG REDIS_VER=5.0.4
 
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
