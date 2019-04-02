@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Python-2.7.15 #########################################
+########## Dockerfile for Python-2.7.16 #########################################
 #
 # Python is an interactive high-level object-oriented language
 #
@@ -30,7 +30,7 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG PYTHON_VER=2.7.15
+ARG PYTHON_VER=2.7.16
 
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -40,29 +40,28 @@ RUN apt-get update && apt-get install -y \
     curl \
     g++ \
     gcc \
-	gdb \
-    libbz2-dev \ 
+    gdb \
+    libbz2-dev \
     libc6-dev \
-	libdb-dev \
-	libdb1-compat \
-    libgdbm-dev \ 
+    libdb-dev \
+    libdb1-compat \
+    libgdbm-dev \
     libncurses5-dev \
     libreadline6-dev \
     libsqlite3-dev \
     libssl-dev \
     make \
-    patch \
     tar \
-	tk8.5-dev \
+    tk-dev \
     wget \
     xz-utils \ 
-	zlib1g-dev \	
+    zlib1g-dev \
 # Download Python from the ftp site
  && wget https://www.python.org/ftp/python/${PYTHON_VER}/Python-${PYTHON_VER}.tar.xz \
  && tar -xf Python-${PYTHON_VER}.tar.xz \
 # Build Python
  && cd Python-${PYTHON_VER} \
- && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
+ && ./configure \
  && make \
  && make install \
 # Clean up cache data and remove dependencies that are not required
@@ -72,7 +71,6 @@ RUN apt-get update && apt-get install -y \
     g++ \
     gcc \
     make \
-    patch \
     wget \
     xz-utils \ 
  && apt autoremove -y \
