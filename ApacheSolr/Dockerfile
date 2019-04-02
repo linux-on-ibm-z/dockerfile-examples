@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Apache Solr version 7.3.1 #########################
+############### Dockerfile for Apache Solr version 8.0.0 #########################
 #
 # To build Apache Solr image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -21,35 +21,41 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 # Create a working directory for Apache Solr
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x PATH=$JAVA_HOME/bin:$PATH
-ENV ANT_OPTS="-Xmx1024m -Xss1g"
+ENV JAVA_HOME=/opt/jdk8u202-b08 PATH=$JAVA_HOME/bin:$PATH
+
+ARG SOLR_VER=8.0.0
 
 # Install dependencies
 RUN apt-get update &&   apt-get install -y \
     ant \
     curl \
+    git \
     lsof \
-    openjdk-8-jdk \
     tar \
     wget \
 
+# Download AdoptOpenJDK 8 with OpenJ9
+ && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u202-b08_openj9-0.12.1/OpenJDK8U-jdk_s390x_linux_openj9_8u202b08_openj9-0.12.1.tar.gz \
+ && tar -xzf OpenJDK8U-jdk_s390x_linux_openj9_8u202b08_openj9-0.12.1.tar.gz -C /opt \
+
 # Download Solr and build it
- && wget http://archive.apache.org/dist/lucene/solr/7.3.1/solr-7.3.1-src.tgz \
- && tar zxvf solr-7.3.1-src.tgz  \
- && cd solr-7.3.1/solr \
+ && wget http://archive.apache.org/dist/lucene/solr/$SOLR_VER/solr-$SOLR_VER-src.tgz \
+ && tar zxvf solr-$SOLR_VER-src.tgz  \
+ && cd solr-$SOLR_VER\
  && ant ivy-bootstrap \
+ && cd solr \
  && ant compile \
  && ant server \
- && cd  $SOURCE_DIR/solr-7.3.1/solr/bin  \
+ && cd  $SOURCE_DIR/solr-$SOLR_VER/solr/bin  \
  && chmod a+x solr  \
- && cp -r $SOURCE_DIR/solr-7.3.1/solr /opt/ \
+ && cp -r $SOURCE_DIR/solr-$SOLR_VER/solr /opt/ \
 
 # Tidy and clean up 
  && rm -rf $SOURCE_DIR \
  && apt-get remove -y \
     ant \
     curl \
-    lsof \
+    git \
     wget \
  && apt-get autoremove -y && apt autoremove -y \
  && apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/* && rm -rf /var/tmp
