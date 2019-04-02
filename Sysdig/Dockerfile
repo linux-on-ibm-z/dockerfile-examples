@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Sysdig version 0.24.1 #########
+########## Dockerfile for Sysdig version 0.24.2 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG SYSDIG_VER=0.24.1
+ARG SYSDIG_VER=0.24.2
 
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -61,8 +61,8 @@ RUN apt-get update \
 	&& make install \	
 # Copy important content from build
 	&& mkdir -p /opt/sysdig \
-	&& cp $SOURCEDIR/sysdig-0.24.1/build/driver/sysdig-probe.ko /opt/sysdig \
-	&& cp -r $SOURCEDIR/sysdig-0.24.1/build/userspace/sysdig /opt/sysdig \
+	&& cp $SOURCEDIR/sysdig-0.24.2/build/driver/sysdig-probe.ko /opt/sysdig \
+	&& cp -r $SOURCEDIR/sysdig-0.24.2/build/userspace/sysdig /opt/sysdig \
 # Clean up cache data and remove dependencies which are not required
 	&&	apt-get -y remove \
 		cmake \
