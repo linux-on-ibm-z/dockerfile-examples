@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################# Dockerfile for Apache Tomcat version 8.5.38 #####################################
+############################# Dockerfile for Apache Tomcat version 8.5.39 #####################################
 #
 # This Dockerfile builds a basic installation of Apache Tomcat.
 #
@@ -40,12 +40,12 @@ RUN apt-get update && apt-get install -y \
         wget \
 
 # download binary 
- && cd $WORKDIR && wget http://www-us.apache.org/dist/tomcat/tomcat-8/v8.5.38/bin/apache-tomcat-8.5.38.tar.gz \
- && tar -xvzf apache-tomcat-8.5.38.tar.gz \
+ && cd $WORKDIR && wget http://www-us.apache.org/dist/tomcat/tomcat-8/v8.5.39/bin/apache-tomcat-8.5.39.tar.gz \
+ && tar -xvzf apache-tomcat-8.5.39.tar.gz \
  
 
 # Clean up source dir and unused packages/libraries
- && cd $WORKDIR && ls && rm -rf apache-tomcat-8.5.38.tar.gz  \ 
+ && cd $WORKDIR && ls && rm -rf apache-tomcat-8.5.39.tar.gz  \ 
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -54,6 +54,6 @@ RUN apt-get update && apt-get install -y \
 EXPOSE 8080
 
 # Start Apache Tomcat
-CMD $WORKDIR/apache-tomcat-8.5.38/bin/startup.sh && tail -f $WORKDIR/apache-tomcat-8.5.38/logs/catalina.out
+CMD $WORKDIR/apache-tomcat-8.5.39/bin/startup.sh && tail -f $WORKDIR/apache-tomcat-8.5.39/logs/catalina.out
 
 # End of Dockerfile
