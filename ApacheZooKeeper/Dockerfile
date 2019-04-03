@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ################ Dockerfile for Apache ZooKeeper version 3.4.13 ######################
@@ -36,7 +36,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install Apache ZooKeeper
  && cd $WORKDIR \
- && wget http://www-eu.apache.org/dist/zookeeper/zookeeper-3.4.13/zookeeper-3.4.13.tar.gz \
+ && wget https://archive.apache.org/dist/zookeeper/zookeeper-3.4.13/zookeeper-3.4.13.tar.gz \
  && tar -xzvf zookeeper-3.4.13.tar.gz \
 
 # Copy default config file 
