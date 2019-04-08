@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 #################### Dockerfile for Beats 6.2.4 #############################
@@ -49,9 +49,12 @@ RUN apt-get update && apt-get install -y \
     python-setuptools \
     tar \
     wget \
+    libffi-dev \
+    libssl-dev \
+    python-dev \
 # Install go and donload beats source code
  && python -m easy_install pip \
- && python -m pip install appdirs pyparsing six packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv \
+ && python -m pip install appdirs pyparsing six packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv cffi==1.4.1 \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
