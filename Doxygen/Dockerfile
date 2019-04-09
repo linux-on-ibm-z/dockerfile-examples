@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
-# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+# © Copyright IBM Corporation 2017, 2019.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0) 
 
-################## Dockerfile for Doxygen version 1.8.14 ##################
+################## Dockerfile for Doxygen version 1.8.15 ##################
 #
 # This Dockerfile builds a basic installation of Doxygen
 #
@@ -28,6 +28,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
+ARG DOXYGEN_VER=1.8.15
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -45,7 +46,7 @@ RUN apt-get update && apt-get install -y \
     python \
     qt-sdk \
  && git clone git://github.com/doxygen/doxygen.git \
- && cd doxygen && git checkout Release_1_8_14 \
+ && cd doxygen && git checkout ${DOXYGEN_VER} \
   && mkdir build && cd build \
  && cmake -G "Unix Makefiles" -Dbuild_doc=NO -Dbuild_wizard=YES .. \
  && make && make install \
@@ -68,3 +69,4 @@ RUN apt-get update && apt-get install -y \
 # a container e.g. as shown in the header comment above.
 
 # End of Dockerfile
+
