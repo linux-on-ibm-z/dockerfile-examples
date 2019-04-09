@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for WildFly (JBoss) version 14.0.1 ##########################
+################# Dockerfile for WildFly (JBoss) version 16.0.0 ##########################
 #
 # This Dockerfile builds a basic installation of WildFly.
 #
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG WILDFLY_VER=14.0.1.Final
+ARG WILDFLY_VER=16.0.0.Final
 
 ENV JAVA_HOME=/opt/jdk-11+28
 ENV PWD=`pwd`
