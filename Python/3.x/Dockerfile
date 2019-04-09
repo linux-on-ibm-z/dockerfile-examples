@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Python 3.7.2 #########################################
+########################### Dockerfile for Python 3.7.3 ###################################
 #
 # Python is an interactive high-level object-oriented language
 #
@@ -30,23 +30,27 @@ FROM s390x/ubuntu:16.04
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-ARG PYTHON_VER=3.7.2
+ARG PYTHON_VER=3.7.3
 
 RUN apt-get update && apt-get install -y \
     g++ \
     gcc \
     libbz2-dev \ 
-    libc6-dev \
+    libdb-dev \
     libffi-dev \
-    libgdbm-dev \ 
-    libncurses5-dev \
-    libreadline6-dev \
+    libgdbm-dev \
+    liblzma-dev 
+    libncurses-dev \
+    libreadline-dev \
     libsqlite3-dev \
     libssl-dev \
     make \
     tar \
+    tk-dev \
+    uuid-dev \
     wget \
-    xz-utils \ 
+    xz-utils \
+    zlib1g-dev \
 
 # Download Python from the ftp site
  && wget https://www.python.org/ftp/python/${PYTHON_VER}/Python-${PYTHON_VER}.tar.xz \
@@ -54,7 +58,7 @@ RUN apt-get update && apt-get install -y \
 
 # Build Python
  && cd Python-${PYTHON_VER} \
- && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
+ && ./configure \
  && make \
  && make install \
 
