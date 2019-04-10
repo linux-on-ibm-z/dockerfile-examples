@@ -28,7 +28,7 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
-ARG DOXYGEN_VER=1.8.15
+ARG DOXYGEN_VER=Release_1_8_15
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
