@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y \
     libdb-dev \
     libffi-dev \
     libgdbm-dev \
-    liblzma-dev 
+    liblzma-dev \
     libncurses-dev \
     libreadline-dev \
     libsqlite3-dev \
