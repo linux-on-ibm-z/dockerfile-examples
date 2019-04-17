@@ -1,4 +1,7 @@
-########## Dockerfile for Hibernate version 5.2.15 #########
+# © Copyright IBM Corporation 2017, 2019.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+################# Dockerfile for Hibernate version 5.4.2 ###########################
 #
 # This Dockerfile builds a basic installation of Hibernate.
 #
@@ -17,7 +20,7 @@
 # docker cp <container_id>:/hibernate <path_on_host>
 #
 # Reference:
-# https://github.com/hibernate/hibernate-orm/tree/5.2.15
+# https://github.com/hibernate/hibernate-orm/tree/5.4.2
 #
 ##################################################################################
 
@@ -51,7 +54,7 @@ RUN     apt-get update && apt-get -y install \
         &&      cd $SOURCE_DIR \
         &&      git clone git://github.com/hibernate/hibernate-orm.git \
         &&      cd hibernate-orm \
-        &&      git checkout 5.2.15 \
+        &&      git checkout 5.4.2 \
 
 # Build Hibernate
         &&      mkdir -p $HOME/.gem/jruby/1.9 \
@@ -81,4 +84,5 @@ RUN     apt-get update && apt-get -y install \
 VOLUME /hibernate
 
 # Hibernate provides jar library to user so no need of CMD
+
 # End of Dockerfile
