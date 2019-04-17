@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 5.4.3 ############################################
+############################ Dockerfile for Grafana 6.1.0 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -20,13 +20,13 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG GRAFANA_VER=5.4.3
+ARG GRAFANA_VER=6.1.0
 
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV QT_QPA_PLATFORM=offscreen GOPATH=/opt
-ENV PATH=$PATH:/usr/local/node-v8.15.0-linux-s390x/bin:/usr/local/go/bin:/usr/share/grafana/bin/linux-s390x
+ENV PATH=$PATH:/usr/local/node-v10.15.3-linux-s390x/bin:/usr/local/go/bin:/usr/share/grafana/bin/linux-s390x
 
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
@@ -40,14 +40,14 @@ RUN apt-get update -y && apt-get install -y \
     unzip \
 # Install go
  && cd $GOPATH \
- && wget https://storage.googleapis.com/golang/go1.11.4.linux-s390x.tar.gz \
- && chmod ugo+r go1.11.4.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.11.4.linux-s390x.tar.gz \
+ && wget https://storage.googleapis.com/golang/go1.11.5.linux-s390x.tar.gz \
+ && chmod ugo+r go1.11.5.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.11.5.linux-s390x.tar.gz \
 # Install Nodejs
  && cd $GOPATH \
- && wget https://nodejs.org/dist/v8.15.0/node-v8.15.0-linux-s390x.tar.xz \
- && chmod ugo+r node-v8.15.0-linux-s390x.tar.xz \
- && tar -C /usr/local -xf node-v8.15.0-linux-s390x.tar.xz \
+ && wget https://nodejs.org/dist/v10.15.3/node-v10.15.3-linux-s390x.tar.xz \
+ && chmod ugo+r node-v10.15.3-linux-s390x.tar.xz \
+ && tar -C /usr/local -xf node-v10.15.3-linux-s390x.tar.xz \
 # Get the Grafana Soure code and build Grafana backend
  && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
  && cd $GOPATH/src/github.com/grafana/grafana && git checkout v${GRAFANA_VER} \
@@ -72,7 +72,7 @@ RUN apt-get update -y && apt-get install -y \
     wget \
     unzip \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* $GOPATH/src/github.com $GOPATH/node-v8.15.0-linux-s390x.tar.xz $GOPATH/go1.11.4.linux-s390x.tar.gz
+ && apt-get clean && rm -rf /var/lib/apt/lists/* $GOPATH/src/github.com $GOPATH/node-v10.15.3-linux-s390x.tar.xz $GOPATH/go1.11.5.linux-s390x.tar.gz
 
 VOLUME ["/usr/share/grafana/conf","/usr/share/grafana/data"]
 
