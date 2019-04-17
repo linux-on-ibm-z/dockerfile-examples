@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################### Dockerfile for Salt version 2018.3.3 ##################################
+################### Dockerfile for Salt version 2019.2.0 ##################################
 #
 # This Dockerfile builds a basic installation of Salt.
 #
@@ -32,69 +32,65 @@ MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/commun
 ENV SOURCE_DIR=/
 WORKDIR $SOURCE_DIR
 
+ARG SALT_VER=v2019.2.0
+
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-		bzip2 \
-		gcc \
+        g++ \		
+        gcc \
 		git \
-		g++ \
 		libffi-dev \
-		libssl-dev \ 
-		libtool \
+        libsasl2-dev \
+		libssl-dev \
+        libxml2-dev \
 		libxslt1-dev \
 		libzmq3-dev \
 		make \
-		openssl \
-		python \
-		python-dev \
-		python-setuptools \
+        man \
+		python3-dev \
+		python3-pip \
 		tar \
-		unzip \
 		wget \
-	&&	easy_install pip \	
-# Install required packages using pip
-	&&	pip install \
+
+# Install required packages using pip3
+	&&	pip3 install \
 			pyzmq \
-			PyYAML \
+			'PyYAML<5.1' \
 			pycrypto \
 			msgpack-python \
 			jinja2 \
 			psutil \
 			futures \
 			tornado \
-			'pyOpenSSL>=0.14' \
-			'six>=1.10.0' \		 
+
 # Clone the repository and install SaltStack
 && 	git clone git://github.com/saltstack/salt \
 && 	cd salt \
-&& 	git checkout v2018.3.3 \
-&& 	pip install -r requirements/dev_python27.txt \
-&& 	pip install -e . \
+&& 	git checkout $SALT_VER \
+&& 	pip3 install -e . \
+
 # Configure SaltStack to run self-contained version
 && 	cd $SOURCE_DIR \
-&&	mkdir -p /etc/salt/pki/master \
-&&	mkdir -p /etc/salt/pki/minion \
+&&	mkdir -p etc/salt/pki/master \
+&&	mkdir -p etc/salt/pki/minion \
 && 	cp ./salt/conf/master ./salt/conf/minion etc/salt/ \
 && 	cd etc/salt/ \
+
 # Edit config file master
 &&	sed -i 's/#user: root/user: root/g' master \
 && 	sed -i 's,#root_dir: /,'"root_dir: $SOURCE_DIR"',' master \
-&&	sed -i 's,#pki_dir: /etc/salt/pki/master,'"pki_dir: /etc/salt/pki/master"',' master \
 
 # Edit config file minion
 &&	sed -i 's/#master: salt/master: localhost/g' minion \
 &&	sed -i 's/#user: root/user: root/g' minion \
 &&	sed -i 's,#root_dir: /,'"root_dir: $SOURCE_DIR"',' minion \
-&&  sed -i 's,#pki_dir: /etc/salt/pki/minion,'"pki_dir: /etc/salt/pki/minion"',' minion \
+
 # Clean up cache data and remove dependencies which are not required
 &&	apt-get remove -y \
-			bzip2 \
 			gcc \
 			git \
 			g++ \
 			make \
-			openssl \ 
-			unzip \
 			wget \
 && apt autoremove -y && apt-get clean \
 && rm -rf salt/ && rm -rf /var/lib/apt/lists/*
