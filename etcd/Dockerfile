@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for etcd 3.3.12 ####################
+################## Dockerfile for etcd 3.3.13 ####################
 #
 # This Dockerfile builds a basic installation of etcd.
 #
@@ -24,10 +24,10 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG ETCD_VER=v3.3.12
+ARG ETCD_VER=v3.3.13
 
 # Maintainer
-MAINTAINER LoZ Open Source Ecosystem
+LABEL maintainer="LoZ Open Source Ecosystem"
 
 ENV PATH=$PATH:/usr/lib/go-1.10/bin GOPATH=/
 ENV ETCD_DATA_DIR=/data ETCD_UNSUPPORTED_ARCH=s390x
