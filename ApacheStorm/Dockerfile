@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Storm version 1.2.2 #########
+########## Dockerfile for Apache Storm version 2.0.0 #########
 #
 # This Dockerfile builds a basic installation of Apache Storm.
 #
@@ -60,7 +60,7 @@ ENV STORM_HOME=/opt/storm
 ENV _JAVA_OPTIONS=-Xmx4096m
 ENV JVM_ARGS="-Xms4096m -Xmx4096m"
 ENV MAVEN_OPTS="-Xms4096m -Xmx8192m -Xss4096k"
-ENV PATH=$JAVA_HOME/bin:$SOURCE_DIR/apache-maven-3.2.5/bin:$PATH:$STORM_HOME/bin
+ENV PATH=$JAVA_HOME/bin:$SOURCE_DIR/apache-maven-3.5.2/bin:$PATH:$STORM_HOME/bin
 
 WORKDIR $SOURCE_DIR
 
@@ -79,10 +79,10 @@ RUN apt-get update  \
         tar \
         wget \
 
-# Install Maven 3.2.5
+# Install Maven 3.5.2
  && cd $SOURCE_DIR \
- && wget https://archive.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz \
- && tar -xzf apache-maven-3.2.5-bin.tar.gz \
+ && wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.5.2/apache-maven-3.5.2-bin.tar.gz \
+ && tar -xzf apache-maven-3.5.2-bin.tar.gz \
 
 # Install rvm and nvm
  && cd $HOME \
@@ -95,14 +95,14 @@ RUN apt-get update  \
  && cd $SOURCE_DIR \
  && git clone https://github.com/apache/storm.git \
  && cd storm/ \
- && git checkout tags/v1.2.2 \
+ && git checkout tags/v2.0.0 \
  && mvn clean install -DskipTests \
  && ln -s $STORM_HOME/bin/storm /usr/bin/storm \
 
 # Create binary distribution
  && cd $SOURCE_DIR/storm/storm-dist/binary && mvn package -Dgpg.skip=true \
- && tar -zxf $SOURCE_DIR/storm/storm-dist/binary/target/apache-storm-1.2.2.tar.gz -C $SOURCE_DIR/ \
- && cp -r $SOURCE_DIR/apache-storm-1.2.2 /opt/storm \
+ && tar -zxf $SOURCE_DIR/storm/storm-dist/binary/target/apache-storm-2.0.0.tar.gz -C $SOURCE_DIR/ \
+ && cp -r $SOURCE_DIR/apache-storm-2.0.0 /opt/storm \
 
 # Clean up the unwanted packages and clear the source directory
  && apt-get remove -y \
@@ -116,7 +116,7 @@ RUN apt-get update  \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean \
- && rm -rf /var/lib/apt/lists/* $SOURCE_DIR/storm /root/.m2 $SOURCE_DIR/apache-maven-3.2.5-bin.tar.gz
+ && rm -rf /var/lib/apt/lists/* $SOURCE_DIR/storm /root/.m2 $SOURCE_DIR/apache-maven-3.5.2-bin.tar.gz
 
 # Define mount points for backup of config and logs
 VOLUME ["/opt/storm/logs", "/opt/storm/conf"]
