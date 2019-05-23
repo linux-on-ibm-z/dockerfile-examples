@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################### Dockerfile for Elasticsearch version 6.6.0 ##################################
+############################### Dockerfile for Elasticsearch version 7.0.0 ##################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -23,15 +23,15 @@
 # Base Image
 FROM  s390x/ubuntu:16.04
 
-ARG ELASTICSEARCH_VER=6.6.0
+ARG ELASTICSEARCH_VER=7.0.0
 
 # The Author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 # Set Environment Variables
 
 ENV LANG="en_US.UTF-8" JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8" _JAVA_OPTIONS="-Xmx10g" SOURCE_DIR="/tmp/"
-ENV JAVA_HOME=/usr/share/jdk-11.0.2+7
+ENV JAVA_HOME=/usr/share/jdk-12+33
 ENV PATH=$JAVA_HOME/bin:$PATH
 WORKDIR $SOURCE_DIR
 
@@ -57,15 +57,15 @@ RUN apt-get update &&  apt-get install -y \
     sudo \
 # Download AdoptJDK11
  && cd $SOURCE_DIR \
- && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.2%2B7/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.2_7.tar.gz \
- && tar -C /usr/share/ -xzvf OpenJDK11U-jdk_s390x_linux_hotspot_11.0.2_7.tar.gz \
+ && wget https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12%2B33/OpenJDK12U-jdk_s390x_linux_hotspot_12_33.tar.gz \
+ && tar -C /usr/share/ -xzvf OpenJDK12U-jdk_s390x_linux_hotspot_12_33.tar.gz \
 # Download and build source code of elastic search
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
- && sed -i '$ d' $SOURCE_DIR/elasticsearch/distribution/src/config/jvm.options \
+ && sed -i "170s/linux-x86_64/linux-s390x/" $SOURCE_DIR/elasticsearch/distribution/archives/build.gradle \
  && echo "xpack.ml.enabled: false" >> $SOURCE_DIR/elasticsearch/distribution/src/config/elasticsearch.yml \
  && ./gradlew assemble \
- && cd $SOURCE_DIR/elasticsearch/distribution/archives/tar/build/distributions/ \
- && tar -C /usr/share/ -xf elasticsearch-${ELASTICSEARCH_VER}-SNAPSHOT.tar.gz \
+ && cd $SOURCE_DIR/elasticsearch/distribution/archives/linux-tar/build/distributions/ \
+ && tar -C /usr/share/ -xf elasticsearch-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz \
  && mv /usr/share/elasticsearch-${ELASTICSEARCH_VER}-SNAPSHOT /usr/share/elasticsearch \
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
