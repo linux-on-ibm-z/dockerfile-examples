@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+	# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################# Dockerfile for NGINX 1.14.2 #####################################################
+################################# Dockerfile for NGINX 1.16.0 #####################################################
 #
 # This Dockerfile builds a basic installation of NGINX.
 # NGINX is a free, open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server.
@@ -17,10 +17,10 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG NGINX_VER=1.14.2
+ARG NGINX_VER=1.16.0
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 WORKDIR "/root"
 
