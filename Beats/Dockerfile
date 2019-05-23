@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 6.6.0 #############################
+#################### Dockerfile for Beats 7.0.0 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -11,7 +11,7 @@
 # To create a container of Beats image run the below command:
 # docker run --name <container_name> -it  <image_name>
 #
-# The following modules are present in beats: heartbeat ,filebeat ,metricbeat , packetbeat, libbeat, auditbeat
+# The following modules are present in beats: heartbeat ,filebeat ,metricbeat , packetbeat, libbeat, auditbeat journalbeat
 # docker run --name <container_name> -e BEATSNAME=<beat_name> -d <image_name>
 #
 # To run a particular module like heartbeat run the following command:
@@ -24,16 +24,16 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG BEATS_VER=6.6.0
+ARG BEATS_VER=7.0.0
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 # Set environment variable
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
-ENV PATH=$PATH:/usr/local/go/bin/
 ENV GOPATH=$SOURCE_DIR
+ENV PATH=$PATH:/usr/local/go/bin/:$GOPATH/bin
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -50,6 +50,7 @@ RUN apt-get update && apt-get install -y \
     python-setuptools \
     tar \
     wget \
+    libsystemd-dev \
 # Install go and download beats source code
  && wget https://storage.googleapis.com/golang/go1.10.8.linux-s390x.tar.gz \
  && chmod ugo+r go1.10.8.linux-s390x.tar.gz \
@@ -62,21 +63,6 @@ RUN apt-get update && apt-get install -y \
  && git clone https://github.com/elastic/beats.git  \
  && cd beats  \
  && git checkout v${BEATS_VER}  \
-# Building heartbeat
- && cd $GOPATH/src/github.com/elastic/beats/heartbeat  \
- && make  \
-# Building filebeat
- && cd $GOPATH/src/github.com/elastic/beats/filebeat  \
- && make  \
-# Building packetbeat
- && cd $GOPATH/src/github.com/elastic/beats/packetbeat  \
- && make  \
-# Building metricbeat
- && cd $GOPATH/src/github.com/elastic/beats/metricbeat \
- && make  \
-# Building libbeat
- && cd $GOPATH/src/github.com/elastic/beats/libbeat  \
- && make \
 # Building auditbeat
  && sed -i '37i var \(' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/audit.go \
  && sed -i '38i\\tbyteOrder = GetEndian\(\)' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/audit.go \
@@ -100,6 +86,25 @@ RUN apt-get update && apt-get install -y \
  && sed -i '1d'  $GOPATH/src/github.com/elastic/beats/vendor/github.com/OneOfOne/xxhash/xxhash_safe.go \
  && sed -i '1i// +build appengine safe ppc64le ppc64be mipsle mips s390x' $GOPATH/src/github.com/elastic/beats/vendor/github.com/OneOfOne/xxhash/xxhash_safe.go \
  && sed -i '7i// +build !s390x' $GOPATH/src/github.com/elastic/beats/vendor/github.com/OneOfOne/xxhash/xxhash_unsafe.go \
+# Building heartbeat
+ && cd $GOPATH/src/github.com/elastic/beats/heartbeat  \
+ && make  heartbeat \
+# Building filebeat
+ && cd $GOPATH/src/github.com/elastic/beats/filebeat  \
+ && make  filebeat \
+# Building packetbeat
+ && cd $GOPATH/src/github.com/elastic/beats/packetbeat  \
+ && make  packetbeat \
+# Building metricbeat
+ && cd $GOPATH/src/github.com/elastic/beats/metricbeat \
+ && make  metricbeat \
+# Building libbeat
+ && cd $GOPATH/src/github.com/elastic/beats/libbeat  \
+ && make libbeat \
+# Building journalbeat
+ && cd $GOPATH/src/github.com/elastic/beats/journalbeat  \
+ && make journalbeat \
+# Building auditbeat
  && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
  && make \
  && cp -r $GOPATH/src/github.com/elastic/beats /opt/beats \
@@ -109,6 +114,7 @@ RUN apt-get update && apt-get install -y \
  && ln -s /opt/beats/metricbeat/metricbeat /usr/bin/metricbeat \
  && ln -s /opt/beats/filebeat/filebeat /usr/bin/filebeat \
  && ln -s /opt/beats/auditbeat/auditbeat /usr/bin/auditbeat \
+ && ln -s /opt/beats/journalbeat/journalbeat /usr/bin/journalbeat \
 # Tidy and clean up
  && apt-get remove -y \
     acl \
@@ -128,3 +134,4 @@ RUN apt-get update && apt-get install -y \
 VOLUME /Beats
 
 CMD $BEATSNAME -e -path.config /Beats -d "publish"
+
