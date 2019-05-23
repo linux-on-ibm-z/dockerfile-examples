@@ -1,6 +1,6 @@
 # © Copyright IBM Corporation 2017, 2019.
-# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)	
-	
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
 	################ Dockerfile for Jenkins server version ###################
 #
 # This Dockerfile builds a basic installation of Jenkins server.
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 # Set Environment Variables
 ENV JAVA_HOME=/opt/ibm/java
 ENV PATH=$JAVA_HOME/bin:$PATH
@@ -35,8 +35,8 @@ RUN apt-get update &&  apt-get install -y wget \
 && tail -n +3 installer.properties.java | tee installer.properties \
 && chmod +x ibm-java-s390x-sdk-8.0-5.30.bin \
 && ./ibm-java-s390x-sdk-8.0-5.30.bin -r installer.properties \
-# Install Jenkins 
-&& wget http://mirrors.jenkins.io/war/latest/jenkins.war \
+# Install Jenkins
+&& wget http://mirrors.jenkins.io/war-stable/latest/jenkins.war \
 # Clean up Cache data and unused dependencies
 && apt-get remove -y wget \
 && apt-get autoremove -y && apt-get clean \
