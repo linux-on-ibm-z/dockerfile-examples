@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2019
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for GlusterFS version 5.3 ##########################################
+##################################### Dockerfile for GlusterFS version 6.1 ##########################################
 #
 # This Dockerfile builds a basic installation of GlusterFS.
 #
@@ -17,10 +17,10 @@
 # Base Image
 FROM  s390x/ubuntu:16.04
 
-ARG GLUSTERFS_VER=5.3
+ARG GLUSTERFS_VER=6.1
 
 # The Author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 # Set Environment Variables
 ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" SOURCE_DIR="/tmp/"
@@ -28,45 +28,34 @@ ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" SOURCE_DIR="/tmp/"
 WORKDIR $SOURCE_DIR
 
 # Install Dependencies
-RUN apt-get update && apt-get install -y  attr \
-	autoconf \
-	automake \
-	bc \
-	bison \
-	dbench \
-	flex \
-	git \
-	libacl1-dev \
-	libaio-dev \
-	libcmocka-dev \
-	libglib2.0-dev \
-	libibverbs-dev \
-	liblvm2-dev \
-	librdmacm-dev \
-	libreadline-dev \
-	libsqlite3-dev \
-	libssl-dev \
-	libtool \
-	liburcu-dev \
-	libxml2-dev \
-	libxml2-utils \
-	make \
-	net-tools \
-	nfs-common \
-	pkg-config\
-	python3-dev \
-	python3-pyxattr \
-	sqlite3 \
-	tar \
-	thin-provisioning-tools \
-	uuid-dev \
-	vim-common \
-	wget \
-	xfsprogs \
-	yajl-tools \
+RUN apt-get update && apt-get install -y  \
+    autoconf \
+    automake \
+    bison \
+    flex \
+    gcc \
+    git \
+    libacl1-dev \
+    libaio-dev \
+    libfuse-dev \
+    libglib2.0-dev \
+    libibverbs-dev \
+    librdmacm-dev \
+    libreadline-dev \
+    libssl-dev \
+    libtool \
+    liburcu-dev \
+    libxml2-dev \
+    lvm2 \
+    make \
+    openssl \
+    pkg-config \
+    python3 \
+    uuid-dev \
+    zlib1g-dev \
 
 # Build GlusterFS from source
- && git clone https://github.com/gluster/glusterfs -b v$GLUSTERFS_VER\
+ && git clone https://github.com/gluster/glusterfs -b v$GLUSTERFS_VER \
  && cd glusterfs \
  && ./autogen.sh \
  && ./configure --enable-gnfs \
