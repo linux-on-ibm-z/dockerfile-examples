@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Ruby version 2.6.2 #########
+########## Dockerfile for Ruby version 2.6.3 #########
 #
 # Ruby is a dynamic, open source programming language with a focus on simplicity and productivity.
 # It has an elegant syntax that is natural to read and easy to write.
@@ -30,10 +30,10 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG RUBY_VER=2.6.2
+ARG RUBY_VER=2.6.3
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR=/root
 WORKDIR $SOURCE_DIR
