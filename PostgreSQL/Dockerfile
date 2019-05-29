@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######### Dockerfile for PostgreSQL 11.2 #########
+######### Dockerfile for PostgreSQL 11.3 #########
 #
 # PostgreSQL is an open source relational database management system ( DBMS ) developed by a worldwide team of volunteers.
 #
@@ -22,7 +22,7 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
@@ -46,7 +46,7 @@ RUN apt-get update && apt-get install -y \
 RUN cd $SOURCE_DIR \
 && git clone git://github.com/postgres/postgres.git \
 && cd postgres/ \
-&& git checkout REL_11_2 \
+&& git checkout REL_11_3 \
 && ./configure \
 && make \
 && make install \
