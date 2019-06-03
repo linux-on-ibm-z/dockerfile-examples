@@ -1,10 +1,13 @@
-########## Dockerfile for Apache Mesos version 1.7.0 #########
+# © Copyright IBM Corporation 2017, 2019.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Apache Mesos version 1.8.0 #########
 #
 # This Dockerfile builds a basic installation of Apache Mesos.
 #
-# Apache Mesos is a cluster manager that provides efficient resource isolation and sharing across distributed applications, or frameworks. 
+# Apache Mesos is a cluster manager that provides efficient resource isolation and sharing across distributed applications, or frameworks.
 # It can run Hadoop, Jenkins, Spark, Aurora, and other frameworks on a dynamically shared pool of nodes
-# 
+#
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
@@ -14,11 +17,11 @@
 #
 # Start Master of Apache Mesos using below command :
 # docker run --name <container_name> -d -p <host-port>:5050 <image-name> mesos-master.sh --ip=<ip-address> --work_dir=/var/lib/mesos --log_dir=/var/log/mesos
-# e.g. docker run --name mesos -d -p 5055:5050 mesos:1.7.0 mesos-master.sh --ip=0.0.0.0 --work_dir=/var/lib/mesos --log_dir=/var/log/mesos
+# e.g. docker run --name mesos -d -p 5055:5050 mesos:1.8.0 mesos-master.sh --ip=0.0.0.0 --work_dir=/var/lib/mesos --log_dir=/var/log/mesos
 #
 # Start Agent of Apache Mesos using below command :
 # docker run --name <container_name> -d <image-name> mesos-agent.sh --master=<ip address of master>:<port of master> --work_dir=/var/lib/mesos --log_dir=/var/log/mesos --launcher=posix
-# 
+#
 # Official website: http://mesos.apache.org/
 #
 ###################################################################################
@@ -27,7 +30,7 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR='/root'
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x
@@ -66,9 +69,9 @@ RUN apt-get update  \
   && cd $SOURCE_DIR \
   && git clone https://github.com/apache/mesos \
   && cd $SOURCE_DIR/mesos/ \
-  && git checkout 1.7.0 \
-  
-# Bundling gRPC-1.11.0  
+  && git checkout 1.8.0 \
+
+# Bundling gRPC-1.11.0
   && cd 3rdparty/ \
   && git clone -b v1.11.0 https://github.com/grpc/grpc.git grpc-1.11.0 \
   && cd grpc-1.11.0/ \
@@ -76,14 +79,14 @@ RUN apt-get update  \
   && cd ../ \
   && tar zcvf grpc-1.11.0.tar.gz --exclude .git grpc-1.11.0 \
   && rm -rf grpc-1.11.0 \
-  
+
   && cd $SOURCE_DIR/mesos/ \
   && sed -i '87i \          \<maxmemory>512m</maxmemory>' src/java/mesos.pom.in \
 
 # Add patch for updated gRPC version
   && sed -i -e 's/1.10.0/1.11.0/g' 3rdparty/versions.am \
   && sed -i -e 's/1.10.0/1.11.0/g' src/python/native_common/ext_modules.py.in \
-  
+
 # Add patch for protobuf
   && echo "diff --git a/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h b/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h" >> 3rdparty/protobuf-3.5.0.patch \
   && echo "index 0b0b06c..075c406 100644" >> 3rdparty/protobuf-3.5.0.patch \
@@ -104,7 +107,7 @@ RUN apt-get update  \
   && echo " #endif // defined(__LP64__)" >> 3rdparty/protobuf-3.5.0.patch \
   && echo >> 3rdparty/protobuf-3.5.0.patch \
   && echo " }  // namespace internal" >> 3rdparty/protobuf-3.5.0.patch \
- 
+
   && ./bootstrap \
   && mkdir build && cd build \
   && ../configure && make && make install \
@@ -161,7 +164,7 @@ VOLUME ["/var/lib/mesos", "/var/log/mesos"]
 # Port for Apache Mesos
 EXPOSE 5050
 
-# Set Entrypoint 
+# Set Entrypoint
 CMD mesos
 
 # End of Dockerfile
