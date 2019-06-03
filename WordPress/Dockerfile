@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############## Dockerfile for WordPress version 5.1.1 ############################
+############## Dockerfile for WordPress version 5.2 ############################
 #
 # WordPress is an online, open source website creation tool written in PHP.
 #
@@ -19,10 +19,11 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG WORDPRESS_VER=5.1.1
+ARG WORDPRESS_VER=5.2
 
-# The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+# Maintainer
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+
 ENV DEBIAN_FRONTEND noninteractive
 
 # Install dependencies
