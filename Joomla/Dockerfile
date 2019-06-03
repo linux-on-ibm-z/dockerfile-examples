@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Joomla version 3.9.4 ######
+########## Dockerfile for Joomla version 3.9.6 ######
 #
 # Joomla is an online, open source website creation tool written in PHP.
 #
@@ -20,10 +20,10 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG JOOMLA_VER=3.9.4
+ARG JOOMLA_VER=3.9.6
 
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
@@ -48,7 +48,7 @@ RUN apt-get update -y && apt-get install -y \
  && cp echo -e "ServerName localhost" >> /etc/apache2/apache2.conf \
  && cp echo -e '<Directory "/var/www/html">' >> /etc/apache2/apache2.conf \
  && cp echo -e "AllowOverride  All" >> /etc/apache2/apache2.conf \
- && cp  echo -e "</Directory>" >> /etc/apache2/apache2.conf \
+ && cp echo -e "</Directory>" >> /etc/apache2/apache2.conf \
  && diff -u /etc/apache2/apache2.conf1 /etc/apache2/apache2.conf  ||true \
  && a2enmod rewrite \
 
@@ -61,6 +61,7 @@ RUN apt-get update -y && apt-get install -y \
  && unzip Joomla_${JOOMLA_VER}-Stable-Full_Package.zip  \
  && chmod a+w /var/www/html/Joomla/ \
  && mv installation/configuration.php-dist installation/configuration.php \
+ && chown -R www-data:www-data ./installation \
 
 # Start mysql server and create database for Joomla
  &&  mkdir -p /var/lib/mysql/data \
@@ -90,5 +91,5 @@ VOLUME /var/www/html
 # Expose ports for mysql and apache2
 EXPOSE 80 3306
 
-# Start apache2 and mysql sever
+# Start apache2 and mysql server
 CMD ["/bin/sh", "start.sh"]
