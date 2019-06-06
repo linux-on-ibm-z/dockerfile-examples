@@ -52,7 +52,7 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR='/root'
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x
@@ -101,7 +101,7 @@ RUN apt-get update  \
 
 # Create binary distribution
  && cd $SOURCE_DIR/storm/storm-dist/binary && mvn package -Dgpg.skip=true \
- && tar -zxf $SOURCE_DIR/storm/storm-dist/binary/target/apache-storm-2.0.0.tar.gz -C $SOURCE_DIR/ \
+ && tar -zxf $SOURCE_DIR/storm/storm-dist/binary/final-package/target/apache-storm-2.0.0.tar.gz -C $SOURCE_DIR/ \
  && cp -r $SOURCE_DIR/apache-storm-2.0.0 /opt/storm \
 
 # Clean up the unwanted packages and clear the source directory
