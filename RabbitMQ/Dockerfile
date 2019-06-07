@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for RabbitMQ version 3.7.12 ################################
+################# Dockerfile for RabbitMQ version 3.7.15 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -23,8 +23,10 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
+ARG RABBITMQ_VER=3.7.15
+
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR=/tmp/source
 
@@ -62,15 +64,15 @@ RUN apt-get update && apt-get install -y \
  && make && make install \
 # Download and install rabbitmq
  && mkdir $SOURCE_DIR && cd $SOURCE_DIR \
- && wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/3.7.12/rabbitmq-server-3.7.12.tar.xz \
+ && wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/$RABBITMQ_VER/rabbitmq-server-$RABBITMQ_VER.tar.xz \
  && localedef -c -f UTF-8 -i en_US en_US.UTF-8 \
  && git clone git://github.com/elixir-lang/elixir \
  && cd elixir && git checkout v1.6.6 && make && make install \
  && cd ../ && git clone git://github.com/hexpm/hex.git \
  && cd hex &&  git checkout v0.19.0 && mix install \
- && cd /opt && tar xf $SOURCE_DIR/rabbitmq-server-3.7.12.tar.xz \
- && cp $SOURCE_DIR/hex/_build/dev/lib/hex/ebin/*  rabbitmq-server-3.7.12/deps/.mix/archives/hex-0.19.0/hex-0.19.0/ebin/ \
- && cd rabbitmq-server-3.7.12  && make && make install \
+ && cd /opt && tar xf $SOURCE_DIR/rabbitmq-server-$RABBITMQ_VER.tar.xz \
+ && cp $SOURCE_DIR/hex/_build/dev/lib/hex/ebin/*  rabbitmq-server-$RABBITMQ_VER/deps/.mix/archives/hex-0.19.0/hex-0.19.0/ebin/ \
+ && cd rabbitmq-server-$RABBITMQ_VER  && make && make install \
  && mkdir -p /etc/rabbitmq \
  && echo "[{rabbit, [{loopback_users, []}]}]." | tee /etc/rabbitmq/rabbitmq.config \
  && rm -rf deps/rabbit/plugins && ln -s  $PWD/plugins deps/rabbit/plugins \
@@ -93,7 +95,7 @@ RUN apt-get update && apt-get install -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt/rabbitmq-server-3.7.12
+WORKDIR /opt/rabbitmq-server-$RABBITMQ_VER
 
 # Expose RabbitMQ management console port and RabbitMQ server port
 EXPOSE 15672 5672
