@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for Apache JMeter version 5.1 #########################################
+######################## Dockerfile for Apache JMeter version 5.1.1 #########################################
 #
 # This Dockerfile builds a basic installation of Apache JMeter.
 #
@@ -21,8 +21,10 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
+ARG JMETER_VER=5.1.1
+
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 # Set Environment varibles
 ENV WORKDIR=/root
@@ -37,18 +39,18 @@ RUN apt-get update && apt-get install -y \
 
 # Download from git and build
  && cd $WORKDIR \
- && wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.1.tgz \
- && tar -xvzf apache-jmeter-5.1.tgz \
+ && wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-$JMETER_VER.tgz \
+ && tar -xvzf apache-jmeter-$JMETER_VER.tgz \
 
 #Remove G1GC algorithm as it is unimplemented in OpenJDK zero
- && sed -i '178d' $WORKDIR/apache-jmeter-5.1/bin/jmeter \
+ && sed -i '178d' $WORKDIR/apache-jmeter-$JMETER_VER/bin/jmeter \
  
 # Clean the Cache data and remove source files and dependencies   
  && apt-get autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set Environment Variable for JMeter
-ENV PATH $PATH:$WORKDIR/apache-jmeter-5.1/bin
+ENV PATH $PATH:$WORKDIR/apache-jmeter-$JMETER_VER/bin
 ENTRYPOINT ["jmeter","-n","-t"]
 
 # End Of Dockerfile
