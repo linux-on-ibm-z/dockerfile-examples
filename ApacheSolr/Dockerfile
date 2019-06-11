@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Apache Solr version 8.0.0 #########################
+############### Dockerfile for Apache Solr version 8.1.1 #########################
 #
 # To build Apache Solr image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -16,14 +16,14 @@
 # Base image
 FROM s390x/ubuntu:16.04
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 # Create a working directory for Apache Solr
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
-ENV JAVA_HOME=/opt/jdk8u202-b08 PATH=$JAVA_HOME/bin:$PATH
+ENV JAVA_HOME=/opt/jdk8u212-b04 PATH=$JAVA_HOME/bin:$PATH
 
-ARG SOLR_VER=8.0.0
+ARG SOLR_VER=8.1.1
 
 # Install dependencies
 RUN apt-get update &&   apt-get install -y \
@@ -35,16 +35,14 @@ RUN apt-get update &&   apt-get install -y \
     wget \
 
 # Download AdoptOpenJDK 8 with OpenJ9
- && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u202-b08_openj9-0.12.1/OpenJDK8U-jdk_s390x_linux_openj9_8u202b08_openj9-0.12.1.tar.gz \
- && tar -xzf OpenJDK8U-jdk_s390x_linux_openj9_8u202b08_openj9-0.12.1.tar.gz -C /opt \
+ && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b04_openj9-0.14.2/OpenJDK8U-jdk_s390x_linux_openj9_8u212b04_openj9-0.14.2.tar.gz \
+ && tar -xzf OpenJDK8U-jdk_s390x_linux_openj9_8u212b04_openj9-0.14.2.tar.gz -C /opt \
 
 # Download Solr and build it
  && wget http://archive.apache.org/dist/lucene/solr/$SOLR_VER/solr-$SOLR_VER-src.tgz \
  && tar zxvf solr-$SOLR_VER-src.tgz  \
- && cd solr-$SOLR_VER\
+ && cd solr-$SOLR_VER/solr \
  && ant ivy-bootstrap \
- && cd solr \
- && ant compile \
  && ant server \
  && cd  $SOURCE_DIR/solr-$SOLR_VER/solr/bin  \
  && chmod a+x solr  \
