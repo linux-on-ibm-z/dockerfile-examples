@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Mariadb Server version 10.3.13 #########
+########## Dockerfile for Mariadb Server version 10.3.15 #########
 #
 # This Dockerfile builds a basic installation of Mariadb Server.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG MARIADB_VER=10.3.13
+ARG MARIADB_VER=10.3.15
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -34,23 +34,22 @@ WORKDIR $SOURCE_DIR
 
 ###Install build dependencies
 RUN apt-get update && apt-get install -y \
-    bison \
-    build-essential \ 
-    cmake \
-    dh-autoreconf \
-    gcc \
     git \
+    gcc \ 
+    g++ \
+    make \
+    wget \
+    tar \
+    cmake \
+    libssl-dev \
+    libncurses-dev \
+    bison \
+    scons \
     libboost-dev \
     libboost-program-options-dev \
-    libncurses-dev \
-    libpcre3-dev \
-    libssl-dev \
-    make \
+    check \
     openssl \
-    scons \
-    tar \
-    wget \
-	hostname \
+    libpcre3-dev \
 
 ##Get MariaDB code from Git
  && cd $SOURCE_DIR && wget https://github.com/MariaDB/server/archive/mariadb-${MARIADB_VER}.tar.gz \
@@ -59,17 +58,11 @@ RUN apt-get update && apt-get install -y \
 
 ##Get MariaDB Connector C code from git
  && cd $SOURCE_DIR && git clone git://github.com/MariaDB/mariadb-connector-c.git \
- && cd mariadb-connector-c && git checkout v3.0.2 \
+ && cd mariadb-connector-c && git checkout v3.0.10 \
  && cp -r $SOURCE_DIR/mariadb-connector-c/* $SOURCE_DIR/server-mariadb-${MARIADB_VER}/libmariadb/ \
 
-## Make changes to file to fix openssl related issue
- && cd $SOURCE_DIR/server-mariadb-${MARIADB_VER} \
- && sed -i '231d' libmariadb/include/mariadb_com.h \
- && sed -i '231 a\#define SERVER_STATUS_IN_TRANS_READONLY       8192' libmariadb/include/mariadb_com.h \
- && sed -i '231 a\#define SERVER_SESSION_STATE_CHANGED      16384' libmariadb/include/mariadb_com.h \
- && sed -i '231 a\#define SERVER_STATUS_ANSI_QUOTES        32768' libmariadb/include/mariadb_com.h \
-
 ##Build, configure, install 
+ && cd $SOURCE_DIR/server-mariadb-${MARIADB_VER} \
  && BUILD/autorun.sh \
  && ./configure \
  && make \
@@ -86,10 +79,8 @@ RUN apt-get update && apt-get install -y \
 && apt-get remove -y \
     bison \
     cmake \
-    dh-autoreconf \
     git \
     make \
-    pkg-config \
     wget \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
