@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2019.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 3.5.3 ##################################
+########## Dockerfile for Neo4j version 3.5.6 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -29,12 +29,12 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG NEO4J_VER=3.5.3
+ARG NEO4J_VER=3.5.6
 ENV SOURCE_DIR='/root'
 ENV NEO4J_HOME=$SOURCE_DIR/neo4j
-ENV JAVA_HOME=$SOURCE_DIR/jdk-11.0.2+9
+ENV JAVA_HOME=$SOURCE_DIR/jdk-11.0.3+7
 ENV PATH=$PATH:$NEO4J_HOME/bin:$JAVA_HOME/bin
 
 WORKDIR $SOURCE_DIR
@@ -46,8 +46,8 @@ RUN  apt-get update  \
                 wget \
 # Download adoptopenjdk
   && cd $SOURCE_DIR/ \
-  && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.2%2B9/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.2_9.tar.gz \
-  && tar -zxf OpenJDK11U-jdk_s390x_linux_hotspot_11.0.2_9.tar.gz \
+  && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.3%2B7_openj9-0.14.3/OpenJDK11U-jdk_s390x_linux_openj9_11.0.3_7_openj9-0.14.3.tar.gz \
+  && tar -zxf OpenJDK11U-jdk_s390x_linux_openj9_11.0.3_7_openj9-0.14.3.tar.gz \
 # Download and unzip Neo4j pre build Binary
   && cd $SOURCE_DIR/ \
   && wget https://neo4j.com/artifact.php?name=neo4j-community-${NEO4J_VER}-unix.tar.gz \
@@ -59,7 +59,7 @@ RUN  apt-get update  \
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf $SOURCE_DIR/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.2_9.tar.gz $SOURCE_DIR/artifact.php?name=neo4j-community-${NEO4J_VER}-unix.tar.gz /var/lib/apt/lists/*
+  && rm -rf $SOURCE_DIR/OpenJDK11U-jdk_s390x_linux_openj9_11.0.3_7_openj9-0.14.3.tar.gz $SOURCE_DIR/artifact.php?name=neo4j-community-${NEO4J_VER}-unix.tar.gz /var/lib/apt/lists/*
 
 # Define mount for backup of logs, data, conf & lib
 VOLUME ["$NEO4J_HOME/logs","$NEO4J_HOME/data","$NEO4J_HOME/conf","$NEO4J_HOME/lib"]
