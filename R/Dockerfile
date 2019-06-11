@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################# Dockerfile for R version 3.5.1 ######################
+############################# Dockerfile for R version 3.6.0 ######################
 # This Dockerfile builds a basic installation of R.
 #
 # R is a language and environment for statistical computation and graphics.
@@ -25,7 +25,7 @@ FROM s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
-ENV R_BASE_VERSION 3.5.1
+ENV R_BASE_VERSION 3.6.0
 ENV SOURCE_DIR=/tmp/source
 
 WORKDIR $SOURCE_DIR
@@ -64,10 +64,10 @@ RUN apt-get update && apt-get install -y \
     openjdk-8-jdk \
     ratfor \
     wget \
-	
+
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* $SOURCE_DIR/R-${R_BASE_VERSION}.tar.gz 
+ && apt-get clean && rm -rf /var/lib/apt/lists/* $SOURCE_DIR/R-${R_BASE_VERSION}.tar.gz
 
 CMD ["R"]
 # End of Dockerfile
