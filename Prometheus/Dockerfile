@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Prometheus 2.9.2 #########
+########## Dockerfile for Prometheus 2.10.0 #########
 #
 # This Dockerfile builds Prometheus
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG PROMETHEUS_VER=2.9.2
+ARG PROMETHEUS_VER=2.10.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -34,10 +34,6 @@ ENV PATH=/usr/local/go/bin:$PATH:/prometheus
 RUN apt-get update && apt-get install -y \
     tar \
     wget \
-#Install Golang
- && wget https://dl.google.com/go/go1.11.4.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf  go1.11.4.linux-s390x.tar.gz \
- && rm go1.11.4.linux-s390x.tar.gz && go version \
 # Download Prometheus
  && wget https://github.com/prometheus/prometheus/releases/download/v${PROMETHEUS_VER}/prometheus-${PROMETHEUS_VER}.linux-s390x.tar.gz \
  && tar -xzf prometheus-${PROMETHEUS_VER}.linux-s390x.tar.gz \
