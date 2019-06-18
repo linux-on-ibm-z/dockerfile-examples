@@ -1,85 +1,87 @@
-# © Copyright IBM Corporation 2017, 2018
+# © Copyright IBM Corporation 2017, 2019
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########################### Dockerfile for Magento version 2.2.4 ##############################
+############################## Dockerfile for Magento version 2.3.1 ###################################
 #
 # Magento is an open-source e-commerce platform written in PHP.
 #
 # To build Magento image from the directory containing this Dockerfile
-# (assuming that the file is named "Dockerfile"):
+# 
 # docker build -t <image_name> .
 #
 # To start Magento server run the below command
 # docker run --name <container_name> -p <port_number>:80 -p <port_number_mysql>:3306 -d <image_name>
 #
-# We can view the Magento UI at http://<Magento-host-ip>:<port_number>/magento2/setup
+# We can view the Magento UI at http://<Magento_host_IP>:<Port_number>/magento2/setup
 #
 ###############################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+
 ENV DEBIAN_FRONTEND noninteractive
+
+ARG MAGENTO_VER=2.3.1
+ARG MYSQL_PASSWD=temp_pass
 
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
-    wget \
-    tar \
-    curl \
     apache2 \
     composer \
-    libapache2-mod-php7.0 \
+    git \
+    gzip \
+    libapache2-mod-php \
+    libssl-dev \
+    lsof \
     mysql-server \
-    php7.0-mysql \
-    php7.0-curl \
-    php7.0-json \
-    php7.0-xsl \
-    php7.0-xml \
-    php7.0-mcrypt \
-    php7.0-mbstring \
-    php7.0-intl \
-    php7.0-zip \
-    php7.0-gd  \
-    php7.0-soap \
-    php7.0-bcmath \
+    php7.2 \
+    php7.2-bcmath \
+    php7.2-curl \
+    php7.2-gd \
+    php7.2-intl \
+    php7.2-mbstring \
+    php7.2-mysql \
+    php7.2-soap \
+    php7.2-xml \
+    php7.2-xsl \
+    php7.2-zip \
+    sed \
+    tar \
+    unzip \
 
 # Configure apache2
  && chmod 766 /etc/apache2/apache2.conf \
- && cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf1 \
  && echo "ServerName localhost" >> /etc/apache2/apache2.conf \
  && echo '<Directory "/var/www/html">' >> /etc/apache2/apache2.conf \
  && echo "AllowOverride  All" >> /etc/apache2/apache2.conf \
  && echo "</Directory>" >> /etc/apache2/apache2.conf \
- && diff -u /etc/apache2/apache2.conf1 /etc/apache2/apache2.conf  ||true \
  && a2enmod rewrite \
+ && a2enmod php7.2 \
 
-# Clone Magento source code
- &&  cd /var/www/html/ \
+# Install Magento
+ && cd /var/www/html/ \
  && chmod -R a+w /var/www/html/ \
  && git clone https://github.com/magento/magento2.git \
  && cd magento2 \
- && git checkout 2.2.4 \
- && composer install \
-
-# Start mysql server and create database for Magento
- && mkdir -p /var/lib/mysql/data \
- && /usr/sbin/mysqld --initialize --user=mysql --datadir=/var/lib/mysql/data \
- && sleep 60s && mkdir -p /var/run/mysqld \
- && chown mysql:mysql /var/run/mysqld \
+ && git checkout $MAGENTO_VER \
+ && composer install --no-plugins --no-scripts \
  && cd /var/www/html/magento2 && find var vendor pub/static pub/media app/etc -type f -exec chmod g+w {} \; && find var vendor pub/static pub/media app/etc -type d -exec chmod g+ws {} \; && chown -R :www-data . && chmod u+x bin/magento \
  && chmod g+wsx generated/ && chmod g+wsx generated/.htaccess \
- && service mysql start && sleep 15s && /usr/bin/mysql -e "create database magento" \
- && /usr/bin/mysql -e "create user 'user'@'localhost' " \
- && /usr/bin/mysql -e "grant all privileges on *.* to 'user'@'localhost'" \
 
-#  Create a script to start apache2 and mysql
- && echo 'service apache2 start && /usr/bin/mysqld_safe --user=mysql' > /start.sh \
+# Start MySQL server and create database for Magento and set root password
+ && service mysql start \
+ && mysql -e "CREATE USER magento IDENTIFIED BY 'magento';" \
+ && mysql -e "CREATE DATABASE magento;" \
+ && mysql -e "GRANT ALL ON magento.* TO 'magento';" \
+ && mysql -e "FLUSH PRIVILEGES;" \
+ && mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_PASSWD';" \
 
 # Clean up of unused packages
  && apt-get remove -y \
-    curl  \
+    git \
     unzip \
     wget \
  && apt-get autoremove -y \
@@ -88,12 +90,12 @@ RUN apt-get update -y && apt-get install -y \
  && rm -rf  /var/lib/apt/lists/*
 
 # Create volume
-VOLUME /var/www/html
+VOLUME /var/www/html /var/lib/mysql
 
 # Expose port for mysql and apache2
 EXPOSE 80 3306
 
 # Start mysql and apache2 server
-CMD ["/bin/sh", "start.sh"]
+ENTRYPOINT service mysql start && apache2ctl -D FOREGROUND
 
 # End of Dockerfile
