@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##########  Dockerfile for OCaml 4.07.0 #####################
+##########  Dockerfile for OCaml 4.07.1 #####################
 #
 # OCaml is an industrial strength programming language supporting functional, 
 # imperative and object-oriented styles.
@@ -35,31 +35,24 @@ MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/communi
 
 WORKDIR "/root"
 
-
 #Installing oCaml
 RUN apt-get update && apt-get install -y \
     gcc \
 	git \
-	make \
-		
+	make \    
 # Download the OCaml source tarball from OCaml site
- && git clone -b 4.07.0 git://github.com/ocaml/ocaml.git \
- &&	cd ocaml \
-
+ && git clone -b 4.07.1 git://github.com/ocaml/ocaml.git \
+ &&	cd ocaml \    
 # Configure the system
- && ./configure \
-
+ && ./configure \    
 # Build the OCaml bytecode compiler
- && make world \
-
+ && make world \    
 # Build the native-code compiler, then use it to compile fast versions of the OCaml compilers:
  && make opt \
- && make opt.opt \
-
+ && make opt.opt \    
 # Install the OCaml system:
  && umask 022 \
- &&	make install \
-
+ &&	make install \    
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
     gcc \
