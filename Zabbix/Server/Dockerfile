@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-server version 4.2.0 #########
+########## Dockerfile for Zabbix-server version 4.2.2 #########
 #
 # This Dockerfile builds a basic installation of Zabbix-server.
 #
@@ -22,7 +22,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG ZBX_SERVER_VER=4.2.0
+ARG ZBX_SERVER_VER=4.2.2
 
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -114,8 +114,13 @@ RUN     apt-get update && apt-get install -y mysql-server \
         &&      apt autoremove -y && apt-get clean \
         &&      rm -rf /zabbix-${ZBX_SERVER_VER}.tar.gz && rm -rf /var/lib/apt/lists/*
 
+RUN     cd /var/www/html/zabbix \
+        && chmod 733 assets
+
 # Expose ports for apache2 & default port of Zabbix server
 EXPOSE 80 10051
+
+VOLUME /var/lib/mysql
 
 # Switch to zabbix user
 USER zabbix
