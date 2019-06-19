@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 7.0.0 ###################################################
+############################ Dockerfile for Logstash version 7.0.1 ###################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -19,7 +19,7 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG LOGSTASH_VER=7.0.0
+ARG LOGSTASH_VER=7.0.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -51,13 +51,13 @@ RUN apt-get update && apt-get install -y \
 
 # Copy types.conf to platform.conf, re-create and copy the jar
  && cd /usr/share/logstash/logstash-core/lib/jars \
- && unzip -d jruby-complete-9.2.6.0.jar-dir jruby-complete-9.2.6.0.jar \
- && cd /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.6.0.jar-dir/META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/s390x-linux \
+ && unzip -d jruby-complete-9.2.7.0.jar-dir jruby-complete-9.2.7.0.jar \
+ && cd /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.7.0.jar-dir/META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/s390x-linux \
  && cp -n types.conf platform.conf \
- && cd /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.6.0.jar-dir \
- && zip -r jruby-complete-9.2.6.0.jar * \
- && mv -f jruby-complete-9.2.6.0.jar .. \
- && rm -rf /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.6.0.jar-dir \
+ && cd /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.7.0.jar-dir \
+ && zip -r jruby-complete-9.2.7.0.jar * \
+ && mv -f jruby-complete-9.2.7.0.jar .. \
+ && rm -rf /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.7.0.jar-dir \
  && cd /root \
  
 # Cleanup Cache data , unused packages and source files
