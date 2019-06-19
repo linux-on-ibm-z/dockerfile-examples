@@ -102,5 +102,5 @@
 # The default locale. This locale can be used in certain circumstances to substitute any missing
 # translations.
 #i18n.defaultLocale: "en"
-elasticsearch.url: "http://elasticsearch:9200"
+elasticsearch.hosts: "http://elasticsearch:9200"
 
