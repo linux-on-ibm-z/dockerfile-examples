@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.0.0 #############################
+#################### Dockerfile for Beats 7.0.1 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -9,7 +9,7 @@
 # docker build -t <image_name> .
 #
 # To create a container of Beats image run the below command:
-# docker run --name <container_name> -it  <image_name>
+# docker run --name <container_name> -it  <image_name> /bin/bash
 #
 # The following modules are present in beats: heartbeat ,filebeat ,metricbeat , packetbeat, libbeat, auditbeat journalbeat
 # docker run --name <container_name> -e BEATSNAME=<beat_name> -d <image_name>
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG BEATS_VER=7.0.0
+ARG BEATS_VER=7.0.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -106,7 +106,7 @@ RUN apt-get update && apt-get install -y \
  && make journalbeat \
 # Building auditbeat
  && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
- && make \
+ && make auditbeat \
  && cp -r $GOPATH/src/github.com/elastic/beats /opt/beats \
  && ln -s /opt/beats/heartbeat/heartbeat /usr/bin/heartbeat \
  && ln -s /opt/beats/packetbeat/packetbeat /usr/bin/packetbeat \
