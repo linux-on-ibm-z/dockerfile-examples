@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2019
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Terraform - 0.12.1 ########################
+########## Dockerfile for Terraform - 0.12.2 ########################
 #
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -21,7 +21,7 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG TERRAFORM_VER=0.12.1
+ARG TERRAFORM_VER=0.12.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -42,9 +42,9 @@ RUN apt-get update &&  apt-get install -y \
     zip \
 # Install Go
  && cd $SOURCE_DIR \
- && wget https://storage.googleapis.com/golang/go1.11.5.linux-s390x.tar.gz \
- && chmod ugo+r go1.11.5.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.11.5.linux-s390x.tar.gz \
+ && wget https://dl.google.com/go/go1.12.6.linux-s390x.tar.gz \
+ && chmod ugo+r go1.12.6.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.12.6.linux-s390x.tar.gz \
 # Clone Terraform Source Code
  && cd $SOURCE_DIR \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
@@ -62,7 +62,7 @@ RUN apt-get update &&  apt-get install -y \
     wget \
     zip \
  && apt-get autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* $GOPATH/src $GOPATH/pkg $SOURCE_DIR/go1.11.5.linux-s390x.tar.gz
+ && apt-get clean && rm -rf /var/lib/apt/lists/* $GOPATH/src $GOPATH/pkg $SOURCE_DIR/go1.12.6.linux-s390x.tar.gz
 
 ENTRYPOINT ["terraform"]
 
