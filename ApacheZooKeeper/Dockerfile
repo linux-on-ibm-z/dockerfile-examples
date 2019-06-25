@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Apache ZooKeeper version 3.4.13 ######################
+################ Dockerfile for Apache ZooKeeper version 3.5.5 ######################
 #
 # This Dockerfile builds a basic installation of Apache ZooKeeper.
 #
@@ -19,32 +19,28 @@
 #####################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 # Set Environment varibles
 ENV WORKDIR /root
-ENV PATH $PATH:$WORKDIR/zookeeper-3.4.13/bin
+ENV PATH $PATH:$WORKDIR/apache-zookeeper-3.5.5-bin.tar.gz/bin
 
 # Install the build dependencies
 RUN apt-get update && apt-get install -y \
-    openjdk-8-jdk \
+    openjdk-11-jdk \
 	tar \
     wget \
-
 # Install Apache ZooKeeper
  && cd $WORKDIR \
- && wget https://archive.apache.org/dist/zookeeper/zookeeper-3.4.13/zookeeper-3.4.13.tar.gz \
- && tar -xzvf zookeeper-3.4.13.tar.gz \
-
+ && wget https://archive.apache.org/dist/zookeeper/zookeeper-3.5.5/apache-zookeeper-3.5.5-bin.tar.gz \
+ && tar -xzvf apache-zookeeper-3.5.5-bin.tar.gz \
 # Copy default config file 
- && cd zookeeper-3.4.13 \
+ && cd apache-zookeeper-3.5.5-bin \
  && cp conf/zoo_sample.cfg conf/zoo.cfg \
- 
 # Clean up of unused packages and source directory.  	    
- && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
