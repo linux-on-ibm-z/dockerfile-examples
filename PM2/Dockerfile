@@ -27,7 +27,7 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR=/tmp/source
 ENV PATH=$SOURCE_DIR/nodejs/bin:$PATH
