@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for Hibernate version 5.4.2 ###########################
+################# Dockerfile for Hibernate version 5.4.3 ###########################
 #
 # This Dockerfile builds a basic installation of Hibernate.
 #
@@ -20,7 +20,7 @@
 # docker cp <container_id>:/hibernate <path_on_host>
 #
 # Reference:
-# https://github.com/hibernate/hibernate-orm/tree/5.4.2
+# https://github.com/hibernate/hibernate-orm/tree/5.4.3
 #
 ##################################################################################
 
@@ -28,10 +28,10 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR=/tmp/source
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
+ENV JAVA_HOME=/usr/share/jdk-11.0.3+7
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV _JAVA_OPTIONS=-Xmx10g
 ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
@@ -47,23 +47,22 @@ RUN     apt-get update && apt-get -y install \
         liblocales-perl \
         locales \
         locales-all \
-        openjdk-8-jdk \
         wget \
-
+# Get AdoptOpenJDK 11 with hotspot
+        &&      cd $SOURCE_DIR \
+        &&      wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.3%2B7/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.3_7.tar.gz \
+        &&      tar -C /usr/share/ -xvzf OpenJDK11U-jdk_s390x_linux_hotspot_11.0.3_7.tar.gz \
 # Build and install Hibernate
         &&      cd $SOURCE_DIR \
         &&      git clone git://github.com/hibernate/hibernate-orm.git \
         &&      cd hibernate-orm \
-        &&      git checkout 5.4.2 \
-
+        &&      git checkout 5.4.3 \
 # Build Hibernate
         &&      mkdir -p $HOME/.gem/jruby/1.9 \
         &&      ./gradlew build -x :documentation:renderGettingStartedGuides -x :documentation:renderIntegrationGuide -x :documentation:renderUserGuide -x test \
-
 # copy jar files
         && mkdir -p /hibernate \
         && cp -r $SOURCE_DIR/hibernate-orm/hibernate-core/target/libs /hibernate \
-
 # Clean up cache data and remove dependencies which are not required
         &&      apt-get -y remove \
                 git \
@@ -72,7 +71,6 @@ RUN     apt-get update && apt-get -y install \
                 liblocales-perl \
                 locales \
                 locales-all \
-                openjdk-8-jdk \
                 wget \
         &&      apt-get autoremove -y\
         &&      apt autoremove -y \
