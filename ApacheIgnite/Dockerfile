@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################### Dockerfile for Apache Ignite 2.7.0 ##################################
+############################### Dockerfile for Apache Ignite 2.7.5 ##################################
 #
 # This Dockerfile builds a basic installation of Apache Ignite.
 #
@@ -20,10 +20,10 @@
 # Base Image
 FROM  s390x/ubuntu:16.04
 
-ARG IGNITE_VER=2.7.0
+ARG IGNITE_VER=2.7.5
 
 # The Author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 # Set Environment Variables
 ENV WORKDIR /root
