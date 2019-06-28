@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for WildFly (JBoss) version 16.0.0 ##########################
+################# Dockerfile for WildFly (JBoss) version 17.0.0 ##########################
 #
 # This Dockerfile builds a basic installation of WildFly.
 #
@@ -25,46 +25,38 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
-ENV DEBIAN_FRONTEND noninteractive
+LABEL MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
-ARG WILDFLY_VER=16.0.0.Final
-
-ENV JAVA_HOME=/opt/jdk-11+28
+# Set the WILDFLY_VERSION env variable
+ENV WILDFLY_VERSION 17.0.0.Final
+ENV WILDFLY_SHA1 50bf8c48d4faf27c530af6949a225b9f1428300e
+ENV JBOSS_HOME=/opt/jboss/wildfly-${WILDFLY_VER}
+ENV JAVA_HOME=/opt/jdk-11.0.3+7
 ENV PWD=`pwd`
-ENV SOURCE_DIR=/tmp/source
-ENV JBOSS_HOME=/opt/jboss/wildfly
-WORKDIR $SOURCE_DIR
-
 ENV PATH=$JAVA_HOME/bin:$JBOSS_HOME/bin:$PATH
 
+USER root
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    maven \
     tar \
-    wget \
- && mkdir -p /opt \
- && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jdk_s390x_linux_hotspot_11_28.tar.gz \
- && tar -xf OpenJDK11-jdk_s390x_linux_hotspot_11_28.tar.gz -C /opt \
- && git clone https://github.com/wildfly/wildfly.git \
- && cd wildfly && git checkout ${WILDFLY_VER}\
- && mvn install -DskipTests \
- && mkdir -p /opt/jboss/wildfly \
- && cp -a ./dist/target/wildfly-${WILDFLY_VER}/* /opt/jboss/wildfly \
+    wget  \
+ && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.3%2B7/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.3_7.tar.gz \
+ && tar -xf OpenJDK11U-jdk_s390x_linux_hotspot_11.0.3_7.tar.gz -C /opt \
+ && mkdir /opt/jboss && cd /opt/jboss/ \
+ && wget https://download.jboss.org/wildfly/${WILDFLY_VERSION}/wildfly-${WILDFLY_VERSION}.tar.gz \
+ && sha1sum wildfly-$WILDFLY_VERSION.tar.gz | grep $WILDFLY_SHA1 \
+ && tar -xvzf wildfly-${WILDFLY_VERSION}.tar.gz \
 
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
-    git \
-    maven\
     wget \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*\
  && rm -rf $HOME/.m2
 
-WORKDIR $JBOSS_HOME
+WORKDIR $JBOSS_HOME/bin
 
 EXPOSE 8080 9990
 
