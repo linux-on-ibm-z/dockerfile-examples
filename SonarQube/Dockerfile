@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 7.6 ##############################
+################################ Dockerfile for SonarQube 7.7 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -22,13 +22,16 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-# The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+ARG SONARQUBE_VER=7.7
+ARG SONAR_SCANNER_CLI_VER=3.3.0.1492
 
-ENV SOURCE_DIR=/tmp/source
-WORKDIR $SOURCE_DIR
-ARG SONARQUBE_VER=7.6
-ENV PATH /usr/lib/jvm/java-1.8.0-openjdk-s390x/bin:$PATH
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+
+ENV SOURCE_ROOT=/opt
+ENV SONARQUBE_HOME=/opt/sonarqube
+WORKDIR $SOURCE_ROOT
+ENV PATH /usr/lib/jvm/java-1.8.0-openjdk-s390x/bin:/opt/sonar-scanner-${SONAR_SCANNER_CLI_VER}-linux/bin:$PATH
 
 # Install dependencies
 RUN apt-get update -y && apt-get -y install \
@@ -36,19 +39,20 @@ RUN apt-get update -y && apt-get -y install \
     openjdk-8-jdk \
     unzip \
     wget \
-
 # Download SonarQube
- && cd $SOURCE_DIR \
+ && cd $SOURCE_ROOT \
  && wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-${SONARQUBE_VER}.zip \
  && unzip sonarqube-${SONARQUBE_VER}.zip \
- && wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.2.0.1227-linux.zip \
- && unzip sonar-scanner-cli-3.2.0.1227-linux.zip \
- && rm -rf sonarqube-${SONARQUBE_VER}.zip sonar-scanner-cli-3.2.0.1227-linux.zip \
- && cp -r $SOURCE_DIR/sonarqube-${SONARQUBE_VER} $SOURCE_DIR/sonarqube \
- && cp -r $SOURCE_DIR/sonarqube /opt \
-
+ && wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_CLI_VER}-linux.zip \
+ && unzip sonar-scanner-cli-${SONAR_SCANNER_CLI_VER}-linux.zip \
+ && rm -rf sonarqube-${SONARQUBE_VER}.zip sonar-scanner-cli-${SONAR_SCANNER_CLI_VER}-linux.zip \
+ && mv sonarqube-${SONARQUBE_VER} sonarqube \
+# Create sonarqube user
+ && groupadd -r sonarqube \
+ && useradd -r -g sonarqube sonarqube \
+ && usermod -aG sudo sonarqube \
+ && chown sonarqube:sonarqube -R $SONARQUBE_HOME \
 # Tidy and clean up
- &&  rm -rf $SOURCE_DIR \
  && apt-get remove -y \
     git \
     perl \
@@ -57,12 +61,14 @@ RUN apt-get update -y && apt-get -y install \
  && apt-get autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+USER sonarqube
+
 # Expose port
 EXPOSE 9000
 
 # Add VOLUME
-VOLUME  ["/opt/sonarqube/data"]
+VOLUME "$SONARQUBE_HOME/data"
 
-WORKDIR /opt/sonarqube/lib
-ENV SONARQUBE sonar-application-${SONARQUBE_VER}.jar
+WORKDIR $SONARQUBE_HOME
+ENV SONARQUBE lib/sonar-application-${SONARQUBE_VER}.jar
 CMD java -jar ${SONARQUBE}
