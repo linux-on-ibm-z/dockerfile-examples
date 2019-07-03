@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######### Dockerfile for PostgreSQL 11.3 #########
+######### Dockerfile for PostgreSQL 11.4 #########
 #
 # PostgreSQL is an open source relational database management system ( DBMS ) developed by a worldwide team of volunteers.
 #
@@ -46,7 +46,7 @@ RUN apt-get update && apt-get install -y \
 RUN cd $SOURCE_DIR \
 && git clone git://github.com/postgres/postgres.git \
 && cd postgres/ \
-&& git checkout REL_11_3 \
+&& git checkout REL_11_4 \
 && ./configure \
 && make \
 && make install \
