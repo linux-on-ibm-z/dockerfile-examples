@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Geode version 1.8.0 #####################
+########## Dockerfile for Apache Geode version 1.9.0 #####################
 #
 # This Dockerfile builds a basic installation of Apache Geode.
 #
@@ -15,7 +15,7 @@
 # docker build -t <image_name> .
 #
 # To start Apache Geode run the below command:
-# docker run --name <container_name> -d <image>
+# docker run -it --name <container_name> -p 10334:10334 -p 7575:7575 -p 1099:1099 <image>
 #
 # Reference:
 # http://geode.apache.org/
@@ -23,91 +23,48 @@
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:19.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ENV SOURCE_DIR=/tmp/source JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x \
-        PATH=$PATH:$JAVA_HOME/bin:/geode/geode-assembly/build/install/apache-geode/bin/ \
-        LD_LIBRARY_PATH=/usr/local/lib \
-        LANG="en_US.UTF-8" JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8" \
-        _JAVA_OPTIONS="-Xmx5g -Xss5g" JVM_ARGS="-Xms2048m -Xmx2048m"
+ARG GEODE_VER=1.9.0
 
-# Build Protobuf-3.6.0
+ENV WORKDIR=/root
+ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x
+ENV PATH=$JAVA_HOME/bin:$WORKDIR/apache-geode-$GEODE_VER/bin:$PATH
+
 # Installing dependencies
 RUN apt-get update && apt-get install -y \
     tar \
-        wget \
-        autoconf \
-        libtool \
-        automake \
-        bzip2 \
-        curl \
-        g++ \
-        git \
-        make \
-        unzip \
-        zlib1g-dev \
- 
- # Download and install protobuf
- && git clone https://github.com/google/protobuf.git \
- && cd protobuf \
- && git checkout v3.6.0 \
- && git config --global url."git://github.com/".insteadOf "https://github.com/"  \
- && git submodule update --init --recursive \
- 
-# Generate and then run the configuration
- && ./autogen.sh \
- && ./configure \
- 
-# Build
- && make && make install
+    wget \
+    openjdk-8-jdk \
 
+ # Download and extract apache geode
+ && cd $WORKDIR \
+ && wget http://mirrors.estointernet.in/apache/geode/$GEODE_VER/apache-geode-$GEODE_VER.tgz \
+ && tar -xvzf apache-geode-$GEODE_VER.tgz \
 
-# Install Apache Geode dependencies
-RUN     apt-get update && apt-get -y install \
-        git \
-        openjdk-8-jdk \
-        
-# Get the Geode source
-        &&      mkdir -p $SOURCE_DIR \
-        &&      cd $SOURCE_DIR \
-        &&      git clone https://github.com/apache/geode.git \
-        &&      cd geode/ \
-        &&      git checkout rel/v1.8.0 \
-        
-# Build Apache Geode source
-    && mkdir -p $HOME/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protoc/3.6.0 \
-    && cp /usr/local/bin/protoc $HOME/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protoc/3.6.0/protoc-3.6.0-linux-s390x_64.exe \
-    && sed -i '37d' ./geode-protobuf-messages/build.gradle \
-    && ./gradlew build installDist -x test \
-        
-# Copy default config file
-    && mv $SOURCE_DIR/geode /geode \
-    
 # Clean up cache data and remove dependencies which are not required
-    && apt-get remove -y \
-                autoconf \
-                automake \
-                bzip2 \
-                curl \
-                g++ \
-                git \
-                libtool \
-                make \
-                unzip \
-                wget \
-                zlib1g-dev \
-     && apt-get autoremove -y \
-     && apt autoremove -y \
-     && rm -rf $HOME/.gradle \
-     && rm -rf $SOURCE_DIR \
-     && apt-get clean \
-     && rm -rf /var/lib/apt/lists/*
+ && apt-get remove -y \
+                 wget \
+ && apt-get autoremove -y \
+ && apt autoremove -y \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* \
+ && rm -rf /root/apache-geode-$GEODE_VER.tgz \
 
-VOLUME /geode
+# smoke test to ensure the shell can still run properly after removing temporary deps
+ && gfsh version
 
+# Default ports:
+# RMI/JMX 1099
+# REST 8080
+# PULE 7070
+# LOCATOR 10334
+# CACHESERVER 40404
+EXPOSE  8080 10334 40404 1099 7070
+VOLUME ["/data"]
 CMD ["gfsh"]
 
 # End of Dockerfile
