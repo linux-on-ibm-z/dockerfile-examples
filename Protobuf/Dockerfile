@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)  
 
-####################### Dockerfile for Protobuf version 3.7.1 ##############
+######################## Dockerfile for Protobuf version 3.8.0 #######################
 #
 # Protocol Buffers is a method of serializing structured data.
 #
@@ -24,51 +24,51 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 
+ARG PROTOBUF_VER=v3.8.0
+
 # Installing dependencies
 RUN apt-get update && apt-get install -y \
-	autoconf \
-	automake \
-	bzip2 \
-	curl \
-	g++ \
-	git \
+    autoconf \
+    automake \
+    g++-4.8 \
+    git \
+    gzip \
     libtool \
     make \
-    tar \
-    unzip \
-    wget \
-	
+
+# Set gcc-4.8 default version
+&& update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 10 \
+&& update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 10 \
+
 # Download and install protobuf
- && git clone git://github.com/google/protobuf.git \
- && cd protobuf \
- && git checkout v3.7.1 \
- && git config --global url."git://github.com/".insteadOf "https://github.com/" \
- && git submodule update --init --recursive \
+&& git clone https://github.com/protocolbuffers/protobuf.git \
+&& cd protobuf \
+&& git checkout $PROTOBUF_VER \
+&& git submodule update --init --recursive \
  
 # Build
- && ./autogen.sh \
- && ./configure \
- && make && make install && ldconfig \
- && rm -rf $SOURCE_DIR \
+&& ./autogen.sh \
+&& ./configure \
+&& make \
+&& make install \
+&& ldconfig \
+&& rm -rf $SOURCE_DIR \
+
 # Tidy and clean up
- && apt-get remove -y \
-	autoconf \
-	automake \
-	bzip2 \
-	curl \
-	g++ \
-	git \
+&& apt-get remove -y \
+    autoconf \
+    automake \
+    g++-4.8 \
+    git \
     libtool \
     make \
-    unzip \
-    wget \
- && apt-get autoremove -y && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
+&& apt-get autoremove -y && apt autoremove -y \
+&& apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
