@@ -50,5 +50,5 @@ RUN apt-get update && apt-get install -y \
 #Export port
 EXPOSE 9090
 VOLUME [ "/prometheus" ]
-
-CMD prometheus --config.file=/etc/prometheus/prometheus.yml --web.console.libraries=/etc/prometheus/console_libraries --web.console.templates=/etc/prometheus/consoles
+ENTRYPOINT [ "/prometheus/prometheus" ]
+CMD [ "--config.file=/etc/prometheus/prometheus.yml", "--web.console.libraries=/etc/prometheus/console_libraries", "--web.console.templates=/etc/prometheus/consoles" ]
