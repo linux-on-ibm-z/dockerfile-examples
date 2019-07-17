@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for statsd 0.8.2 ####################
+################## Dockerfile for statsd 0.8.3 ####################
 #
 # This Dockerfile builds a basic installation of statsd.
 #
@@ -22,13 +22,14 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG STATSD_VER=v0.8.2
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-# Maintainer
-MAINTAINER LoZ Open Source Ecosystem
+ARG STATSD_VER=v0.8.3
+ENV PATH=$PATH:/usr/src/app/node-v10.15.3-linux-s390x/bin
 
-ENV SOURCE_ROOT=/opt
-ENV PATH=$PATH:$SOURCE_ROOT/node-v10.15.3-linux-s390x/bin
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -41,33 +42,27 @@ RUN apt-get update && apt-get install -y \
     unzip \
     wget \
 # Install Nodejs
-    && cd $SOURCE_ROOT \
     && wget https://nodejs.org/dist/v10.15.3/node-v10.15.3-linux-s390x.tar.gz \
-    && tar -C $SOURCE_ROOT -xvf node-v10.15.3-linux-s390x.tar.gz \
-# Clone statsd
-    && cd $SOURCE_ROOT \
-    && git clone https://github.com/etsy/statsd.git \
+    && tar -xvf node-v10.15.3-linux-s390x.tar.gz
+
+# Clone statsd and install dependencies via npm
+RUN git clone https://github.com/etsy/statsd.git \
     && cd statsd \
     && git checkout $STATSD_VER \
-    && npm install --unsafe-perm=true \
-    && cp -v exampleConfig.js config.js \
-    && sed -i 's/graphite.example.com/graphite/' config.js \
-# Clean up unused packages and data
-    && apt-get remove -y \
-    g++ \
-    git \
-    make \
-    python \
-    unzip \
-    wget \
-    && apt-get autoremove -y && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* $SOURCE_ROOT/node-v10.15.3-linux-s390x.tar.gz
+    && npm install --unsafe-perm=true && npm cache clean --force
 
-WORKDIR $SOURCE_ROOT/statsd
+# Set graphite hostname to "graphite"
+RUN cd statsd \
+    && ls -la  \
+    && cp -v exampleConfig.js config.js \
+    && sed -i 's/graphite.example.com/graphite/' config.js
 
 # Expose required ports
 EXPOSE 8125/udp
 EXPOSE 8126
+
+# Set the starting directory to statsd
+WORKDIR statsd
 
 # Start statsd
 ENTRYPOINT [ "node", "stats.js", "config.js" ]
