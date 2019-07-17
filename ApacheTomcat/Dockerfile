@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################# Dockerfile for Apache Tomcat version 8.5.40 #####################################
+############################# Dockerfile for Apache Tomcat version 9.0.21 #####################################
 #
 # This Dockerfile builds a basic installation of Apache Tomcat.
 #
@@ -25,7 +25,7 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV WORKDIR /root
 
@@ -40,12 +40,12 @@ RUN apt-get update && apt-get install -y \
         wget \
 
 # download binary 
- && cd $WORKDIR && wget http://www-us.apache.org/dist/tomcat/tomcat-8/v8.5.40/bin/apache-tomcat-8.5.40.tar.gz \
- && tar -xvzf apache-tomcat-8.5.40.tar.gz \
+ && cd $WORKDIR && wget http://mirrors.estointernet.in/apache/tomcat/tomcat-9/v9.0.21/bin/apache-tomcat-9.0.21.tar.gz \
+ && tar -xvzf apache-tomcat-9.0.21.tar.gz \
  
 
 # Clean up source dir and unused packages/libraries
- && cd $WORKDIR && ls && rm -rf apache-tomcat-8.5.40.tar.gz  \ 
+ && cd $WORKDIR && ls && rm -rf apache-tomcat-9.0.21.tar.gz  \ 
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -54,6 +54,6 @@ RUN apt-get update && apt-get install -y \
 EXPOSE 8080
 
 # Start Apache Tomcat
-CMD $WORKDIR/apache-tomcat-8.5.40/bin/startup.sh && tail -f $WORKDIR/apache-tomcat-8.5.40/logs/catalina.out
+CMD $WORKDIR/apache-tomcat-9.0.21/bin/startup.sh && tail -f $WORKDIR/apache-tomcat-9.0.21/logs/catalina.out
 
 # End of Dockerfile
