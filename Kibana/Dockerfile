@@ -34,7 +34,7 @@ WORKDIR "/tmp"
 
 # Set Environment Variable
 ENV PATH=/home/kibana/.yarn/bin:/home/kibana/.config/yarn/global/node_modules/.bin:/usr/share/kibana/bin:$PATH
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Kibana/{ELASTICSEARCH_VER}/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Kibana/${KIBANA_VER}/patch/"
 
 # Set up Kibana user
 RUN groupadd -r kibana \
@@ -91,12 +91,12 @@ RUN curl -o- -L https://yarnpkg.com/install.sh | bash \
 
  && cd /tmp/kibana \
  && yarn build --skip-os-packages --oss \
- && tar -xzf target/kibana-oss-${KIBANA_VER}-SNAPSHOT-linux-x86_64.tar.gz -C /usr/share/kibana --strip-components 1 \
+ && tar -xzf target/kibana-oss-${KIBANA_VER}-SNAPSHOT-linux-x86_64.tar.gz -C /usr/share/kibana --strip-components 1 
 
 USER root
 
 # Cleanup Cache data, unused packages and source files
- && apt-get remove -y \
+RUN apt-get remove -y \
     curl \
     git \
     g++ \
