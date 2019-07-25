@@ -51,6 +51,8 @@ RUN apt-get update && apt-get install -y \
 		python3-pip \
 		tar \
 		wget \
+	
+	&&  pip3 install --upgrade pip \
 
 # Install required packages using pip3
 	&&	pip3 install \
