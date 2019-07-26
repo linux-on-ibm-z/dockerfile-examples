@@ -42,6 +42,8 @@ RUN apt-get update && apt-get install -y \
     mercurial \
     tar \
     wget \
+    patch \
+    curl \
 
 # Setup directories
  && mkdir -p /etc/heketi /var/lib/heketi $GOPATH/bin $GOPATH/src/github.com/heketi \
@@ -55,6 +57,8 @@ RUN apt-get update && apt-get install -y \
  && cd $GOPATH/src/github.com/heketi \
  && git clone -b $HEKETI_VERSION https://github.com/heketi/heketi.git \
  && cd heketi \
+ && curl -o glide.lock.diff https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Heketi/9.0.0/patch/glide.lock.diff \
+ && patch --ignore-whitespace glide.lock < glide.lock.diff \
  && make \
  && cp heketi /usr/bin/ \
  && cp client/cli/go/heketi-cli /usr/bin/ \
