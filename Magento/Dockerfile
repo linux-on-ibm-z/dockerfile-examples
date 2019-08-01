@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################## Dockerfile for Magento version 2.3.1 ###################################
+############################## Dockerfile for Magento version 2.3.2 ###################################
 #
 # Magento is an open-source e-commerce platform written in PHP.
 #
@@ -24,7 +24,7 @@ MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/commun
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG MAGENTO_VER=2.3.1
+ARG MAGENTO_VER=2.3.2
 ARG MYSQL_PASSWD=temp_pass
 
 # Install dependencies
@@ -68,8 +68,10 @@ RUN apt-get update -y && apt-get install -y \
  && cd magento2 \
  && git checkout $MAGENTO_VER \
  && composer install --no-plugins --no-scripts \
- && cd /var/www/html/magento2 && find var vendor pub/static pub/media app/etc -type f -exec chmod g+w {} \; && find var vendor pub/static pub/media app/etc -type d -exec chmod g+ws {} \; && chown -R :www-data . && chmod u+x bin/magento \
- && chmod g+wsx generated/ && chmod g+wsx generated/.htaccess \
+ && find var vendor generated pub/static pub/media app/etc -type f -exec chmod g+w {} + \
+ && find var vendor generated pub/static pub/media app/etc -type d -exec chmod g+ws {} + \ 
+ && chown -R :www-data . && chmod u+x bin/magento \
+ && chmod g+wsx generated/ \
 
 # Start MySQL server and create database for Magento and set root password
  && service mysql start \
