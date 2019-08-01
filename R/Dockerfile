@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################# Dockerfile for R version 3.6.0 ######################
+############################# Dockerfile for R version 3.6.1 ######################
 # This Dockerfile builds a basic installation of R.
 #
 # R is a language and environment for statistical computation and graphics.
@@ -22,10 +22,10 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
-ENV R_BASE_VERSION 3.6.0
+ENV R_BASE_VERSION 3.6.1
 ENV SOURCE_DIR=/tmp/source
 
 WORKDIR $SOURCE_DIR
@@ -43,17 +43,17 @@ RUN apt-get update && apt-get install -y \
     r-base \
     ratfor \
     tar \
-    wget \
+    wget
 
 # Download and build R
- && wget https://cran.r-project.org/src/base/R-3/R-${R_BASE_VERSION}.tar.gz \
+RUN wget https://cran.r-project.org/src/base/R-3/R-${R_BASE_VERSION}.tar.gz \
  && tar zxvf R-${R_BASE_VERSION}.tar.gz && cd R-${R_BASE_VERSION} \
  && ./configure --with-x=no && make && make install \
  && locale-gen "en_US.UTF-8" \
- && locale-gen "en_GB.UTF-8" \
+ && locale-gen "en_GB.UTF-8"
 
 # Clean up cache data and remove dependencies that are not required
- && apt-get remove -y \
+RUN apt-get remove -y \
     g++ \
     gcc \
     gfortran-4.8 \
