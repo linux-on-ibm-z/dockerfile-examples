@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## dockerfile for Apache Kafka version 2.2.0 #########
+########## dockerfile for Apache Kafka version 2.3.0 #########
 #
 # This Dockerfile builds a basic installation of Apache Kafka.
 #
@@ -31,59 +31,36 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ENV SOURCE_DIR=/tmp/source
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
-ENV PATH=$PATH:$SOURCE_DIR/gradle-5.2.1/bin:$JAVA_HOME/bin:/opt/kafka/
+ENV SOURCE_DIR=/home/
+ENV JAVA_HOME=/home/jdk-11.0.4+11
+ENV PATH=$PATH:$SOURCE_DIR/:$JAVA_HOME/bin
+ENV VERSION=2.12-2.3.0
 
 WORKDIR $SOURCE_DIR
+
 # Install dependencies
 RUN	apt-get update && apt-get -y install \
 	git \
-	openjdk-8-jdk \
 	unzip \
 	wget \
 
-# Install Gradle
- &&	wget https://services.gradle.org/distributions/gradle-5.2.1-bin.zip \
- &&	unzip gradle-5.2.1-bin.zip \
-
-# Download the source code
- &&	git clone git://github.com/apache/kafka \
- &&	cd kafka \
- &&	git checkout 2.2.0 \
-
-# Update build parameters
- &&	sed -i '/jvmArgs/ s/Xss2m/Xss256m/' build.gradle \
- 
-
-# Setup Gradle and build the jar files
- &&	gradle \
- &&	gradle jar \
-
-# Copy default config file
- &&	sed -i 's/-XX:+UseG1GC//' bin/kafka-run-class.sh \
- &&	cp -r $SOURCE_DIR/kafka /opt/kafka \
-
-# Clean up cache data and remove dependencies which are not required
- &&	rm -rf $SOURCE_DIR \
- &&	apt-get -y remove \
-	git \
-	unzip \
-	wget \
- &&	apt autoremove -y \
- &&	apt-get clean && rm -rf /var/lib/apt/lists/*
+# Download Adopt JDK
+  && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11_openj9-0.15.1/OpenJDK11U-jdk_s390x_linux_openj9_11.0.4_11_openj9-0.15.1.tar.gz \
+  && tar -xvzf OpenJDK11U-jdk_s390x_linux_openj9_11.0.4_11_openj9-0.15.1.tar.gz \
+  
+# Download the Apache Kafka Binary
+ &&	wget http://mirrors.estointernet.in/apache/kafka/2.3.0/kafka_${VERSION}.tgz \
+ && tar -xvzf kafka_${VERSION}.tgz \
+ && mv kafka_${VERSION} kafka
 
 # Expose ports for Apache ZooKeeper and kafka
 EXPOSE 2181 9092
 
-VOLUME /opt/kafka
-
-# change work directory
-WORKDIR /opt/kafka/
+WORKDIR $SOURCE_DIR/kafka/
 
 # start zookeeper and kafka server
-CMD bin/zookeeper-server-start.sh -daemon config/zookeeper.properties && sleep 20 && bin/kafka-server-start.sh config/server.properties
+CMD bin/zookeeper-server-start.sh -daemon config/zookeeper.properties && sleep 20 && bin/kafka-server-start.sh config/server.properties > /dev/null
 
 # End of Dockerfile
