@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for MySQL version 8.0.15 ############################################
+############################ Dockerfile for MySQL version 8.0.16 ############################################
 #
 # This Dockerfile builds a basic installation of MySQL.
 #
@@ -18,7 +18,7 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 # Set environment variable
 ENV SOURCE_DIR=/tmp/source
@@ -35,10 +35,11 @@ RUN apt-get update && apt-get install -y \
 	libssl-dev \
 	openssl \
 	make \
+	pkg-config \
 
 ##Get MySQL code
 && cd $SOURCE_DIR && git clone https://github.com/mysql/mysql-server.git \
-&& cd mysql-server && git checkout tags/mysql-8.0.15 \
+&& cd mysql-server && git checkout tags/mysql-8.0.16 \
 
 ##Build, configure, install 
 && cmake . -DDOWNLOAD_BOOST=1 -DWITH_BOOST=. -DFORCE_INSOURCE_BUILD=1 && make && make install \
