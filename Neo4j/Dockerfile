@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2019.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 3.5.6 ##################################
+########## Dockerfile for Neo4j version 3.5.7 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -26,18 +26,18 @@
 ##################################################################################
 
 #Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG NEO4J_VER=3.5.6
+ARG NEO4J_VER=3.5.7
 ENV SOURCE_DIR='/root'
 ENV NEO4J_HOME=$SOURCE_DIR/neo4j
 ENV JAVA_HOME=$SOURCE_DIR/jdk-11.0.3+7
 ENV PATH=$PATH:$NEO4J_HOME/bin:$JAVA_HOME/bin
 
-WORKDIR $SOURCE_DIR
+RUN addgroup --system neo4j && adduser --system --no-create-home --home "${NEO4J_HOME}" --ingroup neo4j neo4j
 
 # Install dependencies
 RUN  apt-get update  \
@@ -53,6 +53,16 @@ RUN  apt-get update  \
   && wget https://neo4j.com/artifact.php?name=neo4j-community-${NEO4J_VER}-unix.tar.gz \
   && tar -xvzf artifact.php?name=neo4j-community-${NEO4J_VER}-unix.tar.gz \
   && mv neo4j-community-${NEO4J_VER} neo4j \
+  && mv "${NEO4J_HOME}"/data /data \
+  && mv "${NEO4J_HOME}"/logs /logs \
+  && chown -R neo4j:neo4j /data \
+  && chmod -R 777 /data \
+  && chown -R neo4j:neo4j /logs \
+  && chmod -R 777 /logs \
+  && chown -R neo4j:neo4j "${NEO4J_HOME}" \
+  && chmod -R 777 "${NEO4J_HOME}" \
+  && ln -s /data "${NEO4J_HOME}"/data \
+  && ln -s /logs "${NEO4J_HOME}"/logs \
 # Clean up the unwanted packages and clear the source directory
   && apt-get remove -y \
                 wget  \
@@ -61,11 +71,13 @@ RUN  apt-get update  \
   && apt-get clean \
   && rm -rf $SOURCE_DIR/OpenJDK11U-jdk_s390x_linux_openj9_11.0.3_7_openj9-0.14.3.tar.gz $SOURCE_DIR/artifact.php?name=neo4j-community-${NEO4J_VER}-unix.tar.gz /var/lib/apt/lists/*
 
+WORKDIR "${NEO4J_HOME}"
+  
 # Define mount for backup of logs, data, conf & lib
 VOLUME ["$NEO4J_HOME/logs","$NEO4J_HOME/data","$NEO4J_HOME/conf","$NEO4J_HOME/lib"]
 
 # Port for Neo4j
-EXPOSE 7474 7473 6362 5000 6000 7000 5001 6001 2003 3637 1337
+EXPOSE 7474 7473 7687 6362 5000 6000 7000 5001 6001 2003 3637 1337
 
 # Set the Entrypoint
 CMD ["neo4j","console"]
