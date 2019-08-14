@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-server version 4.2.2 #########
+########## Dockerfile for Zabbix-server version 4.2.5 #########
 #
 # This Dockerfile builds a basic installation of Zabbix-server.
 #
@@ -22,7 +22,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG ZBX_SERVER_VER=4.2.2
+ARG ZBX_SERVER_VER=4.2.5
 
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -101,7 +101,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
         &&      sed -i 's/max_input_time = 60/max_input_time = 300/g' /etc/php/7.0/apache2/php.ini \
         &&      sed -i 's/post_max_size = 8M/post_max_size = 16M/g' /etc/php/7.0/apache2/php.ini \
         &&      sed -i "s/;date.timezone =/date.timezone = 'Asia\/Kolkata'/g" /etc/php/7.0/apache2/php.ini \
-# Start apache, mysql & Zabbix server 		
+# Start apache, mysql & Zabbix server
         &&      echo 'zabbix ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && echo 'sudo service apache2 start && sudo service mysql start && zabbix_server --foreground' > /start.sh \
 # Clean up cache data and remove dependencies which are not required
         &&      apt-get -y remove \
