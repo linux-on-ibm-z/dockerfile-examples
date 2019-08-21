@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2019
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for GlusterFS version 6.1 ##########################################
+##################################### Dockerfile for GlusterFS version 6.3 ##########################################
 #
 # This Dockerfile builds a basic installation of GlusterFS.
 #
