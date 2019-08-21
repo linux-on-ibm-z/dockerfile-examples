@@ -17,7 +17,7 @@
 # Base Image
 FROM  s390x/ubuntu:16.04
 
-ARG GLUSTERFS_VER=6.1
+ARG GLUSTERFS_VER=6.3
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
