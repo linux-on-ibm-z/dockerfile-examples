@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Mariadb Server version 10.4.6 #########
+########## Dockerfile for Mariadb Server version 10.4.7 #########
 #
 # This Dockerfile builds a basic installation of Mariadb Server.
 #
@@ -21,9 +21,9 @@
 ######################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
-ARG MARIADB_VER=10.4.6
+ARG MARIADB_VER=10.4.7
 ARG MARIADB_CONNECTOR_C_VER=3.1.2
 
 # The author
@@ -65,7 +65,7 @@ RUN apt-get update && apt-get install -y \
 
 ##Get wsrep-lib code from git
  && cd $SOURCE_DIR && git clone https://github.com/codership/wsrep-lib.git \
- && cd wsrep-lib && git checkout fd66bdef0bbcdeb3a5189c7f93319cb5f9d77ea7 \
+ && cd wsrep-lib && git checkout 55427188c152739fb2021fa997cad4b89b8c2fc7 \
  && git submodule update --init --recursive \
  && cp -r $SOURCE_DIR/wsrep-lib/* $SOURCE_DIR/server-mariadb-${MARIADB_VER}/wsrep-lib/ \
 
