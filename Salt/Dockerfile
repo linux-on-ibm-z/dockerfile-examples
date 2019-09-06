@@ -16,7 +16,7 @@
 #
 #
 # To start container from image & start an application in production mode
-# docker run -v <host_path>:/etc/salt -v <host_dir>:/data -d <image>
+# docker run -v <host_path>:/etc/salt -d <image>
 # 
 # The official website
 # https://saltstack.com/
@@ -27,7 +27,7 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR=/
 WORKDIR $SOURCE_DIR
@@ -51,11 +51,9 @@ RUN apt-get update && apt-get install -y \
 		python3-pip \
 		tar \
 		wget \
-	
 	&&  pip3 install --upgrade pip \
-
 # Install required packages using pip3
-	&&	pip3 install \
+	&&	pip install \
 			pyzmq \
 			'PyYAML<5.1' \
 			pycrypto \
@@ -64,29 +62,24 @@ RUN apt-get update && apt-get install -y \
 			psutil \
 			futures \
 			tornado \
-
 # Clone the repository and install SaltStack
 && 	git clone git://github.com/saltstack/salt \
 && 	cd salt \
 && 	git checkout $SALT_VER \
-&& 	pip3 install -e . \
-
+&& 	pip install -e . \
 # Configure SaltStack to run self-contained version
 && 	cd $SOURCE_DIR \
 &&	mkdir -p etc/salt/pki/master \
 &&	mkdir -p etc/salt/pki/minion \
 && 	cp ./salt/conf/master ./salt/conf/minion etc/salt/ \
 && 	cd etc/salt/ \
-
 # Edit config file master
 &&	sed -i 's/#user: root/user: root/g' master \
 && 	sed -i 's,#root_dir: /,'"root_dir: $SOURCE_DIR"',' master \
-
 # Edit config file minion
 &&	sed -i 's/#master: salt/master: localhost/g' minion \
 &&	sed -i 's/#user: root/user: root/g' minion \
 &&	sed -i 's,#root_dir: /,'"root_dir: $SOURCE_DIR"',' minion \
-
 # Clean up cache data and remove dependencies which are not required
 &&	apt-get remove -y \
 			gcc \
@@ -99,8 +92,6 @@ RUN apt-get update && apt-get install -y \
 
 VOLUME /etc/salt
 
-VOLUME /data
-
-CMD  salt-master -c ./etc/salt & salt-minion -c ./etc/salt
+CMD salt-master -c ./etc/salt & salt-minion -c ./etc/salt
 
 # End of Dockerfile
