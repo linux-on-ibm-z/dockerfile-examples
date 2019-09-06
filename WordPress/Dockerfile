@@ -1,80 +1,94 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############## Dockerfile for WordPress version 5.2.1 ############################
+########################################## Dockerfile for WordPress 5.2.2 ############################################
 #
-# WordPress is an online, open source website creation tool written in PHP.
+# To build this image, run docker build from the directory containing this Dockerfile:
+# 
+#       docker build -t wordpress:5.2.2 .
 #
-# To build WordPress image from the directory containing this Dockerfile
-# (assuming that the file is named "Dockerfile"):
-# docker build -t <image_name> .
+# Examples configurations for WordPress docker image using MySQL container:
+# Set up docker network:
+#       
+#       docker network create wp_network
 #
-# To start WordPress server run the below command
-# docker run --name <container_name> -p <port_number>:80 -p <port_number_mysql>:3306 -d <image_name>
+# Set up MySQL container and create WordPress database, user and password:
 #
-# We can view the Wordpress UI at http://<wordpress-host-ip>:<port_number>
+#       docker run --name mysql \
+#           -e MYSQL_ROOT_PASSWORD=rootpass \
+#           -e MYSQL_DATABASE=wordpress \
+#           -e MYSQL_USER=wordpress \
+#           -e MYSQL_PASSWORD=wppass \
+#           --network wp-network -d mysql:5.7
+# 
+# Set up WordPress container with MySQL container:
 #
-##################################################################################
+#       docker run --name wordpress \
+#           -e WORDPRESS_DB_HOST=mysql:3306 \
+#           -e WORDPRESS_DB_NAME=wordpress \
+#           -e WORDPRESS_DB_USER=wordpress \
+#           -e WORDPRESS_DB_PASSWORD=wppass \
+#           --network wp-network -p 8080:80 -d wordpress:5.2.2
+#
+# Then, access WordPress admin page via: https://host-ip:8080
+# 
+# For more WordPress docker configuration, please visit the official WordPress dockerhub webpage:
+# 
+#       https://hub.docker.com/_/wordpress
+#
+################################################################################################################
 
-# Base Image
 FROM s390x/ubuntu:16.04
 
-ARG WORDPRESS_VER=5.2.1
+ENV WORDPRESS_VERSION 5.2.2
+ENV WORDPRESS_SHA1 3605bcbe9ea48d714efa59b0eb2d251657e7d5b0
 
-# Maintainer
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-# Install dependencies
-RUN apt-get update -y && apt-get install -y \
+RUN apt-get update && apt-get install -y \
     apache2 \
     curl \
-    git \
+    ghostscript \
     libapache2-mod-php \
-    mysql-server \
+    && rm /var/www/html/index.html
+
+# Install PHP 7 with extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
+RUN apt-get update && apt-get install -y \
     php \
+    php-common \
+    php-curl \
+    php-fpm \
+    php-json \
+    php-mbstring \
     php-mysql \
-# Configure apache2 server
- && echo "AddType application/x-httpd-php .php" >> /etc/apache2/apache2.conf \
- && echo "ServerName localhost" >> /etc/apache2/apache2.conf \
- && echo "<Directory />" >> /etc/apache2/apache2.conf \
- && echo " DirectoryIndex index.php " >> /etc/apache2/apache2.conf \
- && echo "</Directory>" >> /etc/apache2/apache2.conf \
- && line="\/var\/www\/html" \
- && line_new="\/var\/www\/html\/WordPress" \
- && sed -i "s/$line/$line_new/g" /etc/apache2/sites-available/000-default.conf \
-# Download Wordpress application into apache2 server
- && cd /var/www/html && git clone git://github.com/WordPress/WordPress.git \
- && cd WordPress && git checkout $WORDPRESS_VER \
- && mv wp-config-sample.php wp-config.php \
- && sed -i 's/localhost/127.0.0.1/' wp-config.php \
- && sed -i 's/database_name_here/WORDPRESS/' wp-config.php \
- && sed -i 's/username_here/Wordpress/' wp-config.php \
- && sed -i 's/password_here/password/' wp-config.php \
-# Initialize database server
- && mkdir -p /var/lib/mysql/data \
- && /usr/sbin/mysqld --initialize --user=mysql --datadir=/var/lib/mysql/data \
- && sleep 60s && mkdir -p /var/run/mysqld \
- && chown mysql:mysql /var/run/mysqld \
-# Creating script for starting apache2 server and mysql
- && service mysql start && sleep 15s && /usr/bin/mysql -e "create database WORDPRESS" \
- && /usr/bin/mysql -e "create user 'Wordpress'@'localhost' identified by 'password'" \
- && /usr/bin/mysql -e "grant all privileges on WORDPRESS.* to 'Wordpress'@'localhost' identified by 'password' with GRANT OPTION" \
- && echo 'service apache2 start && /usr/bin/mysqld_safe --user=mysql' > /start.sh \
-# Clean up of unused packages
- && apt-get remove -y \
-    curl \
-    git \
- && apt-get autoremove -y \
- && apt autoremove -y \
- && apt-get clean \
- && rm -rf  /var/lib/apt/lists/*
+    php-imagick \
+    php-ssh2 \
+    php-xml \
+    php-zip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -o /usr/local/bin/apache2-foreground -fSL "https://raw.githubusercontent.com/docker-library/php/master/apache2-foreground" \
+    && chmod +x /usr/local/bin/apache2-foreground
+
+RUN a2enmod rewrite expires
 
 VOLUME /var/www/html
 
-EXPOSE 80 3306
+RUN set -ex \
+    && curl -o wordpress.tar.gz -fSL "https://wordpress.org/wordpress-${WORDPRESS_VERSION}.tar.gz" \
+	&& echo "$WORDPRESS_SHA1 *wordpress.tar.gz" | sha1sum -c - \
+    # Upstream tarballs include ./wordpress/ so this gives us /usr/src/wordpress
+	&& tar -xzf wordpress.tar.gz -C /usr/src/ \
+	&& rm wordpress.tar.gz \
+	&& chown -R www-data:www-data /usr/src/wordpress
 
-CMD ["/bin/sh", "start.sh"]
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# End of Dockerfile
+WORKDIR /var/www/html
+EXPOSE 80
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["apache2-foreground"]
