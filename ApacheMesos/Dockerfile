@@ -1,170 +1,129 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Mesos version 1.8.0 #########
+########################################## Dockerfile for Apache Mesos 1.8.1 ###################################################
 #
-# This Dockerfile builds a basic installation of Apache Mesos.
+# This Dockerfile builds and install Apache Mesos 1.8.1 from source using Ubuntu 16:04 on s390x.
 #
 # Apache Mesos is a cluster manager that provides efficient resource isolation and sharing across distributed applications, or frameworks.
-# It can run Hadoop, Jenkins, Spark, Aurora, and other frameworks on a dynamically shared pool of nodes
+# It can run Hadoop, Jenkins, Spark, Aurora, and other frameworks on a dynamically shared pool of nodes.
 #
-# To build this image, from the directory containing this Dockerfile
-# (assuming that the file is named Dockerfile):
-# docker build -t <image_name> .
+# To build this image, run docker build from the directory containing this Dockerfile:
+# 
+#       docker build -t mesos:1.8.1 .
 #
-# To simply run the resultant image, and provide a bash shell:
-# docker run --name <container-name> -it <image_name> /bin/bash
+# To simply run the docker image and provide a bash shell:
 #
-# Start Master of Apache Mesos using below command :
-# docker run --name <container_name> -d -p <host-port>:5050 <image-name> mesos-master.sh --ip=<ip-address> --work_dir=/var/lib/mesos --log_dir=/var/log/mesos
-# e.g. docker run --name mesos -d -p 5055:5050 mesos:1.8.0 mesos-master.sh --ip=0.0.0.0 --work_dir=/var/lib/mesos --log_dir=/var/log/mesos
+#       docker run --name some-mesos -it mesos:1.8.1 /bin/bash
 #
-# Start Agent of Apache Mesos using below command :
-# docker run --name <container_name> -d <image-name> mesos-agent.sh --master=<ip address of master>:<port of master> --work_dir=/var/lib/mesos --log_dir=/var/log/mesos --launcher=posix
+# Simple example of running Mesos on your local machine:
+# Starting Mesos master:
+#
+#       docker run --name mesos-master -p 5050:5050 -ti mesos:1.8.1 mesos-master --ip=0.0.0.0 --work_dir=/var/lib/mesos --no-hostname_lookup
+#
+# Starting Mesos agent:
+#
+#       docker run --name mesos-agent -ti mesos:1.8.1 mesos-agent --master=<mesos_master-ip>:5050 --work_dir=/var/lib/mesos --launcher=posix
 #
 # Official website: http://mesos.apache.org/
 #
-###################################################################################
+#########################################################################################################################
 
-# Base Image
 FROM s390x/ubuntu:16.04
 
-# The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ENV SOURCE_DIR='/root'
-ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x
-ENV MESOS_HOME=/opt/mesos
-ENV PATH=$PATH:$JAVA_HOME/bin:$MESOS_HOME/bin
-ENV MESOS_work_dir=/var/lib/mesos
-ENV MESOS_log_dir=/var/log/mesos
-ENV MESOS_SYSTEMD_ENABLE_SUPPORT false
+ARG MESOS_VERSION=1.8.1
+ARG REPO_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheMesos/1.8.1/patch"
+
+ENV SOURCE_DIR='/tmp'
+ENV JAVA_HOME=/opt/java-1.8.0-ibm
+ENV JVM_DIR=$JAVA_HOME/jre/lib/s390x/default
+ENV JAVA_TEST_LDFLAGS="-L$JVM_DIR -R$JVM_DIR -Wl,-ljvm -ldl"
+ENV JAVA_JVM_LIBRARY=$JAVA_HOME/jre/lib/s390x/default/libjvm.so
+ENV PATH=$JAVA_HOME/bin:$PATH
+ENV MESOS_SYSTEMD_ENABLE_SUPPORT=false
+
 WORKDIR $SOURCE_DIR
 
 # Install dependencies
-RUN apt-get update  \
-  && apt-get install  -y \
-                        autoconf \
-                        automake \
-                        build-essential \
-                        bzip2 \
-                        git \
-                        g++ \
-                        libapr1-dev \
-                        libcurl4-nss-dev \
-                        libsasl2-dev \
-                        libsasl2-modules \
-                        libssl-dev \
-                        libsvn-dev \
-                        libtool \
-                        maven \
-                        openjdk-8-jdk \
-                        python \
-                        python-dev \
-                        tar \
-                        wget \
-                        zlib1g-dev \
+RUN apt-get update && apt-get install -y \
+    autoconf \
+    bzip2 \
+    curl \
+    gcc \
+    g++ \
+    git \
+    libapr1-dev \
+    libcurl4-nss-dev \
+    libsasl2-dev \
+    libssl-dev \
+    libsvn-dev \
+    libtool \
+    make \
+    maven \
+    patch \
+    python-dev \
+    python-six \
+    tar \
+    wget \
+    zlib1g-dev
+
+# Download and install IBM JDK 8
+RUN cd $SOURCE_DIR \
+    && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.37/linux/s390x/ibm-java-s390x-sdk-8.0-5.37.bin \
+    && echo -en 'INSTALLER_UI=silent\nUSER_INSTALL_DIR=/opt/java-1.8.0-ibm\nLICENSE_ACCEPTED=TRUE' > installer.properties \
+    && bash ibm-java-s390x-sdk-8.0-5.37.bin -i silent -f installer.properties
 
 # Download and build source code of Apache Mesos
-  && cd $SOURCE_DIR \
-  && git clone https://github.com/apache/mesos \
-  && cd $SOURCE_DIR/mesos/ \
-  && git checkout 1.8.0 \
+RUN cd $SOURCE_DIR \
+    && git clone -b$MESOS_VERSION https://github.com/apache/mesos \
+    && cd mesos \
 
 # Bundling gRPC-1.11.0
-  && cd 3rdparty/ \
-  && git clone -b v1.11.0 https://github.com/grpc/grpc.git grpc-1.11.0 \
-  && cd grpc-1.11.0/ \
-  && git submodule update --init third_party/cares \
-  && cd ../ \
-  && tar zcvf grpc-1.11.0.tar.gz --exclude .git grpc-1.11.0 \
-  && rm -rf grpc-1.11.0 \
+    && cd 3rdparty \
+    && git clone -b v1.11.0 https://github.com/grpc/grpc.git grpc-1.11.0 \
+    && cd grpc-1.11.0/ \
+    && git submodule update --init third_party/cares \
+    && cd .. \
+    && tar zcf grpc-1.11.0.tar.gz --exclude .git grpc-1.11.0 \
+    && rm -rf grpc-1.11.0 \
 
-  && cd $SOURCE_DIR/mesos/ \
-  && sed -i '87i \          \<maxmemory>512m</maxmemory>' src/java/mesos.pom.in \
-
-# Add patch for updated gRPC version
-  && sed -i -e 's/1.10.0/1.11.0/g' 3rdparty/versions.am \
-  && sed -i -e 's/1.10.0/1.11.0/g' src/python/native_common/ext_modules.py.in \
+# Add patch to update gRPC version
+    && sed -i -e 's/1.10.0/1.11.0/g' versions.am \
+    && sed -i -e 's/1.10.0/1.11.0/g' ../src/python/native_common/ext_modules.py.in \
 
 # Add patch for protobuf
-  && echo "diff --git a/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h b/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "index 0b0b06c..075c406 100644" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "--- a/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "+++ b/src/google/protobuf/stubs/atomicops_internals_generic_gcc.h" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "@@ -146,6 +146,14 @@ inline Atomic64 NoBarrier_Load(volatile const Atomic64* ptr) {" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "   return __atomic_load_n(ptr, __ATOMIC_RELAXED);" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo " }" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "+inline Atomic64 Release_CompareAndSwap(volatile Atomic64* ptr," >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "+                                       Atomic64 old_value," >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "+                                       Atomic64 new_value) {" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "+  __atomic_compare_exchange_n(ptr, &old_value, new_value, false," >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "+                              __ATOMIC_RELEASE, __ATOMIC_ACQUIRE);" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "+  return old_value;" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "+}" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo "+" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo " #endif // defined(__LP64__)" >> 3rdparty/protobuf-3.5.0.patch \
-  && echo >> 3rdparty/protobuf-3.5.0.patch \
-  && echo " }  // namespace internal" >> 3rdparty/protobuf-3.5.0.patch \
+    && cd $SOURCE_DIR/mesos \
+    && curl -o "protobuf-3.5.0.patch" $REPO_URL/protobuf-3.5.0.patch \
+    && cat protobuf-3.5.0.patch >> 3rdparty/protobuf-3.5.0.patch \
+    && rm protobuf-3.5.0.patch \
 
-  && ./bootstrap \
-  && mkdir build && cd build \
-  && ../configure && make && make install \
-
-# Edit the Files
-  && mkdir -p /opt/mesos/src \
-  && mkdir -p /opt/mesos/src/.libs \
-  && mkdir -p /opt/mesos/3rdparty \
-
-  && cp -a $SOURCE_DIR/mesos/build/bin /opt/mesos \
-  && cp -a $SOURCE_DIR/mesos/build/src/master /opt/mesos/src \
-  && cp -a $SOURCE_DIR/mesos/build/src/slave /opt/mesos/src \
-  && cp $SOURCE_DIR/mesos/build/src/.libs/* /opt/mesos/src/.libs/ \
-  && cp -r $SOURCE_DIR/mesos/build/3rdparty/* /opt/mesos/3rdparty/ \
-  && cp -a $SOURCE_DIR/mesos/src/webui /opt/mesos/src \
-  && find $SOURCE_DIR/mesos/build/src/ -maxdepth 1 -type f -exec cp {} /opt/mesos/src \; \
-
-  && sed -i "22s/.*/. \/opt\/mesos\/bin\/mesos-master-flags.sh/" /opt/mesos/bin/mesos-master.sh \
-  && sed -i "24s/.*/exec \/opt\/mesos\/src\/mesos-master \"\$\{\@\}\"/" /opt/mesos/bin/mesos-master.sh \
-  && sed -i "s/\/root\/mesos\/build\/src/\/opt\/mesos\/src/g" /opt/mesos/src/mesos-master \
-
-  && sed -i "22s/.*/. \/opt\/mesos\/bin\/mesos-agent-flags.sh/" /opt/mesos/bin/mesos-agent.sh \
-  && sed -i "24s/.*/exec \/opt\/mesos\/src\/mesos-agent \"\$\{\@\}\"/" /opt/mesos/bin/mesos-agent.sh \
-  && sed -i "s/\/root\/mesos\/build\/src/\/opt\/mesos\/src/g" /opt/mesos/src/mesos-agent \
-
-  && sed -i "s|/root/mesos/build/../src/webui|/opt/mesos/src/webui|" /opt/mesos/bin/mesos-master-flags.sh \
-  && sed -i "s|/root/mesos/build/src|/opt/mesos/src|" /opt/mesos/bin/mesos-agent-flags.sh \
-
-  && sed -i "23s|/root/mesos/build/../src/cli|/opt/mesos/src/cli|" /opt/mesos/bin/mesos.sh \
-  && sed -i "26s|/root/mesos/build/src|/opt/mesos/src|" /opt/mesos/bin/mesos.sh \
-  && sed -i "30s|/root/mesos/build/src/mesos|/opt/mesos/src/mesos|" /opt/mesos/bin/mesos.sh \
+    && ./bootstrap \
+    && mkdir build \
+    && cd build \
+    && ../configure \
+    && make \
+    && make install
 
 # Clean up the unwanted packages and clear the source directory
-  && apt-get remove -y \
-                        autoconf \
-                        automake \
-                        build-essential \
-                        bzip2 \
-                        git \
-                        libtool \
-                        maven \
-                        python \
-                        python-dev \
-                        wget \
-
-  && apt-get autoremove -y \
-  && apt autoremove -y \
-  && apt-get clean \
-  && rm -rf $SOURCE_DIR/mesos /var/lib/apt/lists/* /root/.m2
-
-# Define mount point for important info like replicated logs of mesos
-VOLUME ["/var/lib/mesos", "/var/log/mesos"]
+RUN apt-get remove -y \
+    autoconf \
+    build-essential \
+    bzip2 \
+    git \
+    libtool \
+    maven \
+    python \
+    python-dev \
+    python-six \
+    wget \
+    && apt-get autoremove -y \
+    && apt autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/*
 
 # Port for Apache Mesos
 EXPOSE 5050
-
-# Set Entrypoint
-CMD mesos
 
 # End of Dockerfile
