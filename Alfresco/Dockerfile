@@ -33,8 +33,9 @@ FROM s390x/ubuntu:16.04
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
 
 ENV SOURCE_DIR=/tmp/source 
+ENV JAVA_DIR=/tmp/java
 ENV	M2_HOME=$SOURCE_DIR/apache-maven-3.3.9 
-ENV	JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x 
+ENV	JAVA_HOME=$JAVA_DIR/jdk8u181-b13 
 ENV	PATH=$M2_HOME/bin:$JAVA_HOME/bin:$PATH 
 ENV	MAVEN_OPTS="-Xmx1024m" 
 ENV	_JAVA_OPTIONS=-Xmx10g
@@ -46,7 +47,6 @@ RUN	apt-get update && apt-get -y install \
 		gcc \
 		git \
 		make \
-		openjdk-8-jdk \
 		postgresql \
 		postgresql-contrib \
 		subversion \
@@ -64,6 +64,12 @@ RUN	apt-get update && apt-get -y install \
 	&&	psql -U postgres -c "CREATE DATABASE alfresco;" \
 	&&	psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE alfresco to alfresco;" \
 	&&	service postgresql restart \
+	
+# Install AdoptOpenJDK v8u181b13
+       && mkdir -p $JAVA_DIR \
+       && cd $JAVA_DIR \
+       && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u181-b13/OpenJDK8U-jdk_s390x_linux_hotspot_8u181b13.tar.gz \
+       &&  tar -xvzf OpenJDK8U-jdk_s390x_linux_hotspot_8u181b13.tar.gz \
 	
 # Install OpenSSL version 1.0.2k
 	&&	cd $SOURCE_DIR \
