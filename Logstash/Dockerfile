@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 7.2.0 #####################################################
+############################ Dockerfile for Logstash version 7.3.0 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -19,7 +19,7 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG LOGSTASH_VER=7.2.0
+ARG LOGSTASH_VER=7.3.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -27,7 +27,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 WORKDIR "/opt"
 ENV JAVA_HOME=/opt/jdk8u212-b04/
 ENV PATH=$JAVA_HOME/bin:$PATH
-ENV LD_LIBRARY_PATH=/opt/jffi-jffi-1.2.18/build/jni/:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/opt/jffi-jffi-1.2.18/build/jni/:/opt/jffi-jffi-1.2.18/build/jni/libffi-s390x-linux/.libs:$LD_LIBRARY_PATH
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     ant \
@@ -41,8 +41,8 @@ RUN apt-get update && apt-get install -y \
     zip \
 
 # Download OpenJDK 8 with HotSpot
- && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b04/OpenJDK8U-jdk_s390x_linux_hotspot_8u212b04.tar.gz \
- && tar -xf OpenJDK8U-jdk_s390x_linux_hotspot_8u212b04.tar.gz\
+ && wget https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
+ && tar -xf OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
 
 # Install jffi
  && wget https://github.com/jnr/jffi/archive/jffi-1.2.18.tar.gz \
@@ -75,7 +75,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     zip \
  && apt-get autoremove -y && apt-get clean \
- && rm /opt/OpenJDK8U-jdk_s390x_linux_hotspot_8u212b04.tar.gz \
+ && rm /opt/OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
  && rm -rf /opt/logstash-oss-${LOGSTASH_VER} \
  && rm /opt/logstash-oss-${LOGSTASH_VER}.tar.gz \
  && rm /opt/jffi-1.2.18.tar.gz \
