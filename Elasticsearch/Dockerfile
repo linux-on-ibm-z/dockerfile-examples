@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.2.0 ########################################
+##################################### Dockerfile for Elasticsearch version 7.3.0 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM  s390x/ubuntu:16.04
 
-ARG ELASTICSEARCH_VER=7.2.0
+ARG ELASTICSEARCH_VER=7.3.0
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -31,7 +31,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 # Set Environment Variables
 ENV LANG="en_US.UTF-8"
 ENV SOURCE_DIR="/tmp/"
-ENV JAVA_HOME=/usr/share/jdk-12.0.1+12
+ENV JAVA_HOME=/usr/share/jdk-12.0.2+10
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch/"
 WORKDIR $SOURCE_DIR
@@ -50,14 +50,13 @@ RUN apt-get update && apt-get install -y \
 
 # Download AdoptOpenJDK 12
  && cd $SOURCE_DIR \
- && wget https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.1%2B12/OpenJDK12U-jdk_s390x_linux_hotspot_12.0.1_12.tar.gz \
- && tar -C /usr/share/ -xzvf OpenJDK12U-jdk_s390x_linux_hotspot_12.0.1_12.tar.gz \
+ && wget https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
+ && tar -C /usr/share/ -xzvf OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
 
 # Download and Build Elasticsearch
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
- && curl -o BuildPlugin.diff $PATCH_URL/BuildPlugin.diff \
- && git apply BuildPlugin.diff \
- && sed -i "176s/linux-x86_64/linux-s390x/" $SOURCE_DIR/elasticsearch/distribution/archives/build.gradle \
+ && curl -o patch_gradle.diff $REPO_URL/patch_gradle.diff \
+ && patch $SOURCE_DIR/elasticsearch/distribution/archives/build.gradle patch_gradle.diff \
  && ./gradlew -p distribution/archives/oss-linux-tar assemble --parallel \
 
 # Install Elasticsearch
@@ -90,3 +89,4 @@ ENV PATH=/usr/share/elasticsearch/bin:$PATH
 CMD ["elasticsearch"]
 
 # End of Dockerfile
+
