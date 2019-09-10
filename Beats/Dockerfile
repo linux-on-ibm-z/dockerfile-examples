@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.2.0 #############################
+#################### Dockerfile for Beats 7.3.0 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG BEATS_VER=7.2.0
+ARG BEATS_VER=7.3.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -52,9 +52,9 @@ RUN apt-get update && apt-get install -y \
     wget \
     libsystemd-dev \
 # Install go and download beats source code
- && wget https://storage.googleapis.com/golang/go1.12.4.linux-s390x.tar.gz \
- && chmod ugo+r go1.12.4.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.12.4.linux-s390x.tar.gz \
+ && wget https://storage.googleapis.com/golang/go1.12.9.linux-s390x.tar.gz \
+ && chmod ugo+r go1.12.9.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.12.9.linux-s390x.tar.gz \
  && python -m easy_install pip \
  && python -m pip install appdirs pyparsing six packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
