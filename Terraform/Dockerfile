@@ -51,6 +51,8 @@ RUN apt-get update &&  apt-get install -y \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/terraform.git \
  && cd terraform && git checkout v${TERRAFORM_VER} \
+ && export GO111MODULE=on \
+ && export GOPROXY=https://proxy.golang.org/ \
  && make tools \
 # Build Terraform
  && XC_OS=linux XC_ARCH=s390x make bin \
