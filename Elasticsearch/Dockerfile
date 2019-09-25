@@ -43,26 +43,21 @@ RUN apt-get update && apt-get install -y \
     gzip \
     tar \
     wget \
-
 # Set up locale
  && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
-
 # Download AdoptOpenJDK 12
  && cd $SOURCE_DIR \
  && wget https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
  && tar -C /usr/share/ -xzvf OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
-
 # Download and Build Elasticsearch
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
- && curl -o patch_gradle.diff $REPO_URL/patch_gradle.diff \
+ && curl -o patch_gradle.diff $PATCH_URL/patch_gradle.diff \
  && patch $SOURCE_DIR/elasticsearch/distribution/archives/build.gradle patch_gradle.diff \
  && ./gradlew -p distribution/archives/oss-linux-tar assemble --parallel \
-
 # Install Elasticsearch
  && mkdir -p /usr/share/elasticsearch \
  && tar -xzf distribution/archives/oss-linux-tar/build/distributions/elasticsearch-oss-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1 \
-
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
     curl \
@@ -71,13 +66,12 @@ RUN apt-get update && apt-get install -y \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* /root/.gradle/* /tmp/elasticsearch \
-
 # Create elaticsearch user
  && /usr/sbin/groupadd elasticsearch \
  && /usr/sbin/useradd -g elasticsearch elasticsearch \
  && usermod -aG sudo elasticsearch \
  && chown elasticsearch:elasticsearch -R /usr/share/elasticsearch
-
+ 
 # Expose the default port
 USER elasticsearch
 
@@ -89,4 +83,3 @@ ENV PATH=/usr/share/elasticsearch/bin:$PATH
 CMD ["elasticsearch"]
 
 # End of Dockerfile
-
