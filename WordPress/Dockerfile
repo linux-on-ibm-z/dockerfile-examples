@@ -1,11 +1,11 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########################################## Dockerfile for WordPress 5.2.2 ############################################
+########################################## Dockerfile for WordPress 5.2.3 ############################################
 #
 # To build this image, run docker build from the directory containing this Dockerfile:
 # 
-#       docker build -t wordpress:5.2.2 .
+#       docker build -t wordpress:5.2.3 .
 #
 # Examples configurations for WordPress docker image using MySQL container:
 # Set up docker network:
@@ -19,7 +19,7 @@
 #           -e MYSQL_DATABASE=wordpress \
 #           -e MYSQL_USER=wordpress \
 #           -e MYSQL_PASSWORD=wppass \
-#           --network wp-network -d mysql:5.7
+#           --network wp_network -d mysql:5.7
 # 
 # Set up WordPress container with MySQL container:
 #
@@ -28,7 +28,7 @@
 #           -e WORDPRESS_DB_NAME=wordpress \
 #           -e WORDPRESS_DB_USER=wordpress \
 #           -e WORDPRESS_DB_PASSWORD=wppass \
-#           --network wp-network -p 8080:80 -d wordpress:5.2.2
+#           --network wp_network -p 8080:80 -d wordpress:5.2.3
 #
 # Then, access WordPress admin page via: https://host-ip:8080
 # 
@@ -40,8 +40,8 @@
 
 FROM s390x/ubuntu:16.04
 
-ENV WORDPRESS_VERSION 5.2.2
-ENV WORDPRESS_SHA1 3605bcbe9ea48d714efa59b0eb2d251657e7d5b0
+ENV WORDPRESS_VERSION 5.2.3
+ENV WORDPRESS_SHA1 5efd37148788f3b14b295b2a9bf48a1a467aa303
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
