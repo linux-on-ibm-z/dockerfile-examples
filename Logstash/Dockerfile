@@ -25,7 +25,7 @@ ARG LOGSTASH_VER=7.3.0
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 WORKDIR "/opt"
-ENV JAVA_HOME=/opt/jdk8u212-b04/
+ENV JAVA_HOME=/opt/jdk8u222-b10/
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV LD_LIBRARY_PATH=/opt/jffi-jffi-1.2.18/build/jni/:/opt/jffi-jffi-1.2.18/build/jni/libffi-s390x-linux/.libs:$LD_LIBRARY_PATH
 # Install dependencies
@@ -39,23 +39,19 @@ RUN apt-get update && apt-get install -y \
     unzip \
     wget \
     zip \
-
 # Download OpenJDK 8 with HotSpot
- && wget https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
- && tar -xf OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
-
+ && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jdk_s390x_linux_hotspot_8u222b10.tar.gz \
+ && tar -xvf OpenJDK8U-jdk_s390x_linux_hotspot_8u222b10.tar.gz \
 # Install jffi
  && wget https://github.com/jnr/jffi/archive/jffi-1.2.18.tar.gz \
  && tar -xzvf jffi-1.2.18.tar.gz \
  && cd jffi-jffi-1.2.18 \
  && ant \
-
 # Download and Install Logstash
  && cd /opt \
  && wget https://artifacts.elastic.co/downloads/logstash/logstash-oss-${LOGSTASH_VER}.tar.gz \
  && mkdir /usr/share/logstash \
  && tar -xzf logstash-oss-${LOGSTASH_VER}.tar.gz  -C /usr/share/logstash --strip-components 1 \
-
 # Copy types.conf to platform.conf, re-create and copy the jar
  && cd /usr/share/logstash/logstash-core/lib/jars \
  && unzip jruby-complete-9.2.7.0.jar -d jruby-complete-9.2.7.0 \
@@ -65,7 +61,6 @@ RUN apt-get update && apt-get install -y \
  && zip -r ../jruby-complete-9.2.7.0.jar * \
  && cd  /usr/share/logstash/ \
  && rm -rf /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.7.0 \
- 
 # Cleanup Cache data , unused packages and source files
  && apt-get remove -y \
     ant \
@@ -75,12 +70,11 @@ RUN apt-get update && apt-get install -y \
     wget \
     zip \
  && apt-get autoremove -y && apt-get clean \
- && rm /opt/OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
+ && rm /opt/OpenJDK8U-jdk_s390x_linux_hotspot_8u222b10.tar.gz \
  && rm -rf /opt/logstash-oss-${LOGSTASH_VER} \
  && rm /opt/logstash-oss-${LOGSTASH_VER}.tar.gz \
  && rm /opt/jffi-1.2.18.tar.gz \
  && rm -rf /var/lib/apt/lists/* \
-
 # Create elaticsearch user
  && /usr/sbin/groupadd logstash \
  && /usr/sbin/useradd -g logstash logstash \
