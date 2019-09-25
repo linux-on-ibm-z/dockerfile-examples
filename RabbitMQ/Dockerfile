@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for RabbitMQ version 3.7.15 ################################
+################# Dockerfile for RabbitMQ version 3.7.17 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -23,8 +23,9 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG RABBITMQ_VER=3.7.15
-
+ARG RABBITMQ_VER=3.7.17
+ARG ELIXIR_VERSION=1.7.0
+ARG HEX_VERSION=0.20.1
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
@@ -67,11 +68,11 @@ RUN apt-get update && apt-get install -y \
  && wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/$RABBITMQ_VER/rabbitmq-server-$RABBITMQ_VER.tar.xz \
  && localedef -c -f UTF-8 -i en_US en_US.UTF-8 \
  && git clone git://github.com/elixir-lang/elixir \
- && cd elixir && git checkout v1.6.6 && make && make install \
+ && cd elixir && git checkout v$ELIXIR_VERSION && make && make install \
  && cd ../ && git clone git://github.com/hexpm/hex.git \
- && cd hex &&  git checkout v0.19.0 && mix install \
+ && cd hex &&  git checkout v$HEX_VERSION && mix install \
  && cd /opt && tar xf $SOURCE_DIR/rabbitmq-server-$RABBITMQ_VER.tar.xz \
- && cp $SOURCE_DIR/hex/_build/dev/lib/hex/ebin/*  rabbitmq-server-$RABBITMQ_VER/deps/.mix/archives/hex-0.19.0/hex-0.19.0/ebin/ \
+ && cp $SOURCE_DIR/hex/_build/dev/lib/hex/ebin/*  rabbitmq-server-$RABBITMQ_VER/deps/.mix/archives/hex-$HEX_VERSION/hex-$HEX_VERSION/ebin/ \
  && cd rabbitmq-server-$RABBITMQ_VER  && make && make install \
  && mkdir -p /etc/rabbitmq \
  && echo "[{rabbit, [{loopback_users, []}]}]." | tee /etc/rabbitmq/rabbitmq.config \
@@ -82,10 +83,7 @@ RUN apt-get update && apt-get install -y \
     ant \
     curl \
     git \
-    make \
-    openjdk-8-jdk \
-    openssl \
-    python \
+    make \            
     rsync \
     wget \
     xsltproc \
