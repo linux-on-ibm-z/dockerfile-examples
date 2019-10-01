@@ -1,6 +1,7 @@
-############# Dockerfile for Apache Maven version 3.5.0 #######################################################################################
-#
-# This Dockerfile builds a basic installation of Maven.
+# © Copyright IBM Corporation 2017, 2019.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############# Dockerfile for Apache Maven version 3.6.2 #######################################################################################
 #
 # Apache Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can managea project's build, reporting and documentation from a central piece of information.
 #
@@ -12,44 +13,40 @@
 # docker run --name <container_name> -it <image_name> /bin/bash
 #
 # To use Maven image from command line, use following command:
-# docker run --rm=true --name <container_name> -v <path_to_project_on_host>:<path_on_container> <image_name> <maven_command>
-# For ex. docker run --rm --name <container_name> -v /prj/HelloWorld:/tmp/source maven_img mvn install
+# docker run -it --name <container_name> -v <path_to_project_on_host>:/usr/src/mymaven -w /usr/src/mymaven <image_name> <maven_command>
+# For ex. docker run -it --name maven_test -v /home/test/mvn/gs-maven/initial:/usr/src/mymaven -w /usr/src/mymaven  maven:s390x mvn clean install
 #
 ##############################################################################################################################################
 
-# Base image
 FROM s390x/ubuntu:16.04
 
-# Maintainer
-MAINTAINER LoZ Open Source Ecosystem
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ENV SOURCE_DIR=/tmp/source
-WORKDIR $SOURCE_DIR
-ENV M3_HOME=$SOURCE_DIR/maven
-ENV PATH=$JAVA_HOME/bin:$PATH
+ARG MAVEN_VERSION=3.6.2
+ARG USER_HOME_DIR="/root"
+ARG SHA=d941423d115cd021514bfd06c453658b1b3e39e6240969caf4315ab7119a77299713f14b620fb2571a264f8dff2473d8af3cb47b05acf0036fc2553199a5c1ee
+ARG BASE_URL=https://apache.osuosl.org/maven/maven-3/${MAVEN_VERSION}/binaries
 
-# Install dependencies
 RUN apt-get update && apt-get install -y \
+    curl \
     tar \
-    wget \
-    maven \
     openjdk-8-jdk \
-# Download and build maven code
- && wget https://archive.apache.org/dist/maven/maven-3/3.5.0/source/apache-maven-3.5.0-src.tar.gz \
- && tar -zxvf apache-maven-3.5.0-src.tar.gz \
- && cd apache-maven-3.5.0 \
- && mvn -DdistributionTargetDir="$M3_HOME" clean install \
- &&  apt-get remove -y maven \
- && cp -r $M3_HOME/ /usr/share/ \
- && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn \
+  && mkdir -p /usr/share/maven /usr/share/maven/ref \
+  && curl -fsSL -o /tmp/apache-maven.tar.gz ${BASE_URL}/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
+  && echo "${SHA}  /tmp/apache-maven.tar.gz" | sha512sum -c - \
+  && tar -xzf /tmp/apache-maven.tar.gz -C /usr/share/maven --strip-components=1 \
+  && rm -f /tmp/apache-maven.tar.gz \
+  && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
 
-# Clean up and Tidy 
- && apt-get remove -y \
-    wget \
- && apt-get autoremove -y \
- && apt autoremove -y \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/* /root/.m2 $SOURCE_DIR
+ENV MAVEN_HOME /usr/share/maven
+ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 
-# Set Entrypoint
-CMD ["mvn","-v"]
+COPY mvn-entrypoint.sh /usr/local/bin/mvn-entrypoint.sh
+
+RUN chmod +x /usr/local/bin/mvn-entrypoint.sh
+
+COPY settings-docker.xml /usr/share/maven/ref/
+
+ENTRYPOINT ["/usr/local/bin/mvn-entrypoint.sh"]
+CMD ["mvn"]
