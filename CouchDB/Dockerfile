@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for CouchDB version 2.3.0 ############
+############### Dockerfile for CouchDB version 2.3.1 ############
 #
 # CouchDB, is open source database software.
 #
@@ -21,7 +21,7 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
@@ -42,15 +42,15 @@ RUN apt-get update && apt-get install -y build-essential \
 	make \
 	autoconf automake autoconf \
 	libmozjs185-dev libicu-dev libcurl4-openssl-dev \
- 
+
 # Download and install CouchDB
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
- && git checkout 2.3.0 \
+ && git checkout 2.3.1 \
  && ./configure -c --disable-docs --disable-fauxton \
  && make  \
  && cp -r $SOURCE_DIR/couchdb /usr/share/couchdb \
- 
+
 # Tidy and clean up
  && rm -rf $SOURCE_DIR \
  && apt-get remove -y \
