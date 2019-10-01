@@ -71,9 +71,9 @@ RUN apt-get update && apt-get install -y \
 
 # Download and install IBM JDK 8
 RUN cd $SOURCE_DIR \
-    && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.37/linux/s390x/ibm-java-s390x-sdk-8.0-5.37.bin \
+    && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.41/linux/s390x/ibm-java-s390x-sdk-8.0-5.41.bin \
     && echo -en 'INSTALLER_UI=silent\nUSER_INSTALL_DIR=/opt/java-1.8.0-ibm\nLICENSE_ACCEPTED=TRUE' > installer.properties \
-    && bash ibm-java-s390x-sdk-8.0-5.37.bin -i silent -f installer.properties
+    && bash ibm-java-s390x-sdk-8.0-5.41.bin -i silent -f installer.properties
 
 # Download and build source code of Apache Mesos
 RUN cd $SOURCE_DIR \
