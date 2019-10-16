@@ -54,7 +54,6 @@ RUN	apt-get update && apt-get install -y \
 		openssl dh-autoreconf \
 		libssl-dev python-setuptools \
 		python-lxml \
-		python-pip \
 		curl \
 		python-ldap \
 		python-dev \
@@ -69,7 +68,9 @@ RUN	apt-get update && apt-get install -y \
 		libsasl2-dev \
 		zlib1g-dev \
 		ed \
-		patch\
+		patch \
+	&&	curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+	&&	python get-pip.py \
 	&&	pip install --upgrade setuptools \
 	&&	pip install \
 		six==1.11 \
@@ -102,8 +103,8 @@ RUN	apt-get update && apt-get install -y \
 	&&	pip install --ignore-installed -r requirements.txt \
 	&&	pip install --ignore-installed -r test-requirements.txt  \
 	&&	python setup.py install \
-	&&  sed -i 's/python3/python2/g' tox.ini \
-	&&  tox -egenconfig \
+	&&	sed -i 's/python3/python2/g' tox.ini \
+	&&	tox -egenconfig \
 # Configure Keystone
 	&&	cp -r etc/ /etc/keystone \
 	&&	cd /etc/keystone/ \
