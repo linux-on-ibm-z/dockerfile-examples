@@ -46,9 +46,9 @@ RUN echo 'LICENSE_ACCEPTED=TRUE\n\
 USER_INSTALL_DIR=/opt/ibm/java-s390x-80\n\
 -fileOverwrite_/opt/ibm/java-s390x-80/_uninstall/uninstall.lax=Yes\n'\
 > installer.properties  &&\
- wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.37/linux/s390x/ibm-java-s390x-sdk-8.0-5.37.bin  &&\
- chmod a+x ibm-java-s390x-sdk-8.0-5.37.bin  &&\
- ./ibm-java-s390x-sdk-8.0-5.37.bin -i silent
+ wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.41/linux/s390x/ibm-java-s390x-sdk-8.0-5.41.bin  &&\
+ chmod a+x ibm-java-s390x-sdk-8.0-5.41.bin  &&\
+ ./ibm-java-s390x-sdk-8.0-5.41.bin -i silent
 ENV JAVA_HOME /opt/ibm/java-s390x-80
 ENV PATH $JAVA_HOME/bin:$PATH
 RUN java -version
