@@ -41,11 +41,11 @@ RUN apt-get update && apt-get install -y \
 		ant \
 		patch \
  && ln -s `which nodejs` /usr/local/bin/node \
- && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.30/linux/s390x/ibm-java-s390x-sdk-8.0-5.30.bin \
+ && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.41/linux/s390x/ibm-java-s390x-sdk-8.0-5.41.bin \
  && wget https://raw.githubusercontent.com/zos-spark/scala-workbench/master/files/installer.properties.java \
  && tail -n +3 installer.properties.java | tee installer.properties \
- && chmod +x ibm-java-s390x-sdk-8.0-5.30.bin \
- && ./ibm-java-s390x-sdk-8.0-5.30.bin -r installer.properties \
+ && chmod +x ibm-java-s390x-sdk-8.0-5.41.bin \
+ && ./ibm-java-s390x-sdk-8.0-5.41.bin -r installer.properties \
  && git clone git://github.com/antlr/antlr4.git \
  && cd antlr4 && git checkout 4.7.2 \
  && sed -i 's/\[9.3.24.v20180605,)/9.4.19.v20190610/' runtime-testsuite/pom.xml \
