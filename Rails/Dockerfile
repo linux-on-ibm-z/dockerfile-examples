@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install -y \
     ruby-dev \
     zlib1g-dev \
  && gem update --system \
+ && gem install sprockets -v 3.7.2 \
  && gem install rails -v ${RAILS_VER} \
 # Tidy up (Clear cache data)
  && apt-get remove -y \
