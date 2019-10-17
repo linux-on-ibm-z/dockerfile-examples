@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Prometheus 2.12.0 #########
+########## Dockerfile for Prometheus 2.13.0 #########
 #
 # This Dockerfile builds Prometheus
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG PROMETHEUS_VER=2.12.0
+ARG PROMETHEUS_VER=2.13.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
