@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for Apache ActiveMQ version 5.15.9 ###################
+################# Dockerfile for Apache ActiveMQ version 5.15.10 ###################
 #
 # This Dockerfile builds a basic installation of Apache ActiveMQ.
 #
@@ -14,7 +14,7 @@
 #
 # Run the ActiveMQ Message Broker using below command:
 # docker run --name <container_name> -d -p <port>:8161 <image-name>
-# e.g. docker run --name activemq -d -p 8161:8161 activemq:5.15.9
+# e.g. docker run --name activemq -d -p 8161:8161 activemq:5.15.10
 #
 # To provide custom configuration for Activemq use below command:
 #  docker run --name <container_name> -d -p <port>:8161 -v /<host_path>/conf:/opt/activemq/conf <image-name>
@@ -29,10 +29,10 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG APACHE_AMQ_VER=5.15.9
+ARG APACHE_AMQ_VER=5.15.10
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x
 ENV ACTIVEMQ_HOME=/opt/activemq
