@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Fluentd version 1.7.2 ###############################
+########## Dockerfile for Fluentd version 1.7.3 ###############################
 #
 # This Dockerfile builds a basic installation of Fluentd.
 #
@@ -27,7 +27,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG FLUENTD_VER=1.7.2
+ARG FLUENTD_VER=1.7.3
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
