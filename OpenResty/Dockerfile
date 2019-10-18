@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for OpenResty version 1.15.8.1 #########
+########## Dockerfile for OpenResty version 1.15.8.2 #########
 #
 # This Dockerfile builds a basic installation of OpenResty.
 #
@@ -26,17 +26,26 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-# The Author
+# The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG OPENRESTY_VER=1.15.8.1
+ARG RESTY_VERSION="1.15.8.2"
+ARG NGINX_VERSION="1.15.8"
+ARG RESTY_J="1"
+ARG RESTY_CONFIG_OPTIONS="\
+	--without-http_redis2_module \
+	--with-http_iconv_module \
+	--with-http_postgres_module \
+"
 
-ENV SOURCE_DIR=/tmp/source PATH=$PATH:/usr/local/openresty/bin
+ENV SOURCE_ROOT=/tmp/source PATH=$PATH:/usr/local/openresty/bin
 
-WORKDIR $SOURCE_DIR
+WORKDIR $SOURCE_ROOT
 
 # Install dependencies
-RUN	apt-get update && apt-get -y install \
+RUN	DEBIAN_FRONTEND=noninteractive apt-get update \
+	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+	    ca-certificates \
 		dos2unix \
 		gcc \
 		git \
@@ -55,30 +64,29 @@ RUN	apt-get update && apt-get -y install \
 		postgresql \
 		tar \
 		wget \
+	&& ln -s make /usr/bin/gmake \
 # Download the source code
-	&& cd $SOURCE_DIR \
-	&& wget https://openresty.org/download/openresty-${OPENRESTY_VER}.tar.gz \
-	&& tar -zxvf openresty-${OPENRESTY_VER}.tar.gz \
-# Comment out the below lines in file /<source_root>/openresty-${OPENRESTY_VER}/configure
-	&& cd openresty-${OPENRESTY_VER} \
+	&& cd $SOURCE_ROOT \
+	&& wget https://openresty.org/download/openresty-${RESTY_VERSION}.tar.gz \
+	&& tar -xvf openresty-${RESTY_VERSION}.tar.gz \
+# Comment out the below lines in file /<source_root>/openresty-1.15.8.2/configure
+	&& cd openresty-${RESTY_VERSION} \
 	&& sed -i '730,773 s/^/#/' configure \
 	&& sed -i '723 s/^/#/' configure \
 	&& sed -i '704,713 s/^/#/' configure \
 # Build and install OpenResty
-	&& cd $SOURCE_DIR \
-	&& rm -rf $SOURCE_DIR/openresty-${OPENRESTY_VER}/bundle/LuaJIT-2.1-20190507/* \
+	&& cd $SOURCE_ROOT \
+	&& rm -rf $SOURCE_ROOT/openresty-${RESTY_VERSION}/bundle/LuaJIT-2.1-20190507/* \
 	&& wget https://github.com/openresty/luajit2/archive/v2.1-20190912.tar.gz \
 	&& tar -zxvf v2.1-20190912.tar.gz \
-	&& cp -r $SOURCE_DIR/luajit2-2.1-20190912/* $SOURCE_DIR/openresty-${OPENRESTY_VER}/bundle/LuaJIT-2.1-20190507/ \
-	&& cd $SOURCE_DIR/openresty-${OPENRESTY_VER}/ \
-	&& ./configure --without-http_redis2_module --with-http_iconv_module --with-http_postgres_module -j2 \
+	&& cp -r $SOURCE_ROOT/luajit2-2.1-20190912/* $SOURCE_ROOT/openresty-${RESTY_VERSION}/bundle/LuaJIT-2.1-20190507/ \
+	&& cd $SOURCE_ROOT/openresty-${RESTY_VERSION} \
+	&& ./configure $RESTY_CONFIG_OPTIONS \
 	&& make -j2 \
 	&& make install \
 # Configure Nginx module
-	&& cd build/nginx-1.15.8 \
-	&& ./configure \
-	&& make \
-	&& make install \
+    && cd $SOURCE_ROOT/openresty-${RESTY_VERSION}/build/nginx-${NGINX_VERSION} \
+    && ./configure && make && make install \
 # Clean up cache data and remove dependencies which are not required
 	&&	apt-get -y remove \
 		dos2unix \
@@ -92,13 +100,11 @@ RUN	apt-get update && apt-get -y install \
 		wget \
 	&&	apt-get autoremove -y \
 	&& 	apt autoremove -y \
-	&& 	rm -rf $SOURCE_DIR/* \
+	&& 	rm -rf $SOURCE_ROOT/* \
 	&& 	apt-get clean \
 	&& 	rm -rf /var/lib/apt/lists/*
 	
 EXPOSE 80
-
-VOLUME ["/data"]
 	
 CMD ["openresty", "-g", "daemon off;"]
 	
