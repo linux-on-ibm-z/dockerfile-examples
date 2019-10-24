@@ -30,20 +30,18 @@ ARG KIBANA_VER=7.3.0
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-WORKDIR "/tmp"
-
 # Set Environment Variable
 ENV PATH=/home/kibana/.yarn/bin:/home/kibana/.config/yarn/global/node_modules/.bin:/usr/share/kibana/bin:$PATH
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Kibana/${KIBANA_VER}/patch/"
-
 # Set up Kibana user
-RUN groupadd -r kibana \
- && useradd -g kibana -m kibana \
- && mkdir -p /usr/share/kibana \
- && chown kibana:kibana -R /usr/share/kibana \
 
+RUN apt-get update && apt-get install sudo && groupadd -r kibana \
+ && useradd -g kibana -m kibana \
+ && echo "kibana ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+USER kibana
+ENV WORKDIR=/home/kibana
 # Install the dependencies
- && apt-get update && apt-get install -y \
+RUN sudo apt-get update && sudo apt-get install -y \
     curl \
     git \
     g++ \
@@ -54,59 +52,44 @@ RUN groupadd -r kibana \
     sudo \
     tar \
     wget \
-
 # Installing Node.js v10.15.2
- && mkdir -p /usr/local/lib/nodejs \
- && wget https://nodejs.org/dist/v10.15.2/node-v10.15.2-linux-s390x.tar.gz \
- && tar xzf node-v10.15.2-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
- && ln -s /usr/local/lib/nodejs/node-v10.15.2-linux-s390x/bin/* /usr/bin/
-
-USER kibana
-
+ && sudo mkdir -p /usr/local/lib/nodejs \
+ && cd $WORKDIR && sudo wget https://nodejs.org/dist/v10.15.2/node-v10.15.2-linux-s390x.tar.gz \
+ && sudo tar xzf node-v10.15.2-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
+ && sudo ln -s /usr/local/lib/nodejs/node-v10.15.2-linux-s390x/bin/* /usr/bin/ \
 # Install Yarn
-RUN curl -o- -L https://yarnpkg.com/install.sh | bash \
-
+ && curl -o- -L https://yarnpkg.com/install.sh | bash \
 # Download and Install Kibana
- && git clone -b v${KIBANA_VER} https://github.com/elastic/kibana.git \
+ && cd $WORKDIR && git clone -b v${KIBANA_VER} https://github.com/elastic/kibana.git \
  && cd kibana \
-
 # Apply Kibana patch
  && curl -o kibana_patch.diff $PATCH_URL/kibana_patch.diff \
  && git apply kibana_patch.diff \
-
 # Bootstrap Kibana
  && yarn kbn bootstrap --oss \
-
 # Install Elasticsearch Nodegit
  && cd node_modules/@elastic/ \
  && git clone https://github.com/elastic/nodegit.git \
  && cd nodegit \
  && git checkout v0.25.0-alpha.22 \
-
 # Apply Nodegit patch
  && curl -o nodegit_patch.diff $PATCH_URL/nodegit_patch.diff \
- && git apply nodegit_patch.diff \ 
-
+ && git apply nodegit_patch.diff \
  && npm install \
-
- && cd /tmp/kibana \
+ && cd $WORKDIR/kibana \
  && yarn build --skip-os-packages --oss \
- && tar -xzf target/kibana-oss-${KIBANA_VER}-SNAPSHOT-linux-x86_64.tar.gz -C /usr/share/kibana --strip-components 1 
-
-USER root
-
+ && sudo mkdir /usr/share/kibana/ \
+ && sudo tar xzf target/kibana-oss-${KIBANA_VER}-SNAPSHOT-linux-x86_64.tar.gz -C /usr/share/kibana --strip-components 1 \
+ && sudo chown kibana:kibana -R /usr/share/kibana/ \
 # Cleanup Cache data, unused packages and source files
-RUN apt-get remove -y \
+&& sudo apt-get remove -y \
     curl \
     git \
     g++ \
     wget \
- && apt-get autoremove -y && apt-get clean \
- && rm -rf /tmp/kibana* /tmp/node-v10.15.2-linux-s390x.tar.gz \
- && rm -rf /var/lib/apt/lists/*
-
-USER kibana
-
+ && sudo apt-get autoremove -y && sudo apt-get clean \
+ && sudo rm -rf $WORKDIR/kibana* $WORKDIR/node-v10.15.2-linux-s390x.tar.gz \
+ && sudo rm -rf /var/lib/apt/lists/* $HOME/.cache
 # Expose 5601 port used by Kibana
 EXPOSE 5601
 
