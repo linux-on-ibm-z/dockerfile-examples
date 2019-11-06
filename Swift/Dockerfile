@@ -70,7 +70,8 @@ RUN apt-get update && apt-get -y install \
         systemtap-sdt-dev \
         tzdata \
         clang \
-        wget
+        wget \
+        curl
 
 # Clone and Install Swift
 RUN cd $SWIFT_SOURCE_DIR \
