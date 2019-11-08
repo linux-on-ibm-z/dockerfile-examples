@@ -71,14 +71,12 @@ RUN apt-get update && apt-get -y install \
         tzdata \
         clang \
         wget \
-        curl
-
+        curl \
 # Clone and Install Swift
-RUN cd $SWIFT_SOURCE_DIR \
+ && cd $SWIFT_SOURCE_DIR \
  && git clone -b swift-5.1-branch https://github.com/apple/swift.git \
  && cd swift \
  && ./utils/update-checkout --clone --scheme swift-5.1-branch \
-
 # Apply patches for swift
  && git fetch \
  && git config --global user.email $GIT_USER_EMAIL \
@@ -106,23 +104,23 @@ RUN cd $SWIFT_SOURCE_DIR \
  && git remote add loz https://github.com/linux-on-ibm-z/swift.git \
  && git fetch loz \
  && git cherry-pick cbf68876f51fa804fd538b4f2ad0b2f70c893a57 \
-
 # Apply patches for Swift Foundation
  && cd ../swift-corelibs-foundation/ \
  && git remote add loz https://github.com/linux-on-ibm-z/swift-corelibs-foundation.git \
  && git fetch loz \
  && git cherry-pick 68412be28a843e37e0be2557669d13024443d718 \
-
 # Apply patches for LLDB
  && cd ../llvm-project \
  && curl -o lldb.patch $PATCH_URL/lldb.patch \
  && git apply lldb.patch \
-
 # Apply patches for Swift Package Manager
  && cd ../swiftpm \
  && git cherry-pick b8768525da66690622b37ce8ebc034945604154e \
-
  && cd $SWIFT_SOURCE_DIR \
- && env LD_LIBRARY_PATH=$SWIFT_BUILD_DIR/swift-linux-s390x/lib/swift/linux/s390x/:$SWIFT_BUILD_DIR/swift-linux-s390x/libdispatch-prefix/lib/ $SWIFT_SOURCE_DIR/swift/utils/build-script --preset=buildbot_linux,no_test install_destdir=$SWIFT_INSTALL_DIR installable_package=$SWIFT_INSTALL_PKG
+ && env LD_LIBRARY_PATH=$SWIFT_BUILD_DIR/swift-linux-s390x/lib/swift/linux/s390x/:$SWIFT_BUILD_DIR/swift-linux-s390x/libdispatch-prefix/lib/ $SWIFT_SOURCE_DIR/swift/utils/build-script --preset=buildbot_linux,no_test install_destdir=$SWIFT_INSTALL_DIR installable_package=$SWIFT_INSTALL_PKG \
+ && find . -mindepth 1 -maxdepth 1 -type d -not -name swift-install | xargs rm -rf \
+ && apt-get autoremove -y && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
 
 CMD ["swiftc" , "--version"]
