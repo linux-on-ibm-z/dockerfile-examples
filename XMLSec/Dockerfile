@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for  XMLSec version 1.2.28 ######################
+################# Dockerfile for  XMLSec version 1.2.29 ######################
 #
 # XMLSec is a C library that implements the standards XML Signature and XML Encryption.
 #
@@ -21,10 +21,10 @@
 #############################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV LD_LIBRARY_PATH /usr/local/lib
 
@@ -39,15 +39,13 @@ RUN apt-get update && apt-get install -y \
     libxslt1-dev \
     pkg-config \
 # Clone and build XMLSec
- && git clone git://github.com/lsh123/xmlsec.git && cd xmlsec && git checkout xmlsec-1_2_28 \
+ && git clone git://github.com/lsh123/xmlsec.git && cd xmlsec && git checkout xmlsec-1_2_29 \
  && ./autogen.sh && make && make install \
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
     autoconf \
     git \
     make \
- && apt-get autoremove -y \
- && apt autoremove -y \
  && apt-get clean
  
 # This dockerfile does not have a CMD statement as the image is intended to be
