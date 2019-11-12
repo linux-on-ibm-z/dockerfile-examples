@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 7.7 ##############################
+################################ Dockerfile for SonarQube 8.0 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -20,10 +20,10 @@
 ######################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
-ARG SONARQUBE_VER=7.7
-ARG SONAR_SCANNER_CLI_VER=3.3.0.1492
+ARG SONARQUBE_VER=8.0
+ARG SONAR_SCANNER_CLI_VER=4.2.0.1873
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -31,12 +31,12 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 ENV SOURCE_ROOT=/opt
 ENV SONARQUBE_HOME=/opt/sonarqube
 WORKDIR $SOURCE_ROOT
-ENV PATH /usr/lib/jvm/java-1.8.0-openjdk-s390x/bin:/opt/sonar-scanner-${SONAR_SCANNER_CLI_VER}-linux/bin:$PATH
+ENV PATH /usr/lib/jvm/java-11-openjdk-s390x/bin:/opt/sonar-scanner-${SONAR_SCANNER_CLI_VER}-linux/bin:$PATH
 
 # Install dependencies
 RUN apt-get update -y && apt-get -y install \
     git \
-    openjdk-8-jdk \
+    openjdk-11-jdk \
     unzip \
     wget \
 # Download SonarQube
