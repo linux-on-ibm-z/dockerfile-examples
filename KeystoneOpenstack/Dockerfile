@@ -69,6 +69,7 @@ RUN	apt-get update && apt-get install -y \
 		zlib1g-dev \
 		ed \
 		patch \
+		libapache2-mod-wsgi \
 	&&	curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
 	&&	python get-pip.py \
 	&&	pip install --upgrade setuptools \
