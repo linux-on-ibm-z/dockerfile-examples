@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2019
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Terraform - 0.12.6 ########################
+########## Dockerfile for Terraform - 0.12.13 ########################
 #
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -11,7 +11,7 @@
 #
 # To see the Usage of Terraform resultant image, Use below command:
 # docker run -it --name <container_name> <image_name> -help
-# 
+#
 # Below is an example to run Terraform console :
 # docker run -it --name <container_name> <image_name> console
 #
@@ -21,7 +21,7 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG TERRAFORM_VER=0.12.6
+ARG TERRAFORM_VER=0.12.13
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -42,9 +42,9 @@ RUN apt-get update &&  apt-get install -y \
     zip \
 # Install Go
  && cd $SOURCE_DIR \
- && wget https://dl.google.com/go/go1.12.6.linux-s390x.tar.gz \
- && chmod ugo+r go1.12.6.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.12.6.linux-s390x.tar.gz \
+ && wget https://dl.google.com/go/go1.12.9.linux-s390x.tar.gz \
+ && chmod ugo+r go1.12.9.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.12.9.linux-s390x.tar.gz \
 # Clone Terraform Source Code
  && cd $SOURCE_DIR \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
@@ -53,9 +53,9 @@ RUN apt-get update &&  apt-get install -y \
  && cd terraform && git checkout v${TERRAFORM_VER} \
  && export GO111MODULE=on \
  && export GOPROXY=https://proxy.golang.org/ \
- && make tools \
 # Build Terraform
  && XC_OS=linux XC_ARCH=s390x make bin \
+ && mv ${GOPATH}/src/github.com/hashicorp/terraform/pkg/linux_s390x/terraform /usr/bin/ \
 # Tidy and clean up
  && apt-get remove -y \
     gcc \
@@ -64,7 +64,7 @@ RUN apt-get update &&  apt-get install -y \
     wget \
     zip \
  && apt-get autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* $GOPATH/src $GOPATH/pkg $SOURCE_DIR/go1.12.6.linux-s390x.tar.gz
+ && apt-get clean && rm -rf /var/lib/apt/lists/* $GOPATH/src $GOPATH/pkg $SOURCE_DIR/go1.12.9.linux-s390x.tar.gz
 
 ENTRYPOINT ["terraform"]
 
