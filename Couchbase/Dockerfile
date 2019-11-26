@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Couchbase version 6.0.0 ############
+############### Dockerfile for Couchbase version 6.0.2 ############
 #
 # Couchbase is open source database software.
 #
@@ -21,7 +21,7 @@
 FROM s390x/ubuntu:18.04
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 ENV SOURCE_ROOT=/tmp/source
 WORKDIR $SOURCE_ROOT
 
@@ -128,7 +128,7 @@ RUN curl https://storage.googleapis.com/git-repo-downloads/repo > repo &&\
 WORKDIR $SOURCE_ROOT/couchbase
 RUN git config --global user.email your@email.addr &&\
  git config --global user.name  your_docker_name &&\
- ../repo init -u git://github.com/couchbase/manifest -m released/6.0.0.xml &&\
+ ../repo init -u git://github.com/couchbase/manifest -m released/couchbase-server/6.0.2.xml &&\
  ../repo sync
 WORKDIR $SOURCE_ROOT
 
