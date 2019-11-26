@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.3.0 ########################################
+##################################### Dockerfile for Elasticsearch version 7.4.1 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -21,9 +21,9 @@
 ##############################################################################################################
 
 # Base Image
-FROM  s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
-ARG ELASTICSEARCH_VER=7.3.0
+ARG ELASTICSEARCH_VER=7.4.1
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -66,6 +66,7 @@ RUN apt-get update && apt-get install -y \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* /root/.gradle/* /tmp/elasticsearch \
+ && rm $SOURCE_DIR/OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
 # Create elaticsearch user
  && /usr/sbin/groupadd elasticsearch \
  && /usr/sbin/useradd -g elasticsearch elasticsearch \
