@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.3.0 #############################
+#################### Dockerfile for Beats 7.4.1 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -22,12 +22,13 @@
 ###########################################################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
-ARG BEATS_VER=7.3.0
+ARG BEATS_VER=7.4.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Beats/${BEATS_VER}/patch"
 
 # Set environment variable
 ENV SOURCE_DIR=/tmp/source
@@ -64,27 +65,9 @@ RUN apt-get update && apt-get install -y \
  && cd beats  \
  && git checkout v${BEATS_VER}  \
 # Building auditbeat
- && sed -i '37i var \(' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/audit.go \
- && sed -i '38i\\tbyteOrder = GetEndian\(\)' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/audit.go \
- && sed -i '39i \)' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/audit.go \
- && sed -i 's/binary.LittleEndian/byteOrder/g' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/audit.go \
- && sed -i '23d' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/netlink.go \
- && sed -i 's/^\tbinary.LittleEndian/\tbyteOrder/g' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/netlink.go \
- && sed -i 's/binary.LittleEndian/GetEndian\(\)/g' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/netlink.go \
- && sed -i '25i\\t\"github.com/elastic/go-libaudit\"' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/rule/binary.go \
- && sed -i 's/binary.LittleEndian/libaudit.GetEndian\(\)/g' $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/rule/binary.go \
- && echo  "package libaudit\n\nimport (" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
- && echo  "\t\"encoding/binary\"\n\t\"unsafe\"\n)" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
- && echo  "func GetEndian() binary.ByteOrder {" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
- && echo  "\tvar i int32 = 0x1" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
- && echo  "\tv := (*[4]byte)(unsafe.Pointer(&i))" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
- && echo  "\tif v[0] == 0 {" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
- && echo  "\t\treturn binary.BigEndian" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
- && echo  "\t} else {" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
- && echo  "\t\treturn binary.LittleEndian\n\t}\n}" >> $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/endian.go \
- && sed -i '1d'  $GOPATH/src/github.com/elastic/beats/vendor/github.com/OneOfOne/xxhash/xxhash_safe.go \
- && sed -i '1i// +build appengine safe ppc64le ppc64be mipsle mips s390x' $GOPATH/src/github.com/elastic/beats/vendor/github.com/OneOfOne/xxhash/xxhash_safe.go \
- && sed -i '7i// +build !s390x' $GOPATH/src/github.com/elastic/beats/vendor/github.com/OneOfOne/xxhash/xxhash_unsafe.go \
+ && wget ${PATCH_URL}/endian.go -P $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/ \
+ && wget ${PATCH_URL}/patch.diff \
+ && git apply --ignore-whitespace patch_diff \
 # Building heartbeat
  && cd $GOPATH/src/github.com/elastic/beats/heartbeat  \
  && make  heartbeat \
