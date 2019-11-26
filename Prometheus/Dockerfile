@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Prometheus 2.13.0 #########
+########## Dockerfile for Prometheus 2.14.0 #########
 #
 # This Dockerfile builds Prometheus
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG PROMETHEUS_VER=2.13.0
+ARG PROMETHEUS_VER=2.14.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -45,7 +45,9 @@ RUN apt-get update && apt-get install -y \
  && cp -Rf console_libraries /etc/prometheus/ \
  && cp -Rf consoles /etc/prometheus/ \
 # Clean up unwanted packages
- && apt autoremove -y
+ && cd .. && rm -rf prometheus-${PROMETHEUS_VER}.linux-s390x prometheus-${PROMETHEUS_VER}.linux-s390x.tar.gz \
+ && apt autoremove -y \
+ && rm -rf /var/lib/apt/lists/*
 
 #Export port
 EXPOSE 9090
