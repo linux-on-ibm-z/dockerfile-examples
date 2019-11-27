@@ -67,7 +67,7 @@ RUN apt-get update && apt-get install -y \
 # Building auditbeat
  && wget ${PATCH_URL}/endian.go -P $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/ \
  && wget ${PATCH_URL}/patch.diff \
- && git apply --ignore-whitespace patch_diff \
+ && git apply --ignore-whitespace patch.diff \
 # Building heartbeat
  && cd $GOPATH/src/github.com/elastic/beats/heartbeat  \
  && make  heartbeat \
@@ -116,3 +116,4 @@ RUN apt-get update && apt-get install -y \
 VOLUME /Beats
 
 CMD $BEATSNAME -e -path.config /Beats -d "publish"
+
