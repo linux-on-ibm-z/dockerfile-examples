@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################### Dockerfile for Salt version 2019.2.0 ##################################
+################### Dockerfile for Salt version 2019.2.2 ##################################
 #
 # This Dockerfile builds a basic installation of Salt.
 #
@@ -24,7 +24,7 @@
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -32,7 +32,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 ENV SOURCE_DIR=/
 WORKDIR $SOURCE_DIR
 
-ARG SALT_VER=v2019.2.0
+ARG SALT_VER=v2019.2.2
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -55,7 +55,7 @@ RUN apt-get update && apt-get install -y \
 # Install required packages using pip3
 	&&	pip install \
 			pyzmq \
-			'PyYAML<5.1' \
+			PyYAML \
 			pycrypto \
 			msgpack-python \
 			jinja2 \
@@ -95,3 +95,4 @@ VOLUME /etc/salt
 CMD salt-master -c ./etc/salt & salt-minion -c ./etc/salt
 
 # End of Dockerfile
+
