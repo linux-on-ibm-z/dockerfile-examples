@@ -18,7 +18,7 @@
 ################################################################################################################
 
 # Base Image
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:18.04 as builder
 
 ARG GRAFANA_VER=6.4.2
 
@@ -58,21 +58,20 @@ RUN apt-get update -y && apt-get install -y \
 # Build frontend
  && cd $GOPATH/src/github.com/grafana/grafana \
  && make deps-js \
- && make build-js \
-# Copy it to /usr/share
- && cp -Rf $GOPATH/src/github.com/grafana/grafana /usr/share/ \
-# Clean up cache data and remove dependencies that are not required
- && apt-get remove -y \
-    build-essential \
-    gcc \
-    git \
-    make \
-    phantomjs \
-    python \
-    wget \
-    unzip \
- && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* $GOPATH/src/github.com $GOPATH/node-v10.16.3-linux-s390x.tar.xz $GOPATH/go1.12.9.linux-s390x.tar.gz
+ && make build-js 
+
+# Build a fresh image without all the build requirements
+
+FROM s390x/ubuntu:18.04
+
+RUN apt-get update -y 
+
+ENV BASE=/opt/src/github.com/grafana/grafana 
+
+COPY --from=builder $BASE/public/		/usr/share/grafana/public/
+COPY --from=builder $BASE/conf/		/usr/share/grafana/conf/
+COPY --from=builder $BASE/bin/linux-s390x/grafana-cli		/usr/sbin/
+COPY --from=builder $BASE/bin/linux-s390x/grafana-server	/usr/sbin/
 
 VOLUME ["/usr/share/grafana/conf","/usr/share/grafana/data"]
 
