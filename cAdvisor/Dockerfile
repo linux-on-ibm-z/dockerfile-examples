@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for cAdvisor 0.33.0 #################################
+######################## Dockerfile for cAdvisor 0.34.0 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -23,12 +23,12 @@
 ##########################################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04
-
-ARG CADVISIOR_VER=0.33.0
+FROM s390x/ubuntu:16.04 AS builder
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+
+ARG CADVISIOR_VER=0.34.0
 
 ENV SOURCE_DIR=/tmp/source
 ENV PATH=/usr/lib/go-1.10/bin:$PATH
@@ -40,11 +40,10 @@ ENV PATH=$PATH:$GOPATH/bin
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    git \ 
-	golang-1.10 \ 
-	libseccomp-dev \
-	curl \
-	
+    git \
+        golang-1.10 \
+        libseccomp-dev \
+        curl \
 # Install godep tool
  && go get github.com/tools/godep \
 
@@ -70,10 +69,15 @@ RUN apt-get update && apt-get install -y \
  && apt-get remove -y git && apt-get autoremove -y && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+# Multistage build
+FROM s390x/ubuntu:16.04
+
+WORKDIR /root
+COPY --from=builder /usr/bin/cadvisor /usr/bin/cadvisor
 # Port for cAdvisor
 EXPOSE 8080
 
 # Command to execute
-CMD ["cadvisor"]
+CMD ["/usr/bin/cadvisor"]
 
 # End of Dockerfile
