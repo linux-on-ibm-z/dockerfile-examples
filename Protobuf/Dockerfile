@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for Protobuf version 3.10.0 #######################
+######################## Dockerfile for Protobuf version 3.11.2 #######################
 #
 # Protocol Buffers is a method of serializing structured data.
 #
@@ -29,7 +29,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 
-ARG PROTOBUF_VER=v3.10.0
+ARG PROTOBUF_VER=v3.11.2
 
 # Installing dependencies
 RUN apt-get update && apt-get install -y \
