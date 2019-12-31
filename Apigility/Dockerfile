@@ -25,13 +25,13 @@
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:16.04 as builder
 
-# The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+# The Author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR=/tmp/source
-
+ENV DEBIAN_FRONTEND noninteractive
 # Install dependencies
 RUN	apt-get update && apt-get -y install \
 		apache2 \
@@ -50,45 +50,36 @@ RUN	apt-get update && apt-get -y install \
 		php \
 		php-mbstring \
 		php-xml \
-	
 # Get the source for Apigility
 	&&	mkdir -p $SOURCE_DIR \
 	&&	cd $SOURCE_DIR \
 	&&	git clone https://github.com/zfcampus/zf-apigility-skeleton.git \
 	&&	cd zf-apigility-skeleton/ \
 	&&	git checkout 1.5.2 \
-
 # Install composer
 	&&	curl -s https://getcomposer.org/installer | php -- \
 	&&	./composer.phar -n update \
 	&&	./composer.phar -n install \
-	
-# Put the skeleton/app in development mode
-	&&	./vendor/bin/zf-development-mode enable \
-	
 # Copy 
 	&&	mkdir -p /apigility \
-	&&	cp -R $SOURCE_DIR/zf-apigility-skeleton/* /apigility \
+	&&	cp -R $SOURCE_DIR/zf-apigility-skeleton/* /apigility 
 	
-# Clean up cache data and remove dependencies which are not required
-	&&	apt-get -y remove \
-		curl \
-		gcc \
-		git \
-		make \
-		wget \
-	&&	apt-get autoremove -y \
-	&& 	apt autoremove -y \
-	&&	rm -rf $HOME/.composer \
-	&& 	rm -rf $SOURCE_DIR \
-	&& 	apt-get clean \
-	&& 	rm -rf /var/lib/apt/lists/*
-	
+FROM s390x/ubuntu:16.04
+ENV DEBIAN_FRONTEND noninteractive
+WORKDIR /apigility
+COPY --from=builder /apigility /apigility
+
+RUN  apt-get update && apt-get -y install \
+                php \
+                php-mbstring \
+                php-xml \
+     && mkdir /apigility \
+# Put the skeleton/app in development mode
+     &&  ./vendor/bin/zf-development-mode enable
+
 VOLUME /apigility
 
 EXPOSE 8080
-
-WORKDIR /apigility
 
 CMD php -S $(hostname -i):8080 -t public -f /apigility/public/index.php
 
