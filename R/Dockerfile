@@ -18,8 +18,9 @@
 #  For ex. docker run --name <container_name> -v /home/graphics:/home -it <image_name> /bin/bash
 ###################################################################################
 
-# Base Image
-FROM s390x/ubuntu:16.04
+
+# Base image
+FROM s390x/ubuntu:16.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -67,7 +68,18 @@ RUN apt-get remove -y \
 
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* $SOURCE_DIR/R-${R_BASE_VERSION}.tar.gz
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* $SOURCE_DIR/R-${R_BASE_VERSION}.tar.gz 
+
+# Multistage build
+FROM s390x/ubuntu:16.04
+
+WORKDIR /root
+COPY --from=builder /usr/local/bin/R /usr/local/bin/R
+COPY --from=builder /usr/local/bin/Rscript /usr/local/bin/Rscript
+COPY --from=builder /usr/lib/ /usr/lib/
+COPY --from=builder /usr/local/lib/ /usr/local/lib/
+
 
 CMD ["R"]
 # End of Dockerfile
