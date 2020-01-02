@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2018, 2019
+# © Copyright IBM Corporation 2018, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for GlusterFS version 6.5 ##########################################
+##################################### Dockerfile for GlusterFS version 7.0 ##########################################
 #
 # This Dockerfile builds a basic installation of GlusterFS.
 #
@@ -15,9 +15,9 @@
 ###########################################################################################################
 
 # Base Image
-FROM  s390x/ubuntu:16.04
+FROM  s390x/ubuntu:18.04
 
-ARG GLUSTERFS_VER=6.5
+ARG GLUSTERFS_VER=7.0
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -29,9 +29,10 @@ WORKDIR $SOURCE_DIR
 
 # Install Dependencies
 RUN apt-get update && apt-get install -y  \
-    autoconf \
+    autoconf \ 
     automake \
     bison \
+    curl \
     flex \
     gcc \
     git \
@@ -42,8 +43,7 @@ RUN apt-get update && apt-get install -y  \
     libibverbs-dev \
     librdmacm-dev \
     libreadline-dev \
-    libssl-dev \
-    libtool \
+    libssl-dev \libtool \
     liburcu-dev \
     libxml2-dev \
     lvm2 \
@@ -53,6 +53,7 @@ RUN apt-get update && apt-get install -y  \
     python3 \
     uuid-dev \
     zlib1g-dev \
+    patch \
 
 # Build GlusterFS from source
  && git clone https://github.com/gluster/glusterfs -b v$GLUSTERFS_VER \
@@ -61,6 +62,8 @@ RUN apt-get update && apt-get install -y  \
  && ./configure --enable-gnfs \
  && sed -i '37d' xlators/performance/io-threads/src/io-threads.h \
  && sed -i '37i #define IOT_THREAD_STACK_SIZE   ((size_t)(512*1024))' xlators/performance/io-threads/src/io-threads.h \
+ && sed -i '41d' geo-replication/syncdaemon/monitor.py \
+ && sed -i '41i     gconf.setconfig("master-distribution-count", str(distribute_count))' geo-replication/syncdaemon/monitor.py \
  && make \
  && make install \
  && ldconfig \
@@ -75,6 +78,7 @@ RUN apt-get update && apt-get install -y  \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/glusterfs \
+ && apt-get update && apt-get install -y libxml2
 
 EXPOSE 2222 111 245 443 24007 2049 8080 6010 6011 6012 38465 38466 38468 38469 49152 49153 49154 49156 49157 49158 49159 49160 49161 49162
 
