@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Apache Solr version 8.2.0 #########################
+############### Dockerfile for Apache Solr version 8.3.0 #########################
 #
 # To build Apache Solr image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -23,7 +23,7 @@ ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV JAVA_HOME=/opt/jdk-11.0.4+11 PATH=$JAVA_HOME/bin:$PATH
 
-ARG SOLR_VER=8.2.0
+ARG SOLR_VER=8.3.0
 
 # Install dependencies
 RUN apt-get update &&   apt-get install -y \
