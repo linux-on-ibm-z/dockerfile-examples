@@ -1,6 +1,8 @@
 # © Copyright IBM Corporation 2017, 2018.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-
+#
+# This dockerfile is no longer supported. Please find latest information from http://ibm.biz/LoZOpenSourceVerifiedList
+#
 ########################## Dockerfile for Go version 1.11.4 #######################
 # This Dockerfile builds a basic installation of go and its configuration.
 #
