@@ -1,6 +1,8 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-
+#
+# This dockerfile is no longer supported. Please find latest information from http://ibm.biz/LoZOpenSourceVerifiedList
+#
 ############# Dockerfile for Apache Maven version 3.6.2 #######################################################################################
 #
 # Apache Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can managea project's build, reporting and documentation from a central piece of information.
