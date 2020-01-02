@@ -1,6 +1,8 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-
+#
+# This dockerfile is no longer supported. Please find latest information from http://ibm.biz/LoZOpenSourceVerifiedList
+#
 ################# Dockerfile for Apache Http Server version 2.4.41 #####################
 #
 # This Dockerfile builds a basic installation of Apache Http Server.
