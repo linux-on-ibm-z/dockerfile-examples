@@ -1,6 +1,8 @@
 # © Copyright IBM Corporation 2017, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-
+#
+# This dockerfile is no longer supported. Please find latest information from http://ibm.biz/LoZOpenSourceVerifiedList
+#
 ########## Dockerfile for Joomla version 3.9.12 ######
 #
 # Joomla is an online, open source website creation tool written in PHP.
