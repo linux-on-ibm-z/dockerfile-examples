@@ -1,6 +1,8 @@
 # © Copyright IBM Corporation 2017, 2019
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-
+#
+# This dockerfile is no longer supported. Please find latest information from http://ibm.biz/LoZOpenSourceVerifiedList
+#
 ########## Dockerfile for Ruby version 2.6.3 #########
 #
 # Ruby is a dynamic, open source programming language with a focus on simplicity and productivity.
