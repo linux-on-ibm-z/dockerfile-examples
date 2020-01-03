@@ -73,7 +73,6 @@ RUN  apt-get update && apt-get -y install \
                 php \
                 php-mbstring \
                 php-xml \
-     && mkdir /apigility \
 # Put the skeleton/app in development mode
      &&  ./vendor/bin/zf-development-mode enable
 
