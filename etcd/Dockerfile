@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ################## Dockerfile for etcd 3.4.3 ####################
@@ -13,16 +13,16 @@
 # docker build -t <image_name> .
 #
 # To start a container with etcd image.
-# docker run --name <container_name> -p 2379:2379 -p 2380:2380 -p 4001:4001 -p 7001:7001 -it <image_name> /bin/bash
+# docker run --name <container_name> -p 2379:2379 -p 2380:2380 -it <image_name> /bin/bash
 #
 # Use below command to use etcd
-# docker run  --name <container_name> -v <host_path_dir>:/data -p 2379:2379 -p 2380:2380 -p 4001:4001 -p 7001:7001 -d <image_name>
+# docker run  --name <container_name> -v <host_path_dir>:/data -p 2379:2379 -p 2380:2380 -d <image_name>
 #
 #
 ###########################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:18.04 as builder
 
 ARG ETCD_VER=v3.4.3
 
@@ -52,23 +52,15 @@ RUN apt-get update && apt-get install -y \
  && git checkout ${ETCD_VER} \
  && mkdir -p /data \
 # Build
- && ./build \
- && cd bin && cp -rf etcd etcdctl /usr/bin/ \
-# Clean up cache data and remove dependencies that are not required
- && apt-get remove -y \
-    curl \
-    git \
-    gcc \
-    wget \
- && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /src/github.com/coreos
+ && ./build
+FROM s390x/ubuntu:18.04
+ENV PATH=$PATH:/usr/local/go/bin ETCD_UNSUPPORTED_ARCH=s390x ETCD_DATA_DIR=/data
+COPY --from=builder /src/github.com/coreos/etcd/bin/etcd /usr/local/bin/
+COPY --from=builder /src/github.com/coreos/etcd/bin/etcdctl /usr/local/bin/
+RUN mkdir -p /var/etcd/
+RUN mkdir -p /var/lib/etcd/
+COPY --from=builder /usr/local/go/bin /usr/local/go/bin
+EXPOSE 2379 2380
 
-WORKDIR /data
-VOLUME /data
-
-EXPOSE 2379 2380 4001 7001
-
-CMD etcd
-
+CMD ["/usr/local/bin/etcd"]
 # End of Dockerfile
