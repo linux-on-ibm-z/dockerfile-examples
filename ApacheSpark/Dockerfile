@@ -20,7 +20,7 @@ ARG SPARK_VER=v2.4.4
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/2.4.4/Patch/"
+ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/2.4.4/patch/"
 
 ENV SOURCE_DIR=/root
 WORKDIR $SOURCE_DIR
