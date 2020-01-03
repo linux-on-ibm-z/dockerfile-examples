@@ -25,17 +25,18 @@ FROM s390x/ubuntu:16.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 # Set Environment Variables
-ENV JAVA_HOME=/usr/share/jdk8u192-b12_openj9-0.11.0
+ENV JAVA_HOME=/opt/adoptjdk
 ENV PATH=$JAVA_HOME/bin:$PATH
 # Install dependencies
-RUN apt-get update &&  apt-get install -y tar wget libfontconfig1 \
+RUN apt-get update &&  apt-get install -y tar curl libfontconfig1 \
 # Download AdoptJDK8
-&& wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u192-b12_openj9-0.11.0/OpenJDK8U-jdk_s390x_linux_openj9_8u192b12_openj9-0.11.0.tar.gz \
-&& tar -C /usr/share/ -xzvf OpenJDK8U-jdk_s390x_linux_openj9_8u192b12_openj9-0.11.0.tar.gz \
+&& curl -SL -o java.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u232-b09_openj9-0.17.0/OpenJDK8U-jdk_s390x_linux_openj9_8u232b09_openj9-0.17.0.tar.gz \
+&& tar -C $JAVA_HOME -xzvf java.tar.gz  --strip-components=2 \
 # Install Jenkins
 && wget http://mirrors.jenkins.io/war-stable/latest/jenkins.war \
 # Clean up Cache data and unused dependencies
-&& apt-get remove -y wget \
+&& rm -rf java.tar.gz   \
+&& apt-get remove -y curl \
 && apt-get autoremove -y && apt-get clean \
 EXPOSE 8080
 CMD java -jar jenkins.war && tail -f /var/log/jenkins/jenkins.log
