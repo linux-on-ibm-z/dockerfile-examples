@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0) 
 ########## Dockerfile for Alfresco version 5.2 #####################
 #
@@ -25,21 +25,17 @@
 #	NOTE:- Kindly check correct pg_hba.conf file for PostgreSQL before editing.
 #
 ##################################################################################
-
 # Base Image
 FROM s390x/ubuntu:16.04
-
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
-
-ENV SOURCE_DIR=/tmp/source 
-ENV JAVA_DIR=/tmp/java
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+ENV	SOURCE_DIR=/tmp/source 
+ENV	JAVA_DIR=/tmp/java
 ENV	M2_HOME=$SOURCE_DIR/apache-maven-3.3.9 
 ENV	JAVA_HOME=$JAVA_DIR/jdk8u181-b13 
 ENV	PATH=$M2_HOME/bin:$JAVA_HOME/bin:$PATH 
 ENV	MAVEN_OPTS="-Xmx1024m" 
 ENV	_JAVA_OPTIONS=-Xmx10g
-
 # Install dependencies
 RUN	apt-get update && apt-get -y install \
 		ant \
@@ -52,7 +48,6 @@ RUN	apt-get update && apt-get -y install \
 		subversion \
 		tar \
 		wget \
-		
 # Configure PostgreSQL Database
 	&&	mkdir -p $SOURCE_DIR \
 	&&	cd $SOURCE_DIR \
@@ -64,13 +59,12 @@ RUN	apt-get update && apt-get -y install \
 	&&	psql -U postgres -c "CREATE DATABASE alfresco;" \
 	&&	psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE alfresco to alfresco;" \
 	&&	service postgresql restart \
-	
 # Install AdoptOpenJDK v8u181b13
-       && mkdir -p $JAVA_DIR \
-       && cd $JAVA_DIR \
-       && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u181-b13/OpenJDK8U-jdk_s390x_linux_hotspot_8u181b13.tar.gz \
-       &&  tar -xvzf OpenJDK8U-jdk_s390x_linux_hotspot_8u181b13.tar.gz \
-	
+	&&	mkdir -p $JAVA_DIR \
+	&&	cd $JAVA_DIR \
+	&&	curl -SLO https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u181-b13/OpenJDK8U-jdk_s390x_linux_hotspot_8u181b13.tar.gz \
+	&&	tar -xvzf OpenJDK8U-jdk_s390x_linux_hotspot_8u181b13.tar.gz \
+	&&	cp /usr/lib/jvm/default-java/jre/lib/security/cacerts $JAVA_HOME/jre/lib/security/ \
 # Install OpenSSL version 1.0.2k
 	&&	cd $SOURCE_DIR \
 	&&	git clone https://github.com/openssl/openssl.git \
@@ -79,7 +73,6 @@ RUN	apt-get update && apt-get -y install \
 	&&	./config --prefix=/usr --openssldir=/usr/local/openssl shared \
 	&&	make \
 	&&	make install \
-	
 # Build and Install Apache Tomcat
 	&&	cd $SOURCE_DIR \
 	&&	git clone https://github.com/apache/tomcat.git \
@@ -87,7 +80,6 @@ RUN	apt-get update && apt-get -y install \
 	&&	git checkout 8.5.16 \
 	&&	cp build.properties.default build.properties \
 	&&	ant \
-	
 # Configure Tomcat
 	&&	groupadd tomcat \
 	&&	useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat \
@@ -98,27 +90,21 @@ RUN	apt-get update && apt-get -y install \
 	&&	chmod -R g+r conf \
 	&&	chmod g+x conf \
 	&&	chown -R tomcat webapps/ temp/ logs/ \
-	
 	&&	sed -i '44i <role rolename="manager-gui"/>' conf/tomcat-users.xml \
 	&&	sed -i '45i <role rolename="manager-script"/>' conf/tomcat-users.xml \
 	&&	sed -i '46i <user username="admin" password="admin" roles="manager-gui, manager-script"/>' conf/tomcat-users.xml \
-	
 	&&	cd lib \
-	&&	wget https://jdbc.postgresql.org/download/postgresql-42.1.4.jar \
-	
+	&&	curl -SLO https://jdbc.postgresql.org/download/postgresql-42.1.4.jar \
 # Install Maven
 	&&	cd $SOURCE_DIR \
-	&&	wget https://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz \
+	&&	curl -SLO https://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz \
 	&&	tar -xvzf apache-maven-3.3.9-bin.tar.gz \
 # Get Alfresco Source code
 	&&	svn co https://svn.alfresco.com/repos/alfresco-open-mirror/alfresco/COMMUNITYTAGS/5.2.g/ \
-	
 # Remove or comment on the line 31 of the file: ./5.2.g/root/projects/solr4/source/java/org/alfresco/solr/AlfrescoSolrCloseHook.java
 	&&	sed -i '31 s/^/\/\//' ./5.2.g/root/projects/solr4/source/java/org/alfresco/solr/AlfrescoSolrCloseHook.java \
-	
 # Change alfresco-global.properties.sample to alfresco-global.properties
 	&&	mv 5.2.g/root/projects/repository/config/alfresco-global.properties.sample 5.2.g/root/projects/repository/config/alfresco-global.properties \
-	
 # Edit 5.2.g/root/projects/repository/config/alfresco-global.properties file
 	&&	sed -i '11i dir.root=/Alfresco/alf_data' 5.2.g/root/projects/repository/config/alfresco-global.properties \
 	&&	sed -i '12i dir.contentstore=/Alfresco/alf_data/contentstore' 5.2.g/root/projects/repository/config/alfresco-global.properties \
@@ -131,7 +117,6 @@ RUN	apt-get update && apt-get -y install \
 	&&	sed -i '19i db.url=jdbc:postgresql://localhost:5432/alfresco' 5.2.g/root/projects/repository/config/alfresco-global.properties \
 	&&	sed -i '20i db.pool.max=275' 5.2.g/root/projects/repository/config/alfresco-global.properties \
 	&&	sed -i '21i db.driver=org.postgresql.Driver' 5.2.g/root/projects/repository/config/alfresco-global.properties \
-	
 # Edit 5.2.g/root/projects/dev-tomcat/src/main/tomcat/shared/classes/alfresco-global.properties file
 	&&	sed -i '8d;9d;10d;11d;12d;13d' 5.2.g/root/projects/dev-tomcat/src/main/tomcat/shared/classes/alfresco-global.properties \
 	&&	sed -i '4i dir.root=/Alfresco/alf_data' 5.2.g/root/projects/dev-tomcat/src/main/tomcat/shared/classes/alfresco-global.properties \
@@ -141,15 +126,12 @@ RUN	apt-get update && apt-get -y install \
 	&&	sed -i '12i db.port=5432' 5.2.g/root/projects/dev-tomcat/src/main/tomcat/shared/classes/alfresco-global.properties \
 	&&	sed -i '13i db.url=jdbc:postgresql://localhost:5432/alfresco' 5.2.g/root/projects/dev-tomcat/src/main/tomcat/shared/classes/alfresco-global.properties \
 	&&	sed -i '14i db.pool.max=275' 5.2.g/root/projects/dev-tomcat/src/main/tomcat/shared/classes/alfresco-global.properties \
-	
 # Build and Install Alfresco
 	&&	cd 5.2.g/root/ \
 	&&	mvn clean install -DskipTests \
-	
 # Copy alfresco.war to /opt/tomcat/webapps
 	&&	cd /opt/tomcat \
 	&&	cp $SOURCE_DIR/5.2.g/root/projects/web-client/target/alfresco.war webapps/ \
-	
 # Clean up cache data and remove dependencies which are not required
 	&&	apt-get -y remove \
 		ant \
@@ -165,11 +147,7 @@ RUN	apt-get update && apt-get -y install \
 	&&	rm -rf $SOURCE_DIR \
 	&& 	apt-get clean \
 	&& 	rm -rf /var/lib/apt/lists/*
-	
 EXPOSE 8080
-
 WORKDIR /opt/tomcat
-	
 CMD service postgresql restart && bin/catalina.sh run
-
 # End of Dockerfile
