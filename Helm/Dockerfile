@@ -1,6 +1,6 @@
-# © Copyright IBM Corporation 2019
+# © Copyright IBM Corporation 2019, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-######################### Dockerfile for Helm version 3.0.0 #####################################################
+######################### Dockerfile for Helm version 3.0.2 #####################################################
 #
 # This Dockerfile builds a basic installation of Helm.
 #
@@ -14,9 +14,10 @@
 # docker run -it --name <container_name> <image_name>
 #########################################################################################################################
 #Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:16.04 as builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+ARG VERSION=3.0.2
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH=$SOURCE_DIR
@@ -31,7 +32,7 @@ RUN apt-get update -y && apt-get install -y make wget bash git socat gcc \
 && cd $GOPATH/src/helm.sh \
 && git clone https://github.com/kubernetes/helm.git \
 && cd helm \
-&& git checkout v3.0.0 \
+&& git checkout v$VERSION \
 && make \
 && mkdir -p $GOPATH/bin \
 && cp bin/helm $GOPATH/bin \
@@ -43,7 +44,19 @@ RUN apt-get update -y && apt-get install -y make wget bash git socat gcc \
 && apt autoremove -y \
 && apt-get clean && rm -rf /var/lib/apt/lists/* \
 && rm -rf /src/helm.sh
+
+#Base image
+FROM s390x/ubuntu:16.04
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+ARG VERSION=3.0.2
+ENV SOURCE_DIR=/tmp/source
+WORKDIR $SOURCE_DIR
+ENV GOPATH=$SOURCE_DIR
+ENV PATH=$PATH:/usr/local/go/bin/:$GOPATH/bin
+COPY --from=builder $GOPATH/bin /usr/local/bin
 EXPOSE 44134
 ENV HELM_HOST=localhost:44134
 CMD ["helm"]
 #End of Dockerfile
+
