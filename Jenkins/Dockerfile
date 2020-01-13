@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 	################ Dockerfile for Jenkins server version ###################
@@ -30,6 +30,7 @@ ENV PATH=$JAVA_HOME/bin:$PATH
 # Install dependencies
 RUN apt-get update &&  apt-get install -y tar curl libfontconfig1 \
 # Download AdoptJDK8
+&& mkdir -p $JAVA_HOME \
 && curl -SL -o java.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u232-b09_openj9-0.17.0/OpenJDK8U-jdk_s390x_linux_openj9_8u232b09_openj9-0.17.0.tar.gz \
 && tar -C $JAVA_HOME -xzvf java.tar.gz  --strip-components=2 \
 # Install Jenkins
