@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Keystone version 15.0.0 #########
+########## Dockerfile for Keystone version 16.0.0 #########
 #
 # This Dockerfile builds a basic installation of Keystone.
 #
@@ -100,7 +100,7 @@ RUN	apt-get update && apt-get install -y \
 	&&	cd $SOURCE_DIR \
 	&&	git clone https://github.com/openstack/keystone.git \
 	&&	cd keystone/ \
-	&&	git checkout 15.0.0 \
+	&&	git checkout 16.0.0 \
 	&&	pip install --ignore-installed -r requirements.txt \
 	&&	pip install --ignore-installed -r test-requirements.txt  \
 	&&	python setup.py install \
