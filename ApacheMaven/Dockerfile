@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
-# This dockerfile is no longer supported. Please find latest information from http://ibm.biz/LoZOpenSourceVerifiedList
+# This dockerfile is no longer supported. Please find latest information from https://www.ibm.com/community/z/open-source-software/
 #
 ############# Dockerfile for Apache Maven version 3.6.2 #######################################################################################
 #
