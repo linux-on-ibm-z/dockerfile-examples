@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2018, 2019.
+# © Copyright IBM Corporation 2018, 2020.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 3.5.11 ##################################
+########## Dockerfile for Neo4j version 3.5.14 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -31,7 +31,7 @@ FROM s390x/ubuntu:18.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG NEO4J_VER=3.5.11
+ARG NEO4J_VER=3.5.14
 ENV SOURCE_DIR='/root'
 ENV NEO4J_HOME=$SOURCE_DIR/neo4j
 ENV JAVA_HOME=$SOURCE_DIR/jdk-11.0.4+11
@@ -49,9 +49,10 @@ RUN  apt-get update  \
   && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11_openj9-0.15.1/OpenJDK11U-jdk_s390x_linux_openj9_11.0.4_11_openj9-0.15.1.tar.gz \
   && tar -zxf OpenJDK11U-jdk_s390x_linux_openj9_11.0.4_11_openj9-0.15.1.tar.gz \
 # Download and unzip Neo4j pre build Binary
+  && NEO4J_TAR=neo4j-community-${NEO4J_VER}-unix.tar.gz \
   && cd $SOURCE_DIR/ \
-  && wget https://neo4j.com/artifact.php?name=neo4j-community-${NEO4J_VER}-unix.tar.gz \
-  && tar -xvzf artifact.php?name=neo4j-community-${NEO4J_VER}-unix.tar.gz \
+  && wget -nv -O ${NEO4J_TAR} https://neo4j.com/artifact.php?name=${NEO4J_TAR} \
+  && tar -xvzf ${NEO4J_TAR} \
   && mv neo4j-community-${NEO4J_VER} neo4j \
   && mv "${NEO4J_HOME}"/data /data \
   && mv "${NEO4J_HOME}"/logs /logs \
@@ -69,7 +70,7 @@ RUN  apt-get update  \
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf $SOURCE_DIR/OpenJDK11U-jdk_s390x_linux_openj9_11.0.4_11_openj9-0.15.1.tar.gz $SOURCE_DIR/artifact.php?name=neo4j-community-${NEO4J_VER}-unix.tar.gz /var/lib/apt/lists/*
+  && rm -rf $SOURCE_DIR/OpenJDK11U-jdk_s390x_linux_openj9_11.0.4_11_openj9-0.15.1.tar.gz $SOURCE_DIR/${NEO4J_TAR} /var/lib/apt/lists/*
 
 WORKDIR "${NEO4J_HOME}"
   
