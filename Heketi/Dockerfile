@@ -64,7 +64,7 @@ RUN apt-get update && apt-get install -y \
  && rm -rf $GOPATH/src/github.com/heketi/ && rm -rf $HOME/.glide $HOME/.cache
 
 FROM s390x/ubuntu:18.04
-RUN apt-get update -y && apt-get install -y golang-1.10 
+RUN apt-get update -y && apt-get install -y golang-1.10 && mkdir -p /etc/heketi/
 COPY --from=builder /usr/bin/heketi /usr/bin/
 COPY --from=builder /usr/bin/heketi-cli /usr/bin/
 COPY --from=builder /etc/heketi/heketi.json /etc/heketi
