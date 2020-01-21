@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Prometheus 2.15.1 #########
+########## Dockerfile for Prometheus 2.15.2 #########
 #
 # This Dockerfile builds Prometheus
 #
@@ -23,12 +23,12 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG PROMETHEUS_VER=2.15.1
+ARG PROMETHEUS_VER=2.15.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ENV PATH=/usr/local/go/bin:$PATH:/prometheus
+ENV PATH=/prometheus:$PATH
 
 #Install depenedencies
 RUN apt-get update && apt-get install -y \
@@ -54,3 +54,4 @@ EXPOSE 9090
 VOLUME [ "/prometheus" ]
 ENTRYPOINT [ "/prometheus/prometheus" ]
 CMD [ "--config.file=/etc/prometheus/prometheus.yml", "--web.console.libraries=/etc/prometheus/console_libraries", "--web.console.templates=/etc/prometheus/consoles" ]
+#End of dockerfile
