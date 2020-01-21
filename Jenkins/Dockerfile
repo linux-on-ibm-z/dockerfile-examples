@@ -28,7 +28,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 ENV JAVA_HOME=/opt/adoptjdk
 ENV PATH=$JAVA_HOME/bin:$PATH
 # Install dependencies
-RUN apt-get update &&  apt-get install -y tar curl libfontconfig1 \
+RUN apt-get update &&  apt-get install -y tar wget curl libfontconfig1 \
 # Download AdoptJDK8
 && mkdir -p $JAVA_HOME \
 && curl -SL -o java.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u232-b09_openj9-0.17.0/OpenJDK8U-jdk_s390x_linux_openj9_8u232b09_openj9-0.17.0.tar.gz \
