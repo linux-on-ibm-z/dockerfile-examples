@@ -1,13 +1,11 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
-# This dockerfile is no longer supported. Please find latest information from http://ibm.biz/LoZOpenSourceVerifiedList
-#
-########################################## Dockerfile for WordPress 5.2.3 ############################################
+########################################## Dockerfile for WordPress 5.3.2 ############################################
 #
 # To build this image, run docker build from the directory containing this Dockerfile:
 # 
-#       docker build -t wordpress:5.2.3 .
+#       docker build -t wordpress:5.3.2 .
 #
 # Examples configurations for WordPress docker image using MySQL container:
 # Set up docker network:
@@ -30,7 +28,7 @@
 #           -e WORDPRESS_DB_NAME=wordpress \
 #           -e WORDPRESS_DB_USER=wordpress \
 #           -e WORDPRESS_DB_PASSWORD=wppass \
-#           --network wp_network -p 8080:80 -d wordpress:5.2.3
+#           --network wp_network -p 8080:80 -d wordpress:5.3.2
 #
 # Then, access WordPress admin page via: https://host-ip:8080
 # 
@@ -40,22 +38,17 @@
 #
 ################################################################################################################
 
-FROM s390x/ubuntu:16.04
-
-ENV WORDPRESS_VERSION 5.2.3
-ENV WORDPRESS_SHA1 5efd37148788f3b14b295b2a9bf48a1a467aa303
-
+FROM s390x/ubuntu:18.04
+ENV WORDPRESS_VERSION 5.3.2
+ENV WORDPRESS_SHA1 fded476f112dbab14e3b5acddd2bcfa550e7b01b
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
-
 ENV DEBIAN_FRONTEND noninteractive
-
 RUN apt-get update && apt-get install -y \
     apache2 \
     curl \
     ghostscript \
     libapache2-mod-php \
     && rm /var/www/html/index.html
-
 # Install PHP 7 with extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN apt-get update && apt-get install -y \
     php \
@@ -69,28 +62,21 @@ RUN apt-get update && apt-get install -y \
     php-ssh2 \
     php-xml \
     php-zip \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN curl -o /usr/local/bin/apache2-foreground -fSL "https://raw.githubusercontent.com/docker-library/php/master/apache2-foreground" \
-    && chmod +x /usr/local/bin/apache2-foreground
-
-RUN a2enmod rewrite expires
-
-VOLUME /var/www/html
-
-RUN set -ex \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -o /usr/local/bin/apache2-foreground -fSL "https://raw.githubusercontent.com/docker-library/php/master/apache2-foreground" \
+    && chmod +x /usr/local/bin/apache2-foreground \
+    && a2enmod rewrite expires \
+    && set -ex \
     && curl -o wordpress.tar.gz -fSL "https://wordpress.org/wordpress-${WORDPRESS_VERSION}.tar.gz" \
-	&& echo "$WORDPRESS_SHA1 *wordpress.tar.gz" | sha1sum -c - \
+    && echo "$WORDPRESS_SHA1 *wordpress.tar.gz" | sha1sum -c - \
     # Upstream tarballs include ./wordpress/ so this gives us /usr/src/wordpress
-	&& tar -xzf wordpress.tar.gz -C /usr/src/ \
-	&& rm wordpress.tar.gz \
-	&& chown -R www-data:www-data /usr/src/wordpress
-
+    && tar -xzf wordpress.tar.gz -C /usr/src/ \
+    && rm wordpress.tar.gz \
+    && chown -R www-data:www-data /usr/src/wordpress
+VOLUME /var/www/html
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
 WORKDIR /var/www/html
 EXPOSE 80
-
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["apache2-foreground"]
