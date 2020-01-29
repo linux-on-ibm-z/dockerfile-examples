@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for Consul - 1.6.1 ########################
+###################### Dockerfile for Consul - 1.6.2 ########################
 # 
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter 
@@ -23,9 +23,9 @@
 #####################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:18.04 AS builder
 
-ARG CONSUL_VER=1.6.1
+ARG CONSUL_VER=1.6.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -57,24 +57,17 @@ RUN apt-get update &&  apt-get install -y \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/consul.git \
  && cd consul && git checkout tags/v${CONSUL_VER} \
- && go get -u github.com/SAP/go-hdb/... \
- && mv $GOPATH/src/github.com/hashicorp/consul/vendor/github.com/SAP/go-hdb $GOPATH/src/github.com/hashicorp/consul/vendor/github.com/SAP/go-hdb_bkp \
- && cp -r $GOPATH/src/github.com/SAP/go-hdb $GOPATH/src/github.com/hashicorp/consul/vendor/github.com/SAP/ \
  
 # Build consul
  && make tools \
- && make dev \
- && cp $GOPATH/bin/consul /usr/local/bin \
- && mkdir -p /consul/data \
-# Tidy and clean up
- && rm -rf $SOURCE_DIR \
- && apt-get remove -y \
-   curl \
-   git \
-   gcc \
-   wget \
- && apt-get autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
+ && make dev
+ 
+FROM s390x/ubuntu:18.04
+RUN apt-get update -y
+
+WORKDIR /root
+COPY --from=builder /tmp/source/src/github.com/hashicorp/consul/bin/consul /usr/local/bin/consul
+RUN mkdir -p /consul/data 
 
 # Create Volume
 VOLUME ["/consul/data"]
