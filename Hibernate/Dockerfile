@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for Hibernate version 5.4.9 ###########################
+################# Dockerfile for Hibernate version 5.4.10 ###########################
 #
 # This Dockerfile builds a basic installation of Hibernate.
 #
@@ -56,7 +56,7 @@ RUN     apt-get update && apt-get -y install \
         &&      cd $SOURCE_DIR \
         &&      git clone git://github.com/hibernate/hibernate-orm.git \
         &&      cd hibernate-orm \
-        &&      git checkout 5.4.9 \
+        &&      git checkout 5.4.10 \
 # Build Hibernate
         &&      mkdir -p $HOME/.gem/jruby/1.9 \
         &&      ./gradlew build -x :documentation:renderGettingStartedGuides -x :documentation:renderIntegrationGuide -x :documentation:renderUserGuide -x test \
