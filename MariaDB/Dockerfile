@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Mariadb Server version 10.4.8 #########
+########## Dockerfile for Mariadb Server version 10.4.11 #########
 #
 # This Dockerfile builds a basic installation of Mariadb Server.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG MARIADB_VER=10.4.8
+ARG MARIADB_VER=10.4.11
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -35,16 +35,15 @@ WORKDIR $SOURCE_DIR
 ###Install build dependencies
 RUN apt-get update && apt-get install -y \
     git \
-    gcc \
-    g++ \
+    bison \
     make \
     wget \
     tar \
     cmake \
+    gcc \
+    g++ \
     libssl-dev \
     libncurses-dev \
-    bison \
-    scons \
     libboost-dev \
     libboost-program-options-dev \
     check \
@@ -70,12 +69,18 @@ RUN apt-get update && apt-get install -y \
  && sleep 20s \
  && cp support-files/mysql.server /etc/init.d/mysql \
 # Cleanup
-&& apt-get remove -y \
-    bison \
-    cmake \
-    git \
-    make \
-    wget \
+ && apt-get remove -y \
+    git       \
+    bison     \
+    make      \
+    wget      \
+    cmake     \
+    libssl-dev \
+    libncurses-dev \
+    libboost-dev \
+    libboost-program-options-dev \
+    libpcre3-dev \
+    libpam0g-dev \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
  && rm -rf $SOURCE_DIR/server $SOURCE_DIR/build_mariadb
