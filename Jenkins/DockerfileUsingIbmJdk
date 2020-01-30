@@ -28,15 +28,15 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 ENV JAVA_HOME=/opt/ibm/java
 ENV PATH=$JAVA_HOME/bin:$PATH
 # Install dependencies
-RUN apt-get update &&  apt-get install -y curl \
+RUN apt-get update &&  apt-get install -y wget \
 # Download IBMJDK
-&& curl -SLO http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.6.0/linux/s390x/ibm-java-sdk-8.0-6.0-s390x-archive.bin \
-&& curl -SLO https://raw.githubusercontent.com/zos-spark/scala-workbench/master/files/installer.properties.java \
+&& wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.6.0/linux/s390x/ibm-java-sdk-8.0-6.0-s390x-archive.bin \
+&& wget https://raw.githubusercontent.com/zos-spark/scala-workbench/master/files/installer.properties.java \
 && tail -n +3 installer.properties.java | tee installer.properties \
 && chmod +x ibm-java-sdk-8.0-6.0-s390x-archive.bin \
 && ./ibm-java-sdk-8.0-6.0-s390x-archive.bin -r installer.properties \
 # Install Jenkins
-&& curl -SLO http://mirrors.jenkins.io/war-stable/latest/jenkins.war \
+&& wget http://mirrors.jenkins.io/war-stable/latest/jenkins.war \
 # Clean up Cache data and unused dependencies
 && rm -rfv ibm-java-s390x-sdk-8.0-6.0.bin  \
 && apt-get remove -y curl \
