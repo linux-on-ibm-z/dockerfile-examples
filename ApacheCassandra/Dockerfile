@@ -1,4 +1,4 @@
-# Copyright IBM Corporation 2017, 2019.
+# Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ########## Linux on z Systems Dockerfile for Cassandra version 3.11.4 #########
@@ -70,10 +70,12 @@ RUN apt-get update && apt-get install -y \
 && git clone https://github.com/apache/cassandra.git \
 && cd cassandra \
 && git checkout cassandra-${CASSANDRA_VERSION} \
-&& sed  -i ' s/Xss256k/Xss32m/' build.xml conf/jvm.options \
+&& sed -i ' s/Xss256k/Xss32m/' build.xml conf/jvm.options \
+&& sed -i "s/\<http\>/https/g" build.properties.default \
+&& sed -i "89s/\<http:\/\/repo2\>/https:\/\/repo1/" build.xml    \
 && ant \
 && rm lib/snappy-java-1.1.1.7.jar \
-&& wget -O lib/snappy-java-1.1.2.6.jar http://central.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.2.6/snappy-java-1.1.2.6.jar \
+&& wget -O lib/snappy-java-1.1.2.6.jar https://repo1.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.2.6/snappy-java-1.1.2.6.jar \
 && rm lib/jna-4.2.2.jar \
 && cp $SOURCE_ROOT/jna/build/jna.jar $SOURCE_ROOT/cassandra/lib/jna-4.2.2.jar \
 && cp -R $SOURCE_ROOT/cassandra /usr/local/ \
