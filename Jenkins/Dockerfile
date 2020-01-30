@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-	################ Dockerfile for Jenkins server version ###################
+        ################ Dockerfile for Jenkins server version ###################
 #
 # This Dockerfile builds a basic installation of Jenkins server.
 #
@@ -28,16 +28,16 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 ENV JAVA_HOME=/opt/adoptjdk
 ENV PATH=$JAVA_HOME/bin:$PATH
 # Install dependencies
-RUN apt-get update &&  apt-get install -y tar wget curl libfontconfig1 \
+RUN apt-get update &&  apt-get install -y tar wget libfontconfig1 \
 # Download AdoptJDK8
 && mkdir -p $JAVA_HOME \
-&& curl -SL -o java.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u232-b09_openj9-0.17.0/OpenJDK8U-jdk_s390x_linux_openj9_8u232b09_openj9-0.17.0.tar.gz \
+&& wget -O java.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u232-b09_openj9-0.17.0/OpenJDK8U-jdk_s390x_linux_openj9_8u232b09_openj9-0.17.0.tar.gz \
 && tar -C $JAVA_HOME -xzvf java.tar.gz  --strip-components=2 \
 # Install Jenkins
 && wget http://mirrors.jenkins.io/war-stable/latest/jenkins.war \
 # Clean up Cache data and unused dependencies
 && rm -rf java.tar.gz   \
-&& apt-get remove -y curl \
+&& apt-get remove -y wget \
 && apt-get autoremove -y && apt-get clean \
 EXPOSE 8080
 CMD java -jar jenkins.war && tail -f /var/log/jenkins/jenkins.log
