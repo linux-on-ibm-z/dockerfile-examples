@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2019.
+# © Copyright IBM Corporation 2019, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Jenkins JNLP Slave version 3.35 ###################
+################ Dockerfile for Jenkins JNLP Slave version 3.40 ###################
 #
 # This Dockerfile builds an image for Jenkins slave node.
 #
@@ -25,7 +25,7 @@ FROM s390x/ubuntu:16.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG VERSION=3.35
+ARG VERSION=3.40
 ARG user=jenkins
 ARG group=jenkins
 ARG uid=1000
@@ -48,7 +48,7 @@ RUN curl --create-dirs -fsSLo /usr/share/jenkins/agent.jar https://repo.jenkins-
   && chmod 755 /usr/share/jenkins \
   && chmod 644 /usr/share/jenkins/agent.jar \
 # Download JNLP jenkins agent script
-  && curl -o /usr/local/bin/jenkins-agent https://raw.githubusercontent.com/jenkinsci/docker-jnlp-slave/3.35-4/jenkins-agent \
+  && curl -o /usr/local/bin/jenkins-agent https://raw.githubusercontent.com/jenkinsci/docker-jnlp-slave/3.40-1/jenkins-agent \
   && chmod 755 /usr/local/bin/jenkins-agent \
   && ln -fs /usr/local/bin/jenkins-agent /usr/local/bin/jenkins-slave
 
