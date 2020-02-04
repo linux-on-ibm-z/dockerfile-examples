@@ -1,4 +1,7 @@
-############################ Dockerfile for RethinkDB pre 2.4 ############################################
+# © Copyright IBM Corporation 2017, 2020.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+############################ Dockerfile for RethinkDB 2.4.0 ############################################
 #
 # This Dockerfile builds a basic installation of RethinkDB
 #
@@ -16,10 +19,10 @@
 ################################################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 RUN apt-get update -y && apt-get install -y \
     build-essential \
@@ -35,29 +38,33 @@ RUN apt-get update -y && apt-get install -y \
     python \
     wget \
 
-#Clone and build RethinkDB
+#Install Node 6.11.0
+ && wget https://nodejs.org/dist/v6.11.0/node-v6.11.0-linux-s390x.tar.gz \
+ && tar xvf node-v6.11.0-linux-s390x.tar.gz -C /usr \
+ && export PATH=/usr/node-v6.11.0-linux-s390x/bin:$PATH  \
 
- && git clone https://github.com/linux-on-ibm-z/rethinkdb.git --branch next-s390x \
+#Clone and build RethinkDB
+ && git clone https://github.com/rethinkdb/rethinkdb \
  && cd rethinkdb/ \
- && cp mk/support/pkg/jemalloc.sh mk/support/pkg/jemalloc.sh.orig \
- && sed -i '4d' mk/support/pkg/jemalloc.sh \
- && sed -i '4 i src_url=https://github.com/jemalloc/jemalloc/releases/download/4.1.0/jemalloc-4.1.0.tar.bz2' mk/support/pkg/jemalloc.sh \
+ && git checkout v2.4.0 \
 
 #Changed for V8
- && cp mk/support/pkg/v8.sh mk/support/pkg/v8.sh.orig \
- && sed -i '65 i export CXXFLAGS="-fno-delete-null-pointer-checks"' mk/support/pkg/v8.sh \
- && sed -i '65 s/^/       /' mk/support/pkg/v8.sh \
- && sed -i '67d ' mk/support/pkg/v8.sh \
- && sed -i '67 i make dependencies || true'  mk/support/pkg/v8.sh \
- && sed -i '67 s/^/       /' mk/support/pkg/v8.sh \
- && sed -i '68d ' mk/support/pkg/v8.sh \
- && sed -i '68 i make s390x -j4 werror=no snapshot=off library=static'  mk/support/pkg/v8.sh \
- && sed -i '68 s/^/       /' mk/support/pkg/v8.sh \
- && sed -i '158d ' mk/support/pkg/v8.sh \
- && sed -i '158 i  for lib in libv8_{base,libbase,nosnapshot,libplatform}; do'  mk/support/pkg/v8.sh \
- && sed -i '158 s/^/    /' mk/support/pkg/v8.sh \
- && ./configure --allow-fetch \
- && make -j 4 \
+ &&  cp mk/support/pkg/v8.sh mk/support/pkg/v8.sh.orig \
+ && sed -i '67 i export CXXFLAGS="-fno-delete-null-pointer-checks"' mk/support/pkg/v8.sh \
+ && sed -i '67 s/^/        /' mk/support/pkg/v8.sh \
+ && sed -i '69d ' mk/support/pkg/v8.sh \
+ && sed -i '69 i make dependencies || true'  mk/support/pkg/v8.sh \
+ && sed -i '69 s/^/        /' mk/support/pkg/v8.sh \
+ && sed -i '70d ' mk/support/pkg/v8.sh \
+ && sed -i '70 i make s390x -j4 werror=no snapshot=off library=static'  mk/support/pkg/v8.sh \
+ && sed -i '70 s/^/        /' mk/support/pkg/v8.sh \
+ && sed -i '172d ' mk/support/pkg/v8.sh \
+ && sed -i '172 i  for lib in libv8_{base,libbase,nosnapshot,libplatform}; do'  mk/support/pkg/v8.sh \
+ && sed -i '172 s/^/        /' mk/support/pkg/v8.sh \
+ 
+
+ && ./configure --allow-fetch \ 
+ && make -j 4 \ 
 
 #Install RethinkDB
  && make install \
