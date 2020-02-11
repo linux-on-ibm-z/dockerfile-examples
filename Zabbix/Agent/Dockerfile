@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-Agent version 4.4.4 ####################
+########## Dockerfile for Zabbix-Agent version 4.4.5 ####################
 #
 # This Dockerfile builds a basic installation of Zabbix-Agent.
 #
@@ -34,7 +34,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG ZBX_AGENT_VER=4.4.4
+ARG ZBX_AGENT_VER=4.4.5
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
