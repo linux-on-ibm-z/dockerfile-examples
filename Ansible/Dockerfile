@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ################### Dockerfile for Ansible latest version ##################################
@@ -16,9 +16,9 @@
 # To simply run the resultant image, and provide a bash shell:
 # docker run  --name <container_name> -it <image_name> /bin/bash
 #
-# Use below command to use Ansible:   
+# Use below command to use Ansible:
 #  docker run --rm=true --name <container_name> -v <playbook_file_path_in_host>:<playbook_file_path_in_container>  -it <image_name>  ansible-playbook  <playbook_file_path_in_container>
-#  For ex. docker run --rm=true --name <container_name> -v /playbook.yml:/playbook.yml  -it <image_name>  ansible-playbook  /playbook.yml
+#  For ex. docker run --rm=true --name <container_name> -v `pwd`/playbook.yml:/playbook.yml  -it <image_name>  ansible-playbook  /playbook.yml
 #
 ########################### Sample playbook.yml ######################################
 #
@@ -26,7 +26,7 @@
 #- hosts: localhost
 #  tasks:
 #    - name: Installs nginx web server
-#      apt: pkg=nginx state=installed update_cache=true
+#      apt: pkg=nginx state=latest update_cache=true
 #      notify:
 #        - start nginx
 #
@@ -42,10 +42,9 @@ FROM s390x/ubuntu:18.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-# Install dependencies 
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     software-properties-common \
-		
 # Install ansible
  && apt-add-repository ppa:ansible/ansible \
  && apt-get update && apt-get -y install \
@@ -56,6 +55,5 @@ RUN apt-get update && apt-get install -y \
 # This dockerfile does not have a CMD statement as the image is intended to be
 # used as a base for building an application. If desired it may also be run as
 # a container e.g. as shown in the header comment above.
-          
-# End of Dockerfile
 
+# End of Dockerfile
