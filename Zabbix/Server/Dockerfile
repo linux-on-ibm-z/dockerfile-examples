@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-server version 4.4.4 #########
+########## Dockerfile for Zabbix-server version 4.4.5 #########
 #
 # This Dockerfile builds a basic installation of Zabbix-server.
 #
@@ -22,7 +22,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04 AS builder
 
-ARG ZBX_SERVER_VER=4.4.4
+ARG ZBX_SERVER_VER=4.4.5
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -59,12 +59,12 @@ RUN     apt-get update && apt-get install -y mysql-server \
         &&      make install \
 	&& 	cat /zabbix-${ZBX_SERVER_VER}/database/mysql/schema.sql > /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql \
 	&& 	cat /zabbix-${ZBX_SERVER_VER}/database/mysql/images.sql >> /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql \
-	&&	cat /zabbix-${ZBX_SERVER_VER}/database/mysql/data.sql >> /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql 
+	&&	cat /zabbix-${ZBX_SERVER_VER}/database/mysql/data.sql >> /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql
 
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG ZBX_SERVER_VER=4.4.4
+ARG ZBX_SERVER_VER=4.4.5
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
