@@ -1,7 +1,7 @@
-# Copyright IBM Corporation 2017, 2019.
+# Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 6.4.2 ############################################
+############################ Dockerfile for Grafana 6.5.2 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -20,7 +20,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04 as builder
 
-ARG GRAFANA_VER=6.4.2
+ARG GRAFANA_VER=6.5.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -40,9 +40,9 @@ RUN apt-get update -y && apt-get install -y \
     unzip \
 # Install go
  && cd $GOPATH \
- && wget https://storage.googleapis.com/golang/go1.12.9.linux-s390x.tar.gz \
- && chmod ugo+r go1.12.9.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.12.9.linux-s390x.tar.gz \
+ && wget https://storage.googleapis.com/golang/go1.13.5.linux-s390x.tar.gz \
+ && chmod ugo+r go1.13.5.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.13.5.linux-s390x.tar.gz \
 # Install Nodejs
  && cd $GOPATH \
  && wget https://nodejs.org/dist/v10.16.3/node-v10.16.3-linux-s390x.tar.xz \
