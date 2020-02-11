@@ -1,6 +1,8 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-########## Dockerfile for Drupal version 8.4.5 #########
+
+
+########## Dockerfile for Drupal version 8.8.2 #########
 #
 # This Dockerfile builds a basic installation of Drupal.
 #
@@ -13,18 +15,16 @@
 # docker build -t <image_name> .
 #
 # To start Drupal run the below command:
-# docker run --name <container_name> -p <host_port>:80 -p <host_port>:3306 -d <image_name>  
+# docker run --name <container_name> -p <host_port>:80 -d <image_name>  
 # 
 # We can view the Drupal UI at http://<drupal-host-ip>:<port_number>
 #
 # Reference:
 # https://www.drupal.org/docs/8/install/
 #
-##################################################################################
-
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
 MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
@@ -38,9 +38,9 @@ RUN	apt-get update && apt-get -y install \
 		curl \
 		libapache2-mod-php \
 		php \
-		php7.0-xml \
-		php7.0-gd \
-		php7.0-ldap \
+		php7.2-xml \
+		php7.2-gd \
+		php7.2-ldap \
 		php-mysql \
 		php-bcmath \
 		php-mbstring \
@@ -65,12 +65,12 @@ RUN	apt-get update && apt-get -y install \
 # Download and install Drupal
 	&&	mkdir -p $SOURCE_DIR \
 	&&	cd $SOURCE_DIR \
-	&&	wget https://ftp.drupal.org/files/projects/drupal-8.4.5.tar.gz \
-	&&	tar -xvf drupal-8.4.5.tar.gz \
+	&&	wget https://ftp.drupal.org/files/projects/drupal-8.8.2.tar.gz \
+	&&	tar -xvf drupal-8.8.2.tar.gz \
 	&&	mkdir -p /var/www/html/Drupal \
-	&&	mv drupal-8.4.5/* drupal-8.4.5/.htaccess drupal-8.4.5/.csslintrc \
-		drupal-8.4.5/.editorconfig drupal-8.4.5/.eslintignore drupal-8.4.5/.eslintrc.json \
-		drupal-8.4.5/.gitattributes /var/www/html/Drupal \
+	&&	mv drupal-8.8.2/* drupal-8.8.2/.htaccess drupal-8.8.2/.csslintrc \
+		drupal-8.8.2/.editorconfig drupal-8.8.2/.eslintignore drupal-8.8.2/.eslintrc.json \
+		drupal-8.8.2/.gitattributes /var/www/html/Drupal \
 	&&	cd /var/www/html/Drupal \
 	&& 	composer install \
 	
@@ -81,7 +81,6 @@ RUN	apt-get update && apt-get -y install \
 	&&	cp sites/default/default.settings.php sites/default/settings.php \
 	&&	chmod a+w sites/default/settings.php \
 	
-
 # Clean up cache data and remove dependencies which are not required
 	&&	apt-get -y remove \
 		composer \
@@ -93,11 +92,10 @@ RUN	apt-get update && apt-get -y install \
 	&& 	apt-get clean \
 	&& 	rm -rf /var/lib/apt/lists/*
 	
-EXPOSE 80
+EXPOSE 80 
 
 VOLUME /var/www/html
 
 CMD apachectl -D FOREGROUND
 	
 # End of Dockerfile
-
