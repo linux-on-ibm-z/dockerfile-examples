@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############### Dockerfile for CouchDB version 2.3.1 ############
@@ -18,7 +18,9 @@
 ##################################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:16.04 AS builder
+
+ARG COUCHDB_VER=2.3.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -46,7 +48,7 @@ RUN apt-get update && apt-get install -y build-essential \
 # Download and install CouchDB
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
- && git checkout 2.3.1 \
+ && git checkout ${COUCHDB_VER} \
  && ./configure -c --disable-docs --disable-fauxton \
  && make  \
  && cp -r $SOURCE_DIR/couchdb /usr/share/couchdb \
@@ -64,6 +66,24 @@ RUN apt-get update && apt-get install -y build-essential \
     make \
     pkg-config \
     wget \
+ && apt-get autoremove -y && apt autoremove -y \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Base image
+FROM s390x/ubuntu:16.04
+
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+
+ENV SOURCE_DIR=/tmp/source
+WORKDIR $SOURCE_DIR
+
+ENV PATH=$PATH:/usr/share/couchdb/dev  LD_LIBRARY_PATH=/usr/lib
+
+COPY --from=builder /usr/share/couchdb /usr/share/couchdb
+
+RUN apt-get update && apt-get install -y \
+        python3 erlang \
  && apt-get autoremove -y && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
