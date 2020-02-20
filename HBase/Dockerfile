@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2019
+# © Copyright IBM Corporation 2019, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ########## Dockerfile for Apache Hbase version 2.2.0 #########
@@ -13,8 +13,8 @@
 # docker build -t <image_name> .
 #
 # Start master of Hbase using below command :
-# docker run -d --name <container_name> -p <host-port>:16010 <image-name> hbase master <command> 
-# e.g. docker run -d --name hbase_test -p 16011:16010 hbase hbase master start 
+# docker run -d --name <container_name> -p <host-port>:16010 <image-name> master <command> 
+# e.g. docker run -d --name hbase_test -p 16011:16010 hbase master start 
 # 
 # Start Hbase shell( which connect to running instance of HBase) using below command :
 # docker exec -it <container id/name> hbase shell
@@ -43,18 +43,18 @@ WORKDIR $SOURCE_DIR
 # Install dependencies
 RUN apt-get update  \
   && apt-get install  -y \
-			ant \
-			gcc \
-			g++ \
-			git \
-			make \
-			maven \
-			openjdk-8-jdk \
-   			tar \
-			wget \
-			autoconf curl unzip automake gzip libtool\
+      ant \
+      gcc \
+      g++ \
+      git \
+      make \
+      maven \
+      openjdk-8-jdk \
+      tar \
+      wget \
+      autoconf curl unzip automake gzip libtool
 # Download and build source code of Apache Hbase
-  && cd $SOURCE_DIR \
+RUN cd $SOURCE_DIR \
   && git clone git://github.com/apache/hbase.git \
   && cd hbase/ \
   && git checkout rel/2.2.0 \
@@ -70,7 +70,7 @@ RUN apt-get update  \
   && sed -i '148i inline Atomic64 Release_CompareAndSwap\(volatile Atomic64* ptr, Atomic64 old_value, Atomic64 new_value\) {\n __atomic_compare_exchange_n\(ptr, \&old_value, new_value, false, __ATOMIC_RELEASE, __ATOMIC_ACQUIRE\)\;\n return old_value\;\n\}' src/google/protobuf/stubs/atomicops_internals_generic_gcc.h \
   && ./autogen.sh && ./configure && make \
   && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SOURCE_DIR/hbase/protobuf/src/.libs:$SOURCE_DIR/hbase/protobuf-2.5.0/src/.libs && cd ../ \ 
-  &&  mvn install:install-file -DgroupId=com.google.protobuf -DartifactId=protoc -Dversion=2.5.0 -Dclassifier=linux-s390_64 -Dpackaging=exe -Dfile=$SOURCE_DIR/hbase/protobuf-2.5.0/src/.libs/protoc \
+  && mvn install:install-file -DgroupId=com.google.protobuf -DartifactId=protoc -Dversion=2.5.0 -Dclassifier=linux-s390_64 -Dpackaging=exe -Dfile=$SOURCE_DIR/hbase/protobuf-2.5.0/src/.libs/protoc \
   && mvn install:install-file -DgroupId=com.google.protobuf -DartifactId=protoc -Dversion=3.5.1-1 -Dclassifier=linux-s390_64 -Dpackaging=exe -Dfile=$SOURCE_DIR/hbase/protobuf/src/.libs/protoc \
 # Continue with build and install
   && mvn install -DskipTests=true \
@@ -100,17 +100,18 @@ RUN apt-get update  \
  && mv $SOURCE_DIR/jar_tmp/jruby-complete-9.1.13.0.jar ~/.m2/repository/org/jruby/jruby-complete/9.1.13.0/jruby-complete-9.1.13.0.jar \
 # Clean up the unwanted packages and clear the source directory
  && apt-get remove -y \
-			ant \
-			gcc \
-			git \
-			make \
-			maven \
-			wget \
-			autoconf automake libtool \
+      ant \
+      gcc \
+      git \
+      make \
+      maven \
+      wget \
+      autoconf automake libtool \
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf $SOURCE_DIR/jar_tmp $SOURCE_DIR/1.2.0.tar.gz $SOURCE_DIR/jffi-1.2.0 /var/lib/apt/lists/*
+  && rm -rf $SOURCE_DIR/jar_tmp $SOURCE_DIR/1.2.0.tar.gz $SOURCE_DIR/jffi-1.2.0 /var/lib/apt/lists/* \
+      $SOURCE_DIR/hbase/.git $SOURCE_DIR/hbase/protobuf-2.5.0.tar.gz 
 
 # Define mount points for logs, conf files & data.
 VOLUME ["$SOURCE_DIR/hbase/data", "$SOURCE_DIR/hbase/conf", "$SOURCE_DIR/hbase/logs"]
@@ -119,6 +120,6 @@ VOLUME ["$SOURCE_DIR/hbase/data", "$SOURCE_DIR/hbase/conf", "$SOURCE_DIR/hbase/l
 EXPOSE 2181 16010 60000 60010 60020 60030 8080 8085 9090 9095
 
 # Set the Entrypoint
-CMD ["hbase"]
+ENTRYPOINT ["hbase"]
 
 # End of Dockerfile
