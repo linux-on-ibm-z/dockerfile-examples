@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
-# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0) 
+# © Copyright IBM Corporation 2017, 2020.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for Doxygen version 1.8.16 ##################
+################## Dockerfile for Doxygen version 1.8.17 ##################
 #
 # This Dockerfile builds a basic installation of Doxygen
 #
@@ -24,11 +24,11 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
-ARG DOXYGEN_VER=Release_1_8_16
+ARG DOXYGEN_VER=Release_1_8_17
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -69,4 +69,3 @@ RUN apt-get update && apt-get install -y \
 # a container e.g. as shown in the header comment above.
 
 # End of Dockerfile
-
