@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.4.1 ########################################
+##################################### Dockerfile for Elasticsearch version 7.5.1 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG ELASTICSEARCH_VER=7.4.1
+ARG ELASTICSEARCH_VER=7.5.1
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
