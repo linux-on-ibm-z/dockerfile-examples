@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 7.4.1 #####################################################
+############################ Dockerfile for Logstash version 7.5.1 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -19,7 +19,7 @@
 # Base image
 FROM s390x/ubuntu:18.04
 
-ARG LOGSTASH_VER=7.4.1
+ARG LOGSTASH_VER=7.5.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -27,13 +27,13 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 WORKDIR "/opt"
 ENV JAVA_HOME=/opt/jdk8u222-b10/
 ENV PATH=$JAVA_HOME/bin:$PATH
-ENV LD_LIBRARY_PATH=/opt/jffi-jffi-1.2.21/build/jni/:/opt/jffi-jffi-1.2.21/build/jni/libffi-s390x-linux/.libs:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/usr/lib/s390x-linux-gnu/jni/:$LD_LIBRARY_PATH
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     ant \
     gcc \
     gzip \
-    libffi6 \
+    libjffi-jni \
     make \
     tar \
     unzip \
@@ -42,11 +42,6 @@ RUN apt-get update && apt-get install -y \
 # Download OpenJDK 8 with HotSpot
  && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jdk_s390x_linux_hotspot_8u222b10.tar.gz \
  && tar -xvf OpenJDK8U-jdk_s390x_linux_hotspot_8u222b10.tar.gz \
-# Install jffi
- && wget https://github.com/jnr/jffi/archive/jffi-1.2.21.tar.gz \
- && tar -xzvf jffi-1.2.21.tar.gz \
- && cd jffi-jffi-1.2.21 \
- && ant \
 # Download and Install Logstash
  && cd /opt \
  && wget https://artifacts.elastic.co/downloads/logstash/logstash-oss-${LOGSTASH_VER}.tar.gz \
@@ -73,7 +68,6 @@ RUN apt-get update && apt-get install -y \
  && rm /opt/OpenJDK8U-jdk_s390x_linux_hotspot_8u222b10.tar.gz \
  && rm -rf /opt/logstash-oss-${LOGSTASH_VER} \
  && rm /opt/logstash-oss-${LOGSTASH_VER}.tar.gz \
- && rm /opt/jffi-1.2.21.tar.gz \
  && rm -rf /var/lib/apt/lists/* \
 # Create elasticsearch user
  && /usr/sbin/groupadd logstash \
