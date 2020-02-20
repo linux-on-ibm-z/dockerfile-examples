@@ -1,6 +1,6 @@
 # © Copyright IBM Corporation 2019, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-######################### Dockerfile for Helm version 3.0.2 #####################################################
+######################### Dockerfile for Helm version 3.0.3 #####################################################
 #
 # This Dockerfile builds a basic installation of Helm.
 #
@@ -17,7 +17,7 @@
 FROM s390x/ubuntu:16.04 as builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
-ARG VERSION=3.0.2
+ARG VERSION=3.0.3
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH=$SOURCE_DIR
@@ -25,9 +25,9 @@ ENV PATH=$PATH:/usr/local/go/bin/:$GOPATH/bin
 #Install dependencies
 RUN apt-get update -y && apt-get install -y make wget bash git socat gcc \
 #Get Helm
-&& wget https://dl.google.com/go/go1.13.4.linux-s390x.tar.gz \
-&& chmod ugo+r go1.13.4.linux-s390x.tar.gz \
-&& tar -C /usr/local -xzf go1.13.4.linux-s390x.tar.gz \
+&& wget https://dl.google.com/go/go1.13.7.linux-s390x.tar.gz \
+&& chmod ugo+r go1.13.7.linux-s390x.tar.gz \
+&& tar -C /usr/local -xzf go1.13.7.linux-s390x.tar.gz \
 && mkdir -p $GOPATH/src/helm.sh \
 && cd $GOPATH/src/helm.sh \
 && git clone https://github.com/kubernetes/helm.git \
@@ -49,7 +49,7 @@ RUN apt-get update -y && apt-get install -y make wget bash git socat gcc \
 FROM s390x/ubuntu:16.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
-ARG VERSION=3.0.2
+ARG VERSION=3.0.3
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH=$SOURCE_DIR
@@ -59,4 +59,3 @@ EXPOSE 44134
 ENV HELM_HOST=localhost:44134
 CMD ["helm"]
 #End of Dockerfile
-
