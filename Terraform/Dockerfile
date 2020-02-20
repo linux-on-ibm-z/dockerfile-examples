@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Terraform - 0.12.19 ########################
+########## Dockerfile for Terraform - 0.12.20 ########################
 #
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -24,7 +24,7 @@ FROM s390x/ubuntu:16.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG TERRAFORM_VER=0.12.19
+ARG TERRAFORM_VER=0.12.20
 
 # Set environment variables
 ENV SOURCE_DIR=/source
