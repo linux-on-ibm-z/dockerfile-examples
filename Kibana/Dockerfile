@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 7.4.1 ############################################
+###################################### Dockerfile for Kibana version 7.5.1 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -25,7 +25,7 @@
 
 FROM s390x/ubuntu:18.04
 
-ARG KIBANA_VER=7.4.1
+ARG KIBANA_VER=7.5.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -67,16 +67,6 @@ RUN sudo apt-get update && sudo apt-get install -y \
  && git apply kibana_patch.diff \
 # Bootstrap Kibana
  && yarn kbn bootstrap --oss \
-# Install Elasticsearch Nodegit
- && cd node_modules/@elastic/ \
- && git clone https://github.com/elastic/nodegit.git \
- && cd nodegit \
- && git checkout v0.25.0-alpha.22 \
-# Apply Nodegit patch
- && curl -o nodegit_patch.diff $PATCH_URL/nodegit_patch.diff \
- && git apply nodegit_patch.diff \
- && npm install \
- && cd $WORKDIR/kibana \
  && yarn build --skip-os-packages --oss \
  && sudo mkdir /usr/share/kibana/ \
  && sudo tar xzf target/kibana-oss-${KIBANA_VER}-SNAPSHOT-linux-x86_64.tar.gz -C /usr/share/kibana --strip-components 1 \
