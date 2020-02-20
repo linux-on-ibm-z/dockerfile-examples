@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.4.1 #############################
+#################### Dockerfile for Beats 7.5.1 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:18.04
 
-ARG BEATS_VER=7.4.1
+ARG BEATS_VER=7.5.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -116,4 +116,4 @@ RUN apt-get update && apt-get install -y \
 VOLUME /Beats
 
 CMD $BEATSNAME -e -path.config /Beats -d "publish"
-
+#End of Dockerfile
