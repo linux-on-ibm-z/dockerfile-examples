@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################################ Dockerfile for MySQL 8.0.18 #################################################
+############################################ Dockerfile for MySQL 8.0.19 #################################################
 # To build this image, run docker build from the directory containing this Dockerfile:
 # 
 #       docker build -t mysql:8.0 .
@@ -29,7 +29,7 @@ FROM s390x/ubuntu:16.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ENV MYSQL_VERSION 8.0.18
+ENV MYSQL_VERSION 8.0.19
 
 ENV PATH /usr/local/mysql/bin:$PATH
 
