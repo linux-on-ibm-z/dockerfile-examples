@@ -14,10 +14,10 @@
 # docker run -it --name <container_name> <image_name>
 #########################################################################################################################
 #Base image
-FROM s390x/ubuntu:16.04 as builder
+FROM s390x/ubuntu:18.04 as builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
-ARG VERSION=3.0.3
+ARG VERSION=3.1.0
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH=$SOURCE_DIR
@@ -49,7 +49,7 @@ RUN apt-get update -y && apt-get install -y make wget bash git socat gcc \
 FROM s390x/ubuntu:16.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
-ARG VERSION=3.0.3
+ARG VERSION=3.1.0
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH=$SOURCE_DIR
