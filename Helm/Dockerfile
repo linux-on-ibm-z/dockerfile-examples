@@ -1,6 +1,6 @@
 # © Copyright IBM Corporation 2019, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-######################### Dockerfile for Helm version 3.0.3 #####################################################
+######################### Dockerfile for Helm version 3.1.0 #####################################################
 #
 # This Dockerfile builds a basic installation of Helm.
 #
