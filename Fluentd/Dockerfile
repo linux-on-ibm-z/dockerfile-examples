@@ -30,6 +30,7 @@ FROM s390x/ubuntu:18.04
 
 ARG FLUENTD_VER=1.9.1
 ARG RUBY_VER=2.7.0
+ARG ZLIB_VER=1.2.11
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -50,13 +51,22 @@ RUN apt-get update  \
          flex \
          openssl \
          libssl-dev \
+# Install zlib
+  && cd $SOURCE_DIR \
+  && wget https://zlib.net/zlib-${ZLIB_VER}.tar.gz \
+  && tar -xzvf zlib-${ZLIB_VER}.tar.gz \
+  && cd zlib-${ZLIB_VER} \
+  && ./configure \
+  && make -j4 \
+  && make install \
 # Install Ruby
- && wget http://cache.ruby-lang.org/pub/ruby/2.7/ruby-${RUBY_VER}.tar.gz \
- && tar -xvf ruby-${RUBY_VER}.tar.gz \
- && cd ruby-${RUBY_VER} \
- && ./configure \
- && make \
- && make install \ 
+  && cd $SOURCE_DIR \
+  && wget http://cache.ruby-lang.org/pub/ruby/2.7/ruby-${RUBY_VER}.tar.gz \
+  && tar -xvf ruby-${RUBY_VER}.tar.gz \
+  && cd ruby-${RUBY_VER} \
+  && ./configure \
+  && make \
+  && make install \
 # Install Fluentd
   && gem install fluentd -v ${FLUENTD_VER} \
   && gem list fluentd \
