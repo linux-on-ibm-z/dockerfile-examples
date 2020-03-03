@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################# Dockerfile for R version 3.6.1 ######################
+############################# Dockerfile for R version 3.6.3 ######################
 # This Dockerfile builds a basic installation of R.
 #
 # R is a language and environment for statistical computation and graphics.
@@ -20,27 +20,27 @@
 
 
 # Base image
-FROM s390x/ubuntu:16.04 AS builder
+FROM s390x/ubuntu:18.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
-ENV R_BASE_VERSION 3.6.1
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
+ENV R_BASE_VERSION 3.6.3
 ENV SOURCE_DIR=/tmp/source
 
 WORKDIR $SOURCE_DIR
 
 # Install dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     g++ \
     gcc \
-    gfortran-4.8 \
+    gfortran \
     libcurl4-openssl-dev \
     libx11-dev \
     locales \
     make \
-    openjdk-8-jdk \
+    openjdk-11-jdk \
     r-base \
     ratfor \
     tar \
@@ -57,12 +57,12 @@ RUN wget https://cran.r-project.org/src/base/R-3/R-${R_BASE_VERSION}.tar.gz \
 RUN apt-get remove -y \
     g++ \
     gcc \
-    gfortran-4.8 \
+    gfortran \
     libcurl4-openssl-dev \
     libx11-dev \
     locales \
     make \
-    openjdk-8-jdk \
+    openjdk-11-jdk \
     ratfor \
     wget \
 
@@ -72,8 +72,8 @@ RUN apt-get remove -y \
  && rm -rf /var/lib/apt/lists/* $SOURCE_DIR/R-${R_BASE_VERSION}.tar.gz 
 
 # Multistage build
-FROM s390x/ubuntu:16.04
-
+FROM s390x/ubuntu:18.04
+RUN apt-get update && apt-get install -y libreadline7
 WORKDIR /root
 COPY --from=builder /usr/local/bin/R /usr/local/bin/R
 COPY --from=builder /usr/local/bin/Rscript /usr/local/bin/Rscript
