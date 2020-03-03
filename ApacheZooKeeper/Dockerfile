@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Apache ZooKeeper version 3.5.6 ######################
+################ Dockerfile for Apache ZooKeeper version 3.5.7 ######################
 #
 # This Dockerfile builds a basic installation of Apache ZooKeeper.
 #
@@ -26,23 +26,23 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 
 # Set Environment varibles
 ENV WORKDIR /root
-ENV PATH $PATH:$WORKDIR/apache-zookeeper-3.5.6-bin/bin
+ENV PATH $PATH:$WORKDIR/apache-zookeeper-3.5.7-bin/bin
 
 # Install the build dependencies
 RUN apt-get update && apt-get install -y \
     openjdk-11-jre \
-        tar \
+    tar \
     wget \
 # Install Apache ZooKeeper
  && cd $WORKDIR \
- && wget https://archive.apache.org/dist/zookeeper/zookeeper-3.5.6/apache-zookeeper-3.5.6-bin.tar.gz \
- && tar -xzvf apache-zookeeper-3.5.6-bin.tar.gz \
-# Copy default config file 
- && cd apache-zookeeper-3.5.6-bin \
+ && wget https://archive.apache.org/dist/zookeeper/zookeeper-3.5.7/apache-zookeeper-3.5.7-bin.tar.gz \
+ && tar -xzf apache-zookeeper-3.5.7-bin.tar.gz \
+# Copy default config file
+ && cd apache-zookeeper-3.5.7-bin \
  && cp conf/zoo_sample.cfg conf/zoo.cfg \
 # Clean up of unused packages and source directory.
  && apt autoremove -y \
- && rm ../apache-zookeeper-3.5.6-bin.tar.gz \
+ && rm ../apache-zookeeper-3.5.7-bin.tar.gz \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Expose ports for Apache ZooKeeper
