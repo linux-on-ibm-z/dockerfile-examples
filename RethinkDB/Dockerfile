@@ -42,6 +42,7 @@ RUN apt-get update -y && apt-get install -y \
  && wget https://nodejs.org/dist/v6.11.0/node-v6.11.0-linux-s390x.tar.gz \
  && tar xvf node-v6.11.0-linux-s390x.tar.gz -C /usr \
  && export PATH=/usr/node-v6.11.0-linux-s390x/bin:$PATH  \
+ && export VPYTHON_BYPASS="manually managed python not supported by chrome operations" \
 
 #Clone and build RethinkDB
  && git clone https://github.com/rethinkdb/rethinkdb \
