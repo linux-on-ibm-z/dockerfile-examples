@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019
+# © Copyright IBM Corporation 2017, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################## Dockerfile for Magento version 2.3.3 ###################################
+############################## Dockerfile for Magento version 2.3.4 ###################################
 #
 # Magento is an open-source e-commerce platform written in PHP.
 #
@@ -24,7 +24,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG MAGENTO_VER=2.3.3
+ARG MAGENTO_VER=2.3.4
 ARG MYSQL_PASSWD=temp_pass
 
 # Install dependencies
