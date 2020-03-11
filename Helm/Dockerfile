@@ -1,6 +1,6 @@
 # © Copyright IBM Corporation 2019, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-######################### Dockerfile for Helm version 3.1.0 #####################################################
+######################### Dockerfile for Helm version 3.1.1 #####################################################
 #
 # This Dockerfile builds a basic installation of Helm.
 #
@@ -13,49 +13,22 @@
 # To start Helm use following command:
 # docker run -it --name <container_name> <image_name>
 #########################################################################################################################
-#Base image
-FROM s390x/ubuntu:18.04 as builder
-# The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
-ARG VERSION=3.1.0
-ENV SOURCE_DIR=/tmp/source
-WORKDIR $SOURCE_DIR
-ENV GOPATH=$SOURCE_DIR
-ENV PATH=$PATH:/usr/local/go/bin/:$GOPATH/bin
-#Install dependencies
-RUN apt-get update -y && apt-get install -y make wget bash git socat gcc \
-#Get Helm
-&& wget https://dl.google.com/go/go1.13.7.linux-s390x.tar.gz \
-&& chmod ugo+r go1.13.7.linux-s390x.tar.gz \
-&& tar -C /usr/local -xzf go1.13.7.linux-s390x.tar.gz \
-&& mkdir -p $GOPATH/src/helm.sh \
-&& cd $GOPATH/src/helm.sh \
-&& git clone https://github.com/kubernetes/helm.git \
-&& cd helm \
-&& git checkout v$VERSION \
-&& make \
-&& mkdir -p $GOPATH/bin \
-&& cp bin/helm $GOPATH/bin \
-&& apt-get remove -y \
-        wget \
-        make \
-        git \
-&& apt-get autoremove -y \
-&& apt autoremove -y \
-&& apt-get clean && rm -rf /var/lib/apt/lists/* \
-&& rm -rf /src/helm.sh
 
 #Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
-ARG VERSION=3.1.0
+ARG VERSION=3.1.1
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
-ENV GOPATH=$SOURCE_DIR
-ENV PATH=$PATH:/usr/local/go/bin/:$GOPATH/bin
-COPY --from=builder $GOPATH/bin /usr/local/bin
-EXPOSE 44134
-ENV HELM_HOST=localhost:44134
-CMD ["helm"]
+RUN apt-get update -y && apt-get install -y wget tar \
+#Get Helm
+&& wget https://get.helm.sh/helm-v${VERSION}-linux-s390x.tar.gz \
+&& chmod ugo+r helm-v${VERSION}-linux-s390x.tar.gz \
+&& tar -xzf helm-v${VERSION}-linux-s390x.tar.gz \
+&& mv linux-s390x/helm /usr/bin/helm \
+&& chmod +x /usr/bin/helm \
+&& rm -rf linux-s390x
+ENTRYPOINT ["helm"]
+CMD ["--help"]
 #End of Dockerfile
