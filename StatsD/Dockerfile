@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2019.
+# © Copyright IBM Corporation 2019, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for statsd 0.8.5 ####################
+################## Dockerfile for statsd 0.8.6 ####################
 #
 # This Dockerfile builds a basic installation of statsd.
 #
@@ -25,7 +25,7 @@ FROM s390x/ubuntu:18.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG STATSD_VER=v0.8.5
+ARG STATSD_VER=v0.8.6
 ENV PATH=$PATH:/usr/src/app/node-v10.15.3-linux-s390x/bin
 
 RUN mkdir -p /usr/src/app
