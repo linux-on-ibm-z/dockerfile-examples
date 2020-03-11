@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for etcd 3.4.3 ####################
+################## Dockerfile for etcd 3.4.4 ####################
 #
 # This Dockerfile builds a basic installation of etcd.
 #
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:18.04 as builder
 
-ARG ETCD_VER=v3.4.3
+ARG ETCD_VER=v3.4.4
 
 # Maintainer
 LABEL maintainer="LoZ Open Source Ecosystem(https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -39,10 +39,10 @@ RUN apt-get update && apt-get install -y \
     gcc \
     tar \
     wget \
-# Install GO 1.13.3
- && wget https://dl.google.com/go/go1.13.3.linux-s390x.tar.gz \
- && chmod ugo+r go1.13.3.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.13.3.linux-s390x.tar.gz \
+# Install GO 1.13.8
+ && wget https://dl.google.com/go/go1.13.8.linux-s390x.tar.gz \
+ && chmod ugo+r go1.13.8.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.13.8.linux-s390x.tar.gz \
 # Clone etcd source
  && mkdir -p /src/github.com/coreos \
  && cd /src/github.com/coreos \
