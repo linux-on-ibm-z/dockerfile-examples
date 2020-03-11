@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2019.
+# © Copyright IBM Corporation 2019, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############################### Dockerfile for Apache Ignite 2.7.6 ##################################
@@ -42,7 +42,7 @@ RUN apt-get update &&  apt-get install -y \
  && tar xvf OpenJDK8U-jdk_s390x_linux_openj9_8u222b10_openj9-0.15.1.tar.gz \
 # Install Apache Ignite
  && cd $WORKDIR  \
- && wget http://apachemirror.wuchna.com//ignite/${IGNITE_VER}/apache-ignite-${IGNITE_VER}-bin.zip \
+ && wget https://archive.apache.org/dist/ignite/${IGNITE_VER}/apache-ignite-${IGNITE_VER}-bin.zip \
  && unzip -q apache-ignite-${IGNITE_VER}-bin.zip  \
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
