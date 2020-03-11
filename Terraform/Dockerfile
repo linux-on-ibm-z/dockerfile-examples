@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Terraform - 0.12.20 ########################
+########## Dockerfile for Terraform - 0.12.23 ########################
 #
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -19,12 +19,12 @@
 #####################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04 AS builder
+FROM s390x/ubuntu:18.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG TERRAFORM_VER=0.12.20
+ARG TERRAFORM_VER=0.12.23
 
 # Set environment variables
 ENV SOURCE_DIR=/source
@@ -67,7 +67,7 @@ RUN apt-get update &&  apt-get install -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* $GOPATH/src $GOPATH/pkg $SOURCE_DIR/go1.12.9.linux-s390x.tar.gz
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 WORKDIR /root
 COPY --from=builder /usr/bin/terraform /usr/bin/terraform
