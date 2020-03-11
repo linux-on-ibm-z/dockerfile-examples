@@ -1,69 +1,75 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Antlr version 4.7.2 ################################
+#################### Dockerfile for Antlr4 ################################
 #
-# This Dockerfile builds a basic installation of Antlr.
+# Builds ANTRL and the following supported runtime libraries:
+# Java, Python, Go, NodeJS and C++.
 #
-# To build this image, from the directory containing this Dockerfile
-# (assuming that the file is named Dockerfile):
+# To build this image, from the directory containing this Dockerfile:
 # docker build -t <image_name> .
 #
 # To simply run the resultant image, and provide a bash shell:
 # docker run --name <container_name> -it <image_name> /bin/bash
 #
-# Use below command to use Antlr:
-#  docker run --rm=true --name <container_name> -v <your_grammer_code_folder_absolute_path>:<grammer_code_folder_path_in_container>  -it <image_name>  antlr4 <grammar_file_path_in_container>
-#  For ex. docker run --rm=true --name <container_name> -v /home/grammer_folder:/home/myFolder  -it <image_name>  antlr4  /home/myFolder/<grammer_file_tobe_executed>
-#
-########################################################################################
+###############################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
+# Environment
+ENV SOURCE_ROOT=/tmp
+
 WORKDIR "/tmp"
+COPY antlr4-8.patch .
 
-# Set CLASSPATH
-ENV CLASSPATH /usr/share/java/antlr4-runtime-4.7.2.jar
-ENV JAVA_HOME /opt/ibm/java
-ENV PATH $JAVA_HOME/bin:$PATH
-ENV MAVEN_OPTS "-Xmx1G"
+RUN apt-get update \
+&&  apt-get install -y \
+      tar unzip xz-utils uuid-dev curl wget git make patch \
+      python python3 golang gcc g++ cmake \
+### Install Java ##########################################
+&&  cd $SOURCE_ROOT \
+&&  TARBALL=OpenJDK11U-jdk_s390x_linux_openj9_11.0.6_10_openj9-0.18.1.tar.gz \
+&&  URL="https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download" \
+&&  curl -s -S -L -O "${URL}/jdk-11.0.6%2B10_openj9-0.18.1/${TARBALL}" \
+&&  tar -zxf ${TARBALL} \
+&&  JAVA_HOME=$SOURCE_ROOT/jdk-11.0.6+10 \
+&&  export JAVA_HOME \
+&&  PATH=$JAVA_HOME/bin:$PATH \
+### Install Node ##########################################
+&&  TARBALL=node-v12.14.1-linux-s390x.tar.xz \
+&&  curl -s -S -L -O "https://nodejs.org/dist/v12.14.1/${TARBALL}" \
+&&  tar xJf ${TARBALL} \
+&&  PATH=$SOURCE_ROOT/node-v12.14.1-linux-s390x/bin:$PATH \
+### Install Antlr #########################################
+&&  ZIP=antlr4-4.8.zip \
+&&  URL="https://github.com/antlr/antlr4/archive/4.8.zip" \
+&&  curl -s -S -L -o ${ZIP} "${URL}" \
+&&  unzip ${ZIP} \
+### Install Maven #########################################
+&&  TARBALL=apache-maven-3.3.9-bin.tar.gz \
+&&  URL="https://archive.apache.org/dist/maven/maven-3/3.3.9/binaries" \
+&&  curl -s -S -L -O "${URL}/${TARBALL}" \
+&&  tar xzf ${TARBALL} \
+&&  PATH=$SOURCE_ROOT/apache-maven-3.3.9/bin:$PATH \
+### Build Antrl ###########################################
+&&  MAVEN_OPTS="-Xmx1G" \
+&&  CC=gcc \
+&&  CXX=g++ \
+&&  export MAVEN_OPTS CC CXX \
+&&  cd $SOURCE_ROOT/antlr4-4.8 \
+&&  patch -p1 < /tmp/antlr4-8.patch \
+&&  mvn install -DskipTests=true \
+&&  cd runtime/Cpp \
+&&  mkdir build && mkdir run \
+&&  cd build \
+&&  cmake -DWITH_LIBCXX=Off -DCMAKE_BUILD_TYPE=release .. \
+&&  make -j 8 \
+&&  DESTDIR=$SOURCE_ROOT/antlr4-4.8/runtime/Cpp/run make install 
 
-# Install antlr4
-RUN apt-get update && apt-get install -y \
-		tar \
-		maven \
-		wget \
-		git \
-		ant \
-		patch \
- && ln -s `which nodejs` /usr/local/bin/node \
- && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.41/linux/s390x/ibm-java-s390x-sdk-8.0-5.41.bin \
- && wget https://raw.githubusercontent.com/zos-spark/scala-workbench/master/files/installer.properties.java \
- && tail -n +3 installer.properties.java | tee installer.properties \
- && chmod +x ibm-java-s390x-sdk-8.0-5.41.bin \
- && ./ibm-java-s390x-sdk-8.0-5.41.bin -r installer.properties \
- && git clone git://github.com/antlr/antlr4.git \
- && cd antlr4 && git checkout 4.7.2 \
- && sed -i 's/\[9.3.24.v20180605,)/9.4.19.v20190610/' runtime-testsuite/pom.xml \
- && mvn install -DskipTests \
- && cp tool/target/antlr4-4.7.2.jar /usr/share/java/ \
- && cp tool/target/antlr4-4.7.2-sources.jar /usr/share/java/ \
- && cp tool/target/antlr4-4.7.2-complete.jar /usr/share/java/ \
- && cp antlr4-maven-plugin/target/antlr4-maven-plugin-4.7.2.jar /usr/share/java/ \
- && cp runtime/Java/target/antlr4-runtime-4.7.2.jar /usr/share/java/ \
- && apt-get remove -y \
-        git \
-        wget \
-        maven \
-		ant \
- && apt-get autoremove -y \
- && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /root/.m2 && rm -rf /tmp/installer.properties && rm -rf /tmp/ibm-java-s390x-sdk-8.0-5.30.bin  \
- && rm -rf /tmp/antlr4
 
 # This dockerfile does not have a CMD statement as the image is intended to be
 # used as a base for building an application. If desired it may also be run as
