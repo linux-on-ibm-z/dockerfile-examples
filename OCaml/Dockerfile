@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##########  Dockerfile for OCaml 4.09.0 #####################
+##########  Dockerfile for OCaml 4.10.0 #####################
 #
 # OCaml is an industrial strength programming language supporting functional, 
 # imperative and object-oriented styles.
@@ -28,12 +28,12 @@
 ################################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG OCAML_VER=4.09.0
+ARG OCAML_VER=4.10.0
 
 WORKDIR "/root"
 
@@ -44,7 +44,7 @@ RUN apt-get update && apt-get install -y \
 	make \    
 # Download the OCaml source tarball from OCaml site
  && git clone -b $OCAML_VER git://github.com/ocaml/ocaml.git \
- &&	cd ocaml \    
+ && cd ocaml \    
 # Configure the system
  && ./configure \    
 # Build the OCaml bytecode compiler
@@ -54,7 +54,7 @@ RUN apt-get update && apt-get install -y \
  && make opt.opt \    
 # Install the OCaml system:
  && umask 022 \
- &&	make install \    
+ && make install \    
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
     gcc \
