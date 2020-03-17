@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for CouchDB version 2.3.1 ############
+############### Dockerfile for CouchDB version 3.0.0 ############
 #
 # CouchDB, is open source database software.
 #
@@ -18,9 +18,9 @@
 ##################################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04 AS builder
+FROM s390x/ubuntu:18.04 
 
-ARG COUCHDB_VER=2.3.1
+ARG COUCHDB_VER=3.0.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -29,32 +29,60 @@ ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 
 ENV PATH=$PATH:/usr/share/couchdb/dev  LD_LIBRARY_PATH=/usr/lib
-
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CouchDB/${COUCHDB_VER}/patch"
 # Install following build dependencies
-RUN apt-get update && apt-get install -y build-essential \
-	pkg-config \
-	erlang erlang-dev erlang-reltool \
-	gcc g++ \
-	python3 python3-pip python3-venv \
-	curl \
-	git \
-	patch \
-	wget \
-	tar \
-	make \
-	autoconf automake autoconf \
-	libmozjs185-dev libicu-dev libcurl4-openssl-dev \
-
+RUN apt-get update \
+ && apt-get install -y build-essential pkg-config ncurses-base g++-5 gcc-5 python python3 python3-pip python3-venv curl git patch wget tar make zip autoconf2.13 automake libicu-dev libcurl4-openssl-dev libncurses5-dev locales libncurses-dev libssl-dev unixodbc-dev libwxgtk3.0-dev openjdk-8-jdk \
+ && rm -rf /usr/bin/gcc /usr/bin/g++ /usr/bin/cc \
+ && ln -s /usr/bin/gcc-5 /usr/bin/gcc \
+ && ln -s /usr/bin/g++-5 /usr/bin/g++ \
+ && ln -s /usr/bin/gcc /usr/bin/cc \
+# Download and Install Erlang
+ && cd $SOURCE_DIR \
+ && wget http://www.erlang.org/download/otp_src_22.2.tar.gz \
+ && tar zxf otp_src_22.2.tar.gz && rm otp_src_22.2.tar.gz \
+ && cd otp_src_22.2 \
+ && export ERL_TOP=$SOURCE_DIR/otp_src_22.2 \
+ && ./configure --prefix=/usr \
+ && make \
+ && make install \
+# Download and Install Elixir
+ && git clone https://github.com/elixir-lang/elixir.git \
+ && cd elixir \
+ && git checkout v1.10.2 \
+ && export LANG=en_US.UTF-8 \ 
+ && locale-gen en_US.UTF-8 \
+ && make \
+ && make install \
+# Download and Install Spider Monkey
+ && cd $SOURCE_DIR \
+ && wget http://ftp.mozilla.org/pub/mozilla.org/js/js185-1.0.0.tar.gz \
+ && tar zxf js185-1.0.0.tar.gz  \
+ && cd js-1.8.5 \
+ && cd $SOURCE_DIR \
+ && curl -o jsval.h.diff $PATCH_URL/jsval.h.diff \
+ && patch "$SOURCE_DIR/js-1.8.5/js/src/jsval.h" jsval.h.diff \
+ && curl -o jsvalue.h.diff $PATCH_URL/jsvalue.h.diff \
+ && patch "$SOURCE_DIR/js-1.8.5/js/src/jsvalue.h" jsvalue.h.diff \
+ && curl -o Makefile.in.diff $PATCH_URL/Makefile.in.diff \
+ && patch "$SOURCE_DIR/js-1.8.5/js/src/Makefile.in" Makefile.in.diff \
+ && cd "$SOURCE_DIR/js-1.8.5/js/src"    \
+ && autoconf2.13 \
+ && mkdir $SOURCE_DIR/js-1.8.5/js/src/build_OPT.OBJ \
+ && cd $SOURCE_DIR/js-1.8.5/js/src/build_OPT.OBJ \
+ && ../configure --prefix=/usr \
+ && make \
+ && make install \
 # Download and install CouchDB
+ && cd $SOURCE_DIR \
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
  && git checkout ${COUCHDB_VER} \
  && ./configure -c --disable-docs --disable-fauxton \
  && make  \
  && cp -r $SOURCE_DIR/couchdb /usr/share/couchdb \
-
 # Tidy and clean up
- && rm -rf $SOURCE_DIR \
+ && rm -rf $SOURCE_DIR/ \
  && apt-get remove -y \
     automake \
     autoconf \
@@ -66,24 +94,25 @@ RUN apt-get update && apt-get install -y build-essential \
     make \
     pkg-config \
     wget \
- && apt-get autoremove -y && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Base image
-FROM s390x/ubuntu:16.04
-
-# The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
-
-ENV SOURCE_DIR=/tmp/source
-WORKDIR $SOURCE_DIR
-
-ENV PATH=$PATH:/usr/share/couchdb/dev  LD_LIBRARY_PATH=/usr/lib
-
-COPY --from=builder /usr/share/couchdb /usr/share/couchdb
-
-RUN apt-get update && apt-get install -y \
-        python3 erlang \
+    patch \
+    libicu-dev \
+    libcurl4-openssl-dev \
+    locales \
+    libncurses-dev \
+    libssl-dev \
+    unixodbc-dev \
+    libwxgtk3.0-dev \
+    libbz2-dev \
+    libdb-dev \
+    libffi-dev \
+    libgdbm-dev \
+    liblzma-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    uuid-dev \
+    xz-utils \
+    zlib1g-dev \
  && apt-get autoremove -y && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
