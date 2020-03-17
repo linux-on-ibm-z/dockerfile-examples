@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2019, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-
-############################### Dockerfile for Apache Ignite 2.7.6 ##################################
+​
+############################### Dockerfile for Apache Ignite 2.8.0 ################################
 #
 # This Dockerfile builds a basic installation of Apache Ignite.
 #
@@ -18,16 +18,16 @@
 ##############################################################################################################
 
 # Base Image
-FROM  s390x/ubuntu:16.04
+FROM  s390x/ubuntu:18.04
 
-ARG IGNITE_VER=2.7.6
+ARG IGNITE_VER=2.8.0
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 # Set Environment Variables
 ENV WORKDIR /root
-ENV JAVA_HOME=$WORKDIR/jdk8u222-b10
+ENV JAVA_HOME=$WORKDIR/jdk-11.0.6+10-jre
 ENV IGNITE_HOME=$WORKDIR/apache-ignite-${IGNITE_VER}-bin
 ENV PATH=$JAVA_HOME/bin:$WORKDIR/apache-ignite-${IGNITE_VER}-bin/bin:$PATH
 
@@ -38,11 +38,11 @@ RUN apt-get update &&  apt-get install -y \
         unzip \
 # Download AdoptOpenJDK 8
  && cd $WORKDIR  \
- && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10_openj9-0.15.1/OpenJDK8U-jdk_s390x_linux_openj9_8u222b10_openj9-0.15.1.tar.gz \
- && tar xvf OpenJDK8U-jdk_s390x_linux_openj9_8u222b10_openj9-0.15.1.tar.gz \
+ && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.6%2B10/OpenJDK11U-jre_s390x_linux_hotspot_11.0.6_10.tar.gz \
+ && tar xvf OpenJDK11U-jre_s390x_linux_hotspot_11.0.6_10.tar.gz \
 # Install Apache Ignite
  && cd $WORKDIR  \
- && wget https://archive.apache.org/dist/ignite/${IGNITE_VER}/apache-ignite-${IGNITE_VER}-bin.zip \
+ && wget https://apachemirror.wuchna.com//ignite/${IGNITE_VER}/apache-ignite-${IGNITE_VER}-bin.zip \
  && unzip -q apache-ignite-${IGNITE_VER}-bin.zip  \
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
@@ -50,7 +50,7 @@ RUN apt-get update &&  apt-get install -y \
     unzip \
  && apt-get autoremove -y \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*  $WORKDIR/apache-ignite-${IGNITE_VER}-bin.zip $WORKDIR/OpenJDK8U-jdk_s390x_linux_openj9_8u222b10_openj9-0.15.1.tar.gz
+ && apt-get clean && rm -rf /var/lib/apt/lists/*  $WORKDIR/apache-ignite-${IGNITE_VER}-bin.zip $WORKDIR/OpenJDK11U-jre_s390x_linux_hotspot_11.0.6_10.tar.gz
 
 # Exposing the ports.
 EXPOSE 11211 47100 47500 49112
