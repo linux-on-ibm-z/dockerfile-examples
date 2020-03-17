@@ -1,29 +1,29 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########################################## Dockerfile for Apache Mesos 1.8.1 ###################################################
+########################################## Dockerfile for Apache Mesos 1.9.0 ###################################################
 #
-# This Dockerfile builds and install Apache Mesos 1.8.1 from source using Ubuntu 16:04 on s390x.
+# This Dockerfile builds and install Apache Mesos 1.9.0 from source using Ubuntu 16:04 on s390x.
 #
 # Apache Mesos is a cluster manager that provides efficient resource isolation and sharing across distributed applications, or frameworks.
 # It can run Hadoop, Jenkins, Spark, Aurora, and other frameworks on a dynamically shared pool of nodes.
 #
 # To build this image, run docker build from the directory containing this Dockerfile:
 # 
-#       docker build -t mesos:1.8.1 .
+#       docker build -t mesos:1.9.0 .
 #
 # To simply run the docker image and provide a bash shell:
 #
-#       docker run --name some-mesos -it mesos:1.8.1 /bin/bash
+#       docker run --name some-mesos -it mesos:1.9.0 /bin/bash
 #
 # Simple example of running Mesos on your local machine:
 # Starting Mesos master:
 #
-#       docker run --name mesos-master -p 5050:5050 -ti mesos:1.8.1 mesos-master --ip=0.0.0.0 --work_dir=/var/lib/mesos --no-hostname_lookup
+#       docker run --name mesos-master -p 5050:5050 -ti mesos:1.9.0 mesos-master --ip=0.0.0.0 --work_dir=/var/lib/mesos --no-hostname_lookup
 #
 # Starting Mesos agent:
 #
-#       docker run --name mesos-agent -ti mesos:1.8.1 mesos-agent --master=<mesos_master-ip>:5050 --work_dir=/var/lib/mesos --launcher=posix
+#       docker run --name mesos-agent -ti mesos:1.9.0 mesos-agent --master=<mesos_master-ip>:5050 --work_dir=/var/lib/mesos --launcher=posix
 #
 # Official website: http://mesos.apache.org/
 #
@@ -33,8 +33,8 @@ FROM s390x/ubuntu:16.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG MESOS_VERSION=1.8.1
-ARG REPO_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheMesos/1.8.1/patch"
+ARG MESOS_VERSION=1.9.0
+ARG REPO_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheMesos/1.9.0/patch"
 
 ENV SOURCE_DIR='/tmp'
 ENV JAVA_HOME=/opt/java-1.8.0-ibm
