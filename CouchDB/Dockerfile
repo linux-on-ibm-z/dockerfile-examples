@@ -18,8 +18,7 @@
 ##################################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04 
-
+FROM s390x/ubuntu:18.04 AS builder
 ARG COUCHDB_VER=3.0.0
 
 # The author
@@ -50,7 +49,7 @@ RUN apt-get update \
  && git clone https://github.com/elixir-lang/elixir.git \
  && cd elixir \
  && git checkout v1.10.2 \
- && export LANG=en_US.UTF-8 \ 
+ && export LANG=en_US.UTF-8 \
  && locale-gen en_US.UTF-8 \
  && make \
  && make install \
@@ -80,42 +79,28 @@ RUN apt-get update \
  && git checkout ${COUCHDB_VER} \
  && ./configure -c --disable-docs --disable-fauxton \
  && make  \
- && cp -r $SOURCE_DIR/couchdb /usr/share/couchdb \
-# Tidy and clean up
- && rm -rf $SOURCE_DIR/ \
- && apt-get remove -y \
-    automake \
-    autoconf \
-    build-essential \
-    curl \
-    gcc \
-    git \
-    g++ \
-    make \
-    pkg-config \
-    wget \
-    patch \
-    libicu-dev \
-    libcurl4-openssl-dev \
-    locales \
-    libncurses-dev \
-    libssl-dev \
-    unixodbc-dev \
-    libwxgtk3.0-dev \
-    libbz2-dev \
-    libdb-dev \
-    libffi-dev \
-    libgdbm-dev \
-    liblzma-dev \
-    libreadline-dev \
-    libsqlite3-dev \
-    libssl-dev \
-    uuid-dev \
-    xz-utils \
-    zlib1g-dev \
- && apt-get autoremove -y && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
+ && cp -r $SOURCE_DIR/couchdb /usr/share/couchdb
 
+
+FROM s390x/ubuntu:18.04
+
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+
+ENV SOURCE_DIR=/tmp/source
+WORKDIR $SOURCE_DIR
+ENV PATH=$PATH:/usr/share/couchdb/dev:/usr/bin/:/usr/local/bin/:/usr/lib/  LD_LIBRARY_PATH=/usr/lib
+
+COPY --from=builder /usr/share/couchdb /usr/share/couchdb
+COPY --from=builder /usr/lib/erlang /usr/lib/erlang
+COPY --from=builder /usr/bin/erlc /usr/bin/erlc
+COPY --from=builder /usr/bin/erl /usr/bin/erl
+COPY --from=builder /usr/local/bin/elixir /usr/local/bin/elixir
+COPY --from=builder /usr/lib/libmozjs185* /usr/lib/
+RUN apt-get update && apt-get install -y \
+        python3 python3-pip python3-venv \
+&& apt-get autoremove -y && apt autoremove -y \
+&& apt-get clean && rm -rf /var/lib/apt/lists/*
 # Expose ports
 EXPOSE 15984 25984 35984
 
