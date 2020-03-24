@@ -42,7 +42,7 @@ RUN apt-get update &&  apt-get install -y \
  && tar xvf OpenJDK11U-jre_s390x_linux_hotspot_11.0.6_10.tar.gz \
 # Install Apache Ignite
  && cd $WORKDIR  \
- && wget https://apachemirror.wuchna.com//ignite/${IGNITE_VER}/apache-ignite-${IGNITE_VER}-bin.zip \
+ && wget http://apachemirror.wuchna.com//ignite/${IGNITE_VER}/apache-ignite-${IGNITE_VER}-bin.zip \
  && unzip -q apache-ignite-${IGNITE_VER}-bin.zip  \
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
