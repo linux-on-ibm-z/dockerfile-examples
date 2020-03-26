@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Antlr4 ################################
+#################### Dockerfile for Antlr4-4.8 ################################
 #
 # Builds ANTRL and the following supported runtime libraries:
 # Java, Python, Go, NodeJS and C++.
@@ -15,7 +15,7 @@
 ###############################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:18.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -23,7 +23,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 # Environment
 ENV SOURCE_ROOT=/tmp
 
-WORKDIR "/tmp"
+WORKDIR /tmp
 COPY antlr4-8.patch .
 
 RUN apt-get update \
@@ -68,8 +68,22 @@ RUN apt-get update \
 &&  cd build \
 &&  cmake -DWITH_LIBCXX=Off -DCMAKE_BUILD_TYPE=release .. \
 &&  make -j 8 \
-&&  DESTDIR=$SOURCE_ROOT/antlr4-4.8/runtime/Cpp/run make install 
-
+&&  DESTDIR=$SOURCE_ROOT/antlr4-4.8/runtime/Cpp/run make install \
+### Tidy and clean up ###########################################
+&& rm -rf $SOURCE_DIR/OpenJDK11U-jdk_s390x_linux_openj9_11.0.6_10_openj9-0.18.1.tar.gz  \
+&& rm -rf $SOURCE_DIR/node-v12.14.1-linux-s390x.tar.xz  \
+&& rm -rf $SOURCE_DIR/apache-maven-3.3.9-bin.tar.gz  \
+&& rm -rf $SOURCE_DIR/antlr4-4.8.zip 
+# Multistage build
+FROM s390x/ubuntu:18.04
+# Environment
+ENV SOURCE_ROOT=/tmp
+WORKDIR /tmp
+COPY --from=builder $SOURCE_ROOT/antlr4-4.8 $SOURCE_ROOT/antlr4-4.8
+COPY --from=builder /root/.m2/repository/org/antlr/ /root/.m2/repository/org/antlr/
+COPY --from=builder $SOURCE_ROOT/jdk-11.0.6+10 $SOURCE_ROOT/jdk-11.0.6+10
+COPY --from=builder $SOURCE_ROOT/node-v12.14.1-linux-s390x $SOURCE_ROOT/node-v12.14.1-linux-s390x
+COPY --from=builder $SOURCE_ROOT/apache-maven-3.3.9 $SOURCE_ROOT/apache-maven-3.3.9
 
 # This dockerfile does not have a CMD statement as the image is intended to be
 # used as a base for building an application. If desired it may also be run as
