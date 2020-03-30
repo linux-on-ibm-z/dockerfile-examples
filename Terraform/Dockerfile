@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Terraform - 0.12.23 ########################
+########## Dockerfile for Terraform - 0.12.24 ########################
 #
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -24,14 +24,14 @@ FROM s390x/ubuntu:18.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG TERRAFORM_VER=0.12.23
+ARG TERRAFORM_VER=0.12.24
 
 # Set environment variables
 ENV SOURCE_DIR=/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH $SOURCE_DIR
 ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
-  
+
 # Installing dependencies for Terraform
 RUN apt-get update &&  apt-get install -y \
     gcc \
@@ -42,9 +42,9 @@ RUN apt-get update &&  apt-get install -y \
     zip \
 # Install Go
  && cd $SOURCE_DIR \
- && wget https://dl.google.com/go/go1.12.9.linux-s390x.tar.gz \
- && chmod ugo+r go1.12.9.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.12.9.linux-s390x.tar.gz \
+ && wget https://dl.google.com/go/go1.14.linux-s390x.tar.gz \
+ && chmod ugo+r go1.14.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.14.linux-s390x.tar.gz \
 # Clone Terraform Source Code
  && cd $SOURCE_DIR \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
@@ -71,8 +71,6 @@ FROM s390x/ubuntu:18.04
 
 WORKDIR /root
 COPY --from=builder /usr/bin/terraform /usr/bin/terraform
-# Port for cAdvisor
-EXPOSE 8080
 
 # Command to execute
 ENTRYPOINT ["/usr/bin/terraform"]
