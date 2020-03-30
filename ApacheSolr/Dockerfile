@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Apache Solr version 8.4.1 #########################
+############### Dockerfile for Apache Solr version 8.5.0 #########################
 #
 # To build Apache Solr image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -14,7 +14,7 @@
 #
 ####################################################################################
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
@@ -23,7 +23,7 @@ ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV JAVA_HOME=/opt/jdk-11.0.6+10 PATH=$JAVA_HOME/bin:$PATH
 
-ARG SOLR_VER=8.4.1
+ARG SOLR_VER=8.5.0
 
 # Install dependencies
 RUN apt-get update &&   apt-get install -y \
@@ -35,7 +35,7 @@ RUN apt-get update &&   apt-get install -y \
  && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.6%2B10_openj9-0.18.1/OpenJDK11U-jdk_s390x_linux_openj9_11.0.6_10_openj9-0.18.1.tar.gz \
  && tar -xzf OpenJDK11U-jdk_s390x_linux_openj9_11.0.6_10_openj9-0.18.1.tar.gz -C /opt \
 # Download Solr and build it
- && wget https://archive.apache.org/dist/lucene/solr/$SOLR_VER/solr-$SOLR_VER.tgz \
+ && wget http://apachemirror.wuchna.com/lucene/solr/$SOLR_VER/solr-$SOLR_VER.tgz \
  && tar zxvf solr-$SOLR_VER.tgz  \
  && cd  $SOURCE_DIR/solr-$SOLR_VER/bin  \
  && chmod a+x solr  \
