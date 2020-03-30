@@ -2,7 +2,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 
-########## Dockerfile for Drupal version 8.8.2 #########
+########## Dockerfile for Drupal version 8.8.4 #########
 #
 # This Dockerfile builds a basic installation of Drupal.
 #
@@ -27,7 +27,9 @@
 FROM s390x/ubuntu:18.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+
+ARG DRUPAL_VERSION=8.8.4
 
 ENV SOURCE_DIR=/tmp/source DEBIAN_FRONTEND=noninteractive
 
@@ -41,6 +43,7 @@ RUN	apt-get update && apt-get -y install \
 		php7.2-xml \
 		php7.2-gd \
 		php7.2-ldap \
+		php7.2-curl \
 		php-mysql \
 		php-bcmath \
 		php-mbstring \
@@ -65,12 +68,12 @@ RUN	apt-get update && apt-get -y install \
 # Download and install Drupal
 	&&	mkdir -p $SOURCE_DIR \
 	&&	cd $SOURCE_DIR \
-	&&	wget https://ftp.drupal.org/files/projects/drupal-8.8.2.tar.gz \
-	&&	tar -xvf drupal-8.8.2.tar.gz \
+	&&	wget https://ftp.drupal.org/files/projects/drupal-${DRUPAL_VERSION}.tar.gz \
+	&&	tar -xvf drupal-${DRUPAL_VERSION}.tar.gz \
 	&&	mkdir -p /var/www/html/Drupal \
-	&&	mv drupal-8.8.2/* drupal-8.8.2/.htaccess drupal-8.8.2/.csslintrc \
-		drupal-8.8.2/.editorconfig drupal-8.8.2/.eslintignore drupal-8.8.2/.eslintrc.json \
-		drupal-8.8.2/.gitattributes /var/www/html/Drupal \
+	&&	mv drupal-${DRUPAL_VERSION}/* drupal-${DRUPAL_VERSION}/.htaccess drupal-${DRUPAL_VERSION}/.csslintrc \
+		drupal-${DRUPAL_VERSION}/.editorconfig drupal-${DRUPAL_VERSION}/.eslintignore drupal-${DRUPAL_VERSION}/.eslintrc.json \
+		drupal-${DRUPAL_VERSION}/.gitattributes /var/www/html/Drupal \
 	&&	cd /var/www/html/Drupal \
 	&& 	composer install \
 	
