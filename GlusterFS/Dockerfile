@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for GlusterFS version 7.0 ##########################################
+##################################### Dockerfile for GlusterFS version 7.2 ##########################################
 #
 # This Dockerfile builds a basic installation of GlusterFS.
 #
@@ -17,7 +17,7 @@
 # Base Image
 FROM  s390x/ubuntu:18.04
 
-ARG GLUSTERFS_VER=7.0
+ARG GLUSTERFS_VER=7.2
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
