@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 6.5.2 ############################################
+############################ Dockerfile for Grafana 6.7.1 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -20,13 +20,13 @@
 # Base Image
 FROM s390x/ubuntu:18.04 as builder
 
-ARG GRAFANA_VER=6.5.2
+ARG GRAFANA_VER=6.7.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV QT_QPA_PLATFORM=offscreen GOPATH=/opt
-ENV PATH=$PATH:/usr/local/node-v10.16.3-linux-s390x/bin:/usr/local/go/bin:/usr/share/grafana/bin/linux-s390x
+ENV PATH=$PATH:/usr/local/node-v12.9.1-linux-s390x/bin:/usr/local/go/bin:/usr/share/grafana/bin/linux-s390x
 
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
@@ -40,14 +40,14 @@ RUN apt-get update -y && apt-get install -y \
     unzip \
 # Install go
  && cd $GOPATH \
- && wget https://storage.googleapis.com/golang/go1.13.5.linux-s390x.tar.gz \
- && chmod ugo+r go1.13.5.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.13.5.linux-s390x.tar.gz \
+ && wget https://storage.googleapis.com/golang/go1.14.linux-s390x.tar.gz \
+ && chmod ugo+r go1.14.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.14.linux-s390x.tar.gz \
 # Install Nodejs
  && cd $GOPATH \
- && wget https://nodejs.org/dist/v10.16.3/node-v10.16.3-linux-s390x.tar.xz \
- && chmod ugo+r node-v10.16.3-linux-s390x.tar.xz \
- && tar -C /usr/local -xf node-v10.16.3-linux-s390x.tar.xz \
+ && wget https://nodejs.org/dist/v12.9.1/node-v12.9.1-linux-s390x.tar.xz \
+ && chmod ugo+r node-v12.9.1-linux-s390x.tar.xz \
+ && tar -C /usr/local -xf node-v12.9.1-linux-s390x.tar.xz \
 # Get the Grafana Soure code and build Grafana backend
  && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
  && cd $GOPATH/src/github.com/grafana/grafana && git checkout v${GRAFANA_VER} \
