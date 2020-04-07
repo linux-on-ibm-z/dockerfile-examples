@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-server version 4.4.5 #########
+########## Dockerfile for Zabbix-server version 4.4.7 #########
 #
 # This Dockerfile builds a basic installation of Zabbix-server.
 #
@@ -22,7 +22,7 @@
 # Base Image
 FROM s390x/ubuntu:16.04 AS builder
 
-ARG ZBX_SERVER_VER=4.4.5
+ARG ZBX_SERVER_VER=4.4.7
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -37,6 +37,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
         && apt-get -y install \
                 ceph \
                 gcc \
+		pkg-config \
                 libcurl3 \
                 libcurl4-openssl-dev \
                 libmysqlclient-dev \
@@ -64,7 +65,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
 # Base Image
 FROM s390x/ubuntu:16.04
 
-ARG ZBX_SERVER_VER=4.4.5
+ARG ZBX_SERVER_VER=4.4.7
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -121,8 +122,8 @@ RUN     apt-get update && apt-get install -y mysql-server \
         &&      chown -R zabbix:zabbix conf \
 # Create database and grant privileges to zabbix user
         &&      service mysql start  \
-        &&      /usr/bin/mysql -e "create database zabbix" \
         &&      /usr/bin/mysql -e "create user 'zabbix'@'localhost'" \
+        &&      /usr/bin/mysql -e "create database zabbix character set utf8 collate utf8_bin" \
         &&      /usr/bin/mysql -e "grant all privileges on zabbix.* to 'zabbix'@'localhost'" \
         &&      cd /usr/share/doc/zabbix-server-mysql \
         &&      mysql -uzabbix zabbix < create.sql \
