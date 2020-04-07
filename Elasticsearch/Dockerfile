@@ -33,7 +33,7 @@ ENV LANG="en_US.UTF-8"
 ENV SOURCE_DIR="/tmp/"
 ENV JAVA_HOME=/usr/share/jdk-12.0.2+10
 ENV PATH=$JAVA_HOME/bin:$PATH
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch"
 WORKDIR $SOURCE_DIR
 
 # Install Dependencies
