@@ -29,7 +29,7 @@
 #
 #########################################################################################################################
 
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:16.04 AS builder
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
@@ -67,7 +67,8 @@ RUN apt-get update && apt-get install -y \
     python-six \
     tar \
     wget \
-    zlib1g-dev
+    zlib1g-dev \
+    checkinstall
 
 # Download and install IBM JDK 8
 RUN cd $SOURCE_DIR \
@@ -79,7 +80,6 @@ RUN cd $SOURCE_DIR \
 RUN cd $SOURCE_DIR \
     && git clone -b$MESOS_VERSION https://github.com/apache/mesos \
     && cd mesos \
-
 # Bundling gRPC-1.11.0
     && cd 3rdparty \
     && git clone -b v1.11.0 https://github.com/grpc/grpc.git grpc-1.11.0 \
@@ -88,40 +88,59 @@ RUN cd $SOURCE_DIR \
     && cd .. \
     && tar zcf grpc-1.11.0.tar.gz --exclude .git grpc-1.11.0 \
     && rm -rf grpc-1.11.0 \
-
 # Add patch to update gRPC version
     && sed -i -e 's/1.10.0/1.11.0/g' versions.am \
     && sed -i -e 's/1.10.0/1.11.0/g' ../src/python/native_common/ext_modules.py.in \
-
 # Add patch for protobuf
     && cd $SOURCE_DIR/mesos \
     && curl -o "protobuf-3.5.0.patch" $REPO_URL/protobuf-3.5.0.patch \
     && cat protobuf-3.5.0.patch >> 3rdparty/protobuf-3.5.0.patch \
     && rm protobuf-3.5.0.patch \
-
+# build
     && ./bootstrap \
     && mkdir build \
     && cd build \
     && ../configure \
     && make \
-    && make install
+    && checkinstall --pkgversion=1.9.0 -y
 
-# Clean up the unwanted packages and clear the source directory
-RUN apt-get remove -y \
-    autoconf \
-    build-essential \
-    bzip2 \
-    git \
-    libtool \
-    maven \
+FROM s390x/ubuntu:16.04
+
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+
+ENV SOURCE_DIR='/tmp'
+ENV JAVA_HOME=/opt/java-1.8.0-ibm
+ENV JVM_DIR=$JAVA_HOME/jre/lib/s390x/default
+ENV JAVA_TEST_LDFLAGS="-L$JVM_DIR -R$JVM_DIR -Wl,-ljvm -ldl"
+ENV JAVA_JVM_LIBRARY=$JAVA_HOME/jre/lib/s390x/default/libjvm.so
+ENV PATH=$JAVA_HOME/bin:$PATH
+ENV MESOS_SYSTEMD_ENABLE_SUPPORT=false
+
+WORKDIR $SOURCE_DIR
+
+COPY --from=builder /tmp/mesos/build/build_1.9.0-1_s390x.deb ./
+COPY --from=builder /tmp/mesos/build/src/python/dist ./
+COPY --from=builder /tmp/ibm-java-s390x-sdk-8.0-5.41.bin ./
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
     python \
-    python-dev \
-    python-six \
-    wget \
-    && apt-get autoremove -y \
-    && apt autoremove -y \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/*
+    python-pip \
+    libapr1 \
+    libcurl3-nss \
+    libsasl2-2 \
+    libssl1.0.0 \
+    libsvn1 \
+    zlib1g \
+# Download and install IBM JDK 8
+    && echo -en 'INSTALLER_UI=silent\nUSER_INSTALL_DIR=/opt/java-1.8.0-ibm\nLICENSE_ACCEPTED=TRUE' > installer.properties \
+    && bash ibm-java-s390x-sdk-8.0-5.41.bin -i silent -f installer.properties \
+# Install mesos and python packages
+    && apt install ./build_1.9.0-1_s390x.deb \
+    && pip install dist/mesos.*whl \
+    && ldconfig \
+# Remove temporary files
+    && rm -rf /tmp/*
 
 # Port for Apache Mesos
 EXPOSE 5050
