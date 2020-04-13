@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 7.5.1 #####################################################
+############################ Dockerfile for Logstash version 7.6.1 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -19,7 +19,7 @@
 # Base image
 FROM s390x/ubuntu:18.04
 
-ARG LOGSTASH_VER=7.5.1
+ARG LOGSTASH_VER=7.6.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -44,18 +44,18 @@ RUN apt-get update && apt-get install -y \
  && tar -xvf OpenJDK8U-jdk_s390x_linux_hotspot_8u222b10.tar.gz \
 # Download and Install Logstash
  && cd /opt \
- && wget https://artifacts.elastic.co/downloads/logstash/logstash-oss-${LOGSTASH_VER}.tar.gz \
+ && wget https://artifacts.elastic.co/downloads/logstash/logstash-${LOGSTASH_VER}.tar.gz \
  && mkdir /usr/share/logstash \
- && tar -xzf logstash-oss-${LOGSTASH_VER}.tar.gz  -C /usr/share/logstash --strip-components 1 \
+ && tar -xzf logstash-${LOGSTASH_VER}.tar.gz  -C /usr/share/logstash --strip-components 1 \
 # Copy types.conf to platform.conf, re-create and copy the jar
  && cd /usr/share/logstash/logstash-core/lib/jars \
- && unzip jruby-complete-9.2.8.0.jar -d jruby-complete-9.2.8.0 \
- && cd jruby-complete-9.2.8.0/META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/s390x-linux \
+ && unzip jruby-complete-9.2.9.0.jar -d jruby-complete-9.2.9.0 \
+ && cd jruby-complete-9.2.9.0/META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/s390x-linux \
  && cp -n types.conf platform.conf \
- && cd /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.8.0 \
- && zip -r ../jruby-complete-9.2.8.0.jar * \
+ && cd /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.9.0 \
+ && zip -r ../jruby-complete-9.2.9.0.jar * \
  && cd  /usr/share/logstash/ \
- && rm -rf /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.8.0 \
+ && rm -rf /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.9.0 \
 # Cleanup Cache data , unused packages and source files
  && apt-get remove -y \
     ant \
@@ -66,8 +66,8 @@ RUN apt-get update && apt-get install -y \
     zip \
  && apt-get autoremove -y && apt-get clean \
  && rm /opt/OpenJDK8U-jdk_s390x_linux_hotspot_8u222b10.tar.gz \
- && rm -rf /opt/logstash-oss-${LOGSTASH_VER} \
- && rm /opt/logstash-oss-${LOGSTASH_VER}.tar.gz \
+ && rm -rf /opt/logstash-${LOGSTASH_VER} \
+ && rm /opt/logstash-${LOGSTASH_VER}.tar.gz \
  && rm -rf /var/lib/apt/lists/* \
 # Create elasticsearch user
  && /usr/sbin/groupadd logstash \
