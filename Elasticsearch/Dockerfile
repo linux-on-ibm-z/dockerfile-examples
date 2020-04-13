@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.5.1 ########################################
+##################################### Dockerfile for Elasticsearch version 7.6.1 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG ELASTICSEARCH_VER=7.5.1
+ARG ELASTICSEARCH_VER=7.6.1
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -31,7 +31,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 # Set Environment Variables
 ENV LANG="en_US.UTF-8"
 ENV SOURCE_DIR="/tmp/"
-ENV JAVA_HOME=/usr/share/jdk-12.0.2+10
+ENV JAVA_HOME=/usr/share/jdk-13.0.2+8
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch"
 WORKDIR $SOURCE_DIR
@@ -46,10 +46,10 @@ RUN apt-get update && apt-get install -y \
 # Set up locale
  && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
-# Download AdoptOpenJDK 12
+# Download AdoptOpenJDK 13
  && cd $SOURCE_DIR \
- && wget https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
- && tar -C /usr/share/ -xzvf OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
+ && wget https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.2%2B8/OpenJDK13U-jdk_s390x_linux_hotspot_13.0.2_8.tar.gz \
+ && tar -C /usr/share/ -xzvf OpenJDK13U-jdk_s390x_linux_hotspot_13.0.2_8.tar.gz \
 # Download and Build Elasticsearch
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
  && curl -o patch_gradle.diff $PATCH_URL/patch_gradle.diff \
@@ -66,7 +66,7 @@ RUN apt-get update && apt-get install -y \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* /root/.gradle/* /tmp/elasticsearch \
- && rm $SOURCE_DIR/OpenJDK12U-jdk_s390x_linux_hotspot_12.0.2_10.tar.gz \
+ && rm $SOURCE_DIR/OpenJDK13U-jdk_s390x_linux_hotspot_13.0.2_8.tar.gz \
 # Create elaticsearch user
  && /usr/sbin/groupadd elasticsearch \
  && /usr/sbin/useradd -g elasticsearch elasticsearch \
