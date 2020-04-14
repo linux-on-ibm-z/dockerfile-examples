@@ -39,11 +39,11 @@ ENV HOME /home/${user}
 # Install dependencies
 RUN apt-get update &&  apt-get install -y wget curl \
 # Download IBMJDK
-&& wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.40/linux/s390x/ibm-java-s390x-sdk-8.0-5.40.bin \
+&& wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.6.7/linux/s390x/ibm-java-s390x-sdk-8.0-6.7.bin \
 && wget https://raw.githubusercontent.com/zos-spark/scala-workbench/master/files/installer.properties.java \
 && tail -n +3 installer.properties.java | tee installer.properties \
-&& chmod +x ibm-java-s390x-sdk-8.0-5.40.bin \
-&& ./ibm-java-s390x-sdk-8.0-5.40.bin -r installer.properties \
+&& chmod +x ibm-java-s390x-sdk-8.0-6.7.bin \
+&& ./ibm-java-s390x-sdk-8.0-6.7.bin -r installer.properties \
 && groupadd -g ${gid} ${group} \
 && useradd -c "Jenkins user" -d $HOME -u ${uid} -g ${gid} -m ${user} 
 
