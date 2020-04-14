@@ -33,14 +33,14 @@ ARG gid=1000
 
 # Set Environment Variables
 ENV HOME /home/${user}
-ENV JAVA_HOME=/usr/share/jdk8u222-b10
+ENV JAVA_HOME=/usr/share/jdk8u242-b08
 ENV PATH=$JAVA_HOME/bin:$PATH
 
 # Install dependencies
 RUN apt-get update &&  apt-get install -y tar wget libfontconfig1 curl \
 # Download AdoptJDK8
-&& wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10_openj9-0.15.1/OpenJDK8U-jdk_s390x_linux_openj9_8u222b10_openj9-0.15.1.tar.gz \
-&& tar -C /usr/share/ -xzvf OpenJDK8U-jdk_s390x_linux_openj9_8u222b10_openj9-0.15.1.tar.gz \
+&& wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u242-b08_openj9-0.18.1/OpenJDK8U-jdk_s390x_linux_openj9_8u242b08_openj9-0.18.1.tar.gz \
+&& tar -C /usr/share/ -xzvf OpenJDK8U-jdk_s390x_linux_openj9_8u242b08_openj9-0.18.1.tar.gz \
 && groupadd -g ${gid} ${group} \
 && useradd -c "Jenkins user" -d $HOME -u ${uid} -g ${gid} -m ${user} 
 
