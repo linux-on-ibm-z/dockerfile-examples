@@ -71,8 +71,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                                 git \
                                 patch \
                                 libssl-dev \
-                   && pip3 install \
-                                wheel \
+		   && ln -sf /usr/bin/python3 /usr/bin/python \
+                   && pip3 install cython \
+		   && pip3 install wheel \
                                 numpy==1.16.2 \
                                 future \
                                 backports.weakref \
@@ -84,8 +85,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                                 h5py \
                                 tensorflow_estimator \
                                 grpcio\
-# commenting force link         
-# &&             ln -sf /usr/bin/python3 /usr/bin/python \
+           
 # Install Go
                    &&           mkdir -p $SOURCE_DIR && cd $SOURCE_DIR \
                    &&           wget https://dl.google.com/go/go1.13.3.linux-s390x.tar.gz \
@@ -151,8 +151,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                                 python3-sklearn \
                                 libhdf5-dev \
                                 libssl-dev \
-                   && pip3 install \
-                                wheel \
+		   && ln -sf /usr/bin/python3 /usr/bin/python \
+                   && pip3 install cython \
+		   && pip3 install wheel \
                                 numpy==1.16.2 \
                                 future \
                                 backports.weakref \
