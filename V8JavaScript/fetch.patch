@@ -1,0 +1,41 @@
+diff --git a/fetch.py b/fetch.py
+index 285015e..9929d5e 100755
+--- a/fetch.py
++++ b/fetch.py
+@@ -255,6 +255,19 @@ def handle_args(argv):
+       props)
+
+
++def to_str(bytes_or_str):
++  """ convert bytes_or_str to str so that it can be
++  used by json.load which expects str"""
++  if sys.version_info[:3] < (3,0):
++    val = bytes_or_str
++  else:
++    if isinstance(bytes_or_str, bytes):
++      val = bytes_or_str.decode('utf-8')
++    else:
++      val = bytes_or_str
++  return val
++
++
+ def run_config_fetch(config, props, aliased=False):
+   """Invoke a config's fetch method with the passed-through args
+   and return its json output as a python object."""
+@@ -267,14 +280,14 @@ def run_config_fetch(config, props, aliased=False):
+   cmd = [sys.executable, config_path + '.py', 'fetch'] + props
+   result = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+
+-  spec = json.loads(result)
++  spec = json.loads(to_str(result))
+   if 'alias' in spec:
+     assert not aliased
+     return run_config_fetch(
+         spec['alias']['config'], spec['alias']['props'] + props, aliased=True)
+   cmd = [sys.executable, config_path + '.py', 'root']
+   result = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+-  root = json.loads(result)
++  root = json.loads(to_str(result))
+   return spec, root
+
+
