@@ -77,7 +77,7 @@ RUN	apt-get update && apt-get -y install \
 	&&	cd $SOURCE_DIR \
 	&&	git clone https://github.com/apache/tomcat.git \
 	&&	cd tomcat/ \
-	&&	git checkout 8.5.16 \
+	&&	git checkout 8.5.32 \
 	&&	cp build.properties.default build.properties \
 	&&	ant \
 # Configure Tomcat
