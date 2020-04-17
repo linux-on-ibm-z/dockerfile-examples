@@ -43,7 +43,7 @@ RUN apt-get update && apt-get install -y \
  && tar -xvzf apache-jmeter-$JMETER_VER.tgz \
 
 #Remove G1GC algorithm as it is unimplemented in OpenJDK zero
- && sed -i '178d' $WORKDIR/apache-jmeter-$JMETER_VER/bin/jmeter \
+ && sed -ie 185's/.*/# &/' $WORKDIR/apache-jmeter-$JMETER_VER/bin/jmeter \
  
 # Clean the Cache data and remove source files and dependencies   
  && apt-get autoremove -y \
