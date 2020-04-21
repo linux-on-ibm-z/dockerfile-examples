@@ -137,7 +137,7 @@ RUN apt-get update && apt-get install -y \
     && bash ibm-java-s390x-sdk-8.0-5.41.bin -i silent -f installer.properties \
 # Install mesos and python packages
     && apt install ./build_1.9.0-1_s390x.deb \
-    && pip install dist/mesos.*whl \
+    && pip install mesos.*whl \
     && ldconfig \
 # Remove temporary files
     && rm -rf /tmp/*
