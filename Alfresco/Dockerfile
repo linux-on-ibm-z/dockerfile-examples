@@ -75,16 +75,14 @@ RUN	apt-get update && apt-get -y install \
 	&&	make install \
 # Build and Install Apache Tomcat
 	&&	cd $SOURCE_DIR \
-	&&	git clone https://github.com/apache/tomcat.git \
-	&&	cd tomcat/ \
-	&&	git checkout 8.5.32 \
-	&&	cp build.properties.default build.properties \
-	&&	ant \
+	&&	wget http://mirrors.estointernet.in/apache/tomcat/tomcat-9/v9.0.33/bin/apache-tomcat-9.0.33.tar.gz \
+	&& 	tar -zxvf apache-tomcat-9.0.33.tar.gz -C $SOURCE_DIR \
+	&& 	cd apache-tomcat-9.0.33/ \
 # Configure Tomcat
 	&&	groupadd tomcat \
-	&&	useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat \
 	&&	mkdir /opt/tomcat \
-	&&	cp -R $SOURCE_DIR/tomcat/output/build/* /opt/tomcat/ \
+	&&	useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat \
+	&&	cp -R $SOURCE_DIR/apache-tomcat-9.0.33/* /opt/tomcat/ \
 	&&	cd /opt/tomcat \
 	&&	chgrp -R tomcat /opt/tomcat \
 	&&	chmod -R g+r conf \
@@ -151,3 +149,4 @@ EXPOSE 8080
 WORKDIR /opt/tomcat
 CMD service postgresql restart && bin/catalina.sh run
 # End of Dockerfile
+
