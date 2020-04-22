@@ -35,7 +35,7 @@ RUN apt-get update &&   apt-get install -y \
  && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.6%2B10_openj9-0.18.1/OpenJDK11U-jdk_s390x_linux_openj9_11.0.6_10_openj9-0.18.1.tar.gz \
  && tar -xzf OpenJDK11U-jdk_s390x_linux_openj9_11.0.6_10_openj9-0.18.1.tar.gz -C /opt \
 # Download Solr and build it
- && wget http://apachemirror.wuchna.com/lucene/solr/$SOLR_VER/solr-$SOLR_VER.tgz \
+ && wget https://archive.apache.org/dist/lucene/solr/$SOLR_VER/solr-$SOLR_VER.tgz \
  && tar zxvf solr-$SOLR_VER.tgz  \
  && cd  $SOURCE_DIR/solr-$SOLR_VER/bin  \
  && chmod a+x solr  \
