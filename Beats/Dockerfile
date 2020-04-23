@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.5.1 #############################
+#################### Dockerfile for Beats 7.6.1 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:18.04
 
-ARG BEATS_VER=7.5.1
+ARG BEATS_VER=7.6.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -53,9 +53,9 @@ RUN apt-get update && apt-get install -y \
     wget \
     libsystemd-dev \
 # Install go and download beats source code
- && wget https://storage.googleapis.com/golang/go1.12.9.linux-s390x.tar.gz \
- && chmod ugo+r go1.12.9.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.12.9.linux-s390x.tar.gz \
+ && wget https://dl.google.com/go/go1.13.8.linux-s390x.tar.gz \
+ && chmod ugo+r go1.13.8.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.13.8.linux-s390x.tar.gz \
  && python -m easy_install pip \
  && python -m pip install appdirs pyparsing six packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
@@ -64,7 +64,7 @@ RUN apt-get update && apt-get install -y \
  && git clone https://github.com/elastic/beats.git  \
  && cd beats  \
  && git checkout v${BEATS_VER}  \
-# Building auditbeat
+# Patching
  && wget ${PATCH_URL}/endian.go -P $GOPATH/src/github.com/elastic/beats/vendor/github.com/elastic/go-libaudit/ \
  && wget ${PATCH_URL}/patch.diff \
  && git apply --ignore-whitespace patch.diff \
@@ -83,6 +83,7 @@ RUN apt-get update && apt-get install -y \
 # Building libbeat
  && cd $GOPATH/src/github.com/elastic/beats/libbeat  \
  && make libbeat \
+ && make  update \
 # Building journalbeat
  && cd $GOPATH/src/github.com/elastic/beats/journalbeat  \
  && make journalbeat \
@@ -115,5 +116,5 @@ RUN apt-get update && apt-get install -y \
 # Create mount point for configuration files
 VOLUME /Beats
 
-CMD $BEATSNAME -e -path.config /Beats -d "publish"
+CMD $BEATSNAME -e -c /Beats/${BEATSNAME}.yml -d "publish"
 #End of Dockerfile
