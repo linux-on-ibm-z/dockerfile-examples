@@ -32,8 +32,6 @@ ENV VPYTHON_BYPASS="manually managed python not supported by chrome operations"
 
 WORKDIR $SOURCE_DIR
 
-COPY fetch.patch $SOURCE_DIR
-
 # Install dependencies
 RUN     apt-get update && apt-get -y install \
                 g++ \
@@ -49,7 +47,6 @@ RUN     apt-get update && apt-get -y install \
 # Clone depot_tools from the Chromium project, as it contains a number of tools needed to build V8 6.0
         && cd $SOURCE_DIR \
         && git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git \
-        && patch -p1 < $SOURCE_DIR/fetch.patch -d depot_tools  \
 
 # Obtain the V8 source code
         && fetch v8 \
