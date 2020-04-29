@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Puppetagent version 6.13.0 #########
+########## Dockerfile for Puppetagent version 6.14.0 #########
 #
 # This Dockerfile builds a basic installation of Puppet agent.
 #
@@ -13,7 +13,7 @@
 # docker build -t <image_name> .
 #
 # To start Puppet agent run the below command:
-# docker run -dit --name <container_name> --network host --add-host <server hostname>:<IP address of server> <image>
+# docker run -it --name <container_name> --network host --add-host <server hostname>:<IP address of server> <image>
 # then update $confdir/puppet.conf (see Note 1) and run:
 # puppet agent --debug -t
 #
@@ -71,7 +71,7 @@ RUN	apt-get update && apt-get install -y \
 
 # Install Puppet
 	&&	/usr/bin/gem install facter -v 2.5.7 \
-	&&	/usr/bin/gem install puppet -v 6.13.0 \
+	&&	/usr/bin/gem install puppet -v 6.14.0 \
 
 # Locate the $confdir by command
 	&&	chmod 755 /usr/local/lib \
