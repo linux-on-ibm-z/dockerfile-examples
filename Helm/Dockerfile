@@ -1,6 +1,6 @@
 # © Copyright IBM Corporation 2019, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-######################### Dockerfile for Helm version 3.1.2 #####################################################
+######################### Dockerfile for Helm version 3.2.0 #####################################################
 #
 # This Dockerfile builds a basic installation of Helm.
 #
@@ -19,7 +19,7 @@ FROM s390x/ubuntu:18.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
-ARG VERSION=3.1.2
+ARG VERSION=3.2.0
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 
