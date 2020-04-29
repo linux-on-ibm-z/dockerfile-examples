@@ -2,7 +2,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 
-########## Dockerfile for Fluentd version 1.9.3 ###############################
+########## Dockerfile for Fluentd version 1.10.2 ###############################
 #
 # This Dockerfile builds a basic installation of Fluentd.
 #
@@ -28,9 +28,8 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG FLUENTD_VER=1.9.3
+ARG FLUENTD_VER=1.10.2
 ARG RUBY_VER=2.7.0
-ARG ZLIB_VER=1.2.11
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -51,14 +50,7 @@ RUN apt-get update  \
          flex \
          openssl \
          libssl-dev \
-# Install zlib
-  && cd $SOURCE_DIR \
-  && wget https://zlib.net/zlib-${ZLIB_VER}.tar.gz \
-  && tar -xzvf zlib-${ZLIB_VER}.tar.gz \
-  && cd zlib-${ZLIB_VER} \
-  && ./configure \
-  && make -j4 \
-  && make install \
+         zlib1g-dev \
 # Install Ruby
   && cd $SOURCE_DIR \
   && wget http://cache.ruby-lang.org/pub/ruby/2.7/ruby-${RUBY_VER}.tar.gz \
