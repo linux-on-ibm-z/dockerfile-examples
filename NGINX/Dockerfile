@@ -3,7 +3,7 @@
 #
 # This dockerfile is no longer supported. Please find latest information from https://www.ibm.com/community/z/open-source-software/
 #
-################################# Dockerfile for NGINX 1.16.0 #####################################################
+################################# Dockerfile for NGINX 1.18.0 #####################################################
 #
 # This Dockerfile builds a basic installation of NGINX.
 # NGINX is a free, open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server.
@@ -19,7 +19,7 @@
 # Base image
 FROM s390x/ubuntu:16.04
 
-ARG NGINX_VER=1.16.0
+ARG NGINX_VER=1.18.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
