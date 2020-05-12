@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Sysdig version 0.26.4 #########
+########## Dockerfile for Sysdig version 0.26.6 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -23,8 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG SYSDIG_VER=0.26.4
-ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Sysdig/0.26.4/patch"
+ARG SYSDIG_VER=0.26.6
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 LABEL RUN="docker run -i -t --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro -v /usr:/host/usr:ro --name NAME IMAGE"
@@ -36,6 +35,7 @@ WORKDIR $SOURCE_ROOT
 # Install dependencies
 RUN apt-get update \
         && apt-get install -y \
+		automake \
                 cmake \
                 gcc \
                 g++ \
@@ -50,19 +50,12 @@ RUN apt-get update \
                 wget \
 # Download source code
         && cd $SOURCE_ROOT \
-# Fetch patches
-        && curl -SLO $PATCH_URL/cmake.patch    \
-        && curl -SLO $PATCH_URL/grpc.patch    \
-        && curl -SLO $PATCH_URL/protobuf-3.5.0.patch    \
-        && git clone https://github.com/draios/sysdig.git   \
         && cd sysdig      \
         && git checkout ${SYSDIG_VER}  \
         && mkdir build \
-# Patch sysdig
-        && patch -p1 < $SOURCE_ROOT/cmake.patch        \
 # Configure Sysdig
         && cd build \
-        && cmake -DUSE_BUNDLED_LUAJIT=OFF .. \
+        && cmake .. \
 # Build and Install Sysdig
         && make \
         && make install \
@@ -90,5 +83,4 @@ RUN apt-get update \
 WORKDIR /opt/sysdig
 
 CMD ["bash"]
-
 # End of Dockerfile
