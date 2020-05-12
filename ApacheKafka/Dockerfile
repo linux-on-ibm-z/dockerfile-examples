@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## dockerfile for Apache Kafka version 2.4.1 #########
+########## dockerfile for Apache Kafka version 2.5.0 #########
 #
 # This Dockerfile builds a basic installation of Apache Kafka.
 #
@@ -36,7 +36,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 ENV SOURCE_DIR=/home/
 ENV JAVA_HOME=/home/jdk-11.0.5+10
 ENV PATH=$PATH:$SOURCE_DIR/:$JAVA_HOME/bin
-ENV VERSION=2.12-2.4.1
+ENV VERSION=2.12-2.5.0
 
 WORKDIR $SOURCE_DIR
 
@@ -50,7 +50,7 @@ RUN	apt-get update && apt-get -y install \
   && tar -xvzf OpenJDK11U-jdk_s390x_linux_hotspot_11.0.5_10.tar.gz \
   && rm OpenJDK11U-jdk_s390x_linux_hotspot_11.0.5_10.tar.gz \
 # Download the Apache Kafka Binary
- && wget http://mirrors.estointernet.in/apache/kafka/2.4.1/kafka_${VERSION}.tgz \
+ && wget http://mirrors.estointernet.in/apache/kafka/2.5.0/kafka_${VERSION}.tgz \
  && tar -xvzf kafka_${VERSION}.tgz \
  && rm kafka_${VERSION}.tgz \
  && mv kafka_${VERSION} kafka
