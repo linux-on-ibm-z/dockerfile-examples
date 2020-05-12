@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for Scala version 2.13.1 #############################################################
+################################ Dockerfile for Scala version 2.13.2 #############################################################
 # This Dockerfile builds a basic installation of Scala.
 #
 # To build this image, from the directory containing this Dockerfile
@@ -20,7 +20,7 @@ FROM s390x/ubuntu:18.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG SCALA_VER=2.13.1
+ARG SCALA_VER=2.13.2
 
 # Install build Dependencies 
 RUN apt-get update && apt-get install -y \
