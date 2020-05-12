@@ -11,8 +11,23 @@
 # (assuming that the file is named Dockerfile):
 # docker build --build-arg TARGET=<target_value> -t <image_name> .
 #
-# To start ScyllaDB run the below command:
-# docker run -it --name <container_name>  <image> bash
+# To start ScyllaDB Server run the below command:
+# Replace the following parameters in the command below:
+#   - <container_name> : Name of the container
+#   - <image_name>     : Name of the ScyllaDB image
+#   - <ip_address>     : IP address of the host machine to access the ScyllaDB server.
+#
+# docker run \
+#       -tid \
+#       --name <container_name> \
+#       -p 10000:10000 -p 9042:9042 -p 9160:9160 -p 7000:7000 -p 7001:7001 \
+#       <image_name> \
+#       scylla \
+#               --options-file /etc/scylla/scylla.yaml \
+#               --max-io-requests 65 \
+#               --listen-address <ip_address> \
+#               --rpc-address <ip_address> \
+#               --seed-provider-parameters seeds=<ip_address>
 #
 # Reference :
 # http://www.scylladb.com
@@ -20,10 +35,7 @@
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
-
-# The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+FROM s390x/ubuntu:16.04 AS builder
 
 ENV SOURCE_DIR=/tmp/source LD_LIBRARY_PATH=/opt/gcc-7.4.0/lib64:$LD_LIBRARY_PATH PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
 ENV ANT_HOME=$SOURCE_DIR/ant/apache-ant-1.10.6 
@@ -34,12 +46,12 @@ ARG TARGET
 WORKDIR $SOURCE_DIR
 
 # Install dependencies
-RUN     apt-get update && apt-get install -y openjdk-8-jdk python libgnutls-dev systemtap-sdt-dev lksctp-tools \
+RUN apt-get update && apt-get install -y openjdk-8-jdk python libgnutls-dev systemtap-sdt-dev lksctp-tools \
         xfsprogs snappy libyaml-dev maven cmake openssl perl libc-ares-dev libevent-dev libmpfr-dev libmpcdec-dev  \
-		xz-utils automake gcc git make texinfo wget unzip libtool libssl-dev curl libsystemd-dev libhwloc-dev \
-		libaio-dev libsctp-dev libsnappy-dev libpciaccess-dev libxml2-dev xfslibs-dev libgnutls28-dev libiconv-hook-dev \
-		mpi-default-dev libbz2-dev python-dev libxslt-dev libjsoncpp-dev cmake ragel python3 python3-pyparsing \
-		libprotobuf-dev protobuf-compiler liblz4-dev ninja-build libcrypto++-dev \
+	xz-utils automake gcc git make texinfo wget unzip libtool libssl-dev curl libsystemd-dev libhwloc-dev \
+	libaio-dev libsctp-dev libsnappy-dev libpciaccess-dev libxml2-dev xfslibs-dev libgnutls28-dev libiconv-hook-dev \
+	mpi-default-dev libbz2-dev python-dev libxslt-dev libjsoncpp-dev cmake ragel python3 python3-pyparsing \
+	libprotobuf-dev protobuf-compiler liblz4-dev ninja-build libcrypto++-dev python-pystache python-setuptools checkinstall \
 # Install dependency : GCC 7.4.0
         && cd $SOURCE_DIR \
         && mkdir gcc && cd gcc \
@@ -51,6 +63,9 @@ RUN     apt-get update && apt-get install -y openjdk-8-jdk python libgnutls-dev 
              --build=s390x-linux-gnu --host=s390x-linux-gnu --target=s390x-linux-gnu                  \
              --enable-threads=posix --with-system-zlib --disable-multilib  \
         && make -j 8 \
+        && cd s390x-linux-gnu/libstdc++-v3 \
+        && checkinstall -y --pkgversion=3 \
+        && cd ../.. \
         && make install \
         && ln -sf /opt/gcc-7.4.0/bin/gcc /usr/bin/gcc \
         && ln -sf /opt/gcc-7.4.0/bin/g++ /usr/bin/g++ \
@@ -58,7 +73,7 @@ RUN     apt-get update && apt-get install -y openjdk-8-jdk python libgnutls-dev 
         && cd $SOURCE_DIR \
         && mkdir ant && cd ant \
         && curl -SLO https://mirrors.estointernet.in/apache/ant/binaries/apache-ant-1.10.6-bin.tar.gz \
-        && tar -xf apache-ant-1.10.6-bin.tar.gz \
+        && tar -xzf apache-ant-1.10.6-bin.tar.gz \
         && ant -version \
 # Install dependency : antlr3
         && cd $SOURCE_DIR \
@@ -103,15 +118,34 @@ RUN     apt-get update && apt-get install -y openjdk-8-jdk python libgnutls-dev 
         && git submodule update --init --recursive \
         && ./configure.py --mode=release --target=$TARGET --debuginfo 1 --static --static-boost --static-thrift \
         && ninja -j 8 \
-#Clean up unwanted data
-        && rm -rf $SOURCE_DIR/gcc/gcc-7.4.0.tar.xz $SOURCE_DIR/ant/apache-ant-1.10.6-bin.tar.gz $SOURCE_DIR/antlr3/3.5.2.tar.gz $SOURCE_DIR/boost/boost_1_68_0.tar.gz $SOURCE_DIR/thrift/thrift-0.9.3.tar.gz $SOURCE_DIR/yaml-cpp/yaml-cpp-0.6.2.tar.gz $HOME/.m2 $HOME/.cache \
-        && apt-get autoremove -y \
-        && apt-get clean \
-        && rm -rf /var/lib/apt/lists/*
+        && checkinstall -y --pkgversion=2.3.1 ./install.sh
 		
-ENV     PATH=$SOURCE_DIR/scylla/build/release:$PATH
-EXPOSE  10000 9042 9160 7000 7001
+FROM s390x/ubuntu:16.04
+
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+
+ENV LD_LIBRARY_PATH=/opt/gcc-7.4.0/lib64:$LD_LIBRARY_PATH 
+ENV SOURCE_DIR=/tmp/source
+
+WORKDIR $SOURCE_DIR
+
+COPY --from=builder $SOURCE_DIR/scylla/scylla_2.3.1-1_s390x.deb $SOURCE_DIR/
+COPY --from=builder $SOURCE_DIR/gcc/gcc-7.4.0/objdir/s390x-linux-gnu/libstdc++-v3/libstdc++_3-1_s390x.deb $SOURCE_DIR/
+
+RUN apt-get update && apt-get install -y \
+                libcrypto++9v5 \
+                libgnutls30 \ 
+                libgnutlsxx28 \
+                libprotobuf9v5 \ 
+                libatomic1 \
+                libsnappy1v5 \ 
+                libjsoncpp1 \
+        && apt install ./libstdc++_3-1_s390x.deb \
+        && apt install ./scylla_2.3.1-1_s390x.deb \
+        && rm -rf $SOURCE_DIR
+
+WORKDIR /root
+ 
+EXPOSE 10000 9042 9160 7000 7001
 
 CMD scylla
-
-# End of Dockerfile
