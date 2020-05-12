@@ -1,4 +1,7 @@
-########## Dockerfile for Apache flume-1.8 ##########
+# © Copyright IBM Corporation 2018, 2020.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+########## Dockerfile for Apache flume-1.9.0 ##########
 #
 # Apache Flume is a distributed, reliable, and available service for
 # efficiently collecting, aggregating, and moving large amounts of log data.
@@ -39,47 +42,37 @@
 #################################################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
-
-WORKDIR "/root"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 # Path configuration for apache flume
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x M2_HOME=/usr/share/maven MAVEN_OPTS="-Xms1024m -Xmx1024m -XX:MaxPermSize=1024m"
-ENV PATH=$PATH:$JAVA_HOME:$JAVA_HOME/bin:$M2_HOME/bin:/usr/share/apache-flume-1.8.0/bin
+ENV WORKDIR=/root
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x/
+ENV PATH=$PATH:$JAVA_HOME:$JAVA_HOME/bin:$WORKDIR/apache-flume-1.9.0-bin/bin
 
 # Install dependencies for Apache Flume
 RUN apt-get update && apt-get install -y \
-    ant \
-    git \
-    git-core \
-    maven \
-    openjdk-8-jdk \
-    protobuf-compiler \
-    tar \ 
+    tar \
     wget \
-     
+    git \
+    telnet \
+    openjdk-11-jdk \
+
 # Build Apache Flume
- && git clone -b flume-1.8 https://github.com/apache/flume.git  \
- && cd flume \
- && mvn install -DskipTests -Drat.numUnapprovedLicenses=100 \
+ && cd $WORKDIR \
+ && wget http://apachemirror.wuchna.com/flume/1.9.0/apache-flume-1.9.0-bin.tar.gz  \
+ && tar -xvf apache-flume-1.9.0-bin.tar.gz \
 
-# Copy it to /usr/share
- && cp -Rf /root/flume/flume-ng-dist/target/apache-flume-1.8.0-bin/apache-flume-1.8.0-bin /usr/share/apache-flume-1.8.0 \
-
-# Clean up the unwanted packages and clear the source directory 
+# Clean up the unwanted packages and clear the source directory
  && apt-get remove -y \
-    ant \
     git \
     git-core \
-    maven \
-    protobuf-compiler \
     wget \
  && apt autoremove -y \
  && apt-get clean \
- && rm -rf /var/lib/apt/lists/* /root/.m2 /root/flume
+ && rm -rf /var/lib/apt/lists/* /root/apache-flume-1.9.0-bin.tar.gz
 
 # Expose the port 44444 as defined in configuration file flume.conf
 EXPOSE 44444
