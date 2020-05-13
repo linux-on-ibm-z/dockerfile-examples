@@ -1,6 +1,6 @@
 # © Copyright IBM Corporation 2019, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-##################### Dockerfile for Apache Spark version 2.4.4 ###################################################
+##################### Dockerfile for Apache Spark version 2.4.5 ###################################################
 #
 # This Dockerfile builds a basic installation of Apache Spark.
 #
@@ -15,12 +15,12 @@
 # Base Image
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG SPARK_VER=v2.4.4
+ARG SPARK_VER=v2.4.5
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/2.4.4/patch/"
+ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/2.4.5/patch/"
 
 ENV SOURCE_DIR=/root
 WORKDIR $SOURCE_DIR
@@ -37,11 +37,11 @@ ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SOURCE_DIR
 ENV MAVEN_OPTS="-Xmx3g -XX:ReservedCodeCacheSize=1024m"
 
 # Install the dependencies
-RUN apt-get update -y  &&  apt-get install -y curl tar git libtool autoconf build-essential maven apt-transport-https\
+RUN apt-get update -y  &&  apt-get install -y wget curl tar git libtool autoconf build-essential maven apt-transport-https\
 # Download java
 && mkdir -p ${JAVA_HOME}      \
 && cd $SOURCE_DIR \
-&& curl -SL -o java.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u202-b08_openj9-0.12.1/OpenJDK8U-jdk_s390x_linux_openj9_8u202b08_openj9-0.12.1.tar.gz \
+&& curl -SL -o java.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u242-b08_openj9-0.18.1/OpenJDK8U-jdk_s390x_linux_openj9_8u242b08_openj9-0.18.1.tar.gz \
 && tar -xvf java.tar.gz -C ${JAVA_HOME} --strip 1   \
 # Build LevelDB JNI
 && cd $SOURCE_DIR \
@@ -81,26 +81,16 @@ RUN apt-get update -y  &&  apt-get install -y curl tar git libtool autoconf buil
 && cd spark \
 && git checkout $SPARK_VER  \
 # Apply patches
-&& curl -SL -o "Platform.diff"  $PATCH_URL/Platform.diff \
-&& patch "${SOURCE_DIR}/spark/common/unsafe/src/main/java/org/apache/spark/unsafe/Platform.java" Platform.diff \
-# Patch OffHeapColumnVector.diff
-&& curl -SL -o "OffHeapColumnVector.diff"  $PATCH_URL/OffHeapColumnVector.diff \
-&& patch "${SOURCE_DIR}/spark/sql/core/src/main/java/org/apache/spark/sql/execution/vectorized/OffHeapColumnVector.java" OffHeapColumnVector.diff \
-# Patch OnHeapColumnVector.diff
-&& curl -SL -o "OnHeapColumnVector.diff"  $PATCH_URL/OnHeapColumnVector.diff \
-&& patch "${SOURCE_DIR}/spark/sql/core/src/main/java/org/apache/spark/sql/execution/vectorized/OnHeapColumnVector.java" OnHeapColumnVector.diff \
 # Patch StatsdSinkSuite.diff file
-&& curl -SL -o "StatsdSinkSuite.diff"  $PATCH_URL/StatsdSinkSuite.diff \
-&& patch "${SOURCE_DIR}/spark/core/src/test/scala/org/apache/spark/metrics/sink/StatsdSinkSuite.scala" StatsdSinkSuite.diff \
+&& wget -O - $PATCH_URL/StatsdSinkSuite.diff | git apply \
 # Patch Murmur3_x86_32Suite.diff
-&& curl -SL -o "Murmur3_x86_32Suite.diff"  $PATCH_URL/Murmur3_x86_32Suite.diff \
-&& patch "${SOURCE_DIR}/spark/common/unsafe/src/main/java/org/apache/spark/unsafe/hash/Murmur3_x86_32.java" Murmur3_x86_32Suite.diff \
+&& wget -O - $PATCH_URL/Murmur3_x86_32Suite.diff | git apply \
 # Patch UnsafeMapSuite.diff
-&& curl -SL -o "UnsafeMapSuite.diff"  $PATCH_URL/UnsafeMapSuite.diff \
-&& patch "${SOURCE_DIR}/spark/sql/catalyst/src/test/scala/org/apache/spark/sql/catalyst/util/UnsafeMapSuite.scala" UnsafeMapSuite.diff \
+&& wget -O - $PATCH_URL/UnsafeMapSuite.diff | git apply \
 # Patch EventTimeWatermarkSuite.diff
-&& curl -SL -o "EventTimeWatermarkSuite.diff"  $PATCH_URL/EventTimeWatermarkSuite.diff \
-&& patch "${SOURCE_DIR}/spark/sql/core/src/test/scala/org/apache/spark/sql/streaming/EventTimeWatermarkSuite.scala" EventTimeWatermarkSuite.diff \
+&& wget -O - $PATCH_URL/EventTimeWatermarkSuite.diff | git apply \
+# Patch RecordBinaryComparator.diff
+&& wget -O - $PATCH_URL/RecordBinaryComparator.diff | git apply \
 && mv sql/core/src/test/scala/org/apache/spark/sql/execution/arrow/ArrowConvertersSuite.scala sql/core/src/test/scala/org/apache/spark/sql/execution/arrow/ArrowConvertersSuite.scala.orig \
 && mv sql/core/src/test/scala/org/apache/spark/sql/execution/vectorized/ColumnarBatchSuite.scala sql/core/src/test/scala/org/apache/spark/sql/execution/vectorized/ColumnarBatchSuite.scala.orig \
 && mv sql/core/src/test/scala/org/apache/spark/sql/execution/vectorized/ArrowColumnVectorSuite.scala sql/core/src/test/scala/org/apache/spark/sql/execution/vectorized/ArrowColumnVectorSuite.scala.orig \
