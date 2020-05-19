@@ -35,7 +35,7 @@ WORKDIR $SOURCE_ROOT
 # Install dependencies
 RUN apt-get update \
         && apt-get install -y \
-		automake \
+                automake \
                 cmake \
                 gcc \
                 g++ \
@@ -50,6 +50,7 @@ RUN apt-get update \
                 wget \
 # Download source code
         && cd $SOURCE_ROOT \
+        && git clone https://github.com/draios/sysdig.git \
         && cd sysdig      \
         && git checkout ${SYSDIG_VER}  \
         && mkdir build \
