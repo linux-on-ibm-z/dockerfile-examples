@@ -24,7 +24,7 @@
 ###################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -35,11 +35,8 @@ WORKDIR $SOURCE_DIR
 
 # Install dependencies
 RUN  apt-get update  \
-  && apt-get -y install \
-         wget \
-         tar  \
-  && wget https://nodejs.org/dist/v13.5.0/node-v13.5.0-linux-s390x.tar.gz \
-  && tar -xvf node-v13.5.0-linux-s390x.tar.gz \
+  && apt-get -y install wget tar \
+  && wget -qO- https://nodejs.org/dist/v13.5.0/node-v13.5.0-linux-s390x.tar.gz | tar xvzf - \
   && mv node-v13.5.0-linux-s390x nodejs \
   && npm install pm2 -g \
 # Clean up the unwanted packages and clear the source directory
