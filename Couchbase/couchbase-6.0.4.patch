@@ -1,0 +1,430 @@
++++ couchbase/tlm/CMakeLists.txt
+@@ -73,7 +73,7 @@
+
+ # Try to download the prebuilt 3rd-party dependencies by default
+ IF (NOT DEFINED CB_DOWNLOAD_DEPS)
+-   SET(CB_DOWNLOAD_DEPS True
++   SET(CB_DOWNLOAD_DEPS False
+        CACHE BOOL "Download prebuilt dependencies by default")
+ ENDIF (NOT DEFINED CB_DOWNLOAD_DEPS)
+
+@@ -120,7 +120,7 @@
+ INCLUDE(FindCouchbaseErlang)
+ INCLUDE(FindCouchbaseDtrace)
+ INCLUDE(FindCouchbaseGo)
+-INCLUDE(FindCouchbaseBreakpad)
++#INCLUDE(FindCouchbaseBreakpad)
+ INCLUDE(FindCouchbaseFlatbuffers)
+ INCLUDE(FindCouchbaseValgrind)
+ INCLUDE(FindCouchbaseV8)
+
++++ couchbase/forestdb/src/arch.h
+@@ -330,6 +330,10 @@
+         #define spin_unlock(arg) pthread_spin_unlock(arg)
+         #define spin_destroy(arg) pthread_spin_destroy(arg)
+         #define SPIN_INITIALIZER (spin_t)(1)
++        #if defined(__s390x__)
++            #undef SPIN_INITIALIZER
++            #define SPIN_INITIALIZER (spin_t)(0)
++        #endif
+     #endif
+     #ifndef mutex_t
+         // mutex
+
++++ couchbase/couchstore/src/views/bin/couch_view_file_merger.cc
+@@ -37,8 +37,7 @@
+     MERGE_FILE_TYPE_ID_BTREE = 'i',
+     MERGE_FILE_TYPE_MAPREDUCE_VIEW = 'v',
+     MERGE_FILE_TYPE_SPATIAL = 's'
+-} merge_file_type_t;
+-
++}; typedef unsigned char merge_file_type_t;
+
+ int main(int argc, char *argv[])
+ {
+
++++ couchbase/forestdb/utils/debug.cc
+@@ -89,6 +89,8 @@
+     ucontext_t *u = (ucontext_t *)context;
+ #ifdef REG_RIP // Test if the Program Counter is 64 bits
+     unsigned char *pc = (unsigned char *)u->uc_mcontext.gregs[REG_RIP];
++#elif __s390x__
++    unsigned char *pc = (unsigned char *)u->uc_mcontext.psw.addr;
+ #else // 32 bit machine, PC is stored in %eip register
+     unsigned char *pc = (unsigned char *)u->uc_mcontext.gregs[REG_EIP];
+ #endif // REG_RIP for 64-bit machines
+
++++ couchbase/platform/CMakeLists.txt
+@@ -187,7 +187,6 @@
+                             src/cbassert.c
+                             src/checked_snprintf.cc
+                             src/crc32c.cc
+-                            src/crc32c_sse4_2.cc
+                             src/crc32c_private.h
+                             src/getopt.cc
+                             src/global_new_replacement.cc
+
++++ couchbase/platform/include/platform/crc32c.h
+@@ -39,7 +39,7 @@
+ // To fix will require refactoring to hide the X86 dependencies when
+ // built on another platform.
+ //
+-#if !defined(__x86_64__) && !defined(_M_X64) && !defined(_M_IX86)
++#if !defined(__x86_64__) && !defined(_M_X64) && !defined(_M_IX86) && !defined(__s390x__)
+ #error "crc32c requires X86 SSE4.2 for hardware acceleration"
+ #endif
+
++++ couchbase/platform/src/crc32c.cc
+@@ -52,6 +52,7 @@
+ //
+
+ #include "platform/crc32c.h"
++#include <crc32-s390x.h>
+ #include "crc32c_private.h"
+
+ #include <stdint.h>
+@@ -60,7 +61,7 @@
+ // select header file for cpuid.
+ #if defined(WIN32)
+ #include <intrin.h>
+-#elif defined(__clang__) || defined(__GNUC__)
++#elif defined(__clang__) || defined(__GNUC__) && !defined(__s390x__)
+ #include <cpuid.h>
+ #endif
+
+@@ -368,10 +369,10 @@
+ // If SSE4.2 is available then hardware acceleration is used.
+ //
+ crc32c_function setup_crc32c() {
+-    const uint32_t SSE42 = 0x00100000;
++//    const uint32_t SSE42 = 0x00100000;
+
+     crc32c_function f = crc32c_sw;
+-
++/*
+ #if defined(WIN32)
+     std::array<int, 4> registers = {{0,0,0,0}};
+     __cpuid(registers.data(), 1);
+@@ -383,7 +384,7 @@
+     if (registers[2] & SSE42) {
+         f = crc32c_hw;
+     }
+-
++*/
+     return f;
+ }
+
+
+
++++ couchbase/platform/tests/CMakeLists.txt
+@@ -5,7 +5,7 @@
+ ADD_SUBDIRECTORY(checked_snprintf)
+ ADD_SUBDIRECTORY(cjson)
+ ADD_SUBDIRECTORY(corestore)
+-ADD_SUBDIRECTORY(crc32)
++#ADD_SUBDIRECTORY(crc32)
+ ADD_SUBDIRECTORY(dirutils)
+ ADD_SUBDIRECTORY(gethrtime)
+ ADD_SUBDIRECTORY(gettimeofday)
+
++++ couchbase/goproj/src/github.com/couchbase/indexing/secondary/memdb/skiplist/skiplist.go
+@@ -74,12 +74,13 @@
+ 	}
+
+ 	if cfg.UseMemoryMgmt {
+-		s.freeNode = func(n *Node) {
+-			if Debug {
+-				debugMarkFree(n)
+-			}
+-			cfg.Free(unsafe.Pointer(n))
+-		}
++		s.freeNode = func(*Node) {}
++		//s.freeNode = func(n *Node) {
++		//	if Debug {
++		//		debugMarkFree(n)
++		//	}
++		//	cfg.Free(unsafe.Pointer(n))
++		//}
+ 	} else {
+ 		s.freeNode = func(*Node) {}
+ 	}
+
++++ couchbase/kv_engine/daemon/subdocument_validators.cc
+@@ -435,7 +435,7 @@
+
+     if ((req->request.magic != PROTOCOL_BINARY_REQ) ||
+         (req->request.keylen == 0) ||
+-        (req->request.bodylen < minimum_body_len) ||
++        (htonl(__bswap_32(req->request.bodylen)) < minimum_body_len) ||
+         (req->request.datatype != PROTOCOL_BINARY_RAW_BYTES)) {
+         return PROTOCOL_BINARY_RESPONSE_EINVAL;
+     }
+
++++ couchbase/benchmark/src/cycleclock.h
+@@ -82,6 +82,11 @@
+   uint64_t low, high;
+   __asm__ volatile("rdtsc" : "=a"(low), "=d"(high));
+   return (high << 32) | low;
++#elif defined(__s390__) // Covers both s390 and s390x.
++  // Return the CPU clock.
++  uint64_t tsc;
++  asm("stck %0" : "=Q"(tsc) : : "cc");
++  return tsc;
+ #elif defined(__powerpc__) || defined(__ppc__)
+   // This returns a time-base, which is not always precisely a cycle-count.
+   int64_t tbl, tbu0, tbu1;
+
++++ couchbase/platform/include/platform/cacheline_padded.h
+@@ -20,7 +20,7 @@
+ // expect this to be a single cache line (64B on x86-64), but on
+ // Sandybridge (at least) it has been observed that pairs of
+ // cachelines can interfere with each other.
+-#define FALSE_SHARING_RANGE 128
++#define FALSE_SHARING_RANGE 64
+
+ namespace cb {
+
+
++++ couchbase/kv_engine/engines/ep/src/ep_engine.cc
+@@ -4353,7 +4353,7 @@
+             vb_id);
+
+         // Get key stats
+-        uint16_t keystatus = 0;
++        uint8_t keystatus = 0;
+         struct key_stats kstats;
+         memset(&kstats, 0, sizeof(key_stats));
+         ENGINE_ERROR_CODE rv = kvBucket->getKeyStats(
+
++++ couchbase/kv_engine/engines/ep/src/tagged_ptr.h
+@@ -19,7 +19,7 @@
+
+ #include <memory>
+
+-#if !__x86_64__ && !_M_X64
++#if !__x86_64__ && !_M_X64 && !__s390x__
+ #error "TaggedPtr is x64 specific code.  Not tested on other architectures"
+ #endif
+
++++ couchbase/tlm/cmake/Modules/CBDownloadDeps.cmake
+@@ -269,7 +269,11 @@
+       SET (_gofile "go${GOVERSION}.freebsd-amd64.tar.gz")
+     ELSE ()
+       # Presumed Linux
+-      SET (_gofile "go${GOVERSION}.linux-amd64.tar.gz")
++      IF (_arch STREQUAL "s390x")
++        SET (_gofile "go${GOVERSION}.linux-s390x.tar.gz")
++      ELSE ()
++        SET (_gofile "go${GOVERSION}.linux-amd64.tar.gz")
++      ENDIF ()
+     ENDIF ()
+     SET (_cachefile "${CB_DOWNLOAD_DEPS_CACHE}/${_gofile}")
+     IF (NOT EXISTS "${_cachefile}")
+
++++ couchbase/kv_engine/engines/ep/tests/ep_testsuite_xdcr.cc
+@@ -2384,7 +2384,7 @@
+     itemMeta.flags = 0xdeadbeef;
+
+     // Watson (4.6) accepts valid encodings, but ignores them
+-    std::vector<char> junkMeta = {-2,-1,2,3};
++    std::vector<char> junkMeta = {char(-2),char(-1),2,3};
+
+     int force = 0;
+
++++ couchbase/platform/include/platform/n_byte_integer.h
+@@ -98,12 +98,20 @@
+     /// @return the current value as a uint64_t
+     uint64_t load() const {
+         uint64_t value = 0;
++#if __s390x__
++	std::copy_n(counter.begin(), N, ((8-N)+reinterpret_cast<uint8_t*>(&value)));
++#else
+         std::copy_n(counter.begin(), N, reinterpret_cast<uint8_t*>(&value));
++#endif
+         return value;
+     }
+
+     void store(uint64_t value) {
++#if __s390x__
++        std::copy_n((reinterpret_cast<uint8_t*>(&value)+(8-N)), N, counter.begin());
++#else
+         std::copy_n(reinterpret_cast<uint8_t*>(&value), N, counter.begin());
++#endif
+     }
+
+     /// The current value of the n-byte integer
+
++++ couchbase/couchstore/tests/views/index_headers.cc
+@@ -343,7 +343,7 @@
+     size_t header_bin2_size = 0;
+     char *header_bin3 = NULL;
+     size_t header_bin3_size = 0;
+-
++#if !__s390x__
+     unsigned char header_bin[] = {
+         5,226,251,160,170,107,207,39,248,218,139,62,137,58,95,46,204,10,12,1,0,64,0,
+         254,1,0,218,1,0,0,136,5,1,4,0,136,254,127,0,218,127,0,8,0,83,119,9,1,254,128,
+@@ -361,7 +361,28 @@
+         0,254,154,0,46,154,0,112,1,0,4,0,5,0,10,0,60,0,62,0,2,0,11,0,15,0,2,0,58,0,
+         61,0,2,0,15,0,58,105,173,44,0,0,4,197,0,63,0,0,0,0,4,197
+     };
+-
++#else
++    unsigned char header_bin[] = {
++        5,226,251,160,170,107,207,39,248,218,139,62,137,58,95,46,204,10,12,1,0,64,0,
++        254,1,0,218,1,0,0,136,5,1,4,0,136,254,127,0,218,127,0,8,0,83,119,9,1,254,128,
++        0,222,128,0,0,36,5,121,20,136,0,0,58,0,1,1,11,12,4,197,0,2,13,8,0,3,13,
++        8,0,4,13,8,0,5,13,8,0,6,13,8,0,7,13,8,0,8,13,8,0,9,13,8,0,10,
++        13,8,0,12,13,8,0,13,13,8,0,14,13,8,0,16,13,8,0,17,13,8,0,18,
++        13,8,0,19,13,8,0,20,13,8,0,21,13,8,0,22,13,8,0,23,13,8,0,24,
++        13,8,0,25,13,8,0,26,13,8,0,27,13,8,0,28,13,8,0,29,13,8,0,30,
++        13,8,0,31,13,8,0,32,13,8,0,33,13,8,0,34,13,8,0,35,13,8,37,19,
++        12,4,197,0,37,13,16,0,38,13,8,0,39,13,8,0,40,13,8,0,41,13,8,0,
++        42,13,8,0,43,13,8,0,44,13,8,0,45,13,8,0,46,13,8,0,47,13,8,0,
++        48,13,8,0,49,13,8,0,50,13,8,0,51,13,8,0,52,13,8,0,53,13,8,0,
++        54,13,8,0,55,13,8,0,56,13,8,0,57,13,8,0,59,13,8,0,60,13,8,0,
++        62,13,8,64,145,0,0,0,24,174,99,0,0,0,19,159,140,0,0,1,49,254,101,3,
++        226,101,3,0,255,13,1,32,2,0,152,0,0,0,44,71,93,1,148,4,152,106,254,148,
++        0,254,148,0,5,148,24,0,5,55,56,49,52,52,5,154,8,63,200,207,1,154,4,129,
++        243,254,154,0,254,154,0,46,154,0,112,1,0,4,0,5,0,10,0,60,0,62,0,2,
++        0,11,0,15,0,2,0,58,0,61,0,2,0,15,0,58,105,173,44,0,0,4,197,0,
++        63,0,0,0,0,4,197
++    };
++#endif
+     fprintf(stderr, "Decoding an index header v1...\n");
+     header = test_index_header_decoding_v1((const char*)header_bin, sizeof(header_bin));
+
+@@ -395,7 +416,7 @@
+     size_t header_bin2_size = 0;
+     char *header_bin3 = NULL;
+     size_t header_bin3_size = 0;
+-
++#if !__s390x__
+     unsigned char header_bin[] = {
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,237,14,12,2,0,32,0,254,1,0,234,1,0,12,1,32,0,
+         24,254,127,0,234,127,0,16,0,144,0,64,34,254,128,0,238,128,0,12,0,0,32,4,61,
+@@ -421,7 +442,38 @@
+         92,62,36,0,0,27,58,36,0,129,120,62,36,0,0,28,54,36,0,133,148,62,36,0,0,29,58,
+         36,0,129,176,62,36,0,0,30,58,36,0,129,204,62,36,0,0,31,58,36,0,0,193
+     };
+-
++#else
++    unsigned char header_bin[] = {
++        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,237,14,12,2,0,32,0,254,
++        1,0,234,1,0,12,1,32,0,24,254,127,0,234,127,0,16,0,144,0,64,34,254,128,
++        0,238,128,0,12,0,0,32,4,61,130,0,1,5,140,8,1,0,2,5,8,8,4,0,
++        3,5,8,8,9,0,4,5,8,8,16,0,5,5,8,8,25,0,6,5,8,8,36,0,
++        7,5,8,8,49,0,8,5,8,8,64,0,9,5,8,8,81,0,10,5,8,8,100,0,
++        11,5,8,8,121,0,12,5,8,8,144,0,13,5,8,8,169,0,14,5,8,8,196,0,
++        15,5,8,8,225,0,16,1,8,12,1,0,0,17,5,8,8,33,0,18,5,8,8,68,
++        0,19,5,8,8,105,0,20,5,8,8,144,0,21,5,8,8,185,0,22,5,8,8,228,
++        0,23,1,8,4,2,17,41,196,12,2,64,0,25,5,16,8,113,0,26,5,8,8,164,
++        0,27,5,8,8,217,0,28,1,8,12,3,16,0,29,5,8,8,73,0,30,5,8,8,
++        132,0,31,5,8,0,193,9,112,4,0,123,1,14,32,2,55,114,101,100,118,97,108,2,
++        9,125,4,9,41,1,21,4,3,21,9,21,0,50,9,21,4,13,128,1,21,4,34,197,
++        9,21,52,51,0,0,1,0,5,0,2,0,14,0,28,0,1,37,62,16,1,0,28,0,
++        2,53,62,17,102,65,234,32,2,97,117,117,105,100,49,50,51,1,66,1,1,28,97,110,
++        111,116,104,101,114,49,1,12,5,1,0,1,66,36,0,0,1,58,36,0,33,160,62,72,
++        0,0,2,58,36,0,33,188,62,36,0,0,3,58,36,0,33,216,62,36,0,0,4,58,
++        36,0,33,244,62,36,0,0,5,58,36,0,65,16,62,36,0,0,6,58,36,0,65,44,
++        62,36,0,0,7,58,36,0,65,72,62,36,0,0,8,58,36,0,65,100,62,36,0,0,
++        9,58,36,0,65,128,62,36,0,0,10,58,36,0,65,156,62,36,0,0,11,58,36,0,
++        8,121,0,12,66,36,0,0,12,58,36,0,65,212,62,72,0,0,13,58,36,0,65,240,
++        62,36,0,0,14,58,36,0,8,196,0,15,66,36,0,0,15,58,36,0,97,40,62,72,
++        0,0,16,54,36,0,101,68,62,36,0,0,17,58,36,0,97,96,62,36,0,0,18,58,
++        36,0,97,124,62,36,0,0,19,58,36,0,97,152,62,36,0,0,20,58,36,0,97,180,
++        62,36,0,0,21,58,36,0,97,208,62,36,0,0,22,58,36,0,8,228,0,23,66,36,
++        0,0,23,54,36,0,0,2,129,8,62,72,0,0,24,58,36,0,129,36,62,36,0,0,
++        25,58,36,0,129,64,62,36,0,0,26,58,36,0,129,92,62,36,0,0,27,58,36,0,
++        129,120,62,36,0,0,28,54,36,0,133,148,62,36,0,0,29,58,36,0,129,176,62,36,
++        0,0,30,58,36,0,129,204,62,36,0,0,31,58,36,0,0,193
++    };
++#endif
+     fprintf(stderr, "Decoding an index header v2...\n");
+     header = test_index_header_decoding_v2(
+         (const char*)header_bin, sizeof(header_bin));
+
++++ couchbase/couchstore/tests/views/spatial.cc
+@@ -280,6 +280,7 @@
+     char encoded[66];
+     double mbb[] = {6.3, 18.7};
+     double mbb2[] = {1.0, 3.0, 30.33, 31.33, 15.4, 138.7, 7.8, 7.8};
++#if !__s390x__
+     unsigned char expected[] = {
+         0x00, 0x02, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x19, 0x40,
+         0x33, 0x33, 0x33, 0x33, 0x33, 0xb3, 0x32, 0x40
+@@ -293,7 +294,22 @@
+         0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x1f, 0x40, 0x33, 0x33,
+         0x33, 0x33, 0x33, 0x33, 0x1f, 0x40
+     };
+-
++#else
++    unsigned char expected[] = {
++        0x00, 0x02, 0x40, 0x19, 0x33, 0x33, 0x33, 0x33,
++        0x33, 0x33, 0x40, 0x32, 0xb3, 0x33, 0x33, 0x33, 0x33, 0x33,
++    };
++    unsigned char expected2[] = {
++        0x00, 0x08, 0x3f, 0xf0, 0x00, 0x00, 0x00, 0x00,
++        0x00, 0x00, 0x40, 0x08, 0x00, 0x00, 0x00, 0x00,
++        0x00, 0x00, 0x40, 0x3e, 0x54, 0x7a, 0xe1, 0x47,
++        0xae, 0x14, 0x40, 0x3f, 0x54, 0x7a, 0xe1, 0x47,
++        0xae, 0x14, 0x40, 0x2e, 0xcc, 0xcc, 0xcc, 0xcc,
++        0xcc, 0xcd, 0x40, 0x61, 0x56, 0x66, 0x66, 0x66,
++        0x66, 0x66, 0x40, 0x1f, 0x33, 0x33, 0x33, 0x33,
++        0x33, 0x33, 0x40, 0x1f, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33
++    };
++#endif
+     fprintf(stderr, "Running encode spatial key tests\n");
+
+     mbb_struct.mbb = mbb;
+@@ -325,6 +341,7 @@
+ void test_decode_spatial_key()
+ {
+     sized_mbb_t decoded;
++#if !__s390x__
+     unsigned char mbb[] = {
+         0x00, 0x02, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x19, 0x40,
+         0x33, 0x33, 0x33, 0x33, 0x33, 0xb3, 0x32, 0x40
+@@ -338,6 +355,24 @@
+         0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x1f, 0x40, 0x33, 0x33,
+         0x33, 0x33, 0x33, 0x33, 0x1f, 0x40
+     };
++#else
++    unsigned char mbb[] = {
++       0x00, 0x02, 0x40, 0x19, 0x33, 0x33, 0x33, 0x33,
++       0x33, 0x33, 0x40, 0x32, 0xb3, 0x33, 0x33, 0x33, 0x33, 0x33
++    };
++    unsigned char mbb2[] = {
++       0x00, 0x08, 0x3f, 0xf0, 0x00, 0x00, 0x00, 0x00,
++       0x00, 0x00, 0x40, 0x08, 0x00, 0x00, 0x00, 0x00,
++       0x00, 0x00, 0x40, 0x3e, 0x54, 0x7a, 0xe1, 0x47,
++       0xae, 0x14, 0x40, 0x3f, 0x54, 0x7a, 0xe1, 0x47,
++       0xae, 0x14, 0x40, 0x2e, 0xcc, 0xcc, 0xcc, 0xcc,
++       0xcc, 0xcd, 0x40, 0x61, 0x56, 0x66, 0x66, 0x66,
++       0x66, 0x66, 0x40, 0x1f, 0x33, 0x33, 0x33, 0x33,
++       0x33, 0x33, 0x40, 0x1f, 0x33, 0x33, 0x33, 0x33,
++       0x33, 0x33
++    };
++
++#endif
+     double expected[] = {6.3, 18.7};
+     double expected2[] = {1.0, 3.0, 30.33, 31.33, 15.4, 138.7, 7.8, 7.8};
+
++++ couchbase/tlm/cmake/Modules/FindCouchbaseNlohmannJson.cmake
+@@ -3,3 +3,3 @@
+-SET(_nhlomann_json_exploded ${CMAKE_BINARY_DIR}/tlm/deps/json.exploded)
++SET(_nhlomann_json_exploded /tmp/source/json/)
+ FIND_PATH(NLOHMANN_JSON_INCLUDE_DIR nlohmann/json.hpp
+
+
++++ couchbase/tlm/cmake/Modules/FindCouchbaseLibevent.cmake
+@@ -45,6 +45,9 @@
+   endif ()
+ endmacro(get_directory _dirname filename)
+-
++set(LIBEVENT_INCLUDE_DIR /usr/include)
++set(LIBEVENT_EXTRA_LIB /usr/lib/s390x-linux-gnu/libevent_extra.so)
++set(LIBEVENT_CORE_LIB /usr/lib/s390x-linux-gnu/libevent_core.so)
++set(LIBEVENT_THREAD_LIB /usr/lib/s390x-linux-gnu/libevent_pthreads.so)
+ set(_libevent_exploded ${CMAKE_BINARY_DIR}/tlm/deps/libevent.exploded)
+ set(_libevent_library_dir ${CMAKE_INSTALL_PREFIX})
