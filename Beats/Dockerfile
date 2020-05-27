@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.6.1 #############################
+#################### Dockerfile for Beats 7.6.2 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -22,12 +22,11 @@
 ###########################################################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:18.04 AS builder
 
-ARG BEATS_VER=7.6.1
+ARG BEATS_VER=7.6.2
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Beats/${BEATS_VER}/patch"
 
 # Set environment variable
@@ -89,29 +88,24 @@ RUN apt-get update && apt-get install -y \
  && make journalbeat \
 # Building auditbeat
  && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
- && make auditbeat \
- && cp -r $GOPATH/src/github.com/elastic/beats /opt/beats \
- && ln -s /opt/beats/heartbeat/heartbeat /usr/bin/heartbeat \
- && ln -s /opt/beats/packetbeat/packetbeat /usr/bin/packetbeat \
- && ln -s /opt/beats/libbeat/libbeat /usr/bin/libbeat \
- && ln -s /opt/beats/metricbeat/metricbeat /usr/bin/metricbeat \
- && ln -s /opt/beats/filebeat/filebeat /usr/bin/filebeat \
- && ln -s /opt/beats/auditbeat/auditbeat /usr/bin/auditbeat \
- && ln -s /opt/beats/journalbeat/journalbeat /usr/bin/journalbeat \
-# Tidy and clean up
- && apt-get remove -y \
-    acl \
-    git \
-    libssh-dev \
-    make \
-    wget \
- && apt-get autoremove -y \
- && apt autoremove -y \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/* $SOURCE_DIR \
- && mkdir /Beats \
- && cd /opt/beats \
- && cp -n **/*.yml /Beats
+ && make auditbeat
+
+FROM s390x/ubuntu:18.04
+
+WORKDIR /Beats
+
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+
+COPY --from=builder /tmp/source/src/github.com/elastic/beats/heartbeat/heartbeat /usr/bin/heartbeat
+COPY --from=builder /tmp/source/src/github.com/elastic/beats/packetbeat/packetbeat /usr/bin/packetbeat
+COPY --from=builder /tmp/source/src/github.com/elastic/beats/libbeat/libbeat /usr/bin/libbeat
+COPY --from=builder /tmp/source/src/github.com/elastic/beats/metricbeat/metricbeat /usr/bin/metricbeat
+COPY --from=builder /tmp/source/src/github.com/elastic/beats/filebeat/filebeat /usr/bin/filebeat
+COPY --from=builder /tmp/source/src/github.com/elastic/beats/auditbeat/auditbeat /usr/bin/auditbeat
+COPY --from=builder /tmp/source/src/github.com/elastic/beats/journalbeat/journalbeat /usr/bin/journalbeat
+COPY --from=builder /tmp/source/src/github.com/elastic/beats/**/*.yml /Beats/
+
+RUN apt-get update && apt-get install -y libpcap0.8
 
 # Create mount point for configuration files
 VOLUME /Beats
