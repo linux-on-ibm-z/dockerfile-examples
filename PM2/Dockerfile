@@ -23,31 +23,13 @@
 #
 ###################################################################################
 
-# Base Image
-FROM s390x/ubuntu:18.04
+# Base image
+FROM node:13.5.0-alpine
 
-# The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ENV SOURCE_DIR=/tmp/source
-ENV PATH=$SOURCE_DIR/nodejs/bin:$PATH
-WORKDIR $SOURCE_DIR
+RUN npm install pm2 -g
 
-# Install dependencies
-RUN  apt-get update  \
-  && apt-get -y install wget tar \
-  && wget -qO- https://nodejs.org/dist/v13.5.0/node-v13.5.0-linux-s390x.tar.gz | tar xvzf - \
-  && mv node-v13.5.0-linux-s390x nodejs \
-  && npm install pm2 -g \
-# Clean up the unwanted packages and clear the source directory
-  && apt-get autoremove -y \
-  && apt autoremove -y \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
-
-#  Expose port
 EXPOSE 8080
 
 CMD pm2
-
-# End of Dockerfile
