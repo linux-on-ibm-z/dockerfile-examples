@@ -1,10 +1,10 @@
-# © Copyright IBM Corporation 2018, 2020.
-# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0) 
-########## Dockerfile for V8 JavaScript version 6.0 #########
+# © Copyright IBM Corporation 2018, 2020
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+########## Dockerfile for V8 JavaScript version 8.1 #########
 #
 # This Dockerfile builds a basic installation of V8_JavaScript.
 #
-# V8 is Google's open source JavaScript engine.
+# V8 is Google’s open source high-performance JavaScript and WebAssembly engine.
 # V8 is written in C++ and is used in Google Chrome, the open source browser from Google.
 # V8 can run standalone, or can be embedded into any C++ application.
 #
@@ -13,82 +13,66 @@
 # docker build -t <image_name> .
 #
 # To Start V8_JavaScript run the below command:
-# docker run --name <container_name> -d <image>
+# docker run --name <container_name> -it <image_name>
 #
 # Reference:
-# https://github.com/v8/v8/wiki
+# https://v8.dev/docs
 #
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR=/tmp/source
-ENV PATH="$SOURCE_DIR/depot_tools:$PATH"
+ENV PATH="$SOURCE_DIR/gn/out:$PATH:$SOURCE_DIR/depot_tools"
 ENV VPYTHON_BYPASS="manually managed python not supported by chrome operations"
 
 WORKDIR $SOURCE_DIR
 
 # Install dependencies
-RUN     apt-get update && apt-get -y install \
-                g++ \
-                gcc \
-                git \
-                make \
-                python \
-                python3 \
-                subversion \
-                tar \
-                wget \
-
-# Clone depot_tools from the Chromium project, as it contains a number of tools needed to build V8 6.0
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python curl pkg-config \
+                libnss3-dev libcups2-dev git vim libglib2.0-dev \
+                libpango1.0-dev libgconf2-dev \
+                libgnome-keyring-dev libatk1.0-dev \
+                libgtk-3-dev wget clang g++ gcc \
+                ninja-build gcc-multilib g++-multilib tzdata \
+# Clone depot_tools from the Chromium project, as it contains a number of tools needed to build V8
         && cd $SOURCE_DIR \
-        && git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git \
-
+        && git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git \
+# Install gn
+        && git clone https://gn.googlesource.com/gn \
+        && cd gn \
+        && sed -i -e 's/-Wl,--icf=all//g' ./build/gen.py \
+        && sed -i -e 's/-lpthread/-pthread/g' ./build/gen.py \
+        && python build/gen.py \
+        && ninja -C out \
 # Obtain the V8 source code
+        && cd $SOURCE_DIR \
         && fetch v8 \
         && cd v8/ \
-        && git checkout 6.0.318 \
+        && git checkout 8.1.307.32 \
         && gclient sync \
-
-# Build V8 Library and V8 shared library
-        && make s390x -j4 werror=no \
-        && make s390x -j4 library=shared werror=no \
-
-# V8 header files will be required to build products invoking the V8 APIs. Issue the following commands to install the header files
-        && cp -vR include/* /usr/include/ \
-        && chmod 644 /usr/include/libplatform/libplatform.h \
-        && chmod 644 /usr/include/v8*h \
-
-# Install the V8 libraries into /usr/local/lib/
-        && cp -v out/s390x.release/lib.target/lib*.so /usr/local/lib/ \
-        && chmod -f 755 /usr/local/lib/libv8.so \
-        && cp -v out/s390x.release/obj.target/src/lib*.a /usr/local/lib/ \
-        && cp -v out/s390x.release/obj.target/third_party/icu/lib*.a /usr/local/lib/ \
-        && chmod -f 755 /usr/local/lib/libicu*.so \
-        && chmod -f 644 /usr/local/lib/libv8*.a \
-
-# Copy default config files
+        && mkdir out/s390x.release \
+        && gn gen out/s390x.release --args='is_component_build=false target_cpu="s390x" v8_target_cpu="s390x" \
+           use_goma=false goma_dir="None" v8_enable_backtrace=true v8_enable_disassembler=true \
+           v8_enable_object_print=true v8_enable_verify_heap=true' \
+        && ninja -C $SOURCE_DIR/v8/out/s390x.release \
         && mkdir -p /v8 \
-        && cp -R $SOURCE_DIR/v8/include /v8 \
-        && cp -R $SOURCE_DIR/v8/out/s390x.release /v8 \
+        && cp -R $SOURCE_DIR/v8/* /v8
 
-# Clean up cache data and remove dependencies which are not required
-        &&      rm -rf $SOURCE_DIR \
-        &&      apt-get -y remove \
-                git \
-                make \
-                subversion \
-                wget \
-        &&      apt-get autoremove -y \
-        &&      apt autoremove -y \
-        &&      apt-get clean && rm -rf  /var/lib/apt/lists/*
+FROM s390x/ubuntu:18.04
 
-VOLUME /v8
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-CMD /v8/s390x.release/v8_shell
+WORKDIR /v8
+
+COPY --from=builder /v8/include /v8/include
+COPY --from=builder /v8/out/s390x.release/d8 /v8/out/s390x.release/snapshot_blob.bin  /v8/out/s390x.release/v8_shell /v8/
+
+CMD /v8/d8
 
 # End of Dockerfile
