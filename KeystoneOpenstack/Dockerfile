@@ -13,7 +13,7 @@
 # docker build -t <image_name> .
 #
 # To start Keystone run the below command:
-# docker run --name <container_name> -p 35357:<host_port> -p 5000:<host_port> -d <image>  
+# docker run --name <container_name> -p <host_port>:35357 -p <host_port>:5000 -d <image>  
 # 
 # Reference:
 # https://docs.openstack.org/keystone/pike/
@@ -21,7 +21,7 @@
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -37,6 +37,7 @@ ENV SOURCE_DIR=/tmp/source DEBIAN_FRONTEND=noninteractive OS_KEYSTONE_CONFIG_DIR
 
 # Install dependencies
 RUN	apt-get update && apt-get install -y \
+		python3-pip \
 		libpq-dev \
 		build-essential \
 		libncurses-dev \
@@ -51,38 +52,37 @@ RUN	apt-get update && apt-get install -y \
 		scons \
 		libboost-dev \
 		libboost-program-options-dev \
-		openssl dh-autoreconf \
-		libssl-dev python-setuptools \
-		python-lxml \
+		openssl \
+		dh-autoreconf \
+		libssl-dev \
+		python3-setuptools \
+		python3-lxml \
 		curl \
-		python-ldap \
-		python-dev \
+		python3-ldap \
+		python3-dev \
 		libxslt-dev \
 		net-tools \
 		libffi-dev \
 		apache2-dev \
-		python-mysqldb \
+		python3-mysqldb \
 		apache2 \
 		mysql-server \
-		python-pkgconfig \
+		python3-pkgconfig \
 		libsasl2-dev \
 		zlib1g-dev \
 		ed \
 		patch \
-		libapache2-mod-wsgi \
-	&&	curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
-	&&	python get-pip.py \
-	&&	pip install --upgrade setuptools \
-	&&	pip install \
-		six==1.11 \
+		libapache2-mod-wsgi-py3 \
+	&&	pip3 install --upgrade pip setuptools \
+	&&	pip3 install \
+		six \
 		tox \
 		cryptography \
 		mod_wsgi \
 		python-memcached \
-		functools32 \
 		python-openstackclient \
 		requests \
-		pika==0.10.0 \
+		pika \
 # Configure and start MariaDB server
 	&&	mkdir -p  /var/log/mysql \
 	&&	/usr/sbin/mysqld --initialize --user=mysql --datadir=/var/lib/mysql/data \
@@ -101,10 +101,9 @@ RUN	apt-get update && apt-get install -y \
 	&&	git clone https://github.com/openstack/keystone.git \
 	&&	cd keystone/ \
 	&&	git checkout 16.0.0 \
-	&&	pip install --ignore-installed -r requirements.txt \
-	&&	pip install --ignore-installed -r test-requirements.txt  \
-	&&	python setup.py install \
-	&&	sed -i 's/python3/python2/g' tox.ini \
+	&&	pip3 install --ignore-installed -r requirements.txt \
+	&&	pip3 install --ignore-installed -r test-requirements.txt  \
+	&&	python3 setup.py install \
 	&&	tox -egenconfig \
 # Configure Keystone
 	&&	cp -r etc/ /etc/keystone \
@@ -131,7 +130,7 @@ RUN	apt-get update && apt-get install -y \
 		--bootstrap-region-id RegionOne \
 # Add below content at end of /etc/apache2/apache2.conf file
 	&&	sed -i "\$a ServerName 127.0.0.1" /etc/apache2/apache2.conf \
-	&&	sed -i "\$a LoadModule wsgi_module /usr/local/lib/python2.7/dist-packages/mod_wsgi/server/mod_wsgi-py27.so" /etc/apache2/apache2.conf \
+	&&	sed -i "\$a LoadModule wsgi_module /usr/local/lib/python3.6/dist-packages/mod_wsgi/server/mod_wsgi-py36.cpython-36m-s390x-linux-gnu.so" /etc/apache2/apache2.conf \
 # Add wsgi-keystone.conf
 	&&	cd /etc/apache2/ \
 	&&	cd sites-available/ \
