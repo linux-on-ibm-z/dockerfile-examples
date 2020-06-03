@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2019, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Hbase version 2.2.3 #########
+########## Dockerfile for Apache Hbase version 2.2.4 #########
 #
 # This Dockerfile builds a basic installation of Apache Hbase.
 #
@@ -34,7 +34,7 @@ FROM s390x/ubuntu:18.04 AS builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR='/root'
-ENV JAVA_HOME='/usr/lib/jvm/java-8-openjdk-s390x'
+ENV JAVA_HOME='/usr/lib/jvm/jdk8u242-b08'
 ENV MAVEN_OPTS='-Xms1024m -Xmx4000m -XX:MaxPermSize=1024m'
 ENV PATH=$PATH:$JAVA_HOME/bin:$SOURCE_DIR/hbase/bin
 
@@ -49,15 +49,19 @@ RUN apt-get update  \
 			git \
 			make \
 			maven \
-			openjdk-8-jdk \
    		tar \
 			wget \
 			autoconf curl unzip automake gzip libtool\
+# Install AdoptOpenJDK with OpenJ9
+  && cd $SOURCE_DIR \
+  && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u242-b08_openj9-0.18.1/OpenJDK8U-jdk_s390x_linux_openj9_8u242b08_openj9-0.18.1.tar.gz \
+  && tar -C /usr/lib/jvm -xf OpenJDK8U-jdk_s390x_linux_openj9_8u242b08_openj9-0.18.1.tar.gz \
+  && rm -rf OpenJDK8U-jdk_s390x_linux_openj9_8u242b08_openj9-0.18.1.tar.gz \
 # Download and build source code of Apache Hbase
   && cd $SOURCE_DIR \
   && git clone git://github.com/apache/hbase.git \
   && cd hbase/ \
-  && git checkout rel/2.2.3 \
+  && git checkout rel/2.2.4 \
 # Build Protobuf 2.5.0 and 3.5.1
   && wget https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz\
   && tar zxvf protobuf-2.5.0.tar.gz && cd protobuf-2.5.0 \
@@ -104,16 +108,21 @@ RUN apt-get update  \
 
 FROM s390x/ubuntu:18.04
 
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+
 ENV SOURCE_DIR='/root'
-ENV JAVA_HOME='/usr/lib/jvm/java-8-openjdk-s390x'
+ENV JAVA_HOME='/usr/lib/jvm/jdk8u242-b08'
 ENV PATH=$PATH:$JAVA_HOME/bin:$SOURCE_DIR/hbase/bin
 
-COPY --from=builder $SOURCE_DIR/hbase/hbase-assembly/target/hbase-2.2.3-bin.tar.gz $SOURCE_DIR
+WORKDIR $SOURCE_DIR
 
-RUN apt-get update && apt-get install -y \
-    openjdk-8-jdk \
-    && tar xvf $SOURCE_DIR/hbase-2.2.3-bin.tar.gz \
-    && rm -rf $SOURCE_DIR/hbase-2.2.3-bin.tar.gz
+COPY --from=builder $SOURCE_DIR/hbase/hbase-assembly/target/hbase-2.2.4-bin.tar.gz $SOURCE_DIR
+COPY --from=builder /usr/lib/jvm/jdk8u242-b08 /usr/lib/jvm/jdk8u242-b08
+
+RUN tar xvf $SOURCE_DIR/hbase-2.2.4-bin.tar.gz \
+  && mv hbase-2.2.4 hbase \
+  && rm -rf $SOURCE_DIR/hbase-2.2.4-bin.tar.gz
 
 # Define mount points for logs, conf files & data.
 VOLUME ["$SOURCE_DIR/hbase/data", "$SOURCE_DIR/hbase/conf", "$SOURCE_DIR/hbase/logs"]
