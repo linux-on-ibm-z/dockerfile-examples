@@ -1,15 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+echo "* Setting up /usr/src links from host"
+apt update && apt install -y linux-headers-`uname -r`
+for i in "/host/usr/src"/*
+do
+     base=$(basename "$i")
+    ln -s "$i" "/usr/src/$base"
+done
 
-if [[ -z "${SYSDIG_SKIP_LOAD}" ]]; then
-    echo "* Setting up /usr/src links from host"
-
-    for i in $(ls $SYSDIG_HOST_ROOT/usr/src)
-    do
-        ln -s $SYSDIG_HOST_ROOT/usr/src/$i /usr/src/$i
-    done
-
-    /usr/bin/falco-probe-loader
-fi
+/usr/bin/falco-driver-loader
 
 exec "$@"
