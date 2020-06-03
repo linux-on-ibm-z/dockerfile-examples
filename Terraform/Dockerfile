@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Terraform - 0.12.24 ########################
+########## Dockerfile for Terraform - 0.12.25 ########################
 #
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -24,7 +24,7 @@ FROM s390x/ubuntu:18.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG TERRAFORM_VER=0.12.24
+ARG TERRAFORM_VER=0.12.25
 
 # Set environment variables
 ENV SOURCE_DIR=/source
@@ -42,9 +42,9 @@ RUN apt-get update &&  apt-get install -y \
     zip \
 # Install Go
  && cd $SOURCE_DIR \
- && wget https://dl.google.com/go/go1.14.linux-s390x.tar.gz \
- && chmod ugo+r go1.14.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.14.linux-s390x.tar.gz \
+ && wget https://dl.google.com/go/go1.14.2.linux-s390x.tar.gz \
+ && chmod ugo+r go1.14.2.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.14.2.linux-s390x.tar.gz \
 # Clone Terraform Source Code
  && cd $SOURCE_DIR \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
