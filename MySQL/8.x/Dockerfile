@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################################ Dockerfile for MySQL 8.0.19 #################################################
+############################################ Dockerfile for MySQL 8.0.20 #################################################
 # To build this image, run docker build from the directory containing this Dockerfile:
 # 
 #       docker build -t mysql:8.0 .
@@ -11,6 +11,7 @@
 # 
 #       docker run --name <container_name> -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:8.0
 #       docker run --name <container_name> -e MYSQL_RANDOM_ROOT_PASSWORD=true -d mysql:8.0
+#       docker run --name <container_name> -e MYSQL_ALLOW_EMPTY_PASSWORD=true -d mysql:8.0
 #
 # To connect MySQL Server from within the Container run below command 
 #       docker exec -it <container_name> mysql -uroot -p
@@ -24,69 +25,51 @@
 #
 ####################################################################################################################
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:20.04
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ENV MYSQL_VERSION 8.0.19
+ENV MYSQL_VERSION 8.0.20-0ubuntu0.20.04.1
 
-ENV PATH /usr/local/mysql/bin:$PATH
+ENV PATH /usr/local/mysql/bin:$PATH 
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
+ENV TZ 'America/Toronto'
+RUN echo $TZ > /etc/timezone \
+    && apt-get update && apt-get install -y tzdata \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && dpkg-reconfigure tzdata
+
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
-    bison \
-    cmake \
-    gcc \
-    g++ \
-    git \
-    libncurses-dev \
-    libssl-dev \
-    libpwquality-tools \
-    make \
     openssl \
-    pkg-config \
-    tzdata \
-# Build & Install mysql-server
-    && git clone -b mysql-${MYSQL_VERSION} https://github.com/mysql/mysql-server.git \
-    && cd mysql-server \
-    && mkdir build \
-    && cd build \
-    && cmake .. -DDOWNLOAD_BOOST=1 -DWITH_BOOST=. -DWITH_SSL=system -DMYSQLX_UNIX_ADDR=/var/run/mysqld/mysqldx.sock -DMYSQL_UNIX_ADDR=/var/run/mysqld/mysqld.sock \
-    && make \
-    && make install  \
+    pwgen \
+    perl \
+    xz-utils \
+    gosu \
+    mysql-server=$MYSQL_VERSION \   
+    && gosu nobody true \
+    && mkdir /docker-entrypoint-initdb.d \
     && rm -rf /var/lib/mysql \
-    && mkdir -p /var/lib/mysql /var/run/mysqld /var/lib/mysql-files/ && mkdir -p /docker-entrypoint-initdb.d && touch /mysql-init-complete \
+    && mkdir -p /var/lib/mysql /var/run/mysqld /var/lib/mysql-files/ && touch /mysql-init-complete \
     && chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /etc/ /var/lib/mysql-files/ /mysql-init-complete \
     # ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
     && chmod 777 /var/run/mysqld \
 # Cleanup
-   && apt-get remove -y \
-    bison\
-    cmake \
-    gcc \
-    g++ \
-    git \
-    libssl-dev \
-    make \
-    pkg-config \
     && apt autoremove -y \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /mysql-server /usr/local/mysql/mysql-test
+    && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
 VOLUME /var/lib/mysql
 
 # Copying con files
-COPY config/my.cnf /etc/
-COPY config/conf.d/ /etc/mysql/conf.d/
-COPY docker-entrypoint.sh /entrypoint.sh
-
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
-USER mysql
+COPY config/ /etc/mysql/
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backward compatible
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Default port
 EXPOSE 3306 33060
