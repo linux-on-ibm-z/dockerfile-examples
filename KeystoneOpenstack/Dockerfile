@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Keystone version 16.0.0 #########
+########## Dockerfile for Keystone version 17.0.0 #########
 #
 # This Dockerfile builds a basic installation of Keystone.
 #
@@ -22,6 +22,8 @@
 
 # Base Image
 FROM s390x/ubuntu:18.04
+
+ARG KEYSTONE_VER=17.0.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -100,7 +102,7 @@ RUN	apt-get update && apt-get install -y \
 	&&	cd $SOURCE_DIR \
 	&&	git clone https://github.com/openstack/keystone.git \
 	&&	cd keystone/ \
-	&&	git checkout 16.0.0 \
+	&&	git checkout ${KEYSTONE_VER} \
 	&&	pip3 install --ignore-installed -r requirements.txt \
 	&&	pip3 install --ignore-installed -r test-requirements.txt  \
 	&&	python3 setup.py install \
