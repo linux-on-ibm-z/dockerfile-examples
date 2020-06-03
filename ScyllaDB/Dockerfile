@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2019, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for ScyllaDB version 2.3.1 #########
+########## Dockerfile for ScyllaDB version 3.3.1 #########
 #
 # This Dockerfile builds a basic installation of ScyllaDB.
 #
@@ -15,137 +15,191 @@
 # Replace the following parameters in the command below:
 #   - <container_name> : Name of the container
 #   - <image_name>     : Name of the ScyllaDB image
-#   - <ip_address>     : IP address of the host machine to access the ScyllaDB server.
+#   - <ip_address>     : IP address of the host machine running Scylla server.
 #
-# docker run \
-#       -tid \
-#       --name <container_name> \
-#       -p 10000:10000 -p 9042:9042 -p 9160:9160 -p 7000:7000 -p 7001:7001 \
-#       <image_name> \
-#       scylla \
-#               --options-file /etc/scylla/scylla.yaml \
-#               --max-io-requests 65 \
-#               --listen-address <ip_address> \
-#               --rpc-address <ip_address> \
-#               --seed-provider-parameters seeds=<ip_address>
+# docker run -dt --name <container_name> --network host <image_name> \
+#   /opt/scylladb/libexec/scylla \
+#   --options-file /opt/scylladb/conf/scylla.yaml \
+#   --max-io-requests 65 \
+#   --listen-address <ip_address> \
+#   --rpc-address <ip_address> \
+#   --seed-provider-parameters seeds=<ip_address>
+#   --api-address <ip_address>
 #
 # Reference :
 # http://www.scylladb.com
 #
-##################################################################################
+#######################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04 AS builder
-
-ENV SOURCE_DIR=/tmp/source LD_LIBRARY_PATH=/opt/gcc-7.4.0/lib64:$LD_LIBRARY_PATH PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
-ENV ANT_HOME=$SOURCE_DIR/ant/apache-ant-1.10.6 
-ENV PATH=/opt/gcc-7.4.0/bin:/usr/local/bin:$ANT_HOME/bin:$PATH
-
-ARG TARGET
-
-WORKDIR $SOURCE_DIR
-
-# Install dependencies
-RUN apt-get update && apt-get install -y openjdk-8-jdk python libgnutls-dev systemtap-sdt-dev lksctp-tools \
-        xfsprogs snappy libyaml-dev maven cmake openssl perl libc-ares-dev libevent-dev libmpfr-dev libmpcdec-dev  \
-	xz-utils automake gcc git make texinfo wget unzip libtool libssl-dev curl libsystemd-dev libhwloc-dev \
-	libaio-dev libsctp-dev libsnappy-dev libpciaccess-dev libxml2-dev xfslibs-dev libgnutls28-dev libiconv-hook-dev \
-	mpi-default-dev libbz2-dev python-dev libxslt-dev libjsoncpp-dev cmake ragel python3 python3-pyparsing \
-	libprotobuf-dev protobuf-compiler liblz4-dev ninja-build libcrypto++-dev python-pystache python-setuptools checkinstall \
-# Install dependency : GCC 7.4.0
-        && cd $SOURCE_DIR \
-        && mkdir gcc && cd gcc \
-        && curl -SLO https://ftpmirror.gnu.org/gcc/gcc-7.4.0/gcc-7.4.0.tar.xz \
-        && tar -xf gcc-7.4.0.tar.xz && cd gcc-7.4.0 \
-        && ./contrib/download_prerequisites \
-        && mkdir objdir && cd objdir \
-        && ../configure --prefix=/opt/gcc-7.4.0 --enable-languages=c,c++ --with-arch=zEC12 --with-long-double-128 \
-             --build=s390x-linux-gnu --host=s390x-linux-gnu --target=s390x-linux-gnu                  \
-             --enable-threads=posix --with-system-zlib --disable-multilib  \
-        && make -j 8 \
-        && cd s390x-linux-gnu/libstdc++-v3 \
-        && checkinstall -y --pkgversion=3 \
-        && cd ../.. \
-        && make install \
-        && ln -sf /opt/gcc-7.4.0/bin/gcc /usr/bin/gcc \
-        && ln -sf /opt/gcc-7.4.0/bin/g++ /usr/bin/g++ \
-# Install dependency : ant
-        && cd $SOURCE_DIR \
-        && mkdir ant && cd ant \
-        && curl -SLO https://mirrors.estointernet.in/apache/ant/binaries/apache-ant-1.10.6-bin.tar.gz \
-        && tar -xzf apache-ant-1.10.6-bin.tar.gz \
-        && ant -version \
-# Install dependency : antlr3
-        && cd $SOURCE_DIR \
-        && mkdir antlr3 && cd antlr3 \
-        && curl -SLO https://github.com/antlr/antlr3/archive/3.5.2.tar.gz \
-        && tar -xzf 3.5.2.tar.gz && cd antlr3-3.5.2 \
-        && cp runtime/Cpp/include/antlr3* /usr/local/include/ \
-        && cd antlr-complete \
-        && MAVEN_OPTS="-Xmx4G" mvn \
-        && echo 'java -cp '"$(pwd)"'/target/antlr-complete-3.5.2.jar org.antlr.Tool $@' | tee /usr/local/bin/antlr3 \
-        && chmod +x /usr/local/bin/antlr3 \
-# Install dependency : Boost
-        && cd $SOURCE_DIR \
-        && mkdir boost && cd boost \
-        && curl -SLO https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz \
-        && tar -xf boost_1_68_0.tar.gz && cd boost_1_68_0 \
-        && sed -i 's/array\.hpp/array_wrapper.hpp/g' boost/numeric/ublas/matrix.hpp \
-        && sed -i 's/array\.hpp/array_wrapper.hpp/g' boost/numeric/ublas/storage.hpp \
-        && ./bootstrap.sh \
-        && ./b2 toolset=gcc variant=release link=static runtime-link=static threading=multi cxxstd=14 --prefix=/usr/local/ --without-python install \
-# Install dependency : Thrift
-        && cd $SOURCE_DIR \
-        && mkdir thrift && cd thrift \
-        && curl -SLO http://archive.apache.org/dist/thrift/0.9.3/thrift-0.9.3.tar.gz \
-        && tar -xzf thrift-0.9.3.tar.gz \
-        && cd thrift-0.9.3 \
-        && ./configure --without-lua --without-go \
-        && make -j 8 \
-        && make install \
-# Install dependency : yaml-cpp
-        && cd $SOURCE_DIR \
-        && mkdir yaml-cpp && cd yaml-cpp \
-        && curl -SLO https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz \
-        && tar -xzf yaml-cpp-0.6.2.tar.gz \
-        && mkdir yaml-cpp-yaml-cpp-0.6.2/build && cd yaml-cpp-yaml-cpp-0.6.2/build \
-        && cmake .. \
-        && make && make install \
-# Build ScyllaDB
-        && cd $SOURCE_DIR \
-        && git clone -b branch-2.3-s390x https://github.com/linux-on-ibm-z/scylla \
-        && cd scylla \
-        && git submodule update --init --recursive \
-        && ./configure.py --mode=release --target=$TARGET --debuginfo 1 --static --static-boost --static-thrift \
-        && ninja -j 8 \
-        && checkinstall -y --pkgversion=2.3.1 ./install.sh
-		
-FROM s390x/ubuntu:16.04
+FROM ubuntu:18.04 AS builder
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ENV LD_LIBRARY_PATH=/opt/gcc-7.4.0/lib64:$LD_LIBRARY_PATH 
-ENV SOURCE_DIR=/tmp/source
+ENV SOURCE_ROOT=/tmp/source
+ENV PATH=/usr/local/bin:/bin:$PATH
+ENV LD_LIBRARY_PATH=/usr/local/lib64:/usr/local/lib:/usr/lib64:$LD_LIBRARY_PATH
+ENV LD_RUN_PATH=/usr/local/lib64:/usr/local/lib:/usr/lib64:$LD_RUN_PATH
+ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+ENV CC=/usr/bin/gcc-8
+ENV CXX=/usr/bin/g++-8
+ENV ver=1.0
+ENV URL=https
 
-WORKDIR $SOURCE_DIR
+ENV PATCH_URL="https://raw.githubusercontent.com/deleisha/scylladb/master"
 
-COPY --from=builder $SOURCE_DIR/scylla/scylla_2.3.1-1_s390x.deb $SOURCE_DIR/
-COPY --from=builder $SOURCE_DIR/gcc/gcc-7.4.0/objdir/s390x-linux-gnu/libstdc++-v3/libstdc++_3-1_s390x.deb $SOURCE_DIR/
+ARG TARGET
 
+WORKDIR $SOURCE_ROOT
+
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-                libcrypto++9v5 \
-                libgnutls30 \ 
-                libgnutlsxx28 \
-                libprotobuf9v5 \ 
-                libatomic1 \
-                libsnappy1v5 \ 
-                libjsoncpp1 \
-        && apt install ./libstdc++_3-1_s390x.deb \
-        && apt install ./scylla_2.3.1-1_s390x.deb \
-        && rm -rf $SOURCE_DIR
+    openjdk-8-jdk libaio-dev \
+    systemtap-sdt-dev lksctp-tools xfsprogs \
+    libyaml-dev openssl libevent-dev \
+    libmpfr-dev libmpcdec-dev liblz4-dev \
+    libssl1.0-dev libsystemd-dev libhwloc-dev \
+    libsctp-dev libsnappy-dev libpciaccess-dev libxml2-dev xfslibs-dev \
+    libgnutls28-dev libiconv-hook-dev mpi-default-dev libbz2-dev \
+    libxslt-dev libjsoncpp-dev libc-ares-dev ragel \
+    libprotobuf-dev protobuf-compiler libcrypto++-dev \
+    libtool perl ant libffi-dev \
+    automake make git maven ninja-build \
+    unzip bzip2 wget curl xz-utils texinfo \
+    diffutils gcc-8 g++-8 liblua5.3-dev libnuma-dev libunistring-dev \
+    pigz ragel rapidjson-dev stow \
+    net-tools ethtool hwloc libhwloc-dev gnutls-bin patchelf util-linux \
+    gawk gzip \
+#######################################################################
+  && ver=3.7.4 \
+  && cd "$SOURCE_ROOT" \
+  && URL="https://www.python.org/ftp/python/${ver}/Python-${ver}.tgz" \
+  && curl -sSL $URL | tar xzf - \
+  && cd Python-${ver} \
+  && ./configure \
+  && make \
+  && make install \
+  && pip3 install --user --upgrade pip \
+  && pip3 install --user pyparsing colorama pyyaml \
+#######################################################################
+  && ver=3.12.4 \
+  && cd "$SOURCE_ROOT" \
+  && URL=https://github.com/Kitware/CMake/releases/download/v${ver}/cmake-${ver}.tar.gz \
+  && curl -sSL $URL | tar xzf - \
+  && cd cmake-${ver} \
+  && ./bootstrap \
+  && make \
+  && make install \
+#######################################################################
+  && ver=3.5.2 \
+  && cd "$SOURCE_ROOT" \
+  && URL=https://github.com/antlr/antlr3/archive/${ver}.tar.gz \
+  && curl -sSL $URL | tar xzf - \
+  && cd antlr3-${ver} \
+  && cp runtime/Cpp/include/antlr3* /usr/local/include/ \
+  && cd antlr-complete \
+  && MAVEN_OPTS="-Xmx4G" mvn \
+  && echo 'java -cp '"$(pwd)"'/target/antlr-complete-3.5.2.jar org.antlr.Tool $@' | tee /usr/local/bin/antlr3 \
+  && chmod +x /usr/local/bin/antlr3 \
+#######################################################################
+  && cd "$SOURCE_ROOT" \
+  && URL=https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz \
+  && curl -sSL $URL | tar xzf - \
+  && cd boost_1_68_0 \
+  && sed -i 's/array\.hpp/array_wrapper.hpp/g' boost/numeric/ublas/matrix.hpp \
+  && sed -i 's/array\.hpp/array_wrapper.hpp/g' boost/numeric/ublas/storage.hpp \
+  && ./bootstrap.sh \
+  && ./b2 toolset=gcc-8 variant=release link=shared runtime-link=shared threading=multi --without-python install \
+#######################################################################
+  && ver=0.9.3 \
+  && cd "$SOURCE_ROOT" \
+  && URL=http://archive.apache.org/dist/thrift/${ver}/thrift-${ver}.tar.gz \
+  && curl -sSL $URL | tar xzf - \
+  && cd thrift-${ver} \
+  && ./configure --without-java --without-lua --without-go --disable-tests --disable-tutorial \
+  && make -j 8 \
+  && make install \
+#######################################################################
+  && cd "$SOURCE_ROOT" \
+  && git clone https://github.com/fmtlib/fmt.git \
+  && cd fmt \
+  && git checkout d6cea50d01d7779e \
+  && mkdir build \
+  && cd build \
+  && /usr/local/bin/cmake -DFMT_TEST=OFF -DCMAKE_CXX_STANDARD=17 .. \
+  && make \
+  && make install \
+#######################################################################
+  && ver=0.6.2 \
+  && cd "$SOURCE_ROOT" \
+  && URL=https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-${ver}.tar.gz \
+  && curl -sSL $URL | tar xzf - \
+  && cd yaml-cpp-yaml-cpp-${ver} \
+  && mkdir build \
+  && cd build \
+  && /usr/local/bin/cmake .. \
+  && make \
+  && make install \
+#######################################################################
+  && cd "$SOURCE_ROOT" \
+  && git clone https://github.com/scylladb/scylla.git \
+  && cd scylla \
+  && git checkout scylla-3.3.1 \
+  && git submodule update --init --recursive \
+  && curl -sSL ${PATCH_URL}/seastar.diff | patch -d seastar -p1 \
+  && curl -sSL ${PATCH_URL}/scylla.diff | patch -p1  \
+  && ./configure.py --mode release --target ${TARGET} --debuginfo 1 \
+  --cflags "-I/usr/local/include -I/usr/local/include/boost -L/usr/local/lib -L/usr/local/lib64" \
+    --ldflags="-Wl,--build-id=sha1" --static-thrift \
+    --compiler "${CXX}" --c-compiler "${CC}" \
+  && ninja -j 2 \
+  && ln -s /bin/gzip /usr/bin/gzip \
+  && ln -s /sbin/ifconfig /usr/sbin/ifconfig \
+  && ln -s /sbin/ethtool /usr/sbin/ethtool \
+  && ln -s /bin/netstat /usr/bin/netstat \
+  && mkdir -p /lib64 \
+  && ln -s /lib/s390x-linux-gnu/libthread_db-1.0.so /lib64/libthread_db-1.0.so \
+  && mkdir -p /etc/crypto-policies/back-ends \
+  && touch /etc/crypto-policies/back-ends/gnutls.config \
+  && ninja build/release/scylla-package.tar.gz \
+#######################################################################
+  && rm -rf $SOURCE_ROOT/antlr3-3.5.2 \
+      $SOURCE_ROOT/boost_1_68_0 \
+      $SOURCE_ROOT/thrift-0.9.3 \
+      $SOURCE_ROOT/yaml-cpp-yaml-cpp-0.6.2 \
+      $SOURCE_ROOT/cmake-3.12.4 \
+      $SOURCE_ROOT/fmt \
+      $SOURCE_ROOT/Python-3.7.4 \
+      $HOME/.m2 $HOME/.cache \
+  && apt-get autoremove -y \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+
+#######################################################################
+FROM ubuntu:18.04
+
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+
+ENV PREFIX=/opt/scylladb
+ENV LD_LIBRARY_PATH=$PREFIX/libreloc
+ENV SCYLLA_HOME=$PREFIX
+ENV SOURCE_ROOT=/tmp/source
+
+WORKDIR $SOURCE_ROOT
+
+
+COPY --from=builder $SOURCE_ROOT/scylla/build/release/scylla-package.tar.gz $SOURCE_ROOT
+
+RUN mkdir -p $PREFIX && cd $PREFIX \
+    && tar xzf $SOURCE_ROOT/scylla-package.tar.gz \
+    && rm -rf $SOURCE_ROOT
 
 WORKDIR /root
- 
-EXPOSE 10000 9042 9160 7000 7001
+EXPOSE  10000 9042 9160 7000 7001
 
-CMD scylla
+CMD ["/opt/scylladb/libexec/scylla", \
+     "--options-file", "/opt/scylladb/conf/scylla.yaml", \
+     "--max-io-requests", "65"]
+
+# End of Dockerfile
