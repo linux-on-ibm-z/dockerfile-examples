@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y \
     make \
     ruby \
     ruby-dev \
+    patch \
     zlib1g-dev \
  && gem install rails -v ${RAILS_VER} \
 # Tidy up (Clear cache data)
