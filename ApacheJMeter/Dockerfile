@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for Apache JMeter version 5.2.1 #########################################
+######################## Dockerfile for Apache JMeter version 5.3 #########################################
 #
 # This Dockerfile builds a basic installation of Apache JMeter.
 #
@@ -19,21 +19,22 @@
 #########################################################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
-ARG JMETER_VER=5.2.1
+ARG JMETER_VER=5.3
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 # Set Environment varibles
 ENV WORKDIR=/root
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x/
 ENV PATH=$JAVA_HOME/bin:$PATH
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    openjdk-8-jdk \    
+    openjdk-11-jdk \    
+    openjdk-11-jdk-headless \
     tar \    
     wget \
 
