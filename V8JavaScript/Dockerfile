@@ -45,6 +45,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3 
 # Install gn
         && git clone https://gn.googlesource.com/gn \
         && cd gn \
+        && git checkout 8948350 \
         && sed -i -e 's/-Wl,--icf=all//g' ./build/gen.py \
         && sed -i -e 's/-lpthread/-pthread/g' ./build/gen.py \
         && python build/gen.py \
