@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 8.3 ##############################
+################################ Dockerfile for SonarQube 8.3.1 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -22,7 +22,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG SONARQUBE_VER=8.3.0.34182
+ARG SONARQUBE_VER=8.3.1.34397
 ARG SONAR_SCANNER_CLI_VER=4.2.0.1873
 
 # The author
