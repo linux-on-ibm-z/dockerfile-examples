@@ -29,8 +29,6 @@ ENV CC=/usr/bin/gcc
 ENV CB_MULTI_GO=0
 ENV GOPATH=/root/go
 WORKDIR $SOURCE_ROOT
-COPY couchbase-6.0.4.patch .
-COPY flatbuffers.patch .
 
 # Install base dependencies
 RUN apt-get update  && apt-get install -y \
@@ -63,6 +61,8 @@ USER_INSTALL_DIR=/opt/ibm/java-s390x-80\n \
 
 # Install additional dependencies
  && cd $SOURCE_ROOT \
+ && curl -SLO https://raw.githubusercontent.com/linux-on-ibm-z/dockerfile-examples/master/Couchbase/couchbase-6.0.4.patch \
+ && curl -SLO https://raw.githubusercontent.com/linux-on-ibm-z/dockerfile-examples/master/Couchbase/flatbuffers.patch \
  && git clone https://github.com/nlohmann/json \
  && wget https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.gz \
  && tar -xzf boost_1_69_0.tar.gz \
