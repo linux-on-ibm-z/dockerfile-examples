@@ -75,14 +75,14 @@ RUN	apt-get update && apt-get -y install \
 	&&	make install \
 # Build and Install Apache Tomcat
 	&&	cd $SOURCE_DIR \
-	&&	wget https://downloads.apache.org/tomcat/tomcat-9/v9.0.35/bin/apache-tomcat-9.0.35.tar.gz \
-	&& 	tar -zxvf apache-tomcat-9.0.35.tar.gz -C $SOURCE_DIR \
-	&& 	cd apache-tomcat-9.0.35/ \
+	&&	wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.36/bin/apache-tomcat-9.0.36.tar.gz \
+	&& 	tar -zxvf apache-tomcat-9.0.36.tar.gz -C $SOURCE_DIR \
+	&& 	cd apache-tomcat-9.0.36/ \
 # Configure Tomcat
 	&&	groupadd tomcat \
 	&&	mkdir /opt/tomcat \
 	&&	useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat \
-	&&	cp -R $SOURCE_DIR/apache-tomcat-9.0.35/* /opt/tomcat/ \
+	&&	cp -R $SOURCE_DIR/apache-tomcat-9.0.36/* /opt/tomcat/ \
 	&&	cd /opt/tomcat \
 	&&	chgrp -R tomcat /opt/tomcat \
 	&&	chmod -R g+r conf \
