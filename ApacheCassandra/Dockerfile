@@ -69,7 +69,7 @@ RUN apt-get update && apt-get install -y \
 && git clone https://github.com/java-native-access/jna.git \
 && cd jna \
 && git checkout 4.2.2 \
-&& ant \
+&& ant native jar \
 ##
 # Build and install Apache Cassandra
 && cd $SOURCE_ROOT \
