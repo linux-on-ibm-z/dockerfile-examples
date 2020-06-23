@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-server version 4.4.7 #########
+########## Dockerfile for Zabbix-server version 5.0.1 #########
 #
 # This Dockerfile builds a basic installation of Zabbix-server.
 #
@@ -20,9 +20,9 @@
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04 AS builder
+FROM s390x/ubuntu:18.04 AS builder
 
-ARG ZBX_SERVER_VER=4.4.7
+ARG ZBX_SERVER_VER=5.0.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -38,7 +38,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
                 ceph \
                 gcc \
 		pkg-config \
-                libcurl3 \
+                libcurl4 \
                 libcurl4-openssl-dev \
                 libmysqlclient-dev \
                 libmysqld-dev \
@@ -52,20 +52,19 @@ RUN     apt-get update && apt-get install -y mysql-server \
                 libpcre3-dev \
 # Download and install Zabbix server
         &&      cd $SOURCE_DIR \
-        &&      wget https://excellmedia.dl.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/${ZBX_SERVER_VER}/zabbix-${ZBX_SERVER_VER}.tar.gz \
-        &&      tar -xf zabbix-${ZBX_SERVER_VER}.tar.gz \
+        &&      wget https://cdn.zabbix.com/zabbix/sources/stable/5.0/zabbix-${ZBX_SERVER_VER}.tar.gz \
+        &&      tar -zxf zabbix-${ZBX_SERVER_VER}.tar.gz \
         &&      cd zabbix-${ZBX_SERVER_VER}/ \
         &&      ./configure --enable-server --with-mysql --enable-ipv6 --with-net-snmp --with-libcurl --with-libxml2 \
-        &&      make \
         &&      make install \
 	&& 	cat /zabbix-${ZBX_SERVER_VER}/database/mysql/schema.sql > /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql \
 	&& 	cat /zabbix-${ZBX_SERVER_VER}/database/mysql/images.sql >> /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql \
 	&&	cat /zabbix-${ZBX_SERVER_VER}/database/mysql/data.sql >> /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
-ARG ZBX_SERVER_VER=4.4.7
+ARG ZBX_SERVER_VER=5.0.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -80,7 +79,7 @@ COPY --from=builder /zabbix-${ZBX_SERVER_VER}/src/zabbix_get /usr/bin/zabbix_get
 COPY --from=builder /zabbix-${ZBX_SERVER_VER}/src/zabbix_sender/ /usr/bin/zabbix_sender
 COPY --from=builder /zabbix-${ZBX_SERVER_VER}/conf/zabbix_server.conf /usr/local/etc/zabbix_server.conf
 COPY --from=builder /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql /usr/share/doc/zabbix-server-mysql/create.sql
-COPY --from=builder /zabbix-${ZBX_SERVER_VER}/frontends/php /usr/share/doc/php
+COPY --from=builder /zabbix-${ZBX_SERVER_VER}/ui /usr/share/doc/ui
 
 # Install dependencies
 RUN     apt-get update && apt-get install -y mysql-server \
@@ -88,19 +87,19 @@ RUN     apt-get update && apt-get install -y mysql-server \
                 sudo \
                 apache2 \
                 libapache2-mod-php \
-                libcurl3 \
+                libcurl4 \
                 libcurl4-openssl-dev \
                 libmysqlclient-dev \
                 libmysqld-dev \
                 libsnmp-dev \
                 libxml2-dev \
                 php \
-                php7.0-gd \
-                php7.0-ldap \
-                php7.0-xml \
-                php-bcmath \
-                php-mbstring \
-                php-mysql \
+                php7.2-gd \
+                php7.2-ldap \
+                php7.2-xml \
+                php7.2-bcmath \
+                php7.2-mbstring \
+                php7.2-mysql \
                 libevent-dev \
                 libpcre3-dev \
 # Enable PHP support by modifying Apache configuration file
@@ -115,7 +114,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
         &&      /usr/sbin/groupadd zabbix \
 	&&      /usr/sbin/useradd -g zabbix zabbix \
 # Installing Zabbix web interface
-        &&      cd /usr/share/doc/php/ \
+        &&      cd /usr/share/doc/ui/ \
         &&      mkdir -p /var/www/html/zabbix \
         &&      cp -rf * /var/www/html/zabbix/ \
         &&      cd /var/www/html/zabbix \
@@ -128,10 +127,10 @@ RUN     apt-get update && apt-get install -y mysql-server \
         &&      cd /usr/share/doc/zabbix-server-mysql \
         &&      mysql -uzabbix zabbix < create.sql \
 # Change php.ini file
-        &&      sed -i 's/max_execution_time = 30/max_execution_time = 300/g' /etc/php/7.0/apache2/php.ini \
-        &&      sed -i 's/max_input_time = 60/max_input_time = 300/g' /etc/php/7.0/apache2/php.ini \
-        &&      sed -i 's/post_max_size = 8M/post_max_size = 16M/g' /etc/php/7.0/apache2/php.ini \
-        &&      sed -i "s/;date.timezone =/date.timezone = 'Asia\/Kolkata'/g" /etc/php/7.0/apache2/php.ini \
+        &&      sed -i 's/max_execution_time = 30/max_execution_time = 300/g' /etc/php/7.2/apache2/php.ini \
+        &&      sed -i 's/max_input_time = 60/max_input_time = 300/g' /etc/php/7.2/apache2/php.ini \
+        &&      sed -i 's/post_max_size = 8M/post_max_size = 16M/g' /etc/php/7.2/apache2/php.ini \
+        &&      sed -i "s/;date.timezone =/date.timezone = 'Asia\/Kolkata'/g" /etc/php/7.2/apache2/php.ini \
 # Start apache, mysql & Zabbix server
         &&      echo 'zabbix ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && echo 'sudo service apache2 start && sudo service mysql start && zabbix_server --foreground' > /start.sh \
 # Clean up cache data and remove dependencies which are not required
