@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for Falco 0.22.1 ####################
+################## Dockerfile for Falco 0.23.0 ####################
 #
 # This Dockerfile builds a basic installation of Falco.
 #
@@ -25,11 +25,12 @@ FROM s390x/ubuntu:18.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 WORKDIR /home/root/
+ARG VERSION=0.23.0
 
 RUN apt-get update \
 && apt-get install -y sudo git curl
 
-RUN curl  -SLO https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Falco/0.22.1/build_falco.sh \
+RUN curl  -SLO https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Falco/${VERSION}/build_falco.sh \
 && chmod +x build_falco.sh \
 && sed -i 's/sudo make install/exit 0;/g' build_falco.sh \
 && bash build_falco.sh -y
@@ -42,6 +43,7 @@ LABEL RUN="docker run -i -t -v /var/run/docker.sock:/host/var/run/docker.sock -v
 ENV FALCO_REPOSITORY stable
 ENV SYSDIG_HOST_ROOT /host
 ENV HOME /root
+ARG VERSION=0.23.0
 
 RUN cp /etc/skel/.bashrc /root && cp /etc/skel/.profile /root
 
@@ -61,12 +63,12 @@ RUN rm -rf /usr/bin/clang \
  && ln -s /usr/bin/clang-7 /usr/bin/clang \
  && ln -s /usr/bin/llc-7 /usr/bin/llc
 
-COPY --from=0 /home/root/falco/build/release/falco-0.22.1-s390x.deb .
+COPY --from=0 /home/root/falco/build/release/falco-${VERSION}-s390x.deb .
 
 RUN apt-get update && apt-get install -y libyaml-0-2   \
- && dpkg -i falco-0.22.1-s390x.deb \
+ && dpkg -i falco-${VERSION}-s390x.deb \
  && apt-get clean \
- && rm -rf /var/lib/apt/lists/* falco-0.22.1-s390x.deb
+ && rm -rf /var/lib/apt/lists/* falco-${VERSION}-s390x.deb
 # Change the falco config within the container to enable ISO 8601
 # output.
 RUN sed -e 's/time_format_iso_8601: false/time_format_iso_8601: true/' < /usr/local/etc/falco/falco.yaml > /etc/falco/falco.yaml.new \
