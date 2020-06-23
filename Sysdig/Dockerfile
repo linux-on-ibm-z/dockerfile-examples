@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Sysdig version 0.26.6 #########
+########## Dockerfile for Sysdig version 0.26.7 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG SYSDIG_VER=0.26.6
+ARG SYSDIG_VER=0.26.7
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 LABEL RUN="docker run -i -t --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro -v /usr:/host/usr:ro --name NAME IMAGE"
@@ -56,7 +56,7 @@ RUN apt-get update \
         && mkdir build \
 # Configure Sysdig
         && cd build \
-        && cmake .. \
+        && cmake .. -DSYSDIG_VERSION=${SYSDIG_VER} \
 # Build and Install Sysdig
         && make \
         && make install \
