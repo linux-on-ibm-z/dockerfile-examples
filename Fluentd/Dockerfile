@@ -2,7 +2,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 
-########## Dockerfile for Fluentd version 1.10.4 ###############################
+########## Dockerfile for Fluentd version 1.11.0 ###############################
 #
 # This Dockerfile builds a basic installation of Fluentd.
 #
@@ -28,7 +28,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG FLUENTD_VER=1.10.4
+ARG FLUENTD_VER=1.11.0
 ARG RUBY_VER=2.7.1
 
 # The author
