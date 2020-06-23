@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-Agent version 4.4.7 ####################
+########## Dockerfile for Zabbix-Agent version 5.0.1 ####################
 #
 # This Dockerfile builds a basic installation of Zabbix-Agent.
 #
@@ -20,7 +20,7 @@
 # docker exec <container_ID> zabbix_get -s <host_ip> -k "agent.version"
 #
 # Reference:
-# https://www.zabbix.com/documentation/4.4/manual/installation
+# https://www.zabbix.com/documentation/5.0/manual/installation
 #
 ##################################################################################
 #
@@ -32,9 +32,9 @@
 ####################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
-ARG ZBX_AGENT_VER=4.4.7
+ARG ZBX_AGENT_VER=5.0.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -52,7 +52,7 @@ RUN	apt-get update && apt-get -y install \
 		wget \
 		libpcre3-dev \
 # Download Zabbix agent
-	&& wget https://excellmedia.dl.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/${ZBX_AGENT_VER}/zabbix-${ZBX_AGENT_VER}.tar.gz  \
+	&& wget https://cdn.zabbix.com/zabbix/sources/stable/5.0/zabbix-${ZBX_AGENT_VER}.tar.gz  \
 	&& tar -xf zabbix-${ZBX_AGENT_VER}.tar.gz \
 # Install Zabbix agent
 	&& cd $SOURCE_DIR/zabbix-${ZBX_AGENT_VER}\
