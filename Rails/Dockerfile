@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for Rails version 6.0.3.1 ###################################
+################## Dockerfile for Rails version 6.0.3.2 ###################################
 #
 # Rails is a web application development framework written in the Ruby language.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG RAILS_VER=6.0.3.1
+ARG RAILS_VER=6.0.3.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
