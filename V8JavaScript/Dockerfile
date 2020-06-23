@@ -1,6 +1,6 @@
 # © Copyright IBM Corporation 2018, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-########## Dockerfile for V8 JavaScript version 8.1 #########
+########## Dockerfile for V8 JavaScript version 8.3 #########
 #
 # This Dockerfile builds a basic installation of V8_JavaScript.
 #
@@ -22,6 +22,8 @@
 
 # Base Image
 FROM s390x/ubuntu:18.04 AS builder
+
+ARG V8_VER=8.3.110.9
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -54,7 +56,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3 
         && cd $SOURCE_DIR \
         && fetch v8 \
         && cd v8/ \
-        && git checkout 8.1.307.32 \
+        && git checkout ${V8_VER} \
         && gclient sync \
         && mkdir out/s390x.release \
         && gn gen out/s390x.release --args='is_component_build=false target_cpu="s390x" v8_target_cpu="s390x" \
@@ -77,3 +79,4 @@ COPY --from=builder /v8/out/s390x.release/d8 /v8/out/s390x.release/snapshot_blob
 CMD /v8/d8
 
 # End of Dockerfile
+
