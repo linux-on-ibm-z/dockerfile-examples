@@ -46,9 +46,9 @@ ENV CXX=/usr/bin/g++-8
 ENV ver=1.0
 ENV URL=https
 
-ENV PATCH_URL="https://raw.githubusercontent.com/deleisha/scylladb/master"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/3.3.1/patch/"
 
-ARG TARGET
+ARG TARGET=native
 
 WORKDIR $SOURCE_ROOT
 
@@ -148,7 +148,7 @@ RUN apt-get update && apt-get install -y \
   && git submodule update --init --recursive \
   && curl -sSL ${PATCH_URL}/seastar.diff | patch -d seastar -p1 \
   && curl -sSL ${PATCH_URL}/scylla.diff | patch -p1  \
-  && ./configure.py --mode release --target ${TARGET} --debuginfo 1 \
+  && ./configure.py --mode release --target ${TARGET} --debuginfo 0 \
   --cflags "-I/usr/local/include -I/usr/local/include/boost -L/usr/local/lib -L/usr/local/lib64" \
     --ldflags="-Wl,--build-id=sha1" --static-thrift \
     --compiler "${CXX}" --c-compiler "${CC}" \
