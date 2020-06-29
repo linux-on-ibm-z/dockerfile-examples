@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 4.0.5 ##################################
+########## Dockerfile for Neo4j version 4.0.6 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -31,7 +31,7 @@ FROM s390x/ubuntu:18.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG NEO4J_VER=4.0.5
+ARG NEO4J_VER=4.0.6
 ENV NEO4J_EDITION=community
 ENV NEO4J_HOME=/var/lib/neo4j
 ENV NEO4J_TARBALL=neo4j-community-${NEO4J_VER}-unix.tar.gz
