@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Puppetagent version 6.15.0 #########
+########## Dockerfile for Puppetagent version 6.16.0 #########
 #
 # This Dockerfile builds a basic installation of Puppet agent.
 #
@@ -71,7 +71,7 @@ RUN	apt-get update && apt-get install -y \
 
 # Install Puppet
 	&&	/usr/bin/gem install facter -v 2.5.7 \
-	&&	/usr/bin/gem install puppet -v 6.15.0 \
+	&&	/usr/bin/gem install puppet -v 6.16.0 \
 
 # Locate the $confdir by command
 	&&	chmod 755 /usr/local/lib \
