@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.6.2 ########################################
+##################################### Dockerfile for Elasticsearch version 7.7.1 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG ELASTICSEARCH_VER=7.6.2
+ARG ELASTICSEARCH_VER=7.7.1
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -31,7 +31,8 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 # Set Environment Variables
 ENV LANG="en_US.UTF-8"
 ENV SOURCE_DIR="/tmp/"
-ENV JAVA_HOME=/usr/share/jdk-13.0.2+8
+ENV JAVA_HOME=/usr/share/jdk-14.0.1+7
+ENV JAVA14_HOME=/usr/share/jdk-14.0.1+7
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch"
 WORKDIR $SOURCE_DIR
@@ -46,18 +47,34 @@ RUN apt-get update && apt-get install -y \
 # Set up locale
  && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
-# Download AdoptOpenJDK 13
+# Download AdoptOpenJDK 14
  && cd $SOURCE_DIR \
- && wget https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.2%2B8/OpenJDK13U-jdk_s390x_linux_hotspot_13.0.2_8.tar.gz \
- && tar -C /usr/share/ -xzvf OpenJDK13U-jdk_s390x_linux_hotspot_13.0.2_8.tar.gz \
+ && wget https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.1%2B7/OpenJDK14U-jdk_s390x_linux_hotspot_14.0.1_7.tar.gz \
+ && tar -C /usr/share/ -xzvf OpenJDK14U-jdk_s390x_linux_hotspot_14.0.1_7.tar.gz \
 # Download and Build Elasticsearch
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
- && curl -o patch_gradle.diff $PATCH_URL/patch_gradle.diff \
- && patch $SOURCE_DIR/elasticsearch/distribution/archives/build.gradle patch_gradle.diff \
- && ./gradlew -p distribution/archives/oss-linux-tar assemble --parallel \
+ && wget $PATCH_URL/build.gradle  -P $SOURCE_DIR/elasticsearch/distribution/archives/linux-s390x-tar \
+ && mkdir -p $SOURCE_DIR/elasticsearch/distribution/archives/oss-linux-s390x-tar && cp $SOURCE_DIR/elasticsearch/distribution/archives/linux-s390x-tar/build.gradle $SOURCE_DIR/elasticsearch/distribution/archives/oss-linux-s390x-tar \
+ && mkdir -p $SOURCE_DIR/elasticsearch/distribution/packages/s390x-deb && cp $SOURCE_DIR/elasticsearch/distribution/archives/linux-s390x-tar/build.gradle $SOURCE_DIR/elasticsearch/distribution/packages/s390x-deb \
+ && mkdir -p $SOURCE_DIR/elasticsearch/distribution/packages/s390x-oss-deb && cp $SOURCE_DIR/elasticsearch/distribution/archives/linux-s390x-tar/build.gradle $SOURCE_DIR/elasticsearch/distribution/packages/s390x-oss-deb \
+ && mkdir -p $SOURCE_DIR/elasticsearch/distribution/packages/s390x-oss-rpm && cp $SOURCE_DIR/elasticsearch/distribution/archives/linux-s390x-tar/build.gradle $SOURCE_DIR/elasticsearch/distribution/packages/s390x-oss-rpm \
+ && mkdir -p $SOURCE_DIR/elasticsearch/distribution/packages/s390x-rpm && cp $SOURCE_DIR/elasticsearch/distribution/archives/linux-s390x-tar/build.gradle $SOURCE_DIR/elasticsearch/distribution/packages/s390x-rpm \
+ && mkdir -p $SOURCE_DIR/elasticsearch/distribution/docker/docker-s390x-export && cp $SOURCE_DIR/elasticsearch/distribution/archives/linux-s390x-tar/build.gradle $SOURCE_DIR/elasticsearch/distribution/docker/docker-s390x-export \
+ && mkdir -p $SOURCE_DIR/elasticsearch/distribution/docker/oss-docker-s390x-export && cp $SOURCE_DIR/elasticsearch/distribution/archives/linux-s390x-tar/build.gradle $SOURCE_DIR/elasticsearch/distribution/docker/oss-docker-s390x-export \
+ && wget $PATCH_URL/docker_build_context_build.gradle -P $SOURCE_DIR/elasticsearch/distribution/docker/docker-s390x-build-context \
+ && mv $SOURCE_DIR/elasticsearch/distribution/docker/docker-s390x-build-context/docker_build_context_build.gradle $SOURCE_DIR/elasticsearch/distribution/docker/docker-s390x-build-context/build.gradle \
+ && wget $PATCH_URL/oss_docker_build_context_build.gradle -P $SOURCE_DIR/elasticsearch/distribution/docker/oss-docker-s390x-build-context \
+ && mv $SOURCE_DIR/elasticsearch/distribution/docker/oss-docker-s390x-build-context/oss_docker_build_context_build.gradle $SOURCE_DIR/elasticsearch/distribution/docker/oss-docker-s390x-build-context/build.gradle \
+ && wget -O - $PATCH_URL/patch_gradle.diff | git apply \
+ && ./gradlew :distribution:archives:oss-linux-s390x-tar:assemble --parallel \
+# Create distributions as deb, rpm and docker
+ && ./gradlew :distribution:packages:s390x-oss-deb:assemble \
+ && ./gradlew :distribution:packages:s390x-oss-rpm:assemble \
+ && ./gradlew :distribution:docker:oss-docker-s390x-build-context:assemble \ 
 # Install Elasticsearch
  && mkdir -p /usr/share/elasticsearch \
- && tar -xzf distribution/archives/oss-linux-tar/build/distributions/elasticsearch-oss-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1 \
+ && tar -xzf distribution/archives/oss-linux-s390x-tar/build/distributions/elasticsearch-oss-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1 \
+ && ln -sf /usr/share/elasticsearch/bin/* /usr/bin/ \
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
     curl \
@@ -66,7 +83,7 @@ RUN apt-get update && apt-get install -y \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/* /root/.gradle/* /tmp/elasticsearch \
- && rm $SOURCE_DIR/OpenJDK13U-jdk_s390x_linux_hotspot_13.0.2_8.tar.gz \
+ && rm $SOURCE_DIR/OpenJDK14U-jdk_s390x_linux_hotspot_14.0.1_7.tar.gz \
 # Create elaticsearch user
  && /usr/sbin/groupadd elasticsearch \
  && /usr/sbin/useradd -g elasticsearch elasticsearch \
