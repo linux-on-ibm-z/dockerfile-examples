@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2019.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Storm version 2.1.0 #########
+########## Dockerfile for Apache Storm version 2.2.0 #########
 #
 # This Dockerfile builds a basic installation of Apache Storm.
 #
@@ -95,14 +95,14 @@ RUN apt-get update  \
  && cd $SOURCE_DIR \
  && git clone https://github.com/apache/storm.git \
  && cd storm/ \
- && git checkout tags/v2.1.0 \
+ && git checkout tags/v2.2.0 \
  && mvn clean install -DskipTests \
  && ln -s $STORM_HOME/bin/storm /usr/bin/storm \
 
 # Create binary distribution
  && cd $SOURCE_DIR/storm/storm-dist/binary && mvn package -Dgpg.skip=true \
- && tar -zxf $SOURCE_DIR/storm/storm-dist/binary/final-package/target/apache-storm-2.1.0.tar.gz -C $SOURCE_DIR/ \
- && cp -r $SOURCE_DIR/apache-storm-2.1.0 /opt/storm \
+ && tar -zxf $SOURCE_DIR/storm/storm-dist/binary/final-package/target/apache-storm-2.2.0.tar.gz -C $SOURCE_DIR/ \
+ && cp -r $SOURCE_DIR/apache-storm-2.2.0 /opt/storm \
 
 # Clean up the unwanted packages and clear the source directory
  && apt-get remove -y \
