@@ -2,7 +2,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 
-########## Dockerfile for Fluentd version 1.11.0 ###############################
+########## Dockerfile for Fluentd version 1.11.1 ###############################
 #
 # This Dockerfile builds a basic installation of Fluentd.
 #
@@ -28,7 +28,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG FLUENTD_VER=1.11.0
+ARG FLUENTD_VER=1.11.1
 ARG RUBY_VER=2.7.1
 
 # The author
@@ -78,7 +78,7 @@ RUN apt-get update  \
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && apt-get clean && rm -rf /var/lib/apt/lists/*
+  && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /root/ruby-${RUBY_VER}.tar.gz
 ENV PATH /usr/local/bin:$PATH
 # Define port 
 EXPOSE 24224 
@@ -87,3 +87,4 @@ EXPOSE 24224
 CMD fluentd 
 
 # End of Dockerfile
+
