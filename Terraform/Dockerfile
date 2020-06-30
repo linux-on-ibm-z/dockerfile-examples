@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Terraform - 0.12.26 ########################
+########## Dockerfile for Terraform - 0.12.28 ########################
 #
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -19,10 +19,10 @@
 #####################################################################
 
 # Base image
-FROM golang:1.14.3-alpine AS builder
+FROM golang:1.14.4-alpine AS builder
 
 # The author
-ENV TERRAFORM_VERSION=0.12.26
+ENV TERRAFORM_VERSION=0.12.28
 
 RUN apk add --update git bash openssh
 
