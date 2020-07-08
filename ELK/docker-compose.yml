@@ -34,5 +34,5 @@ services:
     links:
      - elasticsearch
     volumes:
-     - ./config/logstash.conf:/etc/logstash/logstash.conf
-
+     - ./config/pipelines.yml:/usr/share/logstash/config/pipelines.yml
+     - ./pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
