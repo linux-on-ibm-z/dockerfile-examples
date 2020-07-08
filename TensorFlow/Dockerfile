@@ -71,9 +71,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                                 git \
                                 patch \
                                 libssl-dev \
-		   && ln -sf /usr/bin/python3 /usr/bin/python \
+                   && ln -sf /usr/bin/python3 /usr/bin/python \
                    && pip3 install cython \
-		   && pip3 install wheel \
+                   && pip3 install wheel \
                                 numpy==1.16.2 \
                                 future \
                                 backports.weakref \
@@ -85,7 +85,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                                 h5py \
                                 tensorflow_estimator \
                                 grpcio\
-           
+
 # Install Go
                    &&           mkdir -p $SOURCE_DIR && cd $SOURCE_DIR \
                    &&           wget https://dl.google.com/go/go1.13.3.linux-s390x.tar.gz \
@@ -102,13 +102,13 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                    &&           sed -i "130s/-classpath/-J-Xms1g -J-Xmx1g -classpath/" scripts/bootstrap/compile.sh \
                    &&           env EXTRA_BAZEL_ARGS="--host_javabase=@local_jdk//:jdk" bash ./compile.sh \
 # Patch Bazel tools 
-		   && 		cd $SOURCE_ROOT/bazel \
-		   &&		bazel --host_jvm_args="-Xms1024m" --host_jvm_args="-Xmx2048m" build --host_javabase="@local_jdk//:jdk" //:bazel-distfile \
-		   &&           PATCH="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.0.0/patch" \
-		   && 	        JTOOLS=$SOURCE_ROOT/remote_java_tools_linux \
-		   &&    	mkdir -p $JTOOLS && cd $JTOOLS \
-		   && 		unzip $SOURCE_ROOT/bazel/derived/distdir/java_tools_javac10_linux-v3.2.zip \
-		   && 		curl -sSL $PATCH/tools.diff | patch -p1 || echo "Error: Patch Bazel tools" \
+                   &&                 cd $SOURCE_ROOT/bazel \
+                   &&                bazel --host_jvm_args="-Xms1024m" --host_jvm_args="-Xmx2048m" build --host_javabase="@local_jdk//:jdk" //:bazel-distfile \
+                   &&           PATCH="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.0.0/patch" \
+                   &&                 JTOOLS=$SOURCE_ROOT/remote_java_tools_linux \
+                   &&            mkdir -p $JTOOLS && cd $JTOOLS \
+                   &&                 unzip $SOURCE_ROOT/bazel/derived/distdir/java_tools_javac10_linux-v3.2.zip \
+                   &&                 curl -sSL $PATCH/tools.diff | patch -p1 || echo "Error: Patch Bazel tools" \
 # Download source code
                    &&           cd $SOURCE_DIR \
                    &&           git clone https://github.com/linux-on-ibm-z/tensorflow.git \
@@ -150,8 +150,8 @@ PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                                 pkg-config \
-				python3-pip \
-				python3-virtualenv \
+                                python3-pip \
+                                python3-virtualenv \
                                 python3-numpy \
                                 python3-dev \
                                 python3-mock \
@@ -159,9 +159,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                                 python3-sklearn \
                                 libhdf5-dev \
                                 libssl-dev \
-		   && ln -sf /usr/bin/python3 /usr/bin/python \
+                   && ln -sf /usr/bin/python3 /usr/bin/python \
                    && pip3 install cython \
-		   && pip3 install wheel \
+                   && pip3 install wheel \
                                 numpy==1.16.2 \
                                 future \
                                 backports.weakref \
