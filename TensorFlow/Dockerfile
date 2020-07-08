@@ -85,7 +85,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                                 h5py \
                                 tensorflow_estimator \
                                 grpcio\
-
 # Install Go
                    &&           mkdir -p $SOURCE_DIR && cd $SOURCE_DIR \
                    &&           wget https://dl.google.com/go/go1.13.3.linux-s390x.tar.gz \
@@ -118,7 +117,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                    &&           yes "" | ./configure \
 # Build TensorFlow
                    &&           bazel --host_jvm_args="-Xms1024m" --host_jvm_args="-Xmx2048m" build  --define=tensorflow_mkldnn_contraction_kernel=0 //tensorflow/tools/pip_package:build_pip_package \
-
 # Build TensorFlow wheel
                    &&           cd $SOURCE_DIR/tensorflow \
                    &&           mkdir -p /tensorflow_wheel \
