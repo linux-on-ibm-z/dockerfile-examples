@@ -361,7 +361,7 @@ _main() {
 	exec "$@"
 }
 
-# If we are sourced from elsewhere,don't perform any further actions
+# If we are sourced from elsewhere, don't perform any further actions
 if ! _is_sourced; then
 	_main "$@"
 fi
