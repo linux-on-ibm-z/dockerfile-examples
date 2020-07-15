@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################### Dockerfile for Salt version v3000 ##################################
+################### Dockerfile for Salt version v3000.3 ##################################
 #
 # This Dockerfile builds a basic installation of Salt.
 #
@@ -32,7 +32,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 ENV SOURCE_DIR=/
 WORKDIR $SOURCE_DIR
 
-ARG SALT_VER=v3000
+ARG SALT_VER=v3000.3
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
