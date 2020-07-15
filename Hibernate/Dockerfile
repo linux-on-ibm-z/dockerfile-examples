@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for Hibernate version 5.4.13 ###########################
+################# Dockerfile for Hibernate version 5.4.18 ###########################
 #
 # This Dockerfile builds a basic installation of Hibernate.
 #
@@ -20,7 +20,7 @@
 # docker cp <container_id>:/hibernate <path_on_host>
 #
 # Reference:
-# https://github.com/hibernate/hibernate-orm/tree/5.4.13
+# https://github.com/hibernate/hibernate-orm/tree/5.4.18
 # http://hibernate.org/orm/releases/5.4/
 #
 ##################################################################################
@@ -31,7 +31,7 @@ FROM s390x/ubuntu:18.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG HIBERNATE_VER=5.4.13.Final
+ARG HIBERNATE_VER=5.4.18.Final
 
 ARG ADOPTOPENJDK_URL=https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.6%2B10/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.6_10.tar.gz
 ARG HIBERNATE_URL=https://downloads.sourceforge.net/project/hibernate/hibernate-orm/$HIBERNATE_VER/hibernate-release-$HIBERNATE_VER.zip
