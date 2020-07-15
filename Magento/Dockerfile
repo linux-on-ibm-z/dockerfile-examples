@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################## Dockerfile for Magento version 2.3.4 ###################################
+############################## Dockerfile for Magento version 2.3.5 ###################################
 #
 # Magento is an open-source e-commerce platform written in PHP.
 #
@@ -24,7 +24,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG MAGENTO_VER=2.3.4
+ARG MAGENTO_VER=2.3.5
 ARG MYSQL_PASSWD=temp_pass
 
 # Install dependencies
@@ -51,6 +51,7 @@ RUN apt-get update -y && apt-get install -y \
     sed \
     tar \
     unzip \
+    curl \
 
 # Configure apache2
  && chmod 766 /etc/apache2/apache2.conf \
@@ -67,8 +68,7 @@ RUN apt-get update -y && apt-get install -y \
  && git clone https://github.com/magento/magento2.git \
  && cd magento2 \
  && git checkout $MAGENTO_VER \
-# to fix issue with github repo - see https://github.com/magento/magento2/issues/24937
- && composer update symfony/service-contracts \
+ && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
  && composer install --no-plugins --no-scripts \
  && find var vendor generated pub/static pub/media app/etc -type f -exec chmod g+w {} + \
  && find var vendor generated pub/static pub/media app/etc -type d -exec chmod g+ws {} + \
