@@ -1,3 +1,6 @@
+# © Copyright IBM Corporation 2017, 2020.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
 ########## Dockerfile for word2vec version 0.1c #########################################
 #
 # This Dockerfile builds a basic installation of word2vec.
@@ -22,7 +25,7 @@
 #########################################################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:20.04
 
 # The author
 MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
