@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Linux on z Systems Dockerfile for Cassandra version 3.11.5 #########
+########## Linux on z Systems Dockerfile for Cassandra version 3.11.6 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -21,7 +21,7 @@
 # Base image
 FROM s390x/ubuntu:18.04
 
-ARG CASSANDRA_VERSION=3.11.5
+ARG CASSANDRA_VERSION=3.11.6
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -81,6 +81,7 @@ RUN apt-get update && apt-get install -y \
 && rm lib/snappy-java-1.1.1.7.jar \
 && wget -O lib/snappy-java-1.1.2.6.jar https://repo1.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.2.6/snappy-java-1.1.2.6.jar \
 && rm lib/jna-4.2.2.jar \
+&& cd $SOURCE_ROOT \
 && cp $SOURCE_ROOT/jna/build/jna.jar $SOURCE_ROOT/cassandra/lib/jna-4.2.2.jar \
 && cp -R $SOURCE_ROOT/cassandra /usr/local/ \
 && rm -rf  $SOURCE_ROOT/jna $SOURCE_ROOT/cassandra $SOURCE_ROOT/*.tar.gz  \
