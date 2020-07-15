@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for Apache ActiveMQ version 5.15.13 ###################
+################# Dockerfile for Apache ActiveMQ version 5.16.0 ###################
 #
 # This Dockerfile builds a basic installation of Apache ActiveMQ.
 #
@@ -14,7 +14,7 @@
 #
 # Run the ActiveMQ Message Broker using below command:
 # docker run --name <container_name> -d -p <port>:8161 <image-name>
-# e.g. docker run --name activemq -d -p 8161:8161 activemq:5.15.13
+# e.g. docker run --name activemq -d -p 8161:8161 activemq:5.16.0
 #
 # To provide custom configuration for Activemq use below command:
 #  docker run --name <container_name> -d -p <port>:8161 -v /<host_path>/conf:/opt/activemq/conf <image-name>
@@ -29,7 +29,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG APACHE_AMQ_VER=5.15.13
+ARG APACHE_AMQ_VER=5.16.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -49,6 +49,7 @@ RUN apt-get update && apt-get install -y \
   && cd $SOURCE_DIR \
   && wget http://archive.apache.org/dist/activemq/${APACHE_AMQ_VER}/apache-activemq-${APACHE_AMQ_VER}-bin.tar.gz \
   && tar -xzvf apache-activemq-${APACHE_AMQ_VER}-bin.tar.gz \
+  && sed -i "s/127.0.0.1/0.0.0.0/" apache-activemq-${APACHE_AMQ_VER}/conf/jetty.xml \
   && mkdir -p /opt/activemq \
   && cp -a $SOURCE_DIR/apache-activemq-${APACHE_AMQ_VER}/* $ACTIVEMQ_HOME \
 # Clean up the unwanted packages and clear the source directory
