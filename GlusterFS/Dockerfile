@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for GlusterFS version 7.4 ##########################################
+##################################### Dockerfile for GlusterFS version 7.6 ##########################################
 #
 # This Dockerfile builds a basic installation of GlusterFS.
 #
@@ -17,7 +17,7 @@
 # Base Image
 FROM  s390x/ubuntu:18.04
 
-ARG GLUSTERFS_VER=7.4
+ARG GLUSTERFS_VER=7.6
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -53,8 +53,6 @@ RUN apt-get update && apt-get install -y  \
     python3 \
     uuid-dev \
     zlib1g-dev \
-    patch \
-
 # Build GlusterFS from source
  && git clone https://github.com/gluster/glusterfs -b v$GLUSTERFS_VER \
  && cd glusterfs \
@@ -62,12 +60,9 @@ RUN apt-get update && apt-get install -y  \
  && ./configure --enable-gnfs \
  && sed -i '37d' xlators/performance/io-threads/src/io-threads.h \
  && sed -i '37i #define IOT_THREAD_STACK_SIZE   ((size_t)(512*1024))' xlators/performance/io-threads/src/io-threads.h \
- && sed -i '41d' geo-replication/syncdaemon/monitor.py \
- && sed -i '41i     gconf.setconfig("master-distribution-count", str(distribute_count))' geo-replication/syncdaemon/monitor.py \
  && make \
  && make install \
  && ldconfig \
-
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
    make \
@@ -83,6 +78,6 @@ RUN apt-get update && apt-get install -y  \
 EXPOSE 2222 111 245 443 24007 2049 8080 6010 6011 6012 38465 38466 38468 38469 49152 49153 49154 49156 49157 49158 49159 49160 49161 49162
 
 # Start the Gluster daemon
-ENTRYPOINT /usr/local/sbin/glusterd && tail -f /dev/null
+ENTRYPOINT /usr/local/sbin/glusterd && echo "Process id of glusterd=$(pidof glusterd)" && tail -f /dev/null
 
 # End of Dockerfile
