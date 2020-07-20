@@ -40,7 +40,7 @@ RUN  apt-get update  \
   && git checkout v2.1 \
   && make \
   && make install \
-  && ln -s luajit-2.1.0-beta2 /usr/local/bin/luajit \
+  && ln -s luajit-2.1.0-beta3 /usr/local/bin/luajit \
   
 # Clean up the unwanted packages and clear the source directory 
   && apt-get remove -y \
