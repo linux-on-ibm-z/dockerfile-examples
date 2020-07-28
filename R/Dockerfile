@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################# Dockerfile for R version 4.0.1 ######################
+############################# Dockerfile for R version 4.0.2 ######################
 # This Dockerfile builds a basic installation of R.
 #
 # R is a language and environment for statistical computation and graphics.
@@ -26,7 +26,7 @@ FROM s390x/ubuntu:20.04 AS builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
-ENV R_BASE_VERSION 4.0.1
+ENV R_BASE_VERSION 4.0.2
 ENV SOURCE_DIR=/tmp/source
 
 WORKDIR $SOURCE_DIR
