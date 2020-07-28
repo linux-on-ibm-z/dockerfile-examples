@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Apache Solr version 8.5.1 #########################
+############### Dockerfile for Apache Solr version 8.6.0 #########################
 #
 # To build Apache Solr image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -21,9 +21,9 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 # Create a working directory for Apache Solr
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
-ENV JAVA_HOME=/opt/jdk-11.0.7+10 PATH=$JAVA_HOME/bin:$PATH
+ENV JAVA_HOME=/opt/adopt/java PATH=$JAVA_HOME/bin:$PATH
 
-ARG SOLR_VER=8.5.1
+ARG SOLR_VER=8.6.0
 
 # Install dependencies
 RUN apt-get update &&   apt-get install -y \
@@ -32,8 +32,9 @@ RUN apt-get update &&   apt-get install -y \
     tar \
     wget \
 # Download AdoptOpenJDK 11 with OpenJ9
- && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.7%2B10_openj9-0.20.0/OpenJDK11U-jdk_s390x_linux_openj9_11.0.7_10_openj9-0.20.0.tar.gz \
- && tar -xzf OpenJDK11U-jdk_s390x_linux_openj9_11.0.7_10_openj9-0.20.0.tar.gz -C /opt \
+ && mkdir -p /opt/adopt/java \
+ && wget -O adoptjdk.tar.gz https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10_openj9-0.21.0/OpenJDK11U-jdk_s390x_linux_openj9_11.0.8_10_openj9-0.21.0.tar.gz \
+ && tar -zxvf adoptjdk.tar.gz -C /opt/adopt/java --strip-components 1 \
 # Download Solr and build it
  && wget https://archive.apache.org/dist/lucene/solr/$SOLR_VER/solr-$SOLR_VER.tgz \
  && tar zxvf solr-$SOLR_VER.tgz  \
