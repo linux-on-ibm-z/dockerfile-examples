@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-server version 5.0.1 #########
+########## Dockerfile for Zabbix-server version 5.0.2 #########
 #
 # This Dockerfile builds a basic installation of Zabbix-server.
 #
@@ -17,12 +17,13 @@
 # Test in the browser by using the following url:
 # http://<hostname>:<port_number>/zabbix
 #
+# Note: To login into zabbix dashboard, Use user name as "Admin" and password as "zabbix" to log in as a Zabbix superuser.
 ##################################################################################
 
 # Base Image
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG ZBX_SERVER_VER=5.0.1
+ARG ZBX_SERVER_VER=5.0.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -37,7 +38,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
         && apt-get -y install \
                 ceph \
                 gcc \
-		pkg-config \
+                pkg-config \
                 libcurl4 \
                 libcurl4-openssl-dev \
                 libmysqlclient-dev \
@@ -57,14 +58,14 @@ RUN     apt-get update && apt-get install -y mysql-server \
         &&      cd zabbix-${ZBX_SERVER_VER}/ \
         &&      ./configure --enable-server --with-mysql --enable-ipv6 --with-net-snmp --with-libcurl --with-libxml2 \
         &&      make install \
-	&& 	cat /zabbix-${ZBX_SERVER_VER}/database/mysql/schema.sql > /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql \
-	&& 	cat /zabbix-${ZBX_SERVER_VER}/database/mysql/images.sql >> /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql \
-	&&	cat /zabbix-${ZBX_SERVER_VER}/database/mysql/data.sql >> /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql
+        &&      cat /zabbix-${ZBX_SERVER_VER}/database/mysql/schema.sql > /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql \
+        &&      cat /zabbix-${ZBX_SERVER_VER}/database/mysql/images.sql >> /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql \
+        &&      cat /zabbix-${ZBX_SERVER_VER}/database/mysql/data.sql >> /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql
 
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG ZBX_SERVER_VER=5.0.1
+ARG ZBX_SERVER_VER=5.0.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -112,7 +113,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
         &&      echo "</Directory>" >> apache2.conf \
 # Create a 'zabbix' user required to start Zabbix server daemon
         &&      /usr/sbin/groupadd zabbix \
-	&&      /usr/sbin/useradd -g zabbix zabbix \
+        &&      /usr/sbin/useradd -g zabbix zabbix \
 # Installing Zabbix web interface
         &&      cd /usr/share/doc/ui/ \
         &&      mkdir -p /var/www/html/zabbix \
