@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-Agent version 5.0.1 ####################
+########## Dockerfile for Zabbix-Agent version 5.0.2 ####################
 #
 # This Dockerfile builds a basic installation of Zabbix-Agent.
 #
@@ -24,17 +24,17 @@
 #
 ##################################################################################
 #
-#	NOTE:-
-#		** To configure zabbix agent with zabbix server please follow instructions below:
-#		1. Edit Zabbix agent configuration file /usr/local/etc/zabbix_agentd.conf
-#		2. Enter Zabbix server IP address and Hostname in configuration file
+#       NOTE:-
+#               ** To configure zabbix agent with zabbix server please follow instructions below:
+#               1. Edit Zabbix agent configuration file /usr/local/etc/zabbix_agentd.conf
+#               2. Enter Zabbix server IP address and Hostname in configuration file
 #
 ####################################################################################
 
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG ZBX_AGENT_VER=5.0.1
+ARG ZBX_AGENT_VER=5.0.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -45,33 +45,33 @@ ENV PATH=$PATH:/usr/local/sbin/
 WORKDIR $SOURCE_DIR
 
 # Install dependencies
-RUN	apt-get update && apt-get -y install \
-		gcc \
-		make \
-		tar \
-		wget \
-		libpcre3-dev \
+RUN apt-get update && apt-get -y install \
+                gcc \
+                make \
+                tar \
+                wget \
+                libpcre3-dev \
 # Download Zabbix agent
-	&& wget https://cdn.zabbix.com/zabbix/sources/stable/5.0/zabbix-${ZBX_AGENT_VER}.tar.gz  \
-	&& tar -xf zabbix-${ZBX_AGENT_VER}.tar.gz \
+        && wget https://cdn.zabbix.com/zabbix/sources/stable/5.0/zabbix-${ZBX_AGENT_VER}.tar.gz  \
+        && tar -xf zabbix-${ZBX_AGENT_VER}.tar.gz \
 # Install Zabbix agent
-	&& cd $SOURCE_DIR/zabbix-${ZBX_AGENT_VER}\
-	&& ./configure --enable-agent \
-	&& make \
-	&& make install \
+        && cd $SOURCE_DIR/zabbix-${ZBX_AGENT_VER}\
+        && ./configure --enable-agent \
+        && make \
+        && make install \
 # Create a 'zabbix' user required to start Zabbix agent daemon
-	&& /usr/sbin/groupadd zabbix \
-	&& /usr/sbin/useradd -g zabbix zabbix \
+        && /usr/sbin/groupadd zabbix \
+        && /usr/sbin/useradd -g zabbix zabbix \
 # Clean up cache data and remove dependencies which are not required
-	&&	apt-get -y remove \
-		gcc \
-		make \
-		wget \
-	&&	apt-get autoremove -y \
-	&& 	apt autoremove -y \
-	&& 	rm -rf $SOURCE_DIR \
-	&& 	apt-get clean \
-	&& 	rm -rf /var/lib/apt/lists/*
+        &&      apt-get -y remove \
+                gcc \
+                make \
+                wget \
+        &&      apt-get autoremove -y \
+        &&      apt autoremove -y \
+        &&      rm -rf $SOURCE_DIR \
+        &&      apt-get clean \
+        &&      rm -rf /var/lib/apt/lists/*
 
 # change user to zabbix
 USER zabbix
