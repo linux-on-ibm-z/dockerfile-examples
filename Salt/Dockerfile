@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################### Dockerfile for Salt version v3000.3 ##################################
+################### Dockerfile for Salt version v3001 ##################################
 #
 # This Dockerfile builds a basic installation of Salt.
 #
@@ -24,7 +24,7 @@
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:18.04
+FROM ubuntu:18.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -32,43 +32,33 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 ENV SOURCE_DIR=/
 WORKDIR $SOURCE_DIR
 
-ARG SALT_VER=v3000.3
+ARG SALT_VER=v3001
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-        g++ \		
-        gcc \
-		git \
-		libffi-dev \
-        libsasl2-dev \
-		libssl-dev \
-        libxml2-dev \
-		libxslt1-dev \
-		libzmq3-dev \
-		make \
-        man \
-		python3-dev \
-		python3-pip \
-		tar \
-		wget \
-	&&  pip3 install --upgrade pip \
+	wget \
+	curl \
+	python3 \
+	git \
+	python3-pip \
+	libffi-dev \
+	libssl-dev \
+	&& pip3 install -U pip \
 # Install required packages using pip3
-	&&	pip install \
+	&&	pip3 install \
 			pyzmq \
 			PyYAML \
-			pycrypto \
+			pycryptodome \
 			msgpack-python \
 			jinja2 \
 			psutil \
 			futures \
 			tornado \
-			python-dateutil \
-			genshi \
 # Clone the repository and install SaltStack
 && 	git clone git://github.com/saltstack/salt \
 && 	cd salt \
 && 	git checkout $SALT_VER \
-&& 	pip install -e . \
+&& 	pip3 install . \
 # Configure SaltStack to run self-contained version
 && 	cd $SOURCE_DIR \
 &&	mkdir -p etc/salt/pki/master \
@@ -78,17 +68,18 @@ RUN apt-get update && apt-get install -y \
 # Edit config file master
 &&	sed -i 's/#user: root/user: root/g' master \
 && 	sed -i 's,#root_dir: /,'"root_dir: $SOURCE_DIR"',' master \
+&&      sed -i 's,#pki_dir: /,'"pki_dir: $SOURCE_DIR/etc/salt/pki/master"',' master \
 # Edit config file minion
 &&	sed -i 's/#master: salt/master: localhost/g' minion \
 &&	sed -i 's/#user: root/user: root/g' minion \
 &&	sed -i 's,#root_dir: /,'"root_dir: $SOURCE_DIR"',' minion \
+&&      sed -i 's,#pki_dir: /,'"pki_dir: $SOURCE_DIR/etc/salt/pki/minion"',' minion \
+&&      sed -i 's,#id:,'"id: saltdev"',' minion \
 # Clean up cache data and remove dependencies which are not required
 &&	apt-get remove -y \
-			gcc \
-			git \
-			g++ \
-			make \
 			wget \
+			curl \
+			git \
 && apt autoremove -y && apt-get clean \
 && rm -rf salt/ && rm -rf /var/lib/apt/lists/*
 
@@ -97,4 +88,3 @@ VOLUME /etc/salt
 CMD salt-master -c ./etc/salt & salt-minion -c ./etc/salt
 
 # End of Dockerfile
-
