@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.7.1 #############################
+#################### Dockerfile for Beats 7.8.0 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG BEATS_VER=7.7.1
+ARG BEATS_VER=7.8.0
 
 # The author
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Beats/${BEATS_VER}/patch"
@@ -78,39 +78,39 @@ RUN apt-get update && apt-get install -y \
  && git apply --ignore-whitespace beats.patch \
 # Building heartbeat
  && cd $GOPATH/src/github.com/elastic/beats/heartbeat  \
- && make  heartbeat \
- && make  update \
- && make  fmt \
+ && make heartbeat \
+ && make update \
+ && make fmt \
 # Building filebeat
  && cd $GOPATH/src/github.com/elastic/beats/filebeat  \
- && make  filebeat \
- && make  update \
- && make  fmt \
+ && make filebeat \
+ && make update \
+ && make fmt \
 # Building packetbeat
  && cd $GOPATH/src/github.com/elastic/beats/packetbeat  \
- && make  packetbeat \
- && make  update \
- && make  fmt \
+ && make packetbeat \
+ && make update \
+ && make fmt \
 # Building metricbeat
  && cd $GOPATH/src/github.com/elastic/beats/metricbeat \
- && make  metricbeat \
- && make  update \
- && make  fmt \
+ && mage build \
+ && mage update \
+ && mage fmt \
 # Building libbeat
  && cd $GOPATH/src/github.com/elastic/beats/libbeat  \
  && make libbeat \
- && make  update \
- && make  fmt \
+ && make update \
+ && make fmt \
 # Building journalbeat
  && cd $GOPATH/src/github.com/elastic/beats/journalbeat  \
  && make journalbeat \
- && make  update \
- && make  fmt \
+ && make update \
+ && make fmt \
 # Building auditbeat
  && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
  && make auditbeat \ 
  && make update \
- && make  fmt \
+ && make fmt \
 # Patching for auditbeat fixes
  && cd $GOPATH/pkg/mod/github.com/elastic/go-libaudit@v0.4.0 \
  && wget ${PATCH_URL}/audit.patch \
@@ -124,7 +124,7 @@ RUN apt-get update && apt-get install -y \
  && make clean \
  && make auditbeat \ 
  && make update \
- && make  fmt
+ && make fmt
 
 FROM s390x/ubuntu:18.04
 
