@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 7.7.1 ############################################
+###################################### Dockerfile for Kibana version 7.8.0 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -25,7 +25,7 @@
 
 FROM s390x/ubuntu:18.04
 
-ARG KIBANA_VER=7.7.1
+ARG KIBANA_VER=7.8.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -52,11 +52,11 @@ RUN sudo apt-get update && sudo apt-get install -y \
     sudo \
     tar \
     wget \
-# Installing Node.js v10.15.2
+# Installing Node.js v10.21.0
  && sudo mkdir -p /usr/local/lib/nodejs \
- && cd $WORKDIR && sudo wget https://nodejs.org/dist/v10.19.0/node-v10.19.0-linux-s390x.tar.gz \
- && sudo tar xzf node-v10.19.0-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
- && sudo ln -s /usr/local/lib/nodejs/node-v10.19.0-linux-s390x/bin/* /usr/bin/ \
+ && cd $WORKDIR && sudo wget https://nodejs.org/dist/v10.21.0/node-v10.21.0-linux-s390x.tar.gz \
+ && sudo tar xzf node-v10.21.0-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
+ && sudo ln -s /usr/local/lib/nodejs/node-v10.21.0-linux-s390x/bin/* /usr/bin/ \
 # Install Yarn
  && curl -o- -L https://yarnpkg.com/install.sh | bash \
 # Download and Install Kibana
@@ -78,7 +78,7 @@ RUN sudo apt-get update && sudo apt-get install -y \
     g++ \
     wget \
  && sudo apt-get autoremove -y && sudo apt-get clean \
- && sudo rm -rf $WORKDIR/kibana* $WORKDIR/node-v10.19.0-linux-s390x.tar.gz \
+ && sudo rm -rf $WORKDIR/kibana* $WORKDIR/node-v10.21.0-linux-s390x.tar.gz \
  && sudo rm -rf /var/lib/apt/lists/* $HOME/.cache
 # Expose 5601 port used by Kibana
 EXPOSE 5601
