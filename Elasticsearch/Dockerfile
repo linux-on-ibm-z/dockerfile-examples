@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.7.1 ########################################
+##################################### Dockerfile for Elasticsearch version 7.8.0 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG ELASTICSEARCH_VER=7.7.1
+ARG ELASTICSEARCH_VER=7.8.0
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -65,7 +65,7 @@ RUN apt-get update && apt-get install -y \
  && mv $SOURCE_DIR/elasticsearch/distribution/docker/docker-s390x-build-context/docker_build_context_build.gradle $SOURCE_DIR/elasticsearch/distribution/docker/docker-s390x-build-context/build.gradle \
  && wget $PATCH_URL/oss_docker_build_context_build.gradle -P $SOURCE_DIR/elasticsearch/distribution/docker/oss-docker-s390x-build-context \
  && mv $SOURCE_DIR/elasticsearch/distribution/docker/oss-docker-s390x-build-context/oss_docker_build_context_build.gradle $SOURCE_DIR/elasticsearch/distribution/docker/oss-docker-s390x-build-context/build.gradle \
- && wget -O - $PATCH_URL/patch_gradle.diff | git apply \
+ && wget -O - $PATCH_URL/diff.patch | git apply \
  && ./gradlew :distribution:archives:oss-linux-s390x-tar:assemble --parallel \
 # Create distributions as deb, rpm and docker
  && ./gradlew :distribution:packages:s390x-oss-deb:assemble \
