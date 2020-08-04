@@ -30,11 +30,11 @@ RUN apt-get update && apt-get install -y \
  && wget http://www.scala-lang.org/files/archive/scala-${SCALA_VER}.deb \
  && dpkg -i scala-${SCALA_VER}.deb \
 # Clean up data and unused packages
+ && rm -rf scala-${SCALA_VER}.deb \
  && apt-get remove -y wget \
  && apt-get autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf /root/scala-${SCALA_VER}.deb
-
-CMD ["scala","-version"]
+ && apt-get clean && rm -rf /var/lib/apt/lists/* 
+ 
+ CMD ["scala","-version"]
 
 # End of Dockerfile
