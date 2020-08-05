@@ -29,7 +29,7 @@
 #
 #########################################################################################################################
 
-FROM s390x/ubuntu:16.04 AS builder
+FROM s390x/ubuntu:18.04 AS builder
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
@@ -104,7 +104,7 @@ RUN cd $SOURCE_DIR \
     && make \
     && checkinstall --pkgversion=1.9.0 -y
 
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
