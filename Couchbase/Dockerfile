@@ -10,7 +10,7 @@
 # docker build -t <image_name> .
 #
 # To start Couchbase server run the below command
-# docker run --name <container_name> -p <port_numbers>:8091-8094 <port_number>:11210 -d <image_name>
+# docker run --name <container_name> -p <port_numbers>:8091-8094 -p <port_number>:11210 -d <image_name>
 #
 # To test Couchbase service, use following command:
 # curl http://127.0.0.1:8091/ui/index.html
