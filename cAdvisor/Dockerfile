@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for cAdvisor 0.35.0 #################################
+######################## Dockerfile for cAdvisor 0.36.0 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -23,15 +23,14 @@
 ##########################################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04 AS builder
+FROM s390x/ubuntu:20.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG CADVISIOR_VER=0.35.0
+ARG CADVISOR_VER=0.36.0
 
 ENV SOURCE_DIR=/tmp/source
-ENV PATH=/usr/lib/go-1.10/bin:$PATH
 WORKDIR $SOURCE_DIR
 
 # Set Environmental Variables
@@ -41,35 +40,34 @@ ENV PATH=$PATH:$GOPATH/bin
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     git \
-        golang-1.10 \
         curl \
-# Install godep tool
- && go get github.com/tools/godep \
-
+        patch \
+        golang-1.14 \
+        make \
+ && export PATH=/usr/lib/go-1.14/bin/:$PATH \
 # Create directory and Change the work directory
  && mkdir -p $GOPATH/src/github.com/google && cd $GOPATH/src/github.com/google \
-
 # Checkout the code from repository
- && git clone https://github.com/google/cadvisor.git -b v$CADVISIOR_VER \
+ && git clone https://github.com/google/cadvisor.git -b v$CADVISOR_VER \
  && cd cadvisor \
-
 # Change the work directory
  && cd $GOPATH/src/github.com/google/cadvisor \
-
-# Edit `$GOPATH/src/github.com/google/cadvisor/Godeps/_workspace/src/github.com/klauspost/crc32/crc32.go` to add the following code to end of the file
- && echo " func updateCastagnoli(crc uint32, p []byte) uint32 { \n // only use slicing-by-8 when input is >= 16 Bytes \n if len(p) >= 16 { \n return updateSlicingBy8(crc, castagnoliTable8, p) \n }  \n return update(crc, castagnoliTable, p) \n } \n "  >> vendor/github.com/klauspost/crc32/crc32.go \
- && echo "func updateIEEE(crc uint32, p []byte) uint32 { \n // only use slicing-by-8 when input is >= 16 Bytes \n  if len(p) >= 16 { \n  iEEETable8Once.Do(func() { \n iEEETable8 = makeTable8(IEEE) \n }) \n return updateSlicingBy8(crc, iEEETable8, p) \n  } \n  return update(crc, IEEETable, p) \n  } \n " >> vendor/github.com/klauspost/crc32/crc32.go \
-
+# Apply patches 
+ && export PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/cAdvisor/0.36.0/patch" \
+ && curl -o "go_mod.patch" $PATCH_URL/go_mod.patch \
+ && curl -o "go_sum.patch" $PATCH_URL/go_sum.patch \
+ && patch --ignore-whitespace go.mod < go_mod.patch \
+ && patch --ignore-whitespace go.sum < go_sum.patch \
 # Build cadvisor
  && cd $GOPATH/src/github.com/google/cadvisor \
- && godep go build . \
+ && make build . \
  && cp $GOPATH/src/github.com/google/cadvisor/cadvisor /usr/bin \
  && cd && rm -rf $SOURCE_DIR \
  && apt-get remove -y git && apt-get autoremove -y && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
 # Multistage build
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:20.04
 
 WORKDIR /root
 COPY --from=builder /usr/bin/cadvisor /usr/bin/cadvisor
