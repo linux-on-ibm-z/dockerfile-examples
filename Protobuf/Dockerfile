@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for Protobuf version 3.12.3 #######################
+######################## Dockerfile for Protobuf version 3.12.4 #######################
 #
 # Protocol Buffers is a method of serializing structured data.
 #
@@ -21,7 +21,7 @@
 #############################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -29,7 +29,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 
-ARG PROTOBUF_VER=v3.12.3
+ARG PROTOBUF_VER=v3.12.4
 
 # Installing dependencies
 RUN apt-get update && apt-get install -y \
@@ -40,17 +40,15 @@ RUN apt-get update && apt-get install -y \
     gzip \
     libtool \
     make \
-
+    zlib1g-dev \
 # Set gcc-4.8 default version
 && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 10 \
 && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 10 \
-
 # Download and install protobuf
 && git clone https://github.com/protocolbuffers/protobuf.git \
 && cd protobuf \
 && git checkout $PROTOBUF_VER \
 && git submodule update --init --recursive \
-
 # Build
 && ./autogen.sh \
 && ./configure \
@@ -58,7 +56,6 @@ RUN apt-get update && apt-get install -y \
 && make install \
 && ldconfig \
 && rm -rf $SOURCE_DIR \
-
 # Tidy and clean up
 && apt-get remove -y \
     autoconf \
