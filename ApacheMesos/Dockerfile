@@ -3,7 +3,7 @@
 
 ########################################## Dockerfile for Apache Mesos 1.9.0 ###################################################
 #
-# This Dockerfile builds and install Apache Mesos 1.9.0 from source using Ubuntu 16:04 on s390x.
+# This Dockerfile builds and install Apache Mesos 1.9.0 from source using Ubuntu 18:04 on s390x.
 #
 # Apache Mesos is a cluster manager that provides efficient resource isolation and sharing across distributed applications, or frameworks.
 # It can run Hadoop, Jenkins, Spark, Aurora, and other frameworks on a dynamically shared pool of nodes.
@@ -72,9 +72,9 @@ RUN apt-get update && apt-get install -y \
 
 # Download and install IBM JDK 8
 RUN cd $SOURCE_DIR \
-    && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.41/linux/s390x/ibm-java-s390x-sdk-8.0-5.41.bin \
+    && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.6.15/linux/s390x/ibm-java-s390x-sdk-8.0-6.15.bin \
     && echo -en 'INSTALLER_UI=silent\nUSER_INSTALL_DIR=/opt/java-1.8.0-ibm\nLICENSE_ACCEPTED=TRUE' > installer.properties \
-    && bash ibm-java-s390x-sdk-8.0-5.41.bin -i silent -f installer.properties
+    && bash ibm-java-s390x-sdk-8.0-6.15.bin -i silent -f installer.properties
 
 # Download and build source code of Apache Mesos
 RUN cd $SOURCE_DIR \
@@ -120,7 +120,7 @@ WORKDIR $SOURCE_DIR
 
 COPY --from=builder /tmp/mesos/build/build_1.9.0-1_s390x.deb ./
 COPY --from=builder /tmp/mesos/build/src/python/dist ./
-COPY --from=builder /tmp/ibm-java-s390x-sdk-8.0-5.41.bin ./
+COPY --from=builder /tmp/ibm-java-s390x-sdk-8.0-6.15.bin ./
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -134,7 +134,7 @@ RUN apt-get update && apt-get install -y \
     zlib1g \
 # Download and install IBM JDK 8
     && echo -en 'INSTALLER_UI=silent\nUSER_INSTALL_DIR=/opt/java-1.8.0-ibm\nLICENSE_ACCEPTED=TRUE' > installer.properties \
-    && bash ibm-java-s390x-sdk-8.0-5.41.bin -i silent -f installer.properties \
+    && bash ibm-java-s390x-sdk-8.0-6.15.bin -i silent -f installer.properties \
 # Install mesos and python packages
     && apt install ./build_1.9.0-1_s390x.deb \
     && pip install mesos.*whl \
