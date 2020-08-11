@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################### Dockerfile for Heketi 9.0.0 ########################
+##################### Dockerfile for Heketi 10.0.0 ########################
 #
 # This Dockerfile builds a basic installation of heketi.
 #
@@ -23,56 +23,26 @@
 # docker exec <container_name> heketi-cli -h
 ###########################################################################
 # Base image
-FROM s390x/ubuntu:18.04 as builder
+FROM s390x/ubuntu:18.04
 # Maintainer
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
-ARG HEKETI_VERSION=v9.0.0
-ENV GOPATH=/build
-ENV PATH=$PATH:/usr/lib/go-1.10/bin:$GOPATH/bin
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    git  \
-    golang-1.10 \
-    make \
-    mercurial \
-    tar \
-    wget \
-    patch \
-    curl \
-# Setup directories
- && mkdir -p /etc/heketi /var/lib/heketi $GOPATH/bin $GOPATH/src/github.com/heketi \
-# Install glide
- && cd $GOPATH/bin \
- && curl -SLO https://github.com/Masterminds/glide/releases/download/v0.13.1/glide-v0.13.1-linux-s390x.tar.gz \
- && tar -xzf glide-v0.13.1-linux-s390x.tar.gz linux-s390x/glide --strip=1 \
-# Clone and build heketi source
- && cd $GOPATH/src/github.com/heketi \
- && git clone -b $HEKETI_VERSION https://github.com/heketi/heketi.git \
- && cd heketi \
- && curl -o glide.lock.diff https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Heketi/9.0.0/patch/glide.lock.diff \
- && patch --ignore-whitespace glide.lock < glide.lock.diff \
- && make \
- && cp heketi /usr/bin/ \
- && cp client/cli/go/heketi-cli /usr/bin/ \
- && cd /etc/heketi \
- && wget https://raw.githubusercontent.com/heketi/heketi/v8.0.0/etc/heketi.json \
-# Clean up cache data and remove dependencies that are not required
- && apt-get remove -y \
-    git \
- && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && rm -rf $GOPATH/src/github.com/heketi/ && rm -rf $HOME/.glide $HOME/.cache
+ARG HEKETI_VERSION=v10.0.0
+COPY heketi-start.sh /heketi-start.sh
+COPY heketi.json /heketi.json
 
-FROM s390x/ubuntu:18.04
-RUN apt-get update -y && apt-get install -y golang-1.10 && mkdir -p /etc/heketi/
-COPY --from=builder /usr/bin/heketi /usr/bin/
-COPY --from=builder /usr/bin/heketi-cli /usr/bin/
-COPY --from=builder /etc/heketi/heketi.json /etc/heketi
-COPY --from=builder /var/lib/heketi /var/lib/
-ENV PATH=$PATH:/usr/lib/go-1.10/bin 
-WORKDIR /etc/heketi/
-VOLUME /etc/heketi/
-VOLUME /var/lib/heketi
+# Install dependencies
+RUN apt-get update && apt-get install -y wget tar \
+    && apt-get -y clean all \
+    && wget https://github.com/heketi/heketi/releases/download/$HEKETI_VERSION/heketi-$HEKETI_VERSION.linux.s390x.tar.gz \
+    && tar -xvf heketi-$HEKETI_VERSION.linux.s390x.tar.gz \
+    && mkdir  /etc/heketi /var/lib/heketi  \
+    && cp heketi/heketi /usr/bin/heketi \
+    && cp heketi/heketi-cli /usr/bin/heketi-cli \
+    && cp heketi-start.sh /usr/bin/heketi-start.sh \
+    && cp -r heketi.json /etc/heketi/heketi.json \
+    && chmod +x /usr/bin/heketi-start.sh
+
+VOLUME /etc/heketi /var/lib/heketi
 EXPOSE 8080
-CMD ["/usr/bin/heketi","--config=/etc/heketi/heketi.json"]
+ENTRYPOINT ["/usr/bin/heketi-start.sh"]
 # End of Dockerfile
