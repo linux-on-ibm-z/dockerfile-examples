@@ -23,7 +23,7 @@ FROM s390x/ubuntu:18.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 ENV SOURCE_ROOT=/tmp/source
-ENV JAVA_HOME=/opt/ibm/java-s390x-80
+ENV JAVA_HOME=/opt/ibm/java
 ENV PATH=$JAVA_HOME/bin:/usr/lib/go-1.10/bin:$PATH:$SOURCE_ROOT/json:$SOURCE_ROOT/flatbuffers
 ENV CC=/usr/bin/gcc
 ENV CB_MULTI_GO=0
@@ -39,7 +39,6 @@ RUN apt-get update  && apt-get install -y \
  xutils-dev \
  && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 40 \
  && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 40 \
-
 # Install openssl
  && wget https://ftp.openssl.org/source/old/1.0.2/openssl-1.0.2h.tar.gz  \
  && tar zxf openssl-1.0.2h.tar.gz \
@@ -47,18 +46,14 @@ RUN apt-get update  && apt-get install -y \
  && ./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib shared zlib-dynamic \
  && make depend \
  && make && make install \
-
 # Install Java
  && cd $SOURCE_ROOT \
- && echo 'LICENSE_ACCEPTED=TRUE\n \
-USER_INSTALL_DIR=/opt/ibm/java-s390x-80\n \
--fileOverwrite_/opt/ibm/java-s390x-80/_uninstall/uninstall.lax=Yes\n' \
-> installer.properties  \
- && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.5.41/linux/s390x/ibm-java-s390x-sdk-8.0-5.41.bin \
- && chmod a+x ibm-java-s390x-sdk-8.0-5.41.bin \
- && ./ibm-java-s390x-sdk-8.0-5.41.bin -i silent \
+ && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.6.11/linux/s390x/ibm-java-s390x-sdk-8.0-6.11.bin \
+ && wget https://raw.githubusercontent.com/zos-spark/scala-workbench/master/files/installer.properties.java \
+ && tail -n +3 installer.properties.java | tee installer.properties \
+ && chmod +x ibm-java-s390x-sdk-8.0-6.11.bin \
+ && ./ibm-java-s390x-sdk-8.0-6.11.bin -r installer.properties \
  && java -version \
-
 # Install additional dependencies
  && cd $SOURCE_ROOT \
  && curl -SLO https://raw.githubusercontent.com/linux-on-ibm-z/dockerfile-examples/master/Couchbase/couchbase-6.0.4.patch \
@@ -66,7 +61,7 @@ USER_INSTALL_DIR=/opt/ibm/java-s390x-80\n \
  && git clone https://github.com/nlohmann/json \
  && wget https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.gz \
  && tar -xzf boost_1_69_0.tar.gz \
- && cp -r $SOURCE_ROOT/boost_1_69_0/boost /usr/include/boost \
+ && ln -s $SOURCE_ROOT/boost_1_69_0/boost /usr/include/boost \
  && cd $SOURCE_ROOT && git clone https://github.com/couchbasedeps/erlang.git \
  && cd $SOURCE_ROOT/erlang \
  && git checkout couchbase-watson  \
@@ -105,22 +100,18 @@ USER_INSTALL_DIR=/opt/ibm/java-s390x-80\n \
  && chmod 644 /usr/local/include/v8*h \
  && cp -v out/s390x.release/lib.target/libv8*.so /usr/local/lib/ \
  && chmod -f 755 /usr/local/lib/libv8*.so \
-
 # Download the repo tool
  && cd $SOURCE_ROOT && curl https://storage.googleapis.com/git-repo-downloads/repo > repo \
  && chmod a+x repo \
  && mkdir couchbase && cd couchbase \
-
 # Clone Couchbase
- && git config --global user.email your@email.addr \
+ && git config --global user.email your@email.addr  \
  && git config --global user.name  your_docker_name \
  && ../repo init -u git://github.com/couchbase/manifest -m released/couchbase-server/6.0.4.xml \
  && ../repo sync \
  && cd $SOURCE_ROOT \
-
 # Patch files
  && patch -p0 < $SOURCE_ROOT/couchbase-6.0.4.patch \
-
 # Replace Boltdb
  && cd $SOURCE_ROOT/couchbase/godeps/src/github.com/ \
  && mv boltdb boltdb_ORIG \
@@ -128,35 +119,27 @@ USER_INSTALL_DIR=/opt/ibm/java-s390x-80\n \
  && git clone https://github.com/boltdb/bolt.git \
  && cd $SOURCE_ROOT/couchbase/godeps/src/github.com/boltdb/bolt \
  && git checkout v1.3.0 \
-
 # Install s390x crc32 support
  && cd $SOURCE_ROOT && git clone https://github.com/linux-on-ibm-z/crc32-s390x.git \
  && cd $SOURCE_ROOT/crc32-s390x \
  && make \
  && cp crc32-s390x.h /usr/local/include/ \
  && cp libcrc32_s390x.a /usr/local/lib/ \
-
 # Update the sys package
  && cd $SOURCE_ROOT/couchbase/godeps/src/golang.org/x/ \
  && mv sys sys_ORIG \
  && git clone https://github.com/golang/sys.git \
-
 # Install go tool yacc
  && go get -u golang.org/x/tools/cmd/goyacc \
  && cp $HOME/go/bin/goyacc /usr/lib/go-1.10/pkg/tool/linux_s390x/ \
  && chown root:root /usr/lib/go-1.10/pkg/tool/linux_s390x/goyacc \
  && chmod -f 755 /usr/lib/go-1.10/pkg/tool/linux_s390x/goyacc \
  && ln -sf /usr/lib/go-1.10/pkg/tool/linux_s390x/goyacc /usr/lib/go-1.10/pkg/tool/linux_s390x/yacc \
-
 # Build Couchbase
  && cd $SOURCE_ROOT/couchbase \
-# && ldconfig \
- && make EXTRA_CMAKE_OPTIONS='-DCMAKE_INSTALL_PREFIX=$SOURCE_ROOT/cbinstall' \
-
+ && make \
 # Clean up cache data and remove dependencies which are not required
- &&	apt-get -y remove \
-	make \
-	wget \
+ && apt-get -y remove autoconf automake check cmake curl flex gcc-5 git g++-5 libcurl4-openssl-dev libevent-dev libglib2.0-dev libncurses5-dev libsnappy-dev libssl-dev libtool libxml2-utils make openssl pkg-config python python-dev ruby sqlite3 subversion unixodbc unixodbc-dev wget xsltproc golang-1.10 patch xinetd xutils-dev \
  && apt autoremove -y \
  && apt-get autoremove -y \
  && apt-get clean \
@@ -167,7 +150,11 @@ USER_INSTALL_DIR=/opt/ibm/java-s390x-80\n \
  && rm -rf $SOURCE_ROOT/erlang \
  && rm -rf $SOURCE_ROOT/icu4c \
  && rm -rf $SOURCE_ROOT/v8 \
- && rm -rf $SOURCE_ROOT/couchbase \
+ && rm -rf $SOURCE_ROOT/crc32-s390x \
+ && rm -rf $SOURCE_ROOT/flatbuffers \
+ && rm -rf $SOURCE_ROOT/json \
+ && rm -rf $SOURCE_ROOT/jemalloc \
+ && rm -rf $SOURCE_ROOT/couchbase/build \
  && rm -rf $SOURCE_ROOT/*.patch
 
 # 8091: Couchbase Web console, REST/HTTP interface
@@ -188,4 +175,4 @@ USER_INSTALL_DIR=/opt/ibm/java-s390x-80\n \
 EXPOSE 8091 8092 8093 8094 8095 8096 11207 11210 11211 18091 18092 18093 18094 18095 18096
 
 # Start the server
-CMD $SOURCE_ROOT/cbinstall/bin/couchbase-server -- -noinput
+CMD $SOURCE_ROOT/couchbase/install/bin/couchbase-server -- -noinput
