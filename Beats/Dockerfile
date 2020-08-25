@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.8.0 #############################
+#################### Dockerfile for Beats 7.8.1 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG BEATS_VER=7.8.0
+ARG BEATS_VER=7.8.1
 
 # The author
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Beats/${BEATS_VER}/patch"
@@ -37,33 +37,36 @@ ENV PATH=$PATH:/usr/local/go/bin/:$GOPATH/bin:/usr/local/bin
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    acl \
-    gcc \
     git \
+    curl \
+    make \
+    wget \
+    tar \
+    gcc \
     libcap-dev \
     libpcap0.8-dev \
-    libssh-dev \
-    make \
     openssl \
-    libjpeg-dev \
-    python3-venv \
-    tar \
-    wget \
+    libssh-dev \
+    acl \
+    rsync \
+    patch \
+    fdclone \
     libsystemd-dev \
-    locales \
-    libffi-dev \
+    libjpeg-dev \
+    python3.8 \
+    python3.8-dev \
+    python3.8-venv \
+    python3-lib2to3 \
+    python3-distutils \
 # Install go and download beats source code
- && locale-gen "en_US.UTF-8" \
- && locale-gen "en_GB.UTF-8" \
- && wget https://www.python.org/ftp/python/3.8.3/Python-3.8.3.tgz \
- && tar -xzf Python-3.8.3.tgz \
- && cd Python-3.8.3 \
- && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
- && make \
- && make install \
+ && /usr/bin/update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 10 \
+ && /usr/bin/update-alternatives --set python3 /usr/bin/python3.8 \
+ && /usr/bin/update-alternatives --display python3 \
  && python3 -V \
- && python3 -m pip install appdirs pyparsing six packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv pillow \
-
+ && wget https://bootstrap.pypa.io/get-pip.py \
+ && python3 get-pip.py \
+ && rm get-pip.py \
+ && python3 -m pip install appdirs pyparsing packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv pillow \
  && wget https://dl.google.com/go/go1.13.9.linux-s390x.tar.gz \
  && chmod ugo+r go1.13.9.linux-s390x.tar.gz \
  && tar -C /usr/local -xzf go1.13.9.linux-s390x.tar.gz \
