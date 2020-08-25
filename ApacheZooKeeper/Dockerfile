@@ -40,6 +40,8 @@ ENV ZOO_CONF_DIR=/conf \
     ZOO_MAX_CLIENT_CNXNS=60 \
     ZOO_STANDALONE_ENABLED=true \
     ZOO_ADMINSERVER_ENABLED=true
+    
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 # Add a user with an explicit UID/GID and create necessary directories
 RUN set -eux; \
@@ -98,7 +100,8 @@ RUN set -eux; \
     tar -zxf "$DISTRO_NAME.tar.gz"; \
     mv "$DISTRO_NAME/conf/"* "$ZOO_CONF_DIR"; \
     rm -rf "$GNUPGHOME" "$DISTRO_NAME.tar.gz" "$DISTRO_NAME.tar.gz.asc"; \
-    chown -R zookeeper:zookeeper "/$DISTRO_NAME"
+    chown -R zookeeper:zookeeper "/$DISTRO_NAME"; \
+    chmod +x /docker-entrypoint.sh
 
 WORKDIR $DISTRO_NAME
 VOLUME ["$ZOO_DATA_DIR", "$ZOO_DATA_LOG_DIR", "$ZOO_LOG_DIR"]
@@ -108,6 +111,5 @@ EXPOSE 2181 2888 3888 8080
 ENV PATH=$PATH:/$DISTRO_NAME/bin \
     ZOOCFGDIR=$ZOO_CONF_DIR
 
-COPY docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["zkServer.sh", "start-foreground"]
