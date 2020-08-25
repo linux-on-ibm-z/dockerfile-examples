@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 7.8.0 ############################################
+###################################### Dockerfile for Kibana version 7.8.1 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -25,7 +25,7 @@
 
 FROM s390x/ubuntu:18.04
 
-ARG KIBANA_VER=7.8.0
+ARG KIBANA_VER=7.8.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -63,7 +63,7 @@ RUN sudo apt-get update && sudo apt-get install -y \
  && cd $WORKDIR && git clone -b v${KIBANA_VER} https://github.com/elastic/kibana.git \
  && cd $WORKDIR/kibana \
 # Apply Kibana patch
- && curl -o kibana_patch.diff $PATCH_URL/kibana_patch.diff \
+ && curl -o kibana_patch.diff $PATCH_URL/kibana_patch.diff \ 
  && git apply kibana_patch.diff \
 # Bootstrap Kibana
  && yarn kbn bootstrap --oss \
