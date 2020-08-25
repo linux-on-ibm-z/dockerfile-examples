@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.8.0 ########################################
+##################################### Dockerfile for Elasticsearch version 7.8.1 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -19,38 +19,69 @@
 # For ex. docker run --name <container_name> -v <path_on_host>/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -p <port>:9200 -d <image_name>
 #
 ##############################################################################################################
+################################################################################
+# Build stage 0 `builder`:
+# Extract elasticsearch artifact
+# Set gid=0 and make group perms==owner perms
+################################################################################
 
-# Base Image
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:18.04 AS builder
 
-ARG ELASTICSEARCH_VER=7.8.0
+ARG ELASTICSEARCH_VER=7.8.1
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-# Set Environment Variables
 ENV LANG="en_US.UTF-8"
 ENV SOURCE_DIR="/tmp/"
-ENV JAVA_HOME=/usr/share/jdk-14.0.1+7
-ENV JAVA14_HOME=/usr/share/jdk-14.0.1+7
+ENV JAVA_HOME=/usr/share/jdk-14.0.2+12
+ENV JAVA14_HOME=/usr/share/jdk-14.0.2+12
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch"
-WORKDIR $SOURCE_DIR
 
-# Install Dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     git \
     gzip \
     tar \
-    wget \
+    wget
+
+# `tini` is a tiny but valid init for containers. This is used to cleanly
+# control how ES and any child processes are shut down.
+#
+# The tini GitHub page gives instructions for verifying the binary using
+# gpg, but the keyservers are slow to return the key and this can fail the
+# build. Instead, we check the binary against the published checksum.
+RUN set -eux ; \
+    \
+    tini_bin="" ; \
+    case "$(arch)" in \
+        aarch64) tini_bin='tini-arm64' ;; \
+        x86_64)  tini_bin='tini-amd64' ;; \
+		s390x)   tini_bin='tini-s390x' ;; \
+        *) echo >&2 ; echo >&2 "Unsupported architecture $(arch)" ; echo >&2 ; exit 1 ;; \
+    esac ; \
+    curl --retry 8 -S -L -O https://github.com/krallin/tini/releases/download/v0.19.0/${tini_bin} ; \
+    curl --retry 8 -S -L -O https://github.com/krallin/tini/releases/download/v0.19.0/${tini_bin}.sha256sum ; \
+    sha256sum -c ${tini_bin}.sha256sum ; \
+    rm ${tini_bin}.sha256sum ; \
+    mv ${tini_bin} /tini ; \
+    chmod +x /tini
+
+ENV PATH /usr/share/elasticsearch/bin:$PATH
+
+RUN /usr/sbin/groupadd -g 1000 elasticsearch && \
+    /usr/sbin/useradd --uid 1000 --gid 1000 -d /usr/share/elasticsearch elasticsearch
+
+WORKDIR /usr/share/elasticsearch
+	  
 # Set up locale
- && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
+RUN apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
 # Download AdoptOpenJDK 14
  && cd $SOURCE_DIR \
- && wget https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.1%2B7/OpenJDK14U-jdk_s390x_linux_hotspot_14.0.1_7.tar.gz \
- && tar -C /usr/share/ -xzvf OpenJDK14U-jdk_s390x_linux_hotspot_14.0.1_7.tar.gz \
+ && curl -SLO https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_s390x_linux_hotspot_14.0.2_12.tar.gz \
+ && tar -C /usr/share/ -xzf OpenJDK14U-jdk_s390x_linux_hotspot_14.0.2_12.tar.gz \
 # Download and Build Elasticsearch
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
  && wget $PATCH_URL/build.gradle  -P $SOURCE_DIR/elasticsearch/distribution/archives/linux-s390x-tar \
@@ -68,36 +99,61 @@ RUN apt-get update && apt-get install -y \
  && wget -O - $PATCH_URL/diff.patch | git apply \
  && ./gradlew :distribution:archives:oss-linux-s390x-tar:assemble --parallel \
 # Create distributions as deb, rpm and docker
- && ./gradlew :distribution:packages:s390x-oss-deb:assemble \
- && ./gradlew :distribution:packages:s390x-oss-rpm:assemble \
  && ./gradlew :distribution:docker:oss-docker-s390x-build-context:assemble \ 
 # Install Elasticsearch
  && mkdir -p /usr/share/elasticsearch \
- && tar -xzf distribution/archives/oss-linux-s390x-tar/build/distributions/elasticsearch-oss-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1 \
- && ln -sf /usr/share/elasticsearch/bin/* /usr/bin/ \
-# Clean up cache data and remove dependencies that are not required
- && apt-get remove -y \
-    curl \
-    git \
-    wget \
- && apt-get autoremove -y \
- && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/* /root/.gradle/* /tmp/elasticsearch \
- && rm $SOURCE_DIR/OpenJDK14U-jdk_s390x_linux_hotspot_14.0.1_7.tar.gz \
-# Create elaticsearch user
- && /usr/sbin/groupadd elasticsearch \
- && /usr/sbin/useradd -g elasticsearch elasticsearch \
- && usermod -aG sudo elasticsearch \
- && chown elasticsearch:elasticsearch -R /usr/share/elasticsearch
- 
-# Expose the default port
-USER elasticsearch
+ && tar -xzf distribution/archives/oss-linux-s390x-tar/build/distributions/elasticsearch-oss-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1
+
+RUN sed -i -e 's/ES_DISTRIBUTION_TYPE=tar/ES_DISTRIBUTION_TYPE=docker/' /usr/share/elasticsearch/bin/elasticsearch-env
+RUN mkdir -p config config/jvm.options.d data logs
+RUN chmod 0775 config config/jvm.options.d data logs
+COPY config/elasticsearch.yml config/log4j2.properties config/
+RUN chmod 0660 config/elasticsearch.yml config/log4j2.properties
+
+################################################################################
+# Build stage 1 (the actual elasticsearch image):
+# Copy elasticsearch from stage 0
+# Add entrypoint
+################################################################################
+
+FROM s390x/ubuntu:18.04
+
+ENV ELASTIC_CONTAINER true
+
+COPY --from=builder /tini /tini
+	
+RUN apt-get update && apt-get install -y gzip bzip2 netcat
+
+RUN /usr/sbin/groupadd -g 1000 elasticsearch && \
+    /usr/sbin/useradd --uid 1000 --gid 1000 -G 0 -d /usr/share/elasticsearch elasticsearch
+    
+WORKDIR /usr/share/elasticsearch
+COPY --from=builder --chown=1000:0 /usr/share/elasticsearch /usr/share/elasticsearch
+
+RUN chmod 0775 /usr/share/elasticsearch && \
+    chgrp 0 /usr/share/elasticsearch
+
+# Replace OpenJDK's built-in CA certificate keystore with the one from the OS
+# vendor. The latter is superior in several ways.
+# REF: https://github.com/elastic/elasticsearch-docker/issues/171
+RUN ln -sf /etc/pki/ca-trust/extracted/java/cacerts /usr/share/elasticsearch/jdk/lib/security/cacerts
+
+ENV PATH /usr/share/elasticsearch/bin:$PATH
+
+COPY bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+RUN chmod g=u /etc/passwd && \
+    chmod 0775 /usr/local/bin/docker-entrypoint.sh
+
+# Ensure that there are no files with setuid or setgid, in order to mitigate "stackclash" attacks.
+RUN find / -xdev -perm -4000 -exec chmod ug-s {} +
 
 EXPOSE 9200 9300
 
-ENV PATH=/usr/share/elasticsearch/bin:$PATH
+ENTRYPOINT ["/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
+# Dummy overridable parameter parsed by entrypoint
+CMD ["eswrapper"]
 
-# Start the elasticsearch server
-CMD ["elasticsearch"]
-
-# End of Dockerfile
+################################################################################
+# End of multi-stage Dockerfile
+################################################################################
