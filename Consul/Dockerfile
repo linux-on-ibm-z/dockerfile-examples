@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for Consul - 1.7.4 ########################
+###################### Dockerfile for Consul - 1.8.0 ########################
 # 
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter 
@@ -25,7 +25,7 @@
 # Base image
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG CONSUL_VER=1.7.4
+ARG CONSUL_VER=1.8.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -50,8 +50,8 @@ RUN apt-get update &&  apt-get install -y \
  && service rsyslog start \
 # Install go and get source code of consul
  && cd $SOURCE_DIR \
- && wget https://storage.googleapis.com/golang/go1.13.7.linux-s390x.tar.gz \
- && tar -xzf go1.13.7.linux-s390x.tar.gz \ 
+ && wget https://dl.google.com/go/go1.14.4.linux-s390x.tar.gz \
+ && tar -xzf go1.14.4.linux-s390x.tar.gz \ 
  && mkdir -p $GOPATH/src/github.com/hashicorp \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/consul.git \
