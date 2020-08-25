@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 7.8.0 #####################################################
+############################ Dockerfile for Logstash version 7.8.1 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -12,25 +12,30 @@
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
 #
-# Start Logstash using the below command
-# docker run --name <container name> -v <path_on_host>/logstash.conf:/etc/logstash/logstash.conf -d <logstash_image>
+# Start Logstash using below command
+# (Make sure Elasticsearch instance is running)
+# docker run --name <container name> -d <logstash_image>
+#
+# Logstash can be started with custom configuration by changing the pipeline/default.conf file
 ###############################################################################################################
 
-# Base image
+
+FROM golang AS builder
+
+ADD env2yaml/env2yaml.go /go/
+RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
+
 FROM s390x/ubuntu:18.04
 
-ARG LOGSTASH_VER=7.8.0
+ARG LOGSTASH_VER=7.8.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-WORKDIR "/opt"
-ENV JAVA_HOME=/opt/jdk8u252-b09/
-ENV PATH=$JAVA_HOME/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/lib/s390x-linux-gnu/jni/:$LD_LIBRARY_PATH
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    ant \
+
+# Install Dependencies
+RUN apt-get update && apt-get install -y openjdk-11-jdk ant locales \
     gcc \
     gzip \
     libjffi-jni \
@@ -39,49 +44,61 @@ RUN apt-get update && apt-get install -y \
     unzip \
     wget \
     zip \
-# Download OpenJDK 8 with HotSpot
- && wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u252-b09/OpenJDK8U-jdk_s390x_linux_hotspot_8u252b09.tar.gz \
- && tar -xvf OpenJDK8U-jdk_s390x_linux_hotspot_8u252b09.tar.gz \
-# Download and Install Logstash
- && cd /opt \
- && wget https://artifacts.elastic.co/downloads/logstash/logstash-${LOGSTASH_VER}.tar.gz \
- && mkdir /usr/share/logstash \
- && tar -xzf logstash-${LOGSTASH_VER}.tar.gz  -C /usr/share/logstash --strip-components 1 \
-# Copy types.conf to platform.conf, re-create and copy the jar
- && cd /usr/share/logstash/logstash-core/lib/jars \
- && unzip jruby-complete-9.2.11.1.jar -d jruby-complete-9.2.11.1 \
- && cd jruby-complete-9.2.11.1/META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/s390x-linux \
- && cp -n types.conf platform.conf \
- && cd /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.11.1 \
- && zip -r ../jruby-complete-9.2.11.1.jar * \
- && cd  /usr/share/logstash/ \
- && rm -rf /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.11.1 \
-# Cleanup Cache data , unused packages and source files
- && apt-get remove -y \
-    ant \
-    gcc \
-    make \
-    unzip \
-    wget \
-    zip \
- && apt-get autoremove -y && apt-get clean \
- && rm /opt/OpenJDK8U-jdk_s390x_linux_hotspot_8u252b09.tar.gz \
- && rm -rf /opt/logstash-${LOGSTASH_VER} \
- && rm /opt/logstash-${LOGSTASH_VER}.tar.gz \
- && rm -rf /var/lib/apt/lists/* \
-# Create elasticsearch user
- && /usr/sbin/groupadd logstash \
- && /usr/sbin/useradd -g logstash logstash \
- && usermod -aG sudo logstash \
- && chown logstash:logstash -R /usr/share/logstash
+	curl
 
-# Expose the default port
-USER logstash
+# Provide a non-root user to run the process.
+RUN groupadd --gid 1000 logstash && \
+    /usr/sbin/useradd --uid 1000 --gid 1000 \
+      --home-dir /usr/share/logstash --no-create-home \
+      logstash
 
-# Expose ports
-EXPOSE 514 5043 5000 9292
+# Add Logstash itself.
+RUN curl -Lo - https://artifacts.elastic.co/downloads/logstash/logstash-${LOGSTASH_VER}.tar.gz | \
+    tar zxf - -C /usr/share && \
+    mv /usr/share/logstash-${LOGSTASH_VER} /usr/share/logstash && \
+    chown --recursive logstash:logstash /usr/share/logstash/ && \
+    chown -R logstash:root /usr/share/logstash && \
+    chmod -R g=u /usr/share/logstash && \
+    find /usr/share/logstash -type d -exec chmod g+s {} \; && \
+    ln -s /usr/share/logstash /opt/logstash && \
+    # Copy types.conf to platform.conf, re-create and copy the jar
+    cd /usr/share/logstash/logstash-core/lib/jars && \
+    unzip jruby-complete-9.2.11.1.jar -d jruby-complete-9.2.11.1 && \
+    cd jruby-complete-9.2.11.1/META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/s390x-linux && \
+    cp -n types.conf platform.conf && \
+    cd /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.11.1 && \
+    zip -r ../jruby-complete-9.2.11.1.jar * && \
+    cd  /usr/share/logstash/ && \
+    rm -rf /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.11.1 && \
+    # Cleanup Cache data , unused packages and source files
+    apt-get remove -y ant gcc make unzip wget zip curl && apt-get autoremove -y && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
+WORKDIR /usr/share/logstash
+
+ENV ELASTIC_CONTAINER true
 ENV PATH=/usr/share/logstash/bin:$PATH
 
-CMD ["logstash"]
-# End of Dockerfile
+# Provide a minimal configuration, so that simple invocations will provide
+# a good experience.
+ADD config/pipelines.yml config/pipelines.yml
+ADD config/logstash-full.yml config/logstash.yml
+ADD config/log4j2.properties config/
+ADD pipeline/default.conf pipeline/logstash.conf
+RUN chown --recursive logstash:root config/ pipeline/
+
+# Ensure Logstash gets a UTF-8 locale by default.
+RUN locale-gen en_US.UTF-8
+ENV LANG='en_US.UTF-8' LC_ALL='en_US.UTF-8'
+
+# Place the startup wrapper script.
+ADD bin/docker-entrypoint /usr/local/bin/
+RUN chmod 0755 /usr/local/bin/docker-entrypoint
+
+USER 1000
+
+COPY --from=builder /go/env2yaml /usr/local/bin/
+
+EXPOSE 9600 5044
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
