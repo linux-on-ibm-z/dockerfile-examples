@@ -42,12 +42,14 @@ RUN apt-get update  \
 		 tar \
 		 wget \
 		 python \
+		 automake \
 		 
 # Download and build source code of htop
   && cd $SOURCE_DIR \
-  && wget https://hisham.hm/htop/releases/2.2.0/htop-2.2.0.tar.gz \
-  && tar xvzf htop-2.2.0.tar.gz \
+  && wget https://github.com/hishamhm/htop/archive/2.2.0.tar.gz \
+  && tar xvzf 2.2.0.tar.gz \
   && cd $SOURCE_DIR/htop-2.2.0/ \
+  && bash autogen.sh \
   && ./configure \
   && make \
   && make check \
