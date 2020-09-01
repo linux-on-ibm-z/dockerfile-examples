@@ -67,6 +67,7 @@ ENV PATH=/usr/local/go/bin:/cockroach:$PATH
 RUN apt-get update && apt-get install -y tzdata && mkdir -p /cockroach
 COPY cockroach.sh /cockroach/
 COPY --from=builder /usr/local/bin/cockroach  /cockroach/ 
+RUN chmod +x /cockroach/cockroach.sh
 
 WORKDIR /cockroach/
 
