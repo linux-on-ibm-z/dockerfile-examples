@@ -31,7 +31,7 @@ ENV PATH=$JAVA_HOME/bin:$PATH
 RUN apt-get update &&  apt-get install -y tar wget libfontconfig1 \
 # Download AdoptJDK8
 && mkdir -p $JAVA_HOME \
-&& wget -O java.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u252-b09_openj9-0.20.0/OpenJDK8U-jdk_s390x_linux_openj9_8u252b09_openj9-0.20.0.tar.gz \
+&& wget -O java.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u265-b01_openj9-0.21.0/OpenJDK8U-jdk_s390x_linux_openj9_8u265b01_openj9-0.21.0.tar.gz \
 && tar -C $JAVA_HOME -xzvf java.tar.gz  --strip-components=2 \
 # Install Jenkins
 && wget http://mirrors.jenkins.io/war-stable/latest/jenkins.war \
