@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for CockroachDB version 20.1.3 ####################################
+#################################### Dockerfile for CockroachDB version 20.1.5 ####################################
 # 
 # To build CockroachDB image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -19,8 +19,8 @@
 FROM s390x/ubuntu:18.04 AS builder
 
 # CockroachDB version
-ARG CRDB_VER=20.1.3
-ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CockroachDB/20.1.3/patch"
+ARG CRDB_VER=20.1.5
+ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CockroachDB/20.1.5/patch"
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
