@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Docker Compose version 1.26.1 ####################
+################ Dockerfile for Docker Compose version 1.27.3 ####################
 #
 # This Dockerfile builds a basic installation of Docker Compose.
 #
@@ -21,7 +21,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG DOCKERCOMPOSE_VER=1.26.1
+ARG DOCKERCOMPOSE_VER=1.27.3
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
