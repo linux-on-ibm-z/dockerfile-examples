@@ -51,6 +51,8 @@ RUN apt-get update \
 && cd cockroach \
 && git checkout v$CRDB_VER \
 && git submodule update --init --recursive \
+&& curl -sSL $PATCH_URL/cockroach.diff | git apply \
+&& curl -sSL $PATCH_URL/storage.diff | git apply \
 && cd vendor && curl -sSL $PATCH_URL/vendor.diff | git apply \
 && cd .. \
 && make build \
