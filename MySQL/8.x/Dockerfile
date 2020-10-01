@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################################ Dockerfile for MySQL 8.0.20 #################################################
+############################################ Dockerfile for MySQL 8.0.21 #################################################
 # To build this image, run docker build from the directory containing this Dockerfile:
 # 
 #       docker build -t mysql:8.0 .
@@ -30,7 +30,7 @@ FROM s390x/ubuntu:20.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ENV MYSQL_VERSION 8.0.20-0ubuntu0.20.04.1
+ENV MYSQL_VERSION 8.0.21-0ubuntu0.20.04.4
 
 ENV PATH /usr/local/mysql/bin:$PATH 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -57,7 +57,7 @@ RUN apt-get update && apt-get install -y \
     && mkdir -p /var/lib/mysql /var/run/mysqld /var/lib/mysql-files/ && touch /mysql-init-complete \
     && chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /etc/ /var/lib/mysql-files/ /mysql-init-complete \
     # ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
-    && chmod 777 /var/run/mysqld \
+    && chmod 1777 /var/run/mysqld /var/lib/mysql \
 # Cleanup
     && apt autoremove -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/* 
