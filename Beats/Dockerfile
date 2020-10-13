@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.8.1 #############################
+#################### Dockerfile for Beats 7.9.1 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG BEATS_VER=7.8.1
+ARG BEATS_VER=7.9.1
 
 # The author
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Beats/${BEATS_VER}/patch"
@@ -113,21 +113,7 @@ RUN apt-get update && apt-get install -y \
  && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
  && make auditbeat \ 
  && make update \
- && make fmt \
-# Patching for auditbeat fixes
- && cd $GOPATH/pkg/mod/github.com/elastic/go-libaudit@v0.4.0 \
- && wget ${PATCH_URL}/audit.patch \
- && patch -i audit.patch \
- && wget ${PATCH_URL}/endian.go -P $GOPATH/pkg/mod/github.com/elastic/go-libaudit@v0.4.0 \
- && cd $GOPATH/pkg/mod/github.com/elastic/go-libaudit@v0.4.0/rule \
- && wget $PATCH_URL/binary.patch \
- && patch -i binary.patch \
-# Building auditbeat to reflect fixes
- && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
- && make clean \
- && make auditbeat \ 
- && make update \
- && make fmt
+ && make fmt 
 
 FROM s390x/ubuntu:18.04
 
