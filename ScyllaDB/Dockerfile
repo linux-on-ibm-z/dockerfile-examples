@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2019, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for ScyllaDB version 3.3.1 #########
+########## Dockerfile for ScyllaDB version 4.0.3 #########
 #
 # This Dockerfile builds a basic installation of ScyllaDB.
 #
@@ -45,8 +45,9 @@ ENV CC=/usr/bin/gcc-8
 ENV CXX=/usr/bin/g++-8
 ENV ver=1.0
 ENV URL=https
+ENV LC_ALL=C
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/3.3.1/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/4.0.3/patch/"
 
 ARG TARGET=native
 
@@ -69,7 +70,7 @@ RUN apt-get update && apt-get install -y \
     diffutils gcc-8 g++-8 liblua5.3-dev libnuma-dev libunistring-dev \
     pigz ragel rapidjson-dev stow \
     net-tools ethtool hwloc libhwloc-dev gnutls-bin patchelf util-linux \
-    gawk gzip \
+    gawk gzip locales \
 #######################################################################
   && ver=3.7.4 \
   && cd "$SOURCE_ROOT" \
@@ -80,7 +81,7 @@ RUN apt-get update && apt-get install -y \
   && make \
   && make install \
   && pip3 install --user --upgrade pip \
-  && pip3 install --user pyparsing colorama pyyaml \
+  && pip3 install --user pyparsing colorama pyyaml cassandra-driver boto3 requests pyte \
 #######################################################################
   && ver=3.12.4 \
   && cd "$SOURCE_ROOT" \
@@ -144,7 +145,7 @@ RUN apt-get update && apt-get install -y \
   && cd "$SOURCE_ROOT" \
   && git clone https://github.com/scylladb/scylla.git \
   && cd scylla \
-  && git checkout scylla-3.3.1 \
+  && git checkout scylla-4.0.3 \
   && git submodule update --init --recursive \
   && curl -sSL ${PATCH_URL}/seastar.diff | patch -d seastar -p1 \
   && curl -sSL ${PATCH_URL}/scylla.diff | patch -p1  \
