@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for RethinkDB 2.4.0 ############################################
+############################ Dockerfile for RethinkDB 2.4.1 ############################################
 #
 # This Dockerfile builds a basic installation of RethinkDB
 #
@@ -23,31 +23,65 @@ FROM s390x/ubuntu:18.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+ENV SOURCE_ROOT=/tmp/source
+WORKDIR $SOURCE_ROOT
+RUN apt-get update -y && apt-get install -y \ 
+clang \
+build-essential \
+python \
+libcurl4-openssl-dev \
+libboost-all-dev \
+libncurses5-dev \
+wget \
+m4 \
+libssl-dev \
+git \
+curl \
 
-RUN apt-get update -y && apt-get install -y \
-    build-essential \
-    git \
-    libboost-all-dev \
-    libcurl4-openssl-dev \
-    libjemalloc-dev \
-    libncurses5-dev \
-    libprotobuf-dev \
-    libssl-dev \
-    m4 \
-    protobuf-compiler \
-    python \
-    wget \
+#Install gcc-5.4.0
+&& cd $SOURCE_ROOT \
+&& mkdir gcc \
+&& cd gcc \
+&& wget https://ftp.gnu.org/gnu/gcc/gcc-5.4.0/gcc-5.4.0.tar.gz \
+&& tar -xzf gcc-5.4.0.tar.gz \
+&& cd gcc-5.4.0/ \
+&& ./contrib/download_prerequisites \
+&& mkdir objdir \
+&& cd objdir \
+&& ../configure --prefix=/opt/gcc --enable-languages=c,c++ --with-arch=zEC12 --with-long-double-128 \
+  	   --build=s390x-linux-gnu --host=s390x-linux-gnu --target=s390x-linux-gnu                  \
+  	   --enable-threads=posix --with-system-zlib --disable-multilib \
+&& make -j 8 \
+&& make install \
+&& ln -sf /opt/gcc/bin/gcc /usr/bin/gcc \
+&& ln -sf /opt/gcc/bin/g++ /usr/bin/g++ \
+&& ln -sf /opt/gcc/bin/g++ /usr/bin/c++ \
+&& export PATH=/opt/gcc/bin:"$PATH" \
+&& export LD_LIBRARY_PATH=/opt/gcc/lib64:"$LD_LIBRARY_PATH" \
+&& export C_INCLUDE_PATH=/opt/gcc/lib/gcc/s390x-linux-gnu/5.4.0/include \
+&& export CPLUS_INCLUDE_PATH=/opt/gcc/lib/gcc/s390x-linux-gnu/5.4.0/include \
 
-#Install Node 6.11.0
- && wget https://nodejs.org/dist/v6.11.0/node-v6.11.0-linux-s390x.tar.gz \
- && tar xvf node-v6.11.0-linux-s390x.tar.gz -C /usr \
- && export PATH=/usr/node-v6.11.0-linux-s390x/bin:$PATH  \
- && export VPYTHON_BYPASS="manually managed python not supported by chrome operations" \
-
+#Install Protobuf 2.6.0 
+&& cd $SOURCE_ROOT \
+&& wget https://github.com/google/protobuf/releases/download/v2.6.0/protobuf-2.6.0.tar.gz \
+&& tar zxvf protobuf-2.6.0.tar.gz \
+&& cd protobuf-2.6.0 \
+&& sed -i '/elif defined(GOOGLE_PROTOBUF_ARCH_MIPS)/i #elif defined(GOOGLE_PROTOBUF_ARCH_S390)' src/google/protobuf/stubs/atomicops.h \
+&& sed -i '/elif defined(GOOGLE_PROTOBUF_ARCH_MIPS)/i #include <google/protobuf/stubs/atomicops_internals_generic_gcc.h>' src/google/protobuf/stubs/atomicops.h \
+&& sed -i '/#define GOOGLE_PROTOBUF_ARCH_64_BIT 1/a #elif defined(__s390x__)' src/google/protobuf/stubs/platform_macros.h \
+&& sed -i '/#elif defined(__s390x__)/a #define GOOGLE_PROTOBUF_ARCH_S390 1' src/google/protobuf/stubs/platform_macros.h \
+&& sed -i '/#define GOOGLE_PROTOBUF_ARCH_S390/a #define GOOGLE_PROTOBUF_ARCH_64_BIT 1' src/google/protobuf/stubs/platform_macros.h \
+&& ./configure \
+&& make \
+&& make install \
+&& export LD_LIBRARY_PATH=/usr/local/lib \
+&& protoc --version \
 #Clone and build RethinkDB
- && git clone https://github.com/rethinkdb/rethinkdb \
- && cd rethinkdb/ \
- && git checkout v2.4.0 \
+&& export VPYTHON_BYPASS="manually managed python not supported by chrome operations" \
+&& cd $SOURCE_ROOT \
+&& git clone https://github.com/rethinkdb/rethinkdb \
+&& cd rethinkdb/ \
+&& git checkout v2.4.1 \
 
 #Changed for V8
  &&  cp mk/support/pkg/v8.sh mk/support/pkg/v8.sh.orig \
@@ -80,7 +114,7 @@ RUN apt-get update -y && apt-get install -y \
     python \
     wget \
  && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*  /rethinkdb
+ && apt-get clean && rm -rf /var/lib/apt/lists/*  /$SOURCE_ROOT
 
 VOLUME ["/data"]
 
