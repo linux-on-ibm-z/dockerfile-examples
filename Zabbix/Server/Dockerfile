@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-server version 5.0.2 #########
+########## Dockerfile for Zabbix-server version 5.0.4 #########
 #
 # This Dockerfile builds a basic installation of Zabbix-server.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG ZBX_SERVER_VER=5.0.2
+ARG ZBX_SERVER_VER=5.0.4
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -65,7 +65,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG ZBX_SERVER_VER=5.0.2
+ARG ZBX_SERVER_VER=5.0.4
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
