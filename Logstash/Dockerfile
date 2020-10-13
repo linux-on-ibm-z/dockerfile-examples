@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 7.8.1 #####################################################
+############################ Dockerfile for Logstash version 7.9.1 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -13,7 +13,7 @@
 # docker build -t <image_name> .
 #
 # Start Logstash using below command
-# (Make sure Elasticsearch instance is running)
+# (Make sure Elasticsearch instance is running and correct URL is specified in config/logstash-full.yml)
 # docker run --name <container name> -d <logstash_image>
 #
 # Logstash can be started with custom configuration by changing the pipeline/default.conf file
@@ -27,7 +27,7 @@ RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
 FROM s390x/ubuntu:18.04
 
-ARG LOGSTASH_VER=7.8.1
+ARG LOGSTASH_VER=7.9.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -35,15 +35,11 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/
 ENV LD_LIBRARY_PATH=/usr/lib/s390x-linux-gnu/jni/:$LD_LIBRARY_PATH
 
 # Install Dependencies
-RUN apt-get update && apt-get install -y openjdk-11-jdk ant locales \
-    gcc \
-    gzip \
+RUN apt-get update && apt-get install -y openjdk-11-jdk locales \
     libjffi-jni \
     make \
     tar \
-    unzip \
     wget \
-    zip \
 	curl
 
 # Provide a non-root user to run the process.
@@ -61,17 +57,8 @@ RUN curl -Lo - https://artifacts.elastic.co/downloads/logstash/logstash-${LOGSTA
     chmod -R g=u /usr/share/logstash && \
     find /usr/share/logstash -type d -exec chmod g+s {} \; && \
     ln -s /usr/share/logstash /opt/logstash && \
-    # Copy types.conf to platform.conf, re-create and copy the jar
-    cd /usr/share/logstash/logstash-core/lib/jars && \
-    unzip jruby-complete-9.2.11.1.jar -d jruby-complete-9.2.11.1 && \
-    cd jruby-complete-9.2.11.1/META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/s390x-linux && \
-    cp -n types.conf platform.conf && \
-    cd /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.11.1 && \
-    zip -r ../jruby-complete-9.2.11.1.jar * && \
-    cd  /usr/share/logstash/ && \
-    rm -rf /usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.11.1 && \
     # Cleanup Cache data , unused packages and source files
-    apt-get remove -y ant gcc make unzip wget zip curl && apt-get autoremove -y && apt-get clean && \
+    apt-get remove -y make wget curl && apt-get autoremove -y && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/share/logstash
