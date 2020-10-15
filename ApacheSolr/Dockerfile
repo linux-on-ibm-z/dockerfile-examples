@@ -130,6 +130,7 @@ RUN set -ex; \
   rm -r "$GNUPGHOME"
 
 COPY --chown=0:0 scripts /opt/docker-solr/scripts
+RUN chmod +x /opt/docker-solr/scripts/*
 
 VOLUME /var/solr
 EXPOSE 8983
