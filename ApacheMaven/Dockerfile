@@ -23,7 +23,7 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ARG MAVEN_VERSION=3.6.2
 ARG USER_HOME_DIR="/root"
