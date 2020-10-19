@@ -119,7 +119,7 @@ FROM s390x/ubuntu:18.04
 
 WORKDIR /Beats
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 COPY --from=builder /tmp/source/src/github.com/elastic/beats/heartbeat/heartbeat /usr/bin/heartbeat
 COPY --from=builder /tmp/source/src/github.com/elastic/beats/packetbeat/packetbeat /usr/bin/packetbeat
