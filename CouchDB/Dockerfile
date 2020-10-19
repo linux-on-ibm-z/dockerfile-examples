@@ -22,7 +22,7 @@ FROM s390x/ubuntu:18.04 AS builder
 ARG COUCHDB_VER=3.1.0
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
@@ -86,7 +86,7 @@ RUN apt-get update \
 FROM s390x/ubuntu:18.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
