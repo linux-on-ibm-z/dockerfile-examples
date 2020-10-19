@@ -23,7 +23,7 @@ ARG CRDB_VER=20.1.5
 ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CockroachDB/20.1.5/patch"
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Set PATH
 ENV SOURCE_DIR=/root
@@ -62,7 +62,7 @@ RUN apt-get update \
 FROM s390x/ubuntu:18.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV PATH=/usr/local/go/bin:/cockroach:$PATH
 
