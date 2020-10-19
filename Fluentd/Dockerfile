@@ -28,7 +28,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 ARG RUBY_VER=2.7.1
 
 RUN apt-get update \
