@@ -30,7 +30,7 @@ FROM s390x/ubuntu:18.04 AS builder
 ARG ELASTICSEARCH_VER=7.9.1
 
 # The Author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV LANG="en_US.UTF-8"
 ENV SOURCE_DIR="/tmp/"
