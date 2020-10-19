@@ -30,7 +30,7 @@ FROM s390x/ubuntu:16.04
 ARG HAPROXY_VER=1.9.8
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 WORKDIR "/root"
 
