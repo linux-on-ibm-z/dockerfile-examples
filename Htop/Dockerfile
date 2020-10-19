@@ -26,7 +26,7 @@
 FROM s390x/ubuntu:18.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)
 
 ENV SOURCE_DIR='/root'
 WORKDIR $SOURCE_DIR
