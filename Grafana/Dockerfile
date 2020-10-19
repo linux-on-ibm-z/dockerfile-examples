@@ -24,7 +24,7 @@ FROM s390x/ubuntu:18.04 as builder
 ARG GRAFANA_VER=7.0.5
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV GOPATH=/opt
 ENV PATH=$PATH:/usr/local/node-v12.18.2-linux-s390x/bin:/usr/local/go/bin:/usr/share/grafana/bin/linux-s390x
