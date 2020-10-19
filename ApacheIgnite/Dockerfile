@@ -23,7 +23,7 @@ FROM  s390x/ubuntu:18.04
 ARG IGNITE_VER=2.8.1
 
 # The Author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Set Environment Variables
 ENV WORKDIR /root
