@@ -29,7 +29,7 @@
 FROM s390x/ubuntu:20.04 as builder
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Environment
 ARG VERSION=1.8.2
@@ -59,7 +59,7 @@ RUN apt-get update \
 FROM s390x/ubuntu:20.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ARG VERSION=1.8.2
 
