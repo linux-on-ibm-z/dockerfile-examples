@@ -25,7 +25,7 @@
 # Base image
 FROM s390x/ubuntu:18.04
 # Maintainer
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 ARG HEKETI_VERSION=v10.0.0
 COPY heketi-start.sh /heketi-start.sh
 COPY heketi.json /heketi.json
