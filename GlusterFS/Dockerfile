@@ -20,7 +20,7 @@ FROM  s390x/ubuntu:18.04
 ARG GLUSTERFS_VER=7.6
 
 # The Author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Set Environment Variables
 ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" SOURCE_DIR="/tmp/"
