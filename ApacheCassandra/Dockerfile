@@ -24,7 +24,7 @@ FROM s390x/ubuntu:18.04
 ARG CASSANDRA_VERSION=3.11.6
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Set environment variables
 ENV SOURCE_ROOT=/root
