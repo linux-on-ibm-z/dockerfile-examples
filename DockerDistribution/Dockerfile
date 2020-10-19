@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2019.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############### Dockerfile for Docker Distribution version v2.7.1 #################
@@ -25,7 +25,7 @@ FROM s390x/ubuntu:16.04
 ARG DOCKER_DISTRIBUTION_VER=2.7.1
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)
 
 ENV GOPATH /go
 ENV DISTRIBUTION_DIR /go/src/github.com/docker/distribution
