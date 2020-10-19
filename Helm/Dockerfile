@@ -18,7 +18,7 @@
 FROM s390x/ubuntu:20.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 ARG VERSION=3.2.4
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
