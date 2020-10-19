@@ -21,7 +21,7 @@
 FROM s390x/ubuntu:18.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 ENV SOURCE_ROOT=/tmp/source
 ENV JAVA_HOME=/opt/ibm/java
 ENV PATH=$JAVA_HOME/bin:/usr/lib/go-1.10/bin:$PATH:$SOURCE_ROOT/json:$SOURCE_ROOT/flatbuffers
