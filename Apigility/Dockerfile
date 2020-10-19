@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2018, 2019.
+# © Copyright IBM Corporation 2018, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ########## Dockerfile for Apigility version 1.5.2 ###############
@@ -28,7 +28,7 @@
 FROM s390x/ubuntu:16.04 as builder
 
 # The Author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_DIR=/tmp/source
 ENV DEBIAN_FRONTEND noninteractive
