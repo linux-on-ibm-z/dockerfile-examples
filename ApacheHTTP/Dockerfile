@@ -29,7 +29,7 @@ FROM s390x/ubuntu:16.04
 ARG APACHE_HTTP_VER=2.4.43
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
