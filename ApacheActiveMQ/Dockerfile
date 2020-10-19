@@ -32,7 +32,7 @@ FROM s390x/ubuntu:18.04
 ARG APACHE_AMQ_VER=5.16.0
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-s390x
 ENV ACTIVEMQ_HOME=/opt/activemq
