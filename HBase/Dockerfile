@@ -31,7 +31,7 @@
 FROM s390x/ubuntu:18.04 AS builder
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_DIR='/root'
 ENV JAVA_HOME='/usr/lib/jvm/jdk8u242-b08'
@@ -109,7 +109,7 @@ RUN apt-get update  \
 FROM s390x/ubuntu:18.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_DIR='/root'
 ENV JAVA_HOME='/usr/lib/jvm/jdk8u242-b08'
