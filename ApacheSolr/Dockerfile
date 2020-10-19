@@ -16,7 +16,7 @@
 # Base image
 FROM s390x/ubuntu:20.04
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Create a working directory for Apache Solr
 ARG SOLR_VERSION="8.6.1"
