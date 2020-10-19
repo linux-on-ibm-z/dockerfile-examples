@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2018.
+# © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ################ Dockerfile for Docker Swarm version 1.2.9 ####################
@@ -36,7 +36,7 @@ FROM s390x/ubuntu:16.04
 ARG SWARM_VER=v1.2.9
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)
 
 # Set GOPATH environment varibale
 
