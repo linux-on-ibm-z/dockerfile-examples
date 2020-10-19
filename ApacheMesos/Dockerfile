@@ -31,7 +31,7 @@
 
 FROM s390x/ubuntu:18.04 AS builder
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ARG MESOS_VERSION=1.9.0
 ARG REPO_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheMesos/1.9.0/patch"
