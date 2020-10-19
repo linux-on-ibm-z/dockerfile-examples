@@ -24,7 +24,7 @@ FROM s390x/ubuntu:18.04
 ARG DOCKERCOMPOSE_VER=1.27.3
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Install dependencies and Docker Compose
 RUN apt-get update && apt-get install -y \
