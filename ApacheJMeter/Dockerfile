@@ -24,7 +24,7 @@ FROM s390x/ubuntu:18.04
 ARG JMETER_VER=5.3
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Set Environment varibles
 ENV WORKDIR=/root
