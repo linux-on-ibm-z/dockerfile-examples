@@ -31,7 +31,7 @@
 FROM s390x/ubuntu:20.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_DIR=/home/
 ENV JAVA_HOME=/home/jdk-11.0.5+10
