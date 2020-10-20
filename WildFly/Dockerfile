@@ -25,7 +25,7 @@
 FROM s390x/ubuntu:18.04
 
 # The author
-LABEL MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+LABEL MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)
 
 
 # Create a user and group used to launch processes
