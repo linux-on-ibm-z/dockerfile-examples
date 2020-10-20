@@ -28,7 +28,7 @@
 FROM s390x/ubuntu:20.04
 
 # The author
-MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+MAINTAINER LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)
 
 WORKDIR "/usr/share"
 
