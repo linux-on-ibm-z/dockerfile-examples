@@ -20,7 +20,7 @@
 FROM s390x/ubuntu:16.04
 
 # The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)
+MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
