@@ -26,7 +26,7 @@
 FROM s390x/ubuntu:20.04 AS builder
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ARG CADVISOR_VER=0.36.0
 
