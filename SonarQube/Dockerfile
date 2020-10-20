@@ -26,7 +26,7 @@ ARG SONARQUBE_VER=8.4.0.35506
 ARG SONAR_SCANNER_CLI_VER=4.4.0.2170
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_ROOT=/opt
 ENV SONARQUBE_HOME=/opt/sonarqube
