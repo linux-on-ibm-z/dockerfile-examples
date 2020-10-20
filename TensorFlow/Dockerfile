@@ -25,7 +25,7 @@
 FROM ubuntu:18.04 as builder
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_ROOT=/tmp/source
 ENV PATH=$SOURCE_ROOT/bazel/output/:$PATH \
@@ -119,7 +119,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 FROM ubuntu:18.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 ENV SOURCE_ROOT=/tmp/source
 ENV PATH=$SOURCE_ROOT/bazel/output/:$PATH \
 PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
