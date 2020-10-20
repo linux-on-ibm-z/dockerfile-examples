@@ -26,7 +26,7 @@ FROM s390x/ubuntu:18.04 AS builder
 ARG V8_VER=8.3.110.9
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_DIR=/tmp/source
 ENV PATH="$SOURCE_DIR/gn/out:$PATH:$SOURCE_DIR/depot_tools"
@@ -69,7 +69,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3 
 FROM s390x/ubuntu:18.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 WORKDIR /v8
 
