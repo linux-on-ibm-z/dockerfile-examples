@@ -37,7 +37,7 @@ FROM s390x/ubuntu:18.04
 ARG ZBX_AGENT_VER=5.0.4
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_DIR=/tmp/source
 ENV PATH=$PATH:/usr/local/sbin/
