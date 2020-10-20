@@ -26,7 +26,7 @@ FROM s390x/ubuntu:18.04 AS builder
 ARG ZBX_SERVER_VER=5.0.4
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH=$PATH:/usr/local/sbin/
@@ -68,7 +68,7 @@ FROM s390x/ubuntu:18.04
 ARG ZBX_SERVER_VER=5.0.4
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH=$PATH:/usr/local/sbin/
