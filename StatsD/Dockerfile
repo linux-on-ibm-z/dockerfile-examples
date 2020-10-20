@@ -23,7 +23,7 @@
 FROM s390x/ubuntu:18.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ARG STATSD_VER=v0.9.0
 ENV PATH=$PATH:/usr/src/app/node-v12.18.3-linux-s390x/bin
