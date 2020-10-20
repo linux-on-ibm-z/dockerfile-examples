@@ -39,7 +39,7 @@ RUN git clone https://github.com/hashicorp/terraform.git ./ && \
 FROM s390x/ubuntu:20.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 WORKDIR /root
 
