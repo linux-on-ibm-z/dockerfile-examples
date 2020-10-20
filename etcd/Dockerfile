@@ -27,7 +27,7 @@ FROM s390x/ubuntu:18.04 as builder
 ARG ETCD_VER=v3.4.10
 
 # Maintainer
-LABEL maintainer="LoZ Open Source Ecosystem(https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem(https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV PATH=$PATH:/usr/local/go/bin GOPATH=/
 ENV ETCD_DATA_DIR=/data ETCD_UNSUPPORTED_ARCH=s390x
