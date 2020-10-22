@@ -34,7 +34,7 @@
 # Base Image
 FROM ubuntu:18.04 AS builder
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_ROOT=/tmp/source
 ENV PATH=/usr/local/bin:/bin:$PATH
@@ -180,7 +180,7 @@ RUN apt-get update && apt-get install -y \
 #######################################################################
 FROM ubuntu:18.04
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV PREFIX=/opt/scylladb
 ENV LD_LIBRARY_PATH=$PREFIX/libreloc
