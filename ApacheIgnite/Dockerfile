@@ -42,7 +42,7 @@ RUN apt-get update &&  apt-get install -y \
  && tar xvf OpenJDK11U-jdk_s390x_linux_openj9_11.0.7_10_openj9-0.20.0.tar.gz \
 # Install Apache Ignite
  && cd $WORKDIR  \
- && wget http://apachemirror.wuchna.com//ignite/${IGNITE_VER}/apache-ignite-${IGNITE_VER}-bin.zip \
+ && wget https://archive.apache.org/dist/ignite/${IGNITE_VER}/apache-ignite-${IGNITE_VER}-bin.zip \
  && unzip -q apache-ignite-${IGNITE_VER}-bin.zip  \
 # Clean up cache data and remove dependencies that are not required
  && apt-get remove -y \
