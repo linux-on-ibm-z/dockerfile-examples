@@ -30,7 +30,7 @@ FROM s390x/ubuntu:18.04
 ARG LOGSTASH_VER=7.9.1
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV LD_LIBRARY_PATH=/usr/lib/s390x-linux-gnu/jni/:$LD_LIBRARY_PATH
 
