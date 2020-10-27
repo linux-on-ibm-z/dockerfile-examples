@@ -26,7 +26,7 @@ FROM s390x/ubuntu:18.04
 ARG KEYSTONE_VER=17.0.0
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_DIR=/tmp/source DEBIAN_FRONTEND=noninteractive OS_KEYSTONE_CONFIG_DIR=/etc/keystone \
 	OS_USERNAME=admin \
