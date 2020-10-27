@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for etcd 3.4.10 ####################
+################## Dockerfile for etcd 3.4.13 ####################
 #
 # This Dockerfile builds a basic installation of etcd.
 #
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:18.04 as builder
 
-ARG ETCD_VER=v3.4.10
+ARG ETCD_VER=v3.4.13
 
 # Maintainer
 LABEL maintainer="LoZ Open Source Ecosystem(https://www.ibm.com/community/z/usergroups/opensource)"
