@@ -36,6 +36,7 @@ WORKDIR $SOURCE_DIR
 # Set Environmental Variables
 ENV GOPATH=$SOURCE_DIR
 ENV PATH=$PATH:$GOPATH/bin
+ENV DEBIAN_FRONTEND noninteractive
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
