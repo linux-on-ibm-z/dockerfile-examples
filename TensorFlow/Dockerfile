@@ -61,7 +61,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     enum34 \
     keras_preprocessing \
     keras_applications \
-    h5py \
+    h5py==2.10.0 \
     tensorflow_estimator \
     setuptools \
     pybind11 \
