@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for CouchDB version 3.1.0 ############
+############### Dockerfile for CouchDB version 3.1.1 ############
 #
 # CouchDB, is open source database software.
 #
@@ -11,6 +11,7 @@
 #
 # To start CouchDB server run the below command
 # docker run --name <container_name> -p <port_number>:5984 -d <image_name>
+# docker run --name <container_name> -e COUCHDB_USER=admin -e COUCHDB_PASSWORD=password -p <port_number>:5984 -d <image_name>
 #
 # To test CouchDB service, use following command:
 # curl http://<host-ip>:<port_number>/
@@ -19,7 +20,7 @@
 
 # Base image
 FROM s390x/ubuntu:18.04 AS builder
-ARG COUCHDB_VER=3.1.0
+ARG COUCHDB_VER=3.1.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -180,7 +181,7 @@ RUN set -xe; \
     rm -rf "$GNUPGHOME"; \
     apt-key list
 
-ENV COUCHDB_VERSION 3.1.0
+ENV COUCHDB_VERSION 3.1.1
 
 # https://github.com/apache/couchdb-pkg/blob/master/debian/README.Debian
 RUN set -xe; \
