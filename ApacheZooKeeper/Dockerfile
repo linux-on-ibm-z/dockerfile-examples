@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Apache ZooKeeper version 3.6.1 ######################
+################ Dockerfile for Apache ZooKeeper version 3.6.2 ######################
 #
 # This Dockerfile builds a basic installation of Apache ZooKeeper.
 #
@@ -67,8 +67,8 @@ RUN set -eux; \
     gosu nobody true
 
 ARG GPG_KEY=BBE7232D7991050B54C8EA0ADC08637CA615D22C
-ARG SHORT_DISTRO_NAME=zookeeper-3.6.1
-ARG DISTRO_NAME=apache-zookeeper-3.6.1-bin
+ARG SHORT_DISTRO_NAME=zookeeper-3.6.2
+ARG DISTRO_NAME=apache-zookeeper-3.6.2-bin
 
 # Download Apache Zookeeper, verify its PGP signature, untar and clean up
 RUN set -eux; \
