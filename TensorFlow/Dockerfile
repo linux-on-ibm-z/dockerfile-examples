@@ -120,6 +120,7 @@ FROM ubuntu:18.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+
 ENV SOURCE_ROOT=/tmp/source
 ENV PATH=$SOURCE_ROOT/bazel/output/:$PATH \
 PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
@@ -148,7 +149,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     enum34 \
     keras_preprocessing \
     keras_applications \
-    h5py \
+    h5py==2.10.0 \
     tensorflow_estimator \
     grpcio \
     && ln -sf /usr/bin/python3 /usr/bin/python \
