@@ -15,6 +15,8 @@
 # To run sysdig in a Docker container use below command
 #  docker run -it --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v
 #   /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro -v /usr:/host/usr:ro --name <container_name> <image_name>
+# 
+# Note: Please make sure you have kernel version 4.15.0 to build this Dockerfile.
 #
 # The official website
 # https://www.sysdig.org/
