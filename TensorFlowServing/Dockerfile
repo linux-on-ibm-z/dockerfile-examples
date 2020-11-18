@@ -133,7 +133,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 #Install Tensorflow Serving
 					&& mkdir $SOURCE_ROOT/serving && cd $SOURCE_ROOT/serving \
 					&& git clone -b 2.2.0 https://github.com/tensorflow/serving . \
-					&& wget -O tfs_patch.diff $PATCH_URL/tfs.patch \
+					&& wget -O tfs_patch.diff $PATCH_URL/tfs_patch.diff \
 					&& sed -i "s?source_root?$SOURCE_ROOT?" tfs_patch.diff \
 					&& git apply tfs_patch.diff \
 
