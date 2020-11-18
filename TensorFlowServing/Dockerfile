@@ -44,7 +44,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 ENV SOURCE_ROOT=/tmp/source
 ENV PATH=$SOURCE_ROOT/bazel/output/:$PATH \
 PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True PATCH="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.2.0/patch" JTOOLS=$SOURCE_ROOT/remote_java_tools_linux \
-PATCH_URL="https://github.com/linux-on-ibm-z/scripts/blob/master/TensorflowServing/2.2.0/patch/"
+PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/TensorflowServing/2.2.0/patch"
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                                                                 wget \
