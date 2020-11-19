@@ -29,9 +29,9 @@
 FROM s390x/ubuntu:18.04
 
 # The Author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG MYSQL_VERSION=5.7.31
+ARG MYSQL_VERSION=5.7.32
 ENV DEBIAN_FRONTEND noninteractive
 
 # Add mysql user and group
@@ -57,7 +57,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/mysql \
     && mkdir -p /var/lib/mysql /var/run/mysqld /var/lib/mysql-files && touch /mysql-init-complete \
     && chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /etc/ /var/lib/mysql-files/ /mysql-init-complete \
-    && chmod 777 /var/run/mysqld \
+    && chmod 1777 /var/run/mysqld /var/lib/mysql \
     # comment out a few problematic configuration values
     && find /etc/mysql/ -name '*.cnf' -print0 \
 	| xargs -0 grep -lZE '^(bind-address|log)' \
