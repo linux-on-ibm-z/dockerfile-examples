@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Geode version 1.13.0 #####################
+########## Dockerfile for Apache Geode version 1.13.1 #####################
 #
 # This Dockerfile builds a basic installation of Apache Geode.
 #
@@ -28,23 +28,31 @@ FROM s390x/ubuntu:18.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG GEODE_VER=1.13.0
+ARG GEODE_VER=1.13.1
+ARG file=apache-geode-$GEODE_VER.tgz
 
 ENV WORKDIR=/root
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 ENV PATH=$JAVA_HOME/bin:$WORKDIR/apache-geode-$GEODE_VER/bin:$PATH
 
+WORKDIR /root
 # Installing dependencies
 RUN apt-get update && apt-get install -y \
     tar \
     wget \
-    openjdk-11-jdk \
-
+    openjdk-11-jdk 
  # Download and extract apache geode
- && cd $WORKDIR \
- && wget http://mirrors.estointernet.in/apache/geode/$GEODE_VER/apache-geode-$GEODE_VER.tgz \
- && tar -xvzf apache-geode-$GEODE_VER.tgz \
-
+RUN  for url in \
+			"https://www.apache.org/dyn/closer.cgi?action=download&filename=geode/$GEODE_VER/$file" \
+			"https://downloads.apache.org/geode/$GEODE_VER/$file" \
+			"https://archive.apache.org/dist/geode/$GEODE_VER/$file" \
+		; do \
+			if wget -O "$file" "$url"; then \
+				break; \
+			fi; \
+		done; 
+ 
+RUN tar -xvzf apache-geode-$GEODE_VER.tgz \
 # Clean up cache data and remove dependencies which are not required
  && apt-get remove -y \
                  wget \
@@ -53,10 +61,8 @@ RUN apt-get update && apt-get install -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* \
  && rm -rf /root/apache-geode-$GEODE_VER.tgz \
-
 # smoke test to ensure the shell can still run properly after removing temporary deps
  && gfsh version
-
 # Default ports:
 # RMI/JMX 1099
 # REST 8080
@@ -68,3 +74,4 @@ VOLUME ["/data"]
 CMD ["gfsh"]
 
 # End of Dockerfile
+
