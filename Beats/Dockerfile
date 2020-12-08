@@ -26,7 +26,6 @@ FROM s390x/ubuntu:18.04 AS builder
 
 ARG BEATS_VER=7.9.1
 
-# The author
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Beats/${BEATS_VER}/patch"
 
 # Set environment variable
@@ -51,6 +50,7 @@ RUN apt-get update && apt-get install -y \
     rsync \
     patch \
     fdclone \
+    libffi-dev libpython3-dev \
     libsystemd-dev \
     libjpeg-dev \
     python3.8 \
@@ -111,14 +111,15 @@ RUN apt-get update && apt-get install -y \
  && make fmt \
 # Building auditbeat
  && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
- && make auditbeat \ 
+ && make auditbeat \
  && make update \
- && make fmt 
+ && make fmt
 
 FROM s390x/ubuntu:18.04
 
 WORKDIR /Beats
 
+# The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 COPY --from=builder /tmp/source/src/github.com/elastic/beats/heartbeat/heartbeat /usr/bin/heartbeat
