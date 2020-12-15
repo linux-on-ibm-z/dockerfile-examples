@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for TensorFlow version 2.2.0 #########
+########## Dockerfile for TensorFlow version 2.3.1 #########
 #
 # This Dockerfile builds a basic installation of TensorFlow.
 #
@@ -22,14 +22,14 @@
 ##################################################################################
 
 # Base Image
-FROM ubuntu:18.04 as builder
+FROM ubuntu:20.04 as builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_ROOT=/tmp/source
 ENV PATH=$SOURCE_ROOT/bazel/output/:$PATH \
-PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True PATCH="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.2.0/patch" JTOOLS=$SOURCE_ROOT/remote_java_tools_linux
+PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True PATCH="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.3.1/patch" JTOOLS=$SOURCE_ROOT/remote_java_tools_linux
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     wget \
@@ -43,40 +43,31 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     zip \
     libssl-dev \
     git \
-    python3-numpy \
     libblas-dev  \
     liblapack-dev \
-    python3-scipy \
     gfortran \
-    swig \
     cython3 \
     && ldconfig \
+    && pip3 install --upgrade pip \
     && pip3 install --no-cache-dir \
-    numpy==1.16.2 \
-    future \
+    numpy \
     wheel \
-    backports.weakref \
+    scipy \
     portpicker \
-    futures \
-    enum34 \
-    keras_preprocessing \
-    keras_applications \
-    h5py==2.10.0 \
-    tensorflow_estimator \
-    setuptools \
-    pybind11 \
+    protobuf==3.13.0 \
     grpcio \
+    && pip3 install --no-cache-dir \
+    keras_preprocessing --no-deps \
     && ln -sf /usr/bin/python3 /usr/bin/python \
 # Build Bazel
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
     && mkdir bazel \
     && cd bazel \
-    && wget https://github.com/bazelbuild/bazel/releases/download/2.0.0/bazel-2.0.0-dist.zip \
-    && unzip bazel-2.0.0-dist.zip \
+    && wget https://github.com/bazelbuild/bazel/releases/download/3.1.0/bazel-3.1.0-dist.zip \
+    && unzip bazel-3.1.0-dist.zip \
     && chmod -R +w . \
-    && curl -sSL $PATCH/patch1.diff | patch -p1 \
-    && curl -sSL $PATCH/patch2.diff | patch -Np0 --ignore-whitespace \
+    && curl -sSL $PATCH/patch.diff | patch -p1 \
 # Add patch to resolve java oom issue
     && sed -i "152s/-classpath/-J-Xms1g -J-Xmx1g -classpath/" scripts/bootstrap/compile.sh \
     && env EXTRA_BAZEL_ARGS="--host_javabase=@local_jdk//:jdk" bash ./compile.sh \
@@ -84,13 +75,13 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && cd $SOURCE_ROOT/bazel \
     && bazel --host_jvm_args="-Xms1024m" --host_jvm_args="-Xmx2048m" build --host_javabase="@local_jdk//:jdk" //:bazel-distfile \
     && mkdir -p $JTOOLS && cd $JTOOLS \
-    && unzip $SOURCE_ROOT/bazel/derived/distdir/java_tools_javac11_linux-v7.0.zip \
+    && unzip $SOURCE_ROOT/bazel/derived/distdir/java_tools_javac11_linux-v8.0.zip \
     && curl -sSL $PATCH/tools.diff | patch -p1 \
 # Download source code
     && cd $SOURCE_ROOT \
     && git clone https://github.com/linux-on-ibm-z/tensorflow.git \
     && cd tensorflow \
-    && git checkout v2.2.0-s390x \
+    && git checkout v2.3.1-s390x \
 # Configure
     && yes "" | ./configure \
 # Build TensorFlow
@@ -101,9 +92,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && bazel-bin/tensorflow/tools/pip_package/build_pip_package /tensorflow_wheel \
 # Cleanup
     && apt-get -y remove \
-    bzip2 \
     git \
-    make \
     unzip \
     wget \
     zip \
@@ -116,7 +105,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 #End of builder stage
 
 # Base Image
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -131,33 +120,27 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3-pip \
     pkg-config \
     libssl-dev \
-    python3-numpy \
     libblas-dev  \
     liblapack-dev \
-    python3-scipy \
     gfortran \
-    swig \
     cython3 \
     && ldconfig \
+    && pip3 install --upgrade pip \
     && pip3 install --no-cache-dir \
-    numpy==1.16.2 \
-    future \
+    numpy \
     wheel \
-    backports.weakref \
+    scipy \
     portpicker \
-    futures \
-    enum34 \
-    keras_preprocessing \
-    keras_applications \
-    h5py==2.10.0 \
-    tensorflow_estimator \
+    protobuf==3.13.0 \
     grpcio \
+    && pip3 install --no-cache-dir \
+    keras_preprocessing --no-deps \
     && ln -sf /usr/bin/python3 /usr/bin/python \
     && mkdir -p /tensorflow_wheel
 # COPY the wheel from builder stage
-COPY --from=builder /tensorflow_wheel/tensorflow-2.2.0-cp*-linux_s390x.whl /tensorflow_wheel
+COPY --from=builder /tensorflow_wheel/tensorflow-2.3.1-cp*-linux_s390x.whl /tensorflow_wheel
 # Install the wheel
-RUN pip3 install /tensorflow_wheel/tensorflow-2.2.0-cp*-linux_s390x.whl
+RUN pip3 install /tensorflow_wheel/tensorflow-2.3.1-cp*-linux_s390x.whl
 
 VOLUME /tensorflow_wheel
 
