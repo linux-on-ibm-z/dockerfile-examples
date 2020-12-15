@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Terraform - 0.13.4 ########################
+########## Dockerfile for Terraform - 0.14.2 ########################
 #
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -19,21 +19,30 @@
 #####################################################################
 
 # Base image
-FROM golang:1.14.7-alpine AS builder
+FROM s390x/ubuntu:20.04 AS builder
 
-ENV TERRAFORM_VERSION=0.13.4
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-RUN apk add --update git bash openssh
+ARG TERRAFORM_VERSION=0.14.2
 
-ENV TF_DEV=true
-ENV TF_RELEASE=true
+# Set PATH
+ENV GOPATH=/root
+ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
 
-WORKDIR $GOPATH/src/github.com/hashicorp/terraform
-
-RUN git clone https://github.com/hashicorp/terraform.git ./ && \
+RUN apt-get update && apt-get install -y git wget tar gcc && \
+# Install go
+    cd $GOPATH && \
+    wget https://golang.org/dl/go1.15.3.linux-s390x.tar.gz && \
+    tar -C /usr/local -xvzf go1.15.3.linux-s390x.tar.gz && \
+# build Terraform
+    mkdir -p $GOPATH/src/github.com/hashicorp && \
+    cd $GOPATH/src/github.com/hashicorp && \
+    git clone https://github.com/hashicorp/terraform.git && \
+    cd terraform && \
     git checkout v${TERRAFORM_VERSION} && \
-    /bin/bash scripts/build.sh && \
-    mv ${GOPATH}/src/github.com/hashicorp/terraform/pkg/linux_s390x/terraform /usr/bin/
+    go install .  && \
+    mv ${GOPATH}/bin/terraform /usr/bin/
 
 # Base Image
 FROM s390x/ubuntu:20.04
@@ -48,4 +57,4 @@ COPY --from=builder /usr/bin/terraform /usr/bin/terraform
 # Command to execute
 ENTRYPOINT ["/usr/bin/terraform"]
 
-# End of Dockerfile
+# End of Dockerfile                                                                                           
