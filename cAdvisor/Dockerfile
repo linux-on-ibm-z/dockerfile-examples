@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for cAdvisor 0.36.0 #################################
+######################## Dockerfile for cAdvisor 0.37.0 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG CADVISOR_VER=0.36.0
+ARG CADVISOR_VER=0.37.0
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
@@ -43,25 +43,29 @@ RUN apt-get update && apt-get install -y \
     git \
         curl \
         patch \
-        golang-1.14 \
         make \
- && export PATH=/usr/lib/go-1.14/bin/:$PATH \
+        sudo \
+# Install go
+ && export GO_INSTALL_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Go/1.15.3/build_go.sh" \
+ && curl $GO_INSTALL_URL | bash \
 # Create directory and Change the work directory
  && mkdir -p $GOPATH/src/github.com/google && cd $GOPATH/src/github.com/google \
 # Checkout the code from repository
- && git clone https://github.com/google/cadvisor.git -b v$CADVISOR_VER \
- && cd cadvisor \
-# Change the work directory
- && cd $GOPATH/src/github.com/google/cadvisor \
+ && git clone https://github.com/google/cadvisor.git \
+ && cd $GOPATH/src/github.com/google/cadvisor/ \
+ && git checkout v$CADVISOR_VER \
+
 # Apply patches 
- && export PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/cAdvisor/0.36.0/patch" \
+ && cd $GOPATH/src/github.com/google/cadvisor/cmd \
+ && export PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/cAdvisor/0.37.0/patch" \
  && curl -o "go_mod.patch" $PATCH_URL/go_mod.patch \
  && curl -o "go_sum.patch" $PATCH_URL/go_sum.patch \
  && patch --ignore-whitespace go.mod < go_mod.patch \
  && patch --ignore-whitespace go.sum < go_sum.patch \
 # Build cadvisor
  && cd $GOPATH/src/github.com/google/cadvisor \
- && make build . \
+ && sed -i "s|-short -race|-short|" Makefile \
+ && make build \
  && cp $GOPATH/src/github.com/google/cadvisor/cadvisor /usr/bin \
  && cd && rm -rf $SOURCE_DIR \
  && apt-get remove -y git && apt-get autoremove -y && apt-get clean \
@@ -69,7 +73,8 @@ RUN apt-get update && apt-get install -y \
 
 # Multistage build
 FROM s390x/ubuntu:20.04
-
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 WORKDIR /root
 COPY --from=builder /usr/bin/cadvisor /usr/bin/cadvisor
 # Port for cAdvisor
@@ -79,3 +84,4 @@ EXPOSE 8080
 CMD ["/usr/bin/cadvisor"]
 
 # End of Dockerfile
+
