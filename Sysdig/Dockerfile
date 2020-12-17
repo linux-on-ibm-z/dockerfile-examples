@@ -50,6 +50,7 @@ RUN apt-get update \
                 git \
                 curl \
                 wget \
+                kmod \
 # Download source code
         && cd $SOURCE_ROOT \
         && git clone https://github.com/draios/sysdig.git \
