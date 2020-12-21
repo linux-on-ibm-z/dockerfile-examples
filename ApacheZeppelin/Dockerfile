@@ -22,7 +22,7 @@
 #################################################################################
 
 # Base Image
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:20.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -31,6 +31,8 @@ ARG Z_VERSION=0.8.2
 
 ENV LOG_TAG="[ZEPPELIN_${Z_VERSION}]:" \
         Z_HOME="/zeppelin" \
+        LANG=en_US.UTF-8 \
+        LC_ALL=en_US.UTF-8 \
         DEBIAN_FRONTEND=noninteractive \
         SOURCE_ROOT=/opt \
         JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x \
@@ -40,46 +42,48 @@ ENV LOG_TAG="[ZEPPELIN_${Z_VERSION}]:" \
 # Install dependencies
 RUN apt-get update && apt-get -y install \
                 curl \
-                tar \
-                wget \
                 build-essential \
+                jupyter \
                 openjdk-8-jdk \
                 openjdk-8-jdk-headless \
                 phantomjs \
                 tar \
                 unzip \
                 wget \
-                python-dev \
-                python-pip \
+                python3-dev \
+                python3-pip \
                 gfortran \
                 libblas-dev \
                 liblapack-dev \
                 libpng-dev \
+                libjpeg-dev \
                 libfreetype6-dev \
                 libxft-dev \
-                python-tk \
+                locales \
+                python3-tk \
                 libxml2-dev \
-                libxslt-dev \
+                libgit2-dev \
+                libxslt1-dev \
                 zlib1g-dev \
-        &&      pip install --upgrade pip \
-        &&      python -m pip install numpy \
-        &&      python -m pip install matplotlib && \
+        &&      locale-gen $LANG \
+        &&      pip3 install --upgrade pip \
+        &&      pip3 install numpy matplotlib && \
     echo "$LOG_TAG Install R related packages" && \
     echo "PATH: $PATH" && \
     apt-get -y update && \
     apt-get -y --allow-unauthenticated install r-base r-base-dev && \
-    # for devtools, Rcpp
-    apt-get -y install libcurl4-gnutls-dev libssl-dev git && \
-    R -e "install.packages('devtools', repos='http://cran.us.r-project.org')" && \
-    R -e "install.packages('Rcpp', repos='http://cran.us.r-project.org')" && \
-    Rscript -e "library('devtools'); library('Rcpp'); install_github('ramnathv/rCharts')" && \
     R -e "install.packages('evaluate', repos = 'https://cloud.r-project.org')" && \
     R -e "install.packages('knitr', repos='http://cran.us.r-project.org')" && \
     R -e "install.packages('ggplot2', repos='http://cran.us.r-project.org')" && \
     R -e "install.packages('googleVis', repos='http://cran.us.r-project.org')" && \
     R -e "install.packages('data.table', repos='http://cran.us.r-project.org')" && \
-    R -e "devtools::install_github('IRkernel/IRkernel')" && \
+    R -e "install.packages('IRkernel', repos = 'https://cloud.r-project.org');IRkernel::installspec()" && \
     R -e "install.packages('shiny', repos = 'https://cloud.r-project.org')" && \
+    # for devtools, Rcpp
+    apt-get -y install libcurl4-gnutls-dev libssl-dev && \
+    R -e "install.packages('devtools', repos='http://cran.us.r-project.org')" && \
+    R -e "install.packages('Rcpp', repos='http://cran.us.r-project.org')" && \
+    Rscript -e "library('devtools'); library('Rcpp'); install_github('ramnathv/rCharts')" \
 # Install tini and kubectl
     apt-get install -y apt-transport-https && \
     cd $SOURCE_ROOT && \
@@ -113,7 +117,7 @@ RUN chmod +x /usr/bin/tini
 
 USER 1000
 
-# Start Apache ZooKeeper
+# Start Apache Zeppelin
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 WORKDIR ${Z_HOME}
 CMD ["bin/zeppelin.sh"]
