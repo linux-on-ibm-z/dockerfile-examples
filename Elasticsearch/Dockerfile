@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.9.1 ########################################
+##################################### Dockerfile for Elasticsearch version 7.10.0 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -27,15 +27,15 @@
 
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG ELASTICSEARCH_VER=7.9.1
+ARG ELASTICSEARCH_VER=7.10.0
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV LANG="en_US.UTF-8"
 ENV SOURCE_DIR="/tmp/"
-ENV JAVA_HOME=/usr/share/jdk-11.0.8+10
-ENV JAVA11_HOME=/usr/share/jdk-11.0.8+10
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
+ENV JAVA11_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch"
 
@@ -44,7 +44,8 @@ RUN apt-get update && apt-get install -y \
     git \
     gzip \
     tar \
-    wget
+    wget \
+    openjdk-11-jdk
 
 # `tini` is a tiny but valid init for containers. This is used to cleanly
 # control how ES and any child processes are shut down.
@@ -78,10 +79,7 @@ WORKDIR /usr/share/elasticsearch
 # Set up locale
 RUN apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
-# Download AdoptOpenJDK 11
- && cd $SOURCE_DIR \
- && curl -SLO https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10_openj9-0.21.0/OpenJDK11U-jdk_s390x_linux_openj9_11.0.8_10_openj9-0.21.0.tar.gz \
- && tar -C /usr/share/ -xzf OpenJDK11U-jdk_s390x_linux_openj9_11.0.8_10_openj9-0.21.0.tar.gz \
+
 # Download and Build Elasticsearch
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
  && wget $PATCH_URL/build.gradle  -P $SOURCE_DIR/elasticsearch/distribution/archives/linux-s390x-tar \
@@ -118,11 +116,14 @@ RUN chmod 0660 config/elasticsearch.yml config/log4j2.properties
 
 FROM s390x/ubuntu:18.04
 
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
+ENV JAVA11_HOME=/usr/lib/jvm/java-11-openjdk-s390x
+ENV PATH=$JAVA_HOME/bin:$PATH
 ENV ELASTIC_CONTAINER true
 
 COPY --from=builder /tini /tini
 	
-RUN apt-get update && apt-get install -y gzip bzip2 netcat
+RUN apt-get update && apt-get install -y gzip bzip2 netcat openjdk-11-jdk
 
 RUN /usr/sbin/groupadd -g 1000 elasticsearch && \
     /usr/sbin/useradd --uid 1000 --gid 1000 -G 0 -d /usr/share/elasticsearch elasticsearch
