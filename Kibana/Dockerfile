@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 7.9.1 ############################################
+###################################### Dockerfile for Kibana version 7.10.0 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -25,7 +25,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG KIBANA_VER=7.9.1
+ARG KIBANA_VER=7.10.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -67,11 +67,11 @@ RUN sudo apt-get update && sudo apt-get install -y \
     libcairo2-dev \
     libpangocairo-1.0-0 \
     libpango1.0-dev libjpeg-dev \
-# Installing Node.js v10.21.0
+# Installing Node.js v10.22.1
  && sudo mkdir -p /usr/local/lib/nodejs \
- && cd $WORKDIR && sudo wget https://nodejs.org/dist/v10.22.0/node-v10.22.0-linux-s390x.tar.gz \
- && sudo tar xzf node-v10.22.0-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
- && sudo ln -s /usr/local/lib/nodejs/node-v10.22.0-linux-s390x/bin/* /usr/bin/ \
+ && cd $WORKDIR && sudo wget https://nodejs.org/dist/v10.22.1/node-v10.22.1-linux-s390x.tar.gz \
+ && sudo tar xzf node-v10.22.1-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
+ && sudo ln -s /usr/local/lib/nodejs/node-v10.22.1-linux-s390x/bin/* /usr/bin/ \
 # Install Yarn
  && curl -o- -L https://yarnpkg.com/install.sh | bash \
 # Download and Install Kibana
@@ -93,7 +93,7 @@ RUN sudo apt-get update && sudo apt-get install -y \
     g++ \
     wget \
  && sudo apt-get autoremove -y && sudo apt-get clean \
- && sudo rm -rf $WORKDIR/kibana* $WORKDIR/node-v10.22.0-linux-s390x.tar.gz \
+ && sudo rm -rf $WORKDIR/kibana* $WORKDIR/node-v10.22.1-linux-s390x.tar.gz \
  && sudo rm -rf /var/lib/apt/lists/* $HOME/.cache
 
 FROM s390x/ubuntu:18.04
@@ -103,10 +103,10 @@ RUN apt-get update && apt-get install -y sudo wget tar && groupadd -r kibana \
 && useradd -g kibana -m kibana \
 && echo "kibana ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
 && sudo mkdir -p /usr/local/lib/nodejs \
-&& wget https://nodejs.org/dist/v10.22.0/node-v10.22.0-linux-s390x.tar.gz \
-&& sudo tar xzvf node-v10.22.0-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
-&& rm node-v10.22.0-linux-s390x.tar.gz \
-&& sudo ln -s /usr/local/lib/nodejs/node-v10.22.0-linux-s390x/bin/* /usr/bin/
+&& wget https://nodejs.org/dist/v10.22.1/node-v10.22.1-linux-s390x.tar.gz \
+&& sudo tar xzvf node-v10.22.1-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
+&& rm node-v10.22.1-linux-s390x.tar.gz \
+&& sudo ln -s /usr/local/lib/nodejs/node-v10.22.1-linux-s390x/bin/* /usr/bin/
 USER kibana
 RUN sudo chown kibana:kibana -R /usr/share/kibana/ \
 && sudo apt-get autoremove -y && sudo apt-get clean \
