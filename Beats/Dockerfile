@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.9.1 #############################
+#################### Dockerfile for Beats 7.10.0 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -24,8 +24,11 @@
 # Base image
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG BEATS_VER=7.9.1
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
+ARG BEATS_VER=7.10.0
+
+# The author
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Beats/${BEATS_VER}/patch"
 
 # Set environment variable
@@ -50,9 +53,10 @@ RUN apt-get update && apt-get install -y \
     rsync \
     patch \
     fdclone \
-    libffi-dev libpython3-dev \
+    libffi-dev \
     libsystemd-dev \
     libjpeg-dev \
+    libpython3-dev \
     python3.8 \
     python3.8-dev \
     python3.8-venv \
@@ -67,9 +71,9 @@ RUN apt-get update && apt-get install -y \
  && python3 get-pip.py \
  && rm get-pip.py \
  && python3 -m pip install appdirs pyparsing packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv pillow \
- && wget https://dl.google.com/go/go1.13.9.linux-s390x.tar.gz \
- && chmod ugo+r go1.13.9.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.13.9.linux-s390x.tar.gz \
+ && wget https://dl.google.com/go/go1.14.7.linux-s390x.tar.gz \
+ && chmod ugo+r go1.14.7.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.14.7.linux-s390x.tar.gz \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
@@ -111,15 +115,14 @@ RUN apt-get update && apt-get install -y \
  && make fmt \
 # Building auditbeat
  && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
- && make auditbeat \
+ && make auditbeat \ 
  && make update \
- && make fmt
+ && make fmt 
 
 FROM s390x/ubuntu:18.04
 
 WORKDIR /Beats
 
-# The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 COPY --from=builder /tmp/source/src/github.com/elastic/beats/heartbeat/heartbeat /usr/bin/heartbeat
