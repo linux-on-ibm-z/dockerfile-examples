@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2020.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 7.9.1 #####################################################
+############################ Dockerfile for Logstash version 7.10.0 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -13,7 +13,6 @@
 # docker build -t <image_name> .
 #
 # Start Logstash using below command
-# (Make sure Elasticsearch instance is running and correct URL is specified in config/logstash-full.yml)
 # docker run --name <container name> -d <logstash_image>
 #
 # Logstash can be started with custom configuration by changing the pipeline/default.conf file
@@ -25,22 +24,23 @@ FROM golang AS builder
 ADD env2yaml/env2yaml.go /go/
 RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:20.04
 
-ARG LOGSTASH_VER=7.9.1
+ARG LOGSTASH_VER=7.10.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV LD_LIBRARY_PATH=/usr/lib/s390x-linux-gnu/jni/:$LD_LIBRARY_PATH
-
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 # Install Dependencies
 RUN apt-get update && apt-get install -y openjdk-11-jdk locales \
     libjffi-jni \
     make \
     tar \
     wget \
-	curl
+    curl \
+    gzip
 
 # Provide a non-root user to run the process.
 RUN groupadd --gid 1000 logstash && \
@@ -49,7 +49,7 @@ RUN groupadd --gid 1000 logstash && \
       logstash
 
 # Add Logstash itself.
-RUN curl -Lo - https://artifacts.elastic.co/downloads/logstash/logstash-${LOGSTASH_VER}.tar.gz | \
+RUN curl -Lo - https://artifacts.elastic.co/downloads/logstash/logstash-oss-${LOGSTASH_VER}-linux-aarch64.tar.gz  | \
     tar zxf - -C /usr/share && \
     mv /usr/share/logstash-${LOGSTASH_VER} /usr/share/logstash && \
     chown --recursive logstash:logstash /usr/share/logstash/ && \
@@ -64,12 +64,12 @@ RUN curl -Lo - https://artifacts.elastic.co/downloads/logstash/logstash-${LOGSTA
 WORKDIR /usr/share/logstash
 
 ENV ELASTIC_CONTAINER true
-ENV PATH=/usr/share/logstash/bin:$PATH
+ENV PATH=/usr/share/logstash/bin:$JAVA_HOME/bin:$PATH
 
 # Provide a minimal configuration, so that simple invocations will provide
 # a good experience.
 ADD config/pipelines.yml config/pipelines.yml
-ADD config/logstash-full.yml config/logstash.yml
+ADD config/logstash-oss.yml config/logstash.yml
 ADD config/log4j2.properties config/
 ADD pipeline/default.conf pipeline/logstash.conf
 RUN chown --recursive logstash:root config/ pipeline/
