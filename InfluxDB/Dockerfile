@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for InfluxDB 1.8.2 ############################s
+#################### Dockerfile for InfluxDB 2.0.2 ############################s
 #
 # Builds InfluxDB
 #
@@ -16,11 +16,7 @@
 # A typical invocation of the container might be:
 #
 # $ docker run -p <port>:8086 \
-#     -v $PWD:/var/lib/influxdb \
 #     <image_name>
-#
-# Modify $PWD to the directory where you want to store data associated with the
-# InfluxDB container.
 #
 # For more information, see https://hub.docker.com/_/influxdb
 ###############################################################################
@@ -32,28 +28,40 @@ FROM s390x/ubuntu:20.04 as builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Environment
-ARG VERSION=1.8.2
+ARG VERSION=2.0.2
+ENV DEBIAN_FRONTEND noninteractive
 ENV SOURCE_ROOT=/tmp
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/InfluxDB/${VERSION}/patch"
 
 WORKDIR /tmp
 
 RUN apt-get update \
-&&  apt-get install -y git gcc g++ wget patch \
+&&  apt-get install -y clang git gcc g++ wget bzr protobuf-compiler libprotobuf-dev curl pkg-config make nodejs \
+### Install Yarn ##########################################
+&&  curl -o- -L https://yarnpkg.com/install.sh | bash \
+&&  export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH" \
+### Install Rust ##########################################
+&&  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+&&  export PATH="$HOME/.cargo/bin:$PATH" \
 ### Install Go ##########################################
-&&  cd $SOURCE_ROOT \
-&&  wget https://storage.googleapis.com/golang/go1.13.14.linux-s390x.tar.gz \
-&&  tar -C /usr/local -xzf go1.13.14.linux-s390x.tar.gz \
+&&  wget https://golang.org/dl/go1.15.4.linux-s390x.tar.gz \
+&&  tar -C /usr/local -xzf go1.15.4.linux-s390x.tar.gz \
 &&  export PATH=/usr/local/go/bin:$PATH \
 ### Build InfluxDB ###########################################
 &&  export GO111MODULE=on \
+&&  go get github.com/influxdata/pkg-config \
+&&  git clone https://github.com/apache/arrow.git \
+&&  cd arrow/go/arrow \
+&&  git checkout ac86123a3f013ba1eeac2b66c2ccd00810c67871 \
+&&  wget https://github.com/apache/arrow/commit/aca707086160afd92da62aa2f9537a284528e48a.patch \
+&&  git apply aca707086160afd92da62aa2f9537a284528e48a.patch \
+&&  cd ../../../ \
 &&  git clone https://github.com/influxdata/influxdb.git \
 &&  cd influxdb && git checkout v${VERSION} \
-&&  wget $PATCH_URL/patch_functions.diff \
-&&  patch --ignore-whitespace query/functions.go < patch_functions.diff \
-&&  go clean ./... \
-&&  go build ./... \
-&&  go install -ldflags="-X main.version=v${VERSION}" ./...
+&&  wget $PATCH_URL/influxdb.diff \
+&&  git apply ../influxdb.diff \
+&&  export NODE_OPTIONS=--max_old_space_size=4096 \
+&&  make
 
 # Base image
 FROM s390x/ubuntu:20.04
@@ -61,19 +69,11 @@ FROM s390x/ubuntu:20.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG VERSION=1.8.2
-
-COPY --from=builder /root/go/bin/* /usr/bin/
-COPY --from=builder /tmp/influxdb/etc/config.sample.toml /etc/influxdb/influxdb.conf
+COPY --from=builder /tmp/influxdb/bin/linux/influxd /usr/bin/influxd
+COPY --from=builder /tmp/influxdb/bin/linux/influx /usr/bin/influx
 
 EXPOSE 8086
-VOLUME /var/lib/influxdb
 
-COPY ./entrypoint.sh /
-COPY ./init-influxdb.sh /
-RUN chmod +x /entrypoint.sh /init-influxdb.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["influxd"]
+ENTRYPOINT [ "/usr/bin/influxd" ]
 
 # End of Dockerfile
