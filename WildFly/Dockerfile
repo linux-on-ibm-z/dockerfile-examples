@@ -1,20 +1,20 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for WildFly (JBoss) version 21.0.1 ##########################
+################# Dockerfile for WildFly (JBoss) version 21.0.2 ##########################
 #
 # This Dockerfile builds a basic installation of WildFly.
 #
 # WildFly, formerly known as JBoss AS, or simply JBoss, is an application server authored by JBoss, now developed by Red Hat.
-# WildFly is written in Java, and implements the Java Platform, Enterprise Edition (Java EE) specification. 
+# WildFly is written in Java, and implements the Java Platform, Enterprise Edition (Java EE) specification.
 #
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
 #
-# Use below command to start WildFly in standalone mode : 
+# Use below command to start WildFly in standalone mode :
 #    docker run --name <container_name> -p <port_number>:8080 -p <port_number>:9990 -it <image_name> 
-# Use below command to start WildFly in domain mode :
+# Use below command to start WildFly in domain mode : 
 #    docker run --name <container_name> -p <port_number>:8080 -p <port_number>:9990 -it <image_name> domain.sh -b 0.0.0.0 -bmanagement 0.0.0.0
 #
 # To view the web console open the link  http://<wildfly-ip>:8080
@@ -37,8 +37,7 @@ RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s
 
 
 # Set the WILDFLY_VERSION env variable
-ENV WILDFLY_VERSION 21.0.1.Final
-ENV WILDFLY_SHA1 949ab4e1b608f5dbdd2d63c7443cdaba0bc5c07b
+ENV WILDFLY_VERSION 21.0.2.Final
 ENV JBOSS_HOME=/opt/jboss/wildfly-${WILDFLY_VER}
 ENV JAVA_HOME=/opt/jdk-11.0.9+11
 ENV PWD=`pwd`
@@ -55,7 +54,6 @@ RUN apt-get update && apt-get install -y \
  && rm -rf  OpenJDK11U-jdk_s390x_linux_openj9_11.0.9_11_openj9-0.23.0.tar.gz \
  && cd /opt/jboss/ \
  && wget https://download.jboss.org/wildfly/${WILDFLY_VERSION}/wildfly-${WILDFLY_VERSION}.tar.gz \
- && sha1sum wildfly-$WILDFLY_VERSION.tar.gz | grep $WILDFLY_SHA1 \
  && tar -xvzf wildfly-${WILDFLY_VERSION}.tar.gz \
  # Move the WildFly distribution to /opt, and make wildfly the owner of the extracted tar content
  && mv wildfly-$WILDFLY_VERSION $JBOSS_HOME \
