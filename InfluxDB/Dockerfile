@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2020
+# © Copyright IBM Corporation 2020, 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 #################### Dockerfile for InfluxDB 2.0.2 ############################s
@@ -59,7 +59,7 @@ RUN apt-get update \
 &&  git clone https://github.com/influxdata/influxdb.git \
 &&  cd influxdb && git checkout v${VERSION} \
 &&  wget $PATCH_URL/influxdb.diff \
-&&  git apply ../influxdb.diff \
+&&  git apply influxdb.diff \
 &&  export NODE_OPTIONS=--max_old_space_size=4096 \
 &&  make
 
