@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2019, 2020.
+# © Copyright IBM Corporation 2019, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################### Dockerfile for Apache Ignite 2.8.1 ################################
+############################### Dockerfile for Apache Ignite 2.9.1 ################################
 #
 # This Dockerfile builds a basic installation of Apache Ignite.
 #
@@ -20,7 +20,7 @@
 # Base Image
 FROM  s390x/ubuntu:18.04
 
-ARG IGNITE_VER=2.8.1
+ARG IGNITE_VER=2.9.1
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -51,6 +51,17 @@ RUN apt-get update &&  apt-get install -y \
  && apt-get autoremove -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*  $WORKDIR/apache-ignite-${IGNITE_VER}-bin.zip $WORKDIR/OpenJDK11U-jdk_s390x_linux_openj9_11.0.7_10_openj9-0.20.0.tar.gz
+
+# Copy sh files and set permission
+COPY run.sh $IGNITE_HOME/
+# Grant permission to copy optional libs
+RUN chmod 777 ${IGNITE_HOME}/libs
+# Grant permission to create work directory
+RUN chmod 777 ${IGNITE_HOME}
+# Grant permission to execute entry point
+RUN chmod 555 $IGNITE_HOME/run.sh
+# Entry point
+CMD $IGNITE_HOME/run.sh
 
 # Exposing the ports.
 EXPOSE 11211 47100 47500 49112
