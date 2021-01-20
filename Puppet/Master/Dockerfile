@@ -1,115 +1,91 @@
-# © Copyright IBM Corporation 2017, 2020
+# © Copyright IBM Corporation 2017, 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-
-################# Dockerfile for Puppet-master version 5.5.2 ####################
 #
-# This Dockerfile builds a basic installation of Puppet-master.
+################# Dockerfile for Puppet-master version 7.0.1 ####################
 #
-# When set up as an agent/master architecture, a Puppet master server controls the configuration information,
-# and each managed agent node requests its own configuration catalog from the master.
+# This Dockerfile builds a basic installation of Puppet server.
 #
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
-# docker build -t <image_name> .
+# docker build -t <image_name> --build-arg SERVER=<server_hostname> .
 #
 # To Start Puppet master run the below command:
-# docker run --name <container_name> -d <image>
+# docker run --name <container_name> --hostname <server_hostname> -v /<path-to-puppet.config-file>:/etc/puppetserver.config -p <port>:8140 -d <image_name>
 #
-# To start Puppet with custom configuration , use:
-# docker run --name <container_name> -d <image>
-#
-# Reference:
-# https://puppetlabs.com/
-#
-################################################################################
+##################################################################################
 
-# Base Image
-FROM s390x/ubuntu:18.04
+# Base image
+FROM s390x/ubuntu:20.04 as base
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV SOURCE_DIR=/
-WORKDIR $SOURCE_DIR
+ENV SOURCE_ROOT="/root/"
+WORKDIR ${SOURCE_ROOT}
+
+ENV LANG=en_US.UTF-8 SERVER_VERSION="7.0.1" JFFI_VERSION="1.3.1" JRUBY_VERSION="9.2.14.0"
+
+ENV JDK8_URL="https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u265-b01_openj9-0.21.0/OpenJDK8U-jdk_s390x_linux_openj9_8u265b01_openj9-0.21.0.tar.gz"
+ENV JDK11_URL="https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.8_10.tar.gz"
+
+# Setting SERVER
+ARG SERVER=puppet
+ENV MASTERHOST="${SERVER}"
 
 # Install dependencies
-RUN     apt-get update && apt-get install -y \
-        cron \
-        g++ \
-        git \
-        libc6-dev \
-        libreadline7 \
-        libsqlite3-dev \
-        libssl1.0-dev \
-        libyaml-dev \
-        locales \
-        make \
-        openssl \
-        wget \
-        zlibc \
-        zlib1g-dev \
-        zlib1g \
-        libxml2-dev \
-        libgdbm-dev \
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y g++ tar make git wget libsqlite3-dev libc6-dev cron locales locales-all unzip libyaml-dev zlibc zlib1g-dev zlib1g libxml2-dev libgdbm-dev libffi7 ruby ruby-dev ant zip
 
-# Build Ruby
-        &&      cd $SOURCE_DIR \
-        &&      wget http://cache.ruby-lang.org/pub/ruby/2.4/ruby-2.4.1.tar.gz \
-        &&      tar -xvf ruby-2.4.1.tar.gz \
-        &&      cd ruby-2.4.1 \
-        &&      ./configure \
-        &&      make \
-        &&      make install \
+FROM base as jffi
 
-# Install bundler
-        &&      cd $SOURCE_DIR \
-        &&      /usr/local/bin/gem install bundler rake-compiler \
+# Install JDK 8
+ADD "$JDK8_URL" "${SOURCE_ROOT}/openjdk8.tar.gz"
+RUN mkdir openjdk8 \
+ && tar -zxvf openjdk8.tar.gz -C openjdk8/ --strip-components 1 \
+ && wget https://github.com/jnr/jffi/archive/jffi-$JFFI_VERSION.tar.gz \
+ && tar xzf jffi-$JFFI_VERSION.tar.gz \
+ && cd jffi-jffi-$JFFI_VERSION \
+ && JAVA_HOME="${SOURCE_ROOT}/openjdk8" PATH="${SOURCE_ROOT}/openjdk8/bin:${PATH}" ant jar
 
-# Install Puppet
-        &&      /usr/local/bin/gem install puppet -v 5.5.2 \
+FROM base as final
 
-# Locate the $confdir by command
-        &&      chmod 755 /usr/local/lib \
-        &&      confdir=`puppet master --configprint confdir` \
-        &&      mkdir -p $confdir \
+ENV JAVA_HOME="${SOURCE_ROOT}/openjdk11"
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
-# Create necessary directories and files in $confdir
-        &&      mkdir $confdir/modules \
-        &&      mkdir $confdir/manifests \
-        &&      cd $confdir \
-        &&      touch puppet.conf \
-        &&      wget https://raw.githubusercontent.com/puppetlabs/puppet/5.5.2/conf/auth.conf \
-        &&      mkdir -p $confdir/opt/puppetlabs/puppet \
-        &&      mkdir -p $confdir/var/log/puppetlabs \
+#COPY puppetserver.conf /etc/puppetserver.conf
+COPY --from=jffi "${SOURCE_ROOT}/jffi-jffi-${JFFI_VERSION}/build/native.jar" "${SOURCE_ROOT}/native.jar"
 
-# Create "puppet" user and group
-        &&      useradd -d /home/puppet -m -s /bin/bash puppet \
-        &&      /usr/local/bin/puppet resource group puppet ensure=present \
+# Install lein
+ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/bin/lein
+RUN chmod +x /usr/bin/lein \
+    && gem install bundler rake-compiler \
+# Install OpenJDK11
+    && wget -O ${SOURCE_ROOT}/openjdk11.tar.gz "$JDK11_URL" \
+    && mkdir openjdk11 \
+    && tar -zxvf openjdk11.tar.gz -C openjdk11/ --strip-components 1 \
+    && rm openjdk11.tar.gz \
+# Get puppetserver code
+    && git clone --recursive --branch $SERVER_VERSION git://github.com/puppetlabs/puppetserver \
+    && cd puppetserver \
+    && ./dev-setup \
+# Overwrite JFFI jar file in cache.
+    && cp "${SOURCE_ROOT}/native.jar" "/root/.m2/repository/com/github/jnr/jffi/${JFFI_VERSION}/jffi-${JFFI_VERSION}-native.jar" \
+    && rm -f /root/.puppetlabs/opt/server/data/puppetserver/vendored-jruby-gems/cache/*.gem \
+# Update puppet.conf to set autosign to true. Remove this line if you don't want autosign setting
+    && sed  -i '47i autosign=true' dev-setup \
+# Build
+    && ./dev-setup \
+# Patch JRuby
+    && unzip -q "/root/.m2/repository/org/jruby/jruby-stdlib/${JRUBY_VERSION}/jruby-stdlib-${JRUBY_VERSION}.jar" \
+    && cp META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/powerpc-aix/*.rb META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/s390x-linux/ \
+    && cp META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/powerpc-aix/platform.conf META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/s390x-linux/ \
+    && cp std.jar "/root/.m2/repository/org/jruby/jruby-stdlib/${JRUBY_VERSION}/jruby-stdlib-${JRUBY_VERSION}.jar" \
+    && rm -rf META-INF std.jar \
+# Use default config if not provided
+    && cp "${SOURCE_ROOT}/puppetserver/dev/puppetserver.conf" "/etc/puppetserver.conf"
+    
+EXPOSE 8140
 
-# Add sample puppet.conf
-        &&      echo "[main]" >> puppet.conf \
-        &&      echo "        logdir = $confdir/var/log/puppetlabs" >> puppet.conf \
-        &&      echo "        basemodulepath = $confdir/modules" >> puppet.conf \
-        &&      echo "        server = hostname" >> puppet.conf \
-        &&      echo "        user  = puppet" >> puppet.conf \
-        &&      echo "        group = puppet" >> puppet.conf \
-        &&      echo "        pluginsync = false" >> puppet.conf \
-        &&      echo "" >> puppet.conf \
-        &&      echo "[master]" >> puppet.conf \
-        &&      echo "        certname = hostname" >> puppet.conf \
-        &&      echo "            autosign = true" >> puppet.conf \
+WORKDIR "${SOURCE_ROOT}/puppetserver"
 
-# Clean up cache data and remove dependencies which are not required
-        &&      apt-get -y remove \
-                git \
-                make \
-                unzip \
-                wget \
-        &&  apt autoremove -y \
-        &&  apt-get autoremove -y \
-        &&  apt-get clean \
-        &&  rm -rf /var/lib/apt/lists/*
-
-CMD sed -i "s/hostname/$HOSTNAME/" /etc/puppetlabs/puppet/puppet.conf && puppet master --verbose --no-daemonize
-
-# End of Dockerfile
+CMD ["lein", "run", "-c", "/etc/puppetserver.conf"]
