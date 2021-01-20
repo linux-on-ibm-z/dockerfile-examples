@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2020
+# © Copyright IBM Corporation 2017, 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for TensorFlow version 2.3.1 #########
+########## Dockerfile for TensorFlow version 2.4.0 #########
 #
 # This Dockerfile builds a basic installation of TensorFlow.
 #
@@ -29,7 +29,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 
 ENV SOURCE_ROOT=/tmp/source
 ENV PATH=$SOURCE_ROOT/bazel/output/:$PATH \
-PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True PATCH="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.3.1/patch" JTOOLS=$SOURCE_ROOT/remote_java_tools_linux
+PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True PATCH="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.4.0/patch" JTOOLS=$SOURCE_ROOT/remote_java_tools_linux
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     wget \
@@ -81,7 +81,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && cd $SOURCE_ROOT \
     && git clone https://github.com/linux-on-ibm-z/tensorflow.git \
     && cd tensorflow \
-    && git checkout v2.3.1-s390x \
+    && git checkout v2.4.0-s390x \
 # Configure
     && yes "" | ./configure \
 # Build TensorFlow
@@ -138,9 +138,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && ln -sf /usr/bin/python3 /usr/bin/python \
     && mkdir -p /tensorflow_wheel
 # COPY the wheel from builder stage
-COPY --from=builder /tensorflow_wheel/tensorflow-2.3.1-cp*-linux_s390x.whl /tensorflow_wheel
+COPY --from=builder /tensorflow_wheel/tensorflow-2.4.0-cp*-linux_s390x.whl /tensorflow_wheel
 # Install the wheel
-RUN pip3 install /tensorflow_wheel/tensorflow-2.3.1-cp*-linux_s390x.whl
+RUN pip3 install /tensorflow_wheel/tensorflow-2.4.0-cp*-linux_s390x.whl
 
 VOLUME /tensorflow_wheel
 
