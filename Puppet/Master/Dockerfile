@@ -79,8 +79,9 @@ RUN chmod +x /usr/bin/lein \
     && unzip -q "/root/.m2/repository/org/jruby/jruby-stdlib/${JRUBY_VERSION}/jruby-stdlib-${JRUBY_VERSION}.jar" \
     && cp META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/powerpc-aix/*.rb META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/s390x-linux/ \
     && cp META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/powerpc-aix/platform.conf META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/s390x-linux/ \
-    && cp std.jar "/root/.m2/repository/org/jruby/jruby-stdlib/${JRUBY_VERSION}/jruby-stdlib-${JRUBY_VERSION}.jar" \
-    && rm -rf META-INF std.jar \
+    && zip -qr jruby-stdlib.jar META-INF \
+    && cp jruby-stdlib.jar "/root/.m2/repository/org/jruby/jruby-stdlib/${JRUBY_VERSION}/jruby-stdlib-${JRUBY_VERSION}.jar" \
+    && rm -rf META-INF jruby-stdlib.jar \
 # Use default config if not provided
     && cp "${SOURCE_ROOT}/puppetserver/dev/puppetserver.conf" "/etc/puppetserver.conf"
     
