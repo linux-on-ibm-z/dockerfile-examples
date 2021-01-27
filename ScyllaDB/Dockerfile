@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2019, 2020.
+# © Copyright IBM Corporation 2019, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for ScyllaDB version 4.2.1 #########
+########## Dockerfile for ScyllaDB version 4.2.2 #########
 #
 # This Dockerfile builds a basic installation of ScyllaDB.
 #
@@ -47,7 +47,7 @@ ENV ver=1.0
 ENV URL=https
 ENV LC_ALL=C
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/4.2.1/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/4.2.2/patch/"
 
 ARG TARGET=native
 
@@ -176,7 +176,7 @@ RUN apt-get update \
   && cd "$SOURCE_ROOT" \
   && git clone https://github.com/scylladb/scylla.git \
   && cd scylla \
-  && git checkout scylla-4.2.1 \
+  && git checkout scylla-4.2.2 \
   && git submodule update --init --recursive \
   && curl -sSL ${PATCH_URL}/seastar.diff | patch -d seastar -p1 \
   && curl -sSL ${PATCH_URL}/scylla.diff | patch -p1  \
