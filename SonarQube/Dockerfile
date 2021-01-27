@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 8.4.1 ##############################
+################################ Dockerfile for SonarQube 8.6 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -25,8 +25,8 @@ FROM s390x/ubuntu:18.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG ESUM=bcb3f46cbad742b08c81e922e313549c029f436ac7d91ef3c9bed8e4049d67d2
-ARG BINARY_URL=https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.6%2B10/OpenJDK11U-jre_s390x_linux_hotspot_11.0.6_10.tar.gz
+ARG ESUM=ac876b8136b977f2c167909b9698ebf4667d19f4d9eca89516f10882e1f05026
+ARG BINARY_URL=https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.9%2B11_openj9-0.23.0/OpenJDK11U-jdk_s390x_linux_openj9_11.0.9_11_openj9-0.23.0.tar.gz
 #
 # AdoptOpenJDK/openjdk11 setup
 #
@@ -44,7 +44,7 @@ RUN set -eux; \
 #
 # SonarQube setup
 #
-ARG SONARQUBE_VERSION=8.4.1.35646
+ARG SONARQUBE_VERSION=8.6.0.39681
 ARG SONARQUBE_ZIP_URL=https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-${SONARQUBE_VERSION}.zip
 ENV JAVA_HOME=/opt/java/openjdk \
     PATH="/opt/java/openjdk/bin:$PATH" \
@@ -84,9 +84,7 @@ RUN set -ex \
     && chmod -R 777 "${SQ_DATA_DIR}" "${SQ_EXTENSIONS_DIR}" "${SQ_LOGS_DIR}" "${SQ_TEMP_DIR}"
 
 COPY --chown=sonarqube:sonarqube run.sh sonar.sh ${SONARQUBE_HOME}/bin/
-
 RUN chmod +x ${SONARQUBE_HOME}/bin/run.sh ${SONARQUBE_HOME}/bin/sonar.sh
-
 WORKDIR ${SONARQUBE_HOME}
 EXPOSE 9000
 ENTRYPOINT ["bin/run.sh"]
