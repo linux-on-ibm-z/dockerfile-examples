@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############### Dockerfile for Docker Distribution version v2.7.1 #################
@@ -12,46 +12,46 @@
 # docker build -t <image_name> .
 #
 # To start Docker Distribution, create and start a container from above image as follows:
-# docker run --name <container_name> -p 5000:5000 -d <image_name>
+# docker run -d -p 5000:5000 --name <container_name> <image_name>
 #
 # To start Docker Distribution using sample_config.yml file using below command:
-# docker run --name <container_name> -v <path_on_host>/sample_config.yml:/etc/docker/registry/config.yml -p 5000:5000  -d <image_name>
+# docker run -d -p 5000:5000 --name <container_name> -v <path_on_host>/sample_config.yml:/etc/docker/registry/config.yml <image_name>
 #
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
+
+# The Author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ARG DOCKER_DISTRIBUTION_VER=2.7.1
-
-# The author
-MAINTAINER  LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)
 
 ENV GOPATH /go
 ENV DISTRIBUTION_DIR /go/src/github.com/docker/distribution
 ENV PATH=$PATH:/usr/share:/usr/local/go/bin
 
-# Install dependencies 
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    make \
+	git \
+	make \
 	tar \
 	wget \
+	ca-certificates \
 # Install go
  && cd /root \
  && wget https://storage.googleapis.com/golang/go1.11.4.linux-s390x.tar.gz \
  && chmod ugo+r go1.11.4.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.11.4.linux-s390x.tar.gz \          
+ && tar -C /usr/local -xzf go1.11.4.linux-s390x.tar.gz \
 # Download and build source code of Docker Distribution
- && git clone https://github.com/docker/distribution.git $GOPATH/src/github.com/docker/distribution \
- && cd $GOPATH/src/github.com/docker/distribution && git checkout v${DOCKER_DISTRIBUTION_VER} \
+ && git clone https://github.com/docker/distribution.git $DISTRIBUTION_DIR \
+ && cd $DISTRIBUTION_DIR && git checkout v${DOCKER_DISTRIBUTION_VER} \
  && make clean binaries \
  && mkdir -p /etc/docker/registry \
- && cp $DISTRIBUTION_DIR/cmd/registry/config-dev.yml /etc/docker/registry/config.yml \
- && cp -r $DISTRIBUTION_DIR/bin/registry /usr/share/registry \ 
+ && cp -r $DISTRIBUTION_DIR/bin/registry /bin/registry \
 # Tidy up (Clear cache data)
  && apt-get remove -y \
-    git \
+	git \
 	make \
 	wget \
  && apt-get autoremove -y \
@@ -60,11 +60,15 @@ RUN apt-get update && apt-get install -y \
  && rm -rf $DISTRIBUTION_DIR \
  && rm -rf /var/lib/apt/lists/*
 
-VOLUME ["/var/lib/registry"]
+COPY ./config-example.yml /etc/docker/registry/config.yml
 
+VOLUME ["/var/lib/registry"]
 EXPOSE 5000
 
-ENTRYPOINT ["registry"]
+COPY docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["serve", "/etc/docker/registry/config.yml"]
+CMD ["/etc/docker/registry/config.yml"]
+
 # End of Dockerfile
