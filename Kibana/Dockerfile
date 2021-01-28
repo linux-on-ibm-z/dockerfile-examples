@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ###################################### Dockerfile for Kibana version 7.10.1 ############################################
