@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for WildFly (JBoss) version 21.0.2 ##########################
+################# Dockerfile for WildFly (JBoss) version 22.0.0 ##########################
 #
 # This Dockerfile builds a basic installation of WildFly.
 #
@@ -13,8 +13,8 @@
 # docker build -t <image_name> .
 #
 # Use below command to start WildFly in standalone mode :
-#    docker run --name <container_name> -p <port_number>:8080 -p <port_number>:9990 -it <image_name> 
-# Use below command to start WildFly in domain mode : 
+#    docker run --name <container_name> -p <port_number>:8080 -p <port_number>:9990 -it <image_name>
+# Use below command to start WildFly in domain mode :
 #    docker run --name <container_name> -p <port_number>:8080 -p <port_number>:9990 -it <image_name> domain.sh -b 0.0.0.0 -bmanagement 0.0.0.0
 #
 # To view the web console open the link  http://<wildfly-ip>:8080
@@ -22,7 +22,7 @@
 ##############################################################################
 
 # Base Image
-FROM s390x/ubuntu:18.04
+FROM ubuntu:20.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -37,7 +37,7 @@ RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s
 
 
 # Set the WILDFLY_VERSION env variable
-ENV WILDFLY_VERSION 21.0.2.Final
+ENV WILDFLY_VERSION 22.0.0.Final
 ENV JBOSS_HOME=/opt/jboss/wildfly-${WILDFLY_VER}
 ENV JAVA_HOME=/opt/jdk-11.0.9+11
 ENV PWD=`pwd`
