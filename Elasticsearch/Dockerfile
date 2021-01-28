@@ -1,12 +1,15 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.10.0 ########################################
+##################################### Dockerfile for Elasticsearch version 7.10.1 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
 # Elasticsearch is a search server based on Lucene. It provides a distributed, multitenant-capable
 # full-text search engine with an HTTP web interface and schema-free JSON documents.
+#
+# The vm_max_map_count kernel setting needs to be set to at least 262144 for production use using the below command.(See "https://github.com/docker-library/elasticsearch/issues/111")
+# sysctl -w vm.max_map_count=262144
 #
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
@@ -27,7 +30,7 @@
 
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG ELASTICSEARCH_VER=7.10.0
+ARG ELASTICSEARCH_VER=7.10.1
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
