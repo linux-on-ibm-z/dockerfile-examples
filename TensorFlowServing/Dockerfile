@@ -74,7 +74,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && ldconfig \
     && pip3 install --upgrade pip \
     && pip3 install --no-cache-dir \
-    numpy \
+    numpy==1.19.5 \
     wheel \
     scipy \
     portpicker \
