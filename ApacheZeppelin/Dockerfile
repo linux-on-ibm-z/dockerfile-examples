@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############## Dockerfile for Apache Zeppelin version 0.8.2 ###############
+############## Dockerfile for Apache Zeppelin version 0.9.0 ###############
 #
 # This Dockerfile builds a basic installation of Apache Zeppelin.
 #
@@ -17,7 +17,7 @@
 # We can view the Apache Zeppelin UI at http://<zeppelin-host-ip>:<port_number>
 #
 # Reference:
-# http://zeppelin.apache.org/docs/0.8.2/index.html
+# http://zeppelin.apache.org/docs/0.9.0/index.html
 #
 #################################################################################
 
@@ -27,77 +27,99 @@ FROM s390x/ubuntu:20.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG Z_VERSION=0.8.2
+ENV Z_VERSION=0.9.0
 
 ENV LOG_TAG="[ZEPPELIN_${Z_VERSION}]:" \
-        Z_HOME="/zeppelin" \
-        LANG=en_US.UTF-8 \
-        LC_ALL=en_US.UTF-8 \
-        DEBIAN_FRONTEND=noninteractive \
-        SOURCE_ROOT=/opt \
-        JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x \
-        PATH=$JAVA_HOME/bin:$PATH \
-        ZEPPELIN_ADDR="0.0.0.0"
+    Z_HOME="/zeppelin" \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8 \
+    DEBIAN_FRONTEND=noninteractive \
+    JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x \
+    PATH=$JAVA_HOME/bin:$PATH \
+    ZEPPELIN_ADDR="0.0.0.0"
 
-# Install dependencies
-RUN apt-get update && apt-get -y install \
-                curl \
-                build-essential \
-                jupyter \
-                openjdk-8-jdk \
-                openjdk-8-jdk-headless \
-                phantomjs \
-                tar \
-                unzip \
-                wget \
-                python3-dev \
-                python3-pip \
-                gfortran \
-                libblas-dev \
-                liblapack-dev \
-                libpng-dev \
-                libjpeg-dev \
-                libfreetype6-dev \
-                libxft-dev \
-                locales \
-                python3-tk \
-                libxml2-dev \
-                libgit2-dev \
-                libxslt1-dev \
-                zlib1g-dev \
-        &&      locale-gen $LANG \
-        &&      pip3 install --upgrade pip \
-        &&      pip3 install numpy matplotlib && \
-    echo "$LOG_TAG Install R related packages" && \
-    echo "PATH: $PATH" && \
+RUN echo "$LOG_TAG update and install basic packages" && \
     apt-get -y update && \
-    apt-get -y --allow-unauthenticated install r-base r-base-dev && \
+    apt-get install -y locales && \
+    locale-gen $LANG && \
+    apt-get install -y software-properties-common && \
+    apt-get -y autoclean && \
+    apt-get -y dist-upgrade && \
+    apt-get install -y build-essential wget && \
+    echo "$LOG_TAG install tini related packages" && \
+    apt-get install -y apt-transport-https && \
+    wget -O tini-s390x https://github.com/krallin/tini/releases/download/v0.19.0/tini-s390x && \
+    mv tini-s390x /usr/bin/tini && \
+    chmod +x /usr/bin/tini && \
+    echo "$LOG_TAG Install java8" && \
+    apt-get -y update && \
+    apt-get install -y openjdk-8-jdk && \
+    apt-get -y update && DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata && \
+    # Note: intake-parquet and apache_beam python packages are not included on s390x
+    echo "$LOG_TAG Install python related packages" && \
+    apt-add-repository universe && \
+    apt-get -y update && \
+    apt-get install -y python3 python3-dev python3-pip python-is-python3 && \
+    python -m pip install --upgrade pip && \
+    apt-get install -y bzip2 ca-certificates \
+    libglib2.0-0 libxext6 libsm6 libxrender1 \
+    git mercurial subversion cmake && \
+    apt-get install -y gfortran && \
+    # numerical/algebra packages
+    apt-get install -y libblas-dev libatlas-base-dev  liblapack-dev && \
+    # font, image
+    apt-get install -y libpng-dev libfreetype6-dev libxft-dev libjpeg-dev && \
+    # for tkinter
+    apt-get install -y python3-tk libxml2-dev libxslt-dev zlib1g-dev && \
+    apt-get -y install libcurl4-openssl-dev libssl-dev && \
+    hash -r && \
+    echo "$LOG_TAG Install python modules. This may take some time." && \
+    python -m pip install -q pycodestyle && \
+    python -m pip install -q Cython && \
+    GRPC_PYTHON_BUILD_WITH_CYTHON=1 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 python -m pip install -q grpcio && \
+    python -m pip install -q pybind11 && \
+    python -m pip install -q 'numpy==1.*' && \
+    python -m pip install -q 'pandas==1.2.*' && \
+    python -m pip install -q 'scipy==1.*' && \
+    python -m pip install -q bkzep==0.6.1 && \
+    python -m pip install -q hvplot && \
+    python -m pip install -q 'protobuf==3.*' && \
+    python -m pip install -q pandasql==0.7.3 && \
+    python -m pip install -q 'ipython==7.*' && \
+    python -m pip install -q 'matplotlib==3.*' && \
+    python -m pip install -q 'ipykernel==5.*' && \
+    python -m pip install -q 'jupyter_client==5.*' && \
+    python -m pip install -q 'bokeh==2.2.*' && \
+    python -m pip install -q panel && \
+    python -m pip install -q holoviews && \
+    python -m pip install -q 'pyyaml==3.*' && \
+    python -m pip install -q seaborn && \
+    python -m pip install -q plotnine && \
+    python -m pip install -q intake && \
+    python -m pip install -q altair && \
+    echo "$LOG_TAG Install R related packages" && \
+    apt-get -y --allow-unauthenticated install r-base r-base-dev libzmq3-dev libgit2-dev && \
     R -e "install.packages('evaluate', repos = 'https://cloud.r-project.org')" && \
     R -e "install.packages('knitr', repos='http://cran.us.r-project.org')" && \
     R -e "install.packages('ggplot2', repos='http://cran.us.r-project.org')" && \
     R -e "install.packages('googleVis', repos='http://cran.us.r-project.org')" && \
     R -e "install.packages('data.table', repos='http://cran.us.r-project.org')" && \
-    R -e "install.packages('IRkernel', repos = 'https://cloud.r-project.org');IRkernel::installspec()" && \
+    R -e "install.packages('IRkernel', repos = 'https://cloud.r-project.org');IRkernel::installspec(user = FALSE)" && \
     R -e "install.packages('shiny', repos = 'https://cloud.r-project.org')" && \
-    # for devtools, Rcpp
-    apt-get -y install libcurl4-gnutls-dev libssl-dev && \
+    echo "$LOG_TAG Install R related packages2" && \
     R -e "install.packages('devtools', repos='http://cran.us.r-project.org')" && \
     R -e "install.packages('Rcpp', repos='http://cran.us.r-project.org')" && \
-    Rscript -e "library('devtools'); library('Rcpp'); install_github('ramnathv/rCharts')" \
-# Install tini and kubectl
-    apt-get install -y apt-transport-https && \
-    cd $SOURCE_ROOT && \
-    wget https://github.com/krallin/tini/releases/download/v0.18.0/tini-s390x && mv $SOURCE_ROOT/tini-s390x /usr/bin/tini && \
-    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
-    echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list && \
-    apt-get update && \
-    apt-get install -y kubectl && \
-# Download Apache Zeppelin binaries
+    Rscript -e "library('devtools'); library('Rcpp'); install_github('ramnathv/rCharts')" && \
+    echo "$LOG_TAG Cleanup" && \
+    apt-get -y autoclean && \
+    apt-get -y clean && \
+    rm -rf /var/lib/apt/lists/* && \
     echo "$LOG_TAG Download Zeppelin binary" && \
-    mkdir -p ${Z_HOME} && \
-    wget --quiet -O /tmp/zeppelin-${Z_VERSION}-bin-all.tgz https://mirrors.estointernet.in/apache/zeppelin/zeppelin-${Z_VERSION}/zeppelin-${Z_VERSION}-bin-all.tgz && \
-    tar -zxvf /tmp/zeppelin-${Z_VERSION}-bin-all.tgz -C ${Z_HOME} --strip-components 1 && \
+    wget --quiet -O /tmp/zeppelin-${Z_VERSION}-bin-all.tgz "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=zeppelin/zeppelin-${Z_VERSION}/zeppelin-${Z_VERSION}-bin-all.tgz" && \
+    tar -zxvf /tmp/zeppelin-${Z_VERSION}-bin-all.tgz && \
     rm -rf /tmp/zeppelin-${Z_VERSION}-bin-all.tgz && \
+    mkdir -p ${Z_HOME} && \
+    mv /zeppelin-${Z_VERSION}-bin-all/* ${Z_HOME}/ && \
     chown -R root:root ${Z_HOME} && \
     mkdir -p ${Z_HOME}/logs ${Z_HOME}/run ${Z_HOME}/webapps && \
     # Allow process to edit /etc/passwd, to create a user entry for zeppelin
@@ -105,19 +127,15 @@ RUN apt-get update && apt-get -y install \
     # Give access to some specific folders
     chmod -R 775 "${Z_HOME}/logs" "${Z_HOME}/run" "${Z_HOME}/notebook" "${Z_HOME}/conf" && \
     # Allow process to create new folders (e.g. webapps)
-    chmod 775 ${Z_HOME} && \
-# Clean up of unused packages and source directory.
-   apt autoremove -y && \
-   apt-get clean  && rm -rf /var/lib/apt/lists/*
+    chmod 775 ${Z_HOME}
 
-# Expose default port
-EXPOSE 8080
-
-RUN chmod +x /usr/bin/tini
+COPY log4j.properties ${Z_HOME}/conf/
+COPY log4j_docker.properties ${Z_HOME}/conf/
 
 USER 1000
 
-# Start Apache Zeppelin
+EXPOSE 8080
+
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 WORKDIR ${Z_HOME}
 CMD ["bin/zeppelin.sh"]
