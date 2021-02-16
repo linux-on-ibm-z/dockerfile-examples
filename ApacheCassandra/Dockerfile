@@ -1,7 +1,7 @@
-# Copyright IBM Corporation 2017, 2020.
+# Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Linux on z Systems Dockerfile for Cassandra version 3.11.8 #########
+########## Linux on z Systems Dockerfile for Cassandra version 3.11.10 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -87,10 +87,12 @@ ENV GPG_KEYS \
 # gpg: key FE4B2BDA: public key "Michael Shuler <michael@pbandjelly.org>" imported
         A26E528B271F19B9E5D8E19EA278B781FE4B2BDA \
 # gpg: key E91335D77E3E87CB: public key "Michael Semb Wever <mick@thelastpickle.com>" imported
-        A4C465FEA0C552561A392A61E91335D77E3E87CB
+        A4C465FEA0C552561A392A61E91335D77E3E87CB \
+# gpg: key F1000962B7F6840C: public key "Alex Petrov <oleksandr.petrov@gmail.com>" imported
+	9E66CEC6106D578D0B1EB9BFF1000962B7F6840C
 
-ENV CASSANDRA_VERSION 3.11.8
-ENV CASSANDRA_SHA512 ece12cafc7aab7f035a5c8505a7a32915f7fe8c2729c7ade69b21d9354e3f0c06fd5e6206e7f066fb1e525162213fa295200cd46fd1a8bf4b27c9bc834a86c43
+ENV CASSANDRA_VERSION 3.11.10
+ENV CASSANDRA_SHA512 f229e2dad47ebaeb6bb7ed13ee5cea3bd3ad9994cc9222cabbffa59651e12dbf9a463e99d397a0c4096c61bacb87d34eb4fba4f8ed9da0f0972a3d7225cef36f
 ENV JAVA_HOME /opt/java/openjdk
 ENV PATH $JAVA_HOME/bin:$PATH
 
@@ -166,7 +168,7 @@ RUN set -eux; \
                         apt-get install -y automake ant junit ant-optional autoconf git make tar wget unzip g++ libx11-dev libxt-dev libtool locales-all pkg-config python texinfo; \
                         cd "$SOURCE_ROOT"; \
                         mkdir -p "$JAVA_HOME";  \
-                        wget -O jdk.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u202-b08/OpenJDK8U-jdk_s390x_linux_hotspot_8u202b08.tar.gz; \
+                        wget -O jdk.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jdk_s390x_linux_hotspot_8u282b08.tar.gz; \
                         tar -xf jdk.tar.gz -C "$JAVA_HOME" --strip-components=1; \
                         git clone https://github.com/java-native-access/jna.git;\
                         cd jna;\
