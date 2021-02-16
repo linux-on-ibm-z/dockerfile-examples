@@ -1,5 +1,5 @@
-# © Copyright IBM Corporation 2017, 2020.
-# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0) 
+# © Copyright IBM Corporation 2017, 2021.
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ######################### Dockerfile for PM2 latest version ##############################
 #
@@ -24,7 +24,7 @@
 ###################################################################################
 
 # Base image
-FROM node:14.15.0-alpine
+FROM node:14.15.4-alpine
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
