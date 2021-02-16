@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2019, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for ScyllaDB version 4.2.2 #########
+########## Dockerfile for ScyllaDB version 4.3.0 #########
 #
 # This Dockerfile builds a basic installation of ScyllaDB.
 #
@@ -41,13 +41,13 @@ ENV PATH=/usr/local/bin:/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/lib64:/usr/local/lib:/usr/lib64:$LD_LIBRARY_PATH
 ENV LD_RUN_PATH=/usr/local/lib64:/usr/local/lib:/usr/lib64:$LD_RUN_PATH
 ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
-ENV CC=/usr/bin/gcc-10
-ENV CXX=/usr/bin/g++-10
+ENV CC=/usr/local/bin/gcc
+ENV CXX=/usr/local/bin/g++
 ENV ver=1.0
 ENV URL=https
 ENV LC_ALL=C
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/4.2.2/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/4.3.0/patch/"
 
 ARG TARGET=native
 
@@ -58,7 +58,7 @@ RUN apt-get update \
   && apt-get install -y software-properties-common \
   && add-apt-repository -y ppa:ubuntu-toolchain-r/test \
   && apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gcc-10 g++-10 \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gcc g++ \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-8-jdk libaio-dev \
     systemtap-sdt-dev lksctp-tools xfsprogs \
     libyaml-dev openssl libevent-dev \
@@ -72,11 +72,39 @@ RUN apt-get update \
     automake make git maven ninja-build \
     unzip bzip2 wget curl xz-utils texinfo \
     diffutils liblua5.3-dev libnuma-dev libunistring-dev \
-    pigz ragel rapidjson-dev stow patch locales valgrind \
+    pigz ragel rapidjson-dev stow patch locales valgrind libudev-dev \
     net-tools ethtool hwloc libhwloc-dev gnutls-bin patchelf util-linux \
     gawk gzip \
 # packaging scripts expect lsblk to be in /usr/bin/
   && ln -s /bin/lsblk /usr/bin/ \
+#######################################################################
+  && ver=2.34 \
+  && cd "$SOURCE_ROOT" \
+  && URL="http://ftpmirror.gnu.org/binutils/binutils-${ver}.tar.gz" \
+  && curl -sSL $URL | tar xzf - \
+  && cd binutils-${ver} \
+  && mkdir objdir \
+  && cd objdir \
+  && CC=/usr/bin/gcc ../configure --prefix=/usr/local --build=s390x-linux-gnu \
+  && make -j 8 \
+  && make install \
+#######################################################################
+  && ver=10.2.0 \
+  && cd "$SOURCE_ROOT" \
+  && URL="https://ftp.gnu.org/gnu/gcc/gcc-${ver}/gcc-${ver}.tar.gz" \
+  && curl -sSL $URL | tar xzf - \
+  && cd gcc-${ver} \
+  && ./contrib/download_prerequisites \
+  && mkdir objdir \
+  && cd objdir \
+  && CC=/usr/bin/gcc CXX=/usr/bin/g++ ../configure --enable-languages=c,c++ --prefix=/usr/local \
+    --enable-shared --enable-threads=posix \
+    --disable-multilib --disable-libmpx \
+    --with-system-zlib --with-long-double-128 --with-arch=zEC12 \
+    --disable-libphobos --disable-werror \
+    --build=s390x-linux-gnu --host=s390x-linux-gnu --target=s390x-linux-gnu \
+  && make -j 8 bootstrap \
+  && make install \
 #######################################################################
   && ver=3.8.6 \
   && cd "$SOURCE_ROOT" \
@@ -118,8 +146,16 @@ RUN apt-get update \
   && ver=0.8.0 \
   && cd "$SOURCE_ROOT" \
   && URL=https://github.com/Cyan4973/xxHash/archive/v${ver}.tar.gz \
-  && curl -sSL $URL | tar xzf - || error "xxHash $ver" \
+  && curl -sSL $URL | tar xzf - \
   && cd xxHash-${ver} \
+  && make install \
+#######################################################################
+  && cd "$SOURCE_ROOT" \
+  && mkdir cryptopp \
+  && cd cryptopp \
+  && curl -ksSLO https://www.cryptopp.com/cryptopp820.zip \
+  && unzip cryptopp820.zip \
+  && CXXFLAGS="-std=c++11 -g -O2" make \
   && make install \
 #######################################################################
   && ver=3.5.2 \
@@ -141,7 +177,7 @@ RUN apt-get update \
   && sed -i 's/array\.hpp/array_wrapper.hpp/g' boost/numeric/ublas/matrix.hpp \
   && sed -i 's/array\.hpp/array_wrapper.hpp/g' boost/numeric/ublas/storage.hpp \
   && ./bootstrap.sh \
-  && ./b2 toolset=gcc-10 variant=release link=shared runtime-link=shared threading=multi --without-python install \
+  && ./b2 toolset=gcc variant=release link=shared runtime-link=shared threading=multi --without-python install \
 #######################################################################
   && ver=0.13.0 \
   && cd "$SOURCE_ROOT" \
@@ -176,15 +212,17 @@ RUN apt-get update \
   && cd "$SOURCE_ROOT" \
   && git clone https://github.com/scylladb/scylla.git \
   && cd scylla \
-  && git checkout scylla-4.2.2 \
-  && git submodule update --init --recursive \
+  && git checkout scylla-4.3.0 \
+  && git submodule update --init --force --recursive \
   && curl -sSL ${PATCH_URL}/seastar.diff | patch -d seastar -p1 \
   && curl -sSL ${PATCH_URL}/scylla.diff | patch -p1  \
-  && ./configure.py --mode release --target ${TARGET} --debuginfo 0 \
-  --cflags "-I/usr/local/include -I/usr/local/include/boost -L/usr/local/lib -L/usr/local/lib64" \
+  && sed -i 's/boost\/function_output_iterator\.hpp/boost\/iterator\/function_output_iterator\.hpp/g' \
+    /usr/local/include/boost/signals2/detail/null_output_iterator.hpp \
+  && ./configure.py --mode=release --target=${TARGET} --debuginfo=0 \
+  --cflags="-I/usr/local/include -I/usr/local/include/boost -L/usr/local/lib -L/usr/local/lib64" \
     --ldflags="-Wl,--build-id=sha1" --static-thrift \
-    --compiler "${CXX}" --c-compiler "${CC}" --disable-dpdk \
-  && ninja -j 2 \
+    --compiler="${CXX}" --c-compiler="${CC}"\
+  && ninja build -j 2 \
   && ln -s /bin/gzip /usr/bin/gzip \
   && ln -s /sbin/ifconfig /usr/sbin/ifconfig \
   && ln -s /sbin/ethtool /usr/sbin/ethtool \
@@ -204,7 +242,9 @@ RUN apt-get update \
       $SOURCE_ROOT/Python-3.8.6 \
       $SOURCE_ROOT/lz4-1.9.3 \
       $SOURCE_ROOT/zstd-1.4.5 \
-      $SOURCE_ROOT/xxHash-0.8.0 \
+      $SOURCE_ROOT/cryptopp \
+      $SOURCE_ROOT/binutils-* \
+      $SOURCE_ROOT/gcc-* \
       $HOME/.m2 $HOME/.cache \
   && apt-get autoremove -y \
   && apt-get clean \
