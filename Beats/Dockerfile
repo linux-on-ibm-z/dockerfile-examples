@@ -74,6 +74,8 @@ RUN apt-get update && apt-get install -y \
  && wget -O rustup-init.sh https://sh.rustup.rs \
  && bash rustup-init.sh -y \
  && export PATH=$PATH:$HOME/.cargo/bin \
+ && rustup toolchain install 1.49.0 \
+ &&	rustup default 1.49.0 \
  && python3 -m pip install appdirs pyparsing packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv pillow \
  && wget https://dl.google.com/go/go1.14.7.linux-s390x.tar.gz \
  && chmod ugo+r go1.14.7.linux-s390x.tar.gz \
