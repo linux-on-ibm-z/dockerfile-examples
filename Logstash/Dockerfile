@@ -19,7 +19,7 @@
 ###############################################################################################################
 
 
-FROM golang AS builder
+FROM golang:1.8 AS builder
 
 ADD env2yaml/env2yaml.go /go/
 RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
