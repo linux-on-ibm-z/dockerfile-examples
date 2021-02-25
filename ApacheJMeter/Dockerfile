@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for Apache JMeter version 5.4 #########################################
+######################## Dockerfile for Apache JMeter version 5.4.1 #########################################
 #
 # This Dockerfile builds a basic installation of Apache JMeter.
 #
@@ -21,7 +21,7 @@
 # Base image
 FROM s390x/ubuntu:18.04
 
-ARG JMETER_VER=5.4
+ARG JMETER_VER=5.4.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
