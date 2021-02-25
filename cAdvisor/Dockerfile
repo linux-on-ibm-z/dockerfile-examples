@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ######################## Dockerfile for cAdvisor 0.37.0 #################################
@@ -46,7 +46,7 @@ RUN apt-get update && apt-get install -y \
         make \
         sudo \
 # Install go
- && export GO_INSTALL_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Go/1.15.3/build_go.sh" \
+ && export GO_INSTALL_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Go/1.15.8/build_go.sh" \
  && curl $GO_INSTALL_URL | bash \
 # Create directory and Change the work directory
  && mkdir -p $GOPATH/src/github.com/google && cd $GOPATH/src/github.com/google \
