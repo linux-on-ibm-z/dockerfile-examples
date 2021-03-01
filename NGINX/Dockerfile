@@ -14,7 +14,10 @@
 #
 # To create container of NGINX image run the below command
 # docker run --name <container name> -p <port_number>:80 -d <nginximage>
-# To view the default nginx website open the link http://<hostname>:<port_number>                                                   
+# To view the default nginx website open the link http://<hostname>:<port_number>   
+#
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 ###############################################################################################################
 # Base image
 FROM s390x/ubuntu:16.04
