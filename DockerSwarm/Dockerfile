@@ -28,7 +28,8 @@
 #  <ip_of_slave_node2>:<port>
 #
 ##################################################################################
-
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 
 # Base image
 FROM s390x/ubuntu:16.04
