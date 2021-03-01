@@ -21,6 +21,8 @@
 # For example to execute a test file using Ruby:
 # docker run --name <container_name> -v /home/test/test.rb:/home/test.rb --rm=true <ruby image> ruby /home/test.rb
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 # ########################### Sample test.rb ######################################
 #
 # puts RUBY_VERSION
