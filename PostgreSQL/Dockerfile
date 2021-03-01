@@ -18,6 +18,8 @@
 # To create container of PostgreSQL image with config file, run the below command
 # docker run --name <container_name> -v /home/postgresql.conf:/usr/local/pgsql/data/postgresql.conf -d <image_name> postmaster -D /usr/local/pgsql/data -c config_file=/usr/local/pgsql/data/postgresql.conf
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 #####################################################################
 
 # Base image
