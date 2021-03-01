@@ -11,6 +11,8 @@
 # To start Apache Spark server using this image, use following command:
 # docker run --name <container name> -it -p <port>:4040 <image_name>
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 ##################################################################################################################
 # Base Image
 FROM s390x/ubuntu:18.04 AS builder
