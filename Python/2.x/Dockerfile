@@ -20,6 +20,8 @@
 # Below is an example to display Python version:
 # docker run --rm --name <container_name> -v /home/python_source.py:/home/python_source.py -it <image_name> python /home/python_source.py
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 # ########################### Sample python_source.py ##################################
 #
 # import sys
