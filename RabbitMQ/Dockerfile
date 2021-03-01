@@ -20,6 +20,8 @@
 #
 # We can view the RabbitMQ management UI at http://<rabbitmq-host-IP>:15672
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 #########################################################################################
 
 # Base image
