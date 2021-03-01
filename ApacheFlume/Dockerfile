@@ -39,6 +39,9 @@
 # #Bind the source and sink to the channel
 #   a1.sources.r1.channels = c1
 #   a1.sinks.k1.channel = c1
+#
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 #################################################################################################
 
 # Base image
