@@ -14,6 +14,8 @@
 #
 # We can view the Magento UI at http://<Magento_host_IP>:<Port_number>/magento2/setup
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 ###############################################################################################
 
 # Base Image
