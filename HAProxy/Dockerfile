@@ -22,6 +22,8 @@
 # Please note that you will need to expose ports based on your haproxy configuration file.
 # Sample configure file is available in https://github.com/linux-on-ibm-z/docs/wiki/Building-HAProxy
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 #########################################################################################################################
 
 # Base Image
