@@ -11,6 +11,8 @@
 # To start a container of MongoDB image, use following command:
 # docker run --name <container name> -p <port no>:27017 -d <image name>
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 ####################################################################################
 # Base Image
 FROM  s390x/ubuntu:16.04
