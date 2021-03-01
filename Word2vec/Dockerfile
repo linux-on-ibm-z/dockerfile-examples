@@ -22,6 +22,8 @@
 # To check word2vec options run below command.
 # docker run --rm=true --name <container_name> -it <image_name> word2vec
 # 
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 #########################################################################################################
 
 # Base image
