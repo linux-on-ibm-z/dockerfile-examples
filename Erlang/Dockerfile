@@ -20,6 +20,8 @@
 # docker run --rm=true --name <container_name> -it <image_name> erl <argument>
 # For ex. docker run --rm=true --name <container_name> -it <image_name> erl --help
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 ###########################################################################
 
 # Base image
