@@ -23,6 +23,8 @@
 # https://github.com/hibernate/hibernate-orm/tree/5.4.18
 # http://hibernate.org/orm/releases/5.4/
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 ##################################################################################
 
 # Base Image
