@@ -17,6 +17,8 @@
 # Below is the command to use Python :
 # docker run --rm --name <container_name> -it <image_name> python3 <arguments>
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 # ########################### Sample python_source.py ##################################
 #
 # import sys
