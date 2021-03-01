@@ -12,6 +12,8 @@
 # docker run --name <container_name> -v <source path>/file.scala:/file.scala -d <image_name> scala file.scala -o file
 # Example: docker run --name scala_new -v /HelloWorld.scala:/HelloWorld.scala -d scala_img_ub scala HelloWorld.scala -o HelloWorld
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 #########################################################################################################################
 
 # Base Image
