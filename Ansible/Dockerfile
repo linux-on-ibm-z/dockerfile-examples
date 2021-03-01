@@ -20,6 +20,8 @@
 #  docker run --rm=true --name <container_name> -v <playbook_file_path_in_host>:<playbook_file_path_in_container>  -it <image_name>  ansible-playbook  <playbook_file_path_in_container>
 #  For ex. docker run --rm=true --name <container_name> -v `pwd`/playbook.yml:/playbook.yml  -it <image_name>  ansible-playbook  /playbook.yml
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 ########################### Sample playbook.yml ######################################
 #
 #---
