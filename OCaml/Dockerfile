@@ -19,6 +19,8 @@
 # Example to execute test file using OCaml:
 # docker run --rm --name <container_name> -v /home/test/ocaml_test.ml:/home/ocaml_test.ml -it <image_name> ocaml /home/ocaml_test.ml
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 ############################ Sample ocaml_test.ml ####################################
 #
 # print_string "Hello world!\n";;
