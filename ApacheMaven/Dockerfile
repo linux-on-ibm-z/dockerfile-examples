@@ -18,6 +18,8 @@
 # docker run -it --name <container_name> -v <path_to_project_on_host>:/usr/src/mymaven -w /usr/src/mymaven <image_name> <maven_command>
 # For ex. docker run -it --name maven_test -v /home/test/mvn/gs-maven/initial:/usr/src/mymaven -w /usr/src/mymaven  maven:s390x mvn clean install
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 ##############################################################################################################################################
 
 FROM s390x/ubuntu:16.04
