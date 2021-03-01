@@ -12,6 +12,9 @@
 #
 # To start Helm use following command:
 # docker run -it --name <container_name> <image_name>
+#
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 #########################################################################################################################
 
 #Base image
