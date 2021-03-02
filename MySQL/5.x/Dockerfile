@@ -1,26 +1,26 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############################################## Dockerfile for MySQL 5.x ##################################################
 # To build this image, run docker build from the directory containing this Dockerfile:
-# 
+#
 #       docker build -t mysql:5.7 .
 #
 # Start a mysql server instance examples:
 # You can specify one of MYSQL_ROOT_PASSWORD, MYSQL_ALLOW_EMPTY_PASSWORD and MYSQL_RANDOM_ROOT_PASSWORD like shown below
-# 
+#
 #       docker run --name <container_name> -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:5.7
 #       docker run --name <container_name> -e MYSQL_RANDOM_ROOT_PASSWORD=true -d mysql:5.7
 #       docker run --name <container_name> -e MYSQL_ALLOW_EMPTY_PASSWORD=true -d mysql:5.7
 #
-# To connect MySQL Server from within the Container run below command 
+# To connect MySQL Server from within the Container run below command
 #       docker exec -it <container_name> mysql -uroot -p
 #
 # To see randomly generated password for the root user; use below command
 # 		docker logs <container_name> 2>&1 | grep GENERATED
 #
 # For more docker configuration, please visit the official mysql dockerhub webpage:
-# 
+#
 #       https://hub.docker.com/_/mysql
 #
 ####################################################################################################################
@@ -31,7 +31,7 @@ FROM s390x/ubuntu:18.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG MYSQL_VERSION=5.7.32
+ARG MYSQL_VERSION=5.7.33
 ENV DEBIAN_FRONTEND noninteractive
 
 # Add mysql user and group
