@@ -16,6 +16,9 @@
 # To use R image from command line, use following command:
 #  docker run --name <container_name> -v <R_source_file_path_in_host>:<R_source_file_path_in_container> -it <image_name> /bin/bash
 #  For ex. docker run --name <container_name> -v /home/graphics:/home -it <image_name> /bin/bash
+#
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 ###################################################################################
 
 
