@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Docker Compose version 1.27.4 ####################
+################ Dockerfile for Docker Compose version 1.28.4 ####################
 #
 # This Dockerfile builds a basic installation of Docker Compose.
 #
@@ -21,7 +21,7 @@
 # Base Image
 FROM s390x/ubuntu:20.04
 
-ARG DOCKERCOMPOSE_VER=1.27.4
+ARG DOCKERCOMPOSE_VER=1.28.4
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     python3-pip \
     wget \
- && pip3 install cryptography==3.3.1 \
+ && pip3 install cryptography==3.3.2 \
  && pip3 install docker-compose==${DOCKERCOMPOSE_VER} \
 # Clean up unused packages and data
  && apt-get autoremove -y && apt-get remove -y libssl-dev libffi-dev && apt-get clean \
