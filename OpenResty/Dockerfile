@@ -1,12 +1,12 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for OpenResty version 1.17.8.2 #########
+########## Dockerfile for OpenResty version 1.19.3.1 #########
 #
 # This Dockerfile builds a basic installation of OpenResty.
 #
-# OpenResty is a full-fledged web platform that integrates the standard Nginx core, LuaJIT, 
-# many carefully written Lua libraries, lots of high quality 3rd-party Nginx modules, and most of their external dependencies. 
+# OpenResty is a full-fledged web platform that integrates the standard Nginx core, LuaJIT,
+# many carefully written Lua libraries, lots of high quality 3rd-party Nginx modules, and most of their external dependencies.
 # It is designed to help developers easily build scalable web applications, web services, and dynamic web gateways.
 #
 # To build this image, from the directory containing this Dockerfile
@@ -24,17 +24,19 @@
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:18.04
+FROM ubuntu:20.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG RESTY_VERSION="1.17.8.2"
+ARG RESTY_VERSION="1.19.3.1"
+ARG ROLLBACK_VERSION="1.17.8.2"
 ARG RESTY_CONFIG_OPTIONS="\
+	--with-pcre-jit \
+	--with-ipv6 \
 	--without-http_redis2_module \
 	--with-http_iconv_module \
-	--with-http_postgres_module \
-"
+	--with-http_postgres_module"
 
 ENV SOURCE_ROOT=/tmp/source PATH=$PATH:/usr/local/openresty/bin
 
@@ -43,23 +45,20 @@ WORKDIR $SOURCE_ROOT
 # Install dependencies
 RUN	DEBIAN_FRONTEND=noninteractive apt-get update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-	        ca-certificates \
-		dos2unix \
-		gcc \
-		libcurl4-openssl-dev \
-		libncursesada*-dev \
-		libpcre3 \
-		libpcre3-dev \
-		libpq-dev \
-		libreadline-dev \
-		libssl-dev \
-		make \
-		openssl \
-		patch \
-		perl \
-		postgresql \
+		ca-certificates \
+		curl \
 		tar \
 		wget \
+		make \
+		gcc \
+		build-essential \
+		dos2unix \
+		patch \
+		libpcre3-dev \
+		libpq-dev \
+		openssl \
+		libssl-dev \
+		perl \
 		zlib1g-dev \
 	&& ln -s make /usr/bin/gmake \
 # Download the source code
@@ -67,9 +66,17 @@ RUN	DEBIAN_FRONTEND=noninteractive apt-get update \
 	&& wget https://openresty.org/download/openresty-${RESTY_VERSION}.tar.gz \
 	&& tar -xvf openresty-${RESTY_VERSION}.tar.gz \
 # Comment out the below lines in file /<source_root>/openresty-1.17.8.1/configure
-	&& cd openresty-${RESTY_VERSION} \
-	&& sed -i '742,785s/^/#/;717,726s/^/#/' configure \
-	&& cat configure \
+	&& cd $SOURCE_ROOT \
+	&& wget https://openresty.org/download/openresty-${ROLLBACK_VERSION}.tar.gz \
+	&& tar -xvf openresty-${ROLLBACK_VERSION}.tar.gz \
+	&& rm -rf openresty-${RESTY_VERSION}/bundle/LuaJIT-2.1-* \
+	&& rm -rf openresty-${RESTY_VERSION}/bundle/lua-resty-core-* \
+	&& rm -rf openresty-${RESTY_VERSION}/bundle/ngx_lua-* \
+	&& rm -rf openresty-${RESTY_VERSION}/bundle/ngx_stream_lua-* \
+	&& cp -r openresty-${ROLLBACK_VERSION}/bundle/LuaJIT-2.1-* openresty-${RESTY_VERSION}/bundle/ \
+	&& cp -r openresty-${ROLLBACK_VERSION}/bundle/lua-resty-core-* openresty-${RESTY_VERSION}/bundle/ \
+	&& cp -r openresty-${ROLLBACK_VERSION}/bundle/ngx_lua-* openresty-${RESTY_VERSION}/bundle/ \
+	&& cp -r openresty-${ROLLBACK_VERSION}/bundle/ngx_stream_lua-* openresty-${RESTY_VERSION}/bundle/ \
 # Build and install OpenResty
 	&& cd $SOURCE_ROOT/openresty-${RESTY_VERSION} \
 	&& ./configure $RESTY_CONFIG_OPTIONS \
@@ -82,16 +89,15 @@ RUN	DEBIAN_FRONTEND=noninteractive apt-get update \
 		make \
 		openssl \
 		patch \
-		postgresql \
 		wget \
 	&&	apt-get autoremove -y \
 	&& 	apt autoremove -y \
 	&& 	rm -rf $SOURCE_ROOT/* \
 	&& 	apt-get clean \
 	&& 	rm -rf /var/lib/apt/lists/*
-	
+
 EXPOSE 80
-	
+
 CMD ["openresty", "-g", "daemon off;"]
-	
+
 # End of Dockerfile
