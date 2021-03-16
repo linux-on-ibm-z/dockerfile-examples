@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Apache Solr version 8.8.0 #########################
+############### Dockerfile for Apache Solr version 8.8.1 #########################
 #
 # To build Apache Solr image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -18,10 +18,9 @@ FROM s390x/ubuntu:20.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-# Create a working directory for Apache Solr
-ARG SOLR_VERSION="8.8.0"
-#ARG SOLR_SHA512="0a43401ecf7946b2724da2d43896cd505386a8f9b07ddc60256cb586873e7e58610d2c34b1cf797323bf06c7613b109527a15105dc2a11be6f866531a1f2cef6"
-ARG SOLR_KEYS="E58A6F4D5B2B48AC66D5E53BD4F181881A42F9E6"
+ARG SOLR_VERSION="8.8.1"
+ARG SOLR_SHA512="a13ad0f8d67e6465d01bd50b9965a042849395e84024cd1093f9e44b9c602ab43b7bbc2f2bc5c1161178ac6bb0c3f717573c69d51baf0aa8f97fb8b5a97a9ffd"
+ARG SOLR_KEYS="fbc25d7e1712025294fe66590a6aa179b9bbf45e"
 # If specified, this will override SOLR_DOWNLOAD_SERVER and all ASF mirrors. Typically used downstream for custom builds
 ARG SOLR_DOWNLOAD_URL
 ENV JAVA_HOME=/opt/adopt/java PATH=$JAVA_HOME/bin:$PATH
@@ -46,7 +45,7 @@ ENV SOLR_USER="solr" \
     SOLR_DIST_URL="https://www.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz" \
     SOLR_ARCHIVE_URL="https://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz" \
     PATH="/opt/solr/bin:/opt/docker-solr/scripts:$PATH" \
-	SOLR_INCLUDE=/etc/default/solr.in.sh \
+    SOLR_INCLUDE=/etc/default/solr.in.sh \
     SOLR_HOME=/var/solr/data \
     SOLR_PID_DIR=/var/solr \
     SOLR_LOGS_DIR=/var/solr/logs \
@@ -82,7 +81,7 @@ RUN set -ex; \
   MAX_REDIRECTS=1; \
   if [ -n "$SOLR_DOWNLOAD_URL" ]; then \
     # If a custom URL is defined, we download from non-ASF mirror URL and allow more redirects and skip GPG step
-	# This takes effect only if the SOLR_DOWNLOAD_URL build-arg is specified, typically in downstream Dockerfiles
+    # This takes effect only if the SOLR_DOWNLOAD_URL build-arg is specified, typically in downstream Dockerfiles
     MAX_REDIRECTS=4; \
     SKIP_GPG_CHECK=true; \
   elif [ -n "$SOLR_DOWNLOAD_SERVER" ]; then \
@@ -97,9 +96,9 @@ RUN set -ex; \
   if [ -z "$SKIP_GPG_CHECK" ]; then \
     echo "downloading $SOLR_ARCHIVE_URL.asc"; \
     wget -nv "$SOLR_ARCHIVE_URL.asc" -O "/opt/solr-$SOLR_VERSION.tgz.asc"; \
-   # echo "$SOLR_SHA512 */opt/solr-$SOLR_VERSION.tgz" | sha512sum -c -; \
+    echo "$SOLR_SHA512 */opt/solr-$SOLR_VERSION.tgz" | sha512sum -c -; \
     (>&2 ls -l "/opt/solr-$SOLR_VERSION.tgz" "/opt/solr-$SOLR_VERSION.tgz.asc"); \
-   # gpg --batch --verify "/opt/solr-$SOLR_VERSION.tgz.asc" "/opt/solr-$SOLR_VERSION.tgz"; \
+    gpg --batch --verify "/opt/solr-$SOLR_VERSION.tgz.asc" "/opt/solr-$SOLR_VERSION.tgz"; \
   else \
     echo "Skipping GPG validation due to non-Apache build"; \
   fi; \
