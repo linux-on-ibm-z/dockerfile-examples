@@ -2,7 +2,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 
-########## Dockerfile for Fluentd version 1.12.0 ###############################
+########## Dockerfile for Fluentd version 1.12.1 ###############################
 #
 # This Dockerfile builds a basic installation of Fluentd.
 #
@@ -26,7 +26,7 @@
 ##############################################################################
 
 # Base Image
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:20.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 ARG RUBY_VER=2.7.2
@@ -34,7 +34,7 @@ ARG RUBY_VER=2.7.2
 RUN apt-get update \
  && apt-get install -y \
          ca-certificates \
-	 gcc \
+         gcc \
          make \
          wget \
          tar \
@@ -53,12 +53,11 @@ RUN apt-get update \
  && make install \
  && cd ../ && apt-get install -y gnupg \
  && echo 'gem: --no-document' >> /etc/gemrc \
- && gem install oj -v 3.8.1 \
- && gem install json -v 2.3.0 \
- && gem install async-http -v 0.50.7 \
+ && gem install oj -v 3.10.18 \
+ && gem install json -v 2.4.1 \
+ && gem install async-http -v 0.54.0 \
  && gem install ext_monitor -v 0.1.2 \
- && gem install fluentd -v 1.12.0 \
- && gem install bigdecimal -v 1.4.4 \
+ && gem install fluentd -v 1.12.1 \
  && dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')" \
  && wget -O /bin/tini "https://github.com/krallin/tini/releases/download/v0.18.0/tini-$dpkgArch" \
  && wget -O /bin/tini.asc "https://github.com/krallin/tini/releases/download/v0.18.0/tini-$dpkgArch.asc" \
