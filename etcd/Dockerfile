@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for etcd 3.4.14 ####################
+################## Dockerfile for etcd 3.4.15 ####################
 #
 # This Dockerfile builds a basic installation of etcd.
 #
@@ -24,14 +24,14 @@
 # Base image
 FROM s390x/ubuntu:18.04 as builder
 
-ARG ETCD_VER=v3.4.14
+ARG ETCD_VER=v3.4.15
 ARG GO_VER=1.13.15
 
 # Maintainer
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV PATH=$PATH:/usr/local/go/bin GOPATH=/
-ENV ETCD_DATA_DIR=/data ETCD_UNSUPPORTED_ARCH=s390x
+ENV ETCD_DATA_DIR=/data
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -45,9 +45,8 @@ RUN apt-get update && apt-get install -y \
  && chmod ugo+r go${GO_VER}.linux-s390x.tar.gz \
  && tar -C /usr/local -xzf go${GO_VER}.linux-s390x.tar.gz \
 # Clone etcd source
- && mkdir -p /src/github.com/coreos \
- && cd /src/github.com/coreos \
- && rm -rf etcd \
+ && mkdir -p /src/github.com/etcd-io \
+ && cd /src/github.com/etcd-io \
  && git clone http://github.com/etcd-io/etcd \
  && cd etcd \
  && git checkout ${ETCD_VER} \
@@ -55,16 +54,18 @@ RUN apt-get update && apt-get install -y \
 # Build
  && go mod vendor \
  && ./build
+ 
 FROM s390x/ubuntu:18.04
 
 # Maintainer
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV PATH=$PATH:/usr/local/go/bin ETCD_UNSUPPORTED_ARCH=s390x ETCD_DATA_DIR=/data
-COPY --from=builder /src/github.com/coreos/etcd/bin/etcd /usr/local/bin/
-COPY --from=builder /src/github.com/coreos/etcd/bin/etcdctl /usr/local/bin/
-RUN mkdir -p /var/etcd/
-RUN mkdir -p /var/lib/etcd/
+COPY --from=builder /src/github.com/etcd-io/etcd/bin/etcd /usr/local/bin/
+COPY --from=builder /src/github.com/etcd-io/etcd/bin/etcdctl /usr/local/bin/
+RUN mkdir -p /var/etcd/  \
+    && mkdir -p /var/lib/etcd/  \
+    && mkdir -p /data
 COPY --from=builder /usr/local/go/bin /usr/local/go/bin
 EXPOSE 2379 2380
 
