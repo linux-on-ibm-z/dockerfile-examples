@@ -39,6 +39,18 @@ file_env() {
 	unset "$fileVar"
 }
 
+# set MARIADB_xyz from MYSQL_xyz when MARIADB_xyz is unset
+# and make them the same value (so user scripts can use either)
+_mariadb_file_env() {
+	local var="$1"; shift
+	local maria="MARIADB_${var#MYSQL_}"
+	file_env "$var" "$@"
+	file_env "$maria" "${!var}"
+	if [ "${!maria:-}" ]; then
+		export "$var"="${!maria}"
+	fi
+}
+
 # check to see if this file is being run or sourced from another script
 _is_sourced() {
 	# https://unix.stackexchange.com/a/215279
@@ -78,8 +90,15 @@ docker_process_init_files() {
 	done
 }
 
+# arguments necessary to run "mysqld --verbose --help" successfully (used for testing configuration validity and for extracting default/configured values)
+_verboseHelpArgs=(
+	--verbose --help
+	--log-bin-index="$(mktemp -u)" # https://github.com/docker-library/mysql/issues/136
+	--encrypt-tmp-files=0 # https://github.com/docker-library/mariadb/issues/339
+)
+
 mysql_check_config() {
-	local toRun=( "$@" --verbose --help --log-bin-index="$(mktemp -u)" ) errors
+	local toRun=( "$@" "${_verboseHelpArgs[@]}" ) errors
 	if ! errors="$("${toRun[@]}" 2>&1 >/dev/null)"; then
 		mysql_error $'mysqld failed while attempting to check config\n\tcommand was: '"${toRun[*]}"$'\n\t'"$errors"
 	fi
@@ -90,7 +109,7 @@ mysql_check_config() {
 # latter only show values present in config files, and not server defaults
 mysql_get_config() {
 	local conf="$1"; shift
-	"$@" --verbose --help --log-bin-index="$(mktemp -u)" 2>/dev/null \
+	"$@" "${_verboseHelpArgs[@]}" 2>/dev/null \
 		| awk -v conf="$conf" '$1 == conf && /^[^ \t]/ { sub(/^[^ \t]+[ \t]+/, ""); print; exit }'
 	# match "datadir      /some/path with/spaces in/it here" but not "--xyz=abc\n     datadir (xyz)"
 }
@@ -127,8 +146,8 @@ docker_temp_server_stop() {
 
 # Verify that the minimally required password settings are set for new databases.
 docker_verify_minimum_env() {
-	if [ -z "$MYSQL_ROOT_PASSWORD" -a -z "$MYSQL_ALLOW_EMPTY_PASSWORD" -a -z "$MYSQL_RANDOM_ROOT_PASSWORD" ]; then
-		mysql_error $'Database is uninitialized and password option is not specified\n\tYou need to specify one of MYSQL_ROOT_PASSWORD, MYSQL_ALLOW_EMPTY_PASSWORD and MYSQL_RANDOM_ROOT_PASSWORD'
+	if [ -z "$MARIADB_ROOT_PASSWORD" -a -z "$MARIADB_ALLOW_EMPTY_ROOT_PASSWORD" -a -z "$MARIADB_RANDOM_ROOT_PASSWORD" ]; then
+		mysql_error $'Database is uninitialized and password option is not specified\n\tYou need to specify one of MARIADB_ROOT_PASSWORD, MARIADB_ALLOW_EMPTY_ROOT_PASSWORD and MARIADB_RANDOM_ROOT_PASSWORD'
 	fi
 }
 
@@ -168,12 +187,21 @@ docker_setup_env() {
 	DATADIR="$(mysql_get_config 'datadir' "$@")"
 	SOCKET="$(mysql_get_config 'socket' "$@")"
 
+
 	# Initialize values that might be stored in a file
-	file_env 'MYSQL_ROOT_HOST' '%'
-	file_env 'MYSQL_DATABASE'
-	file_env 'MYSQL_USER'
-	file_env 'MYSQL_PASSWORD'
-	file_env 'MYSQL_ROOT_PASSWORD'
+	_mariadb_file_env 'MYSQL_ROOT_HOST' '%'
+	_mariadb_file_env 'MYSQL_DATABASE'
+	_mariadb_file_env 'MYSQL_USER'
+	_mariadb_file_env 'MYSQL_PASSWORD'
+	_mariadb_file_env 'MYSQL_ROOT_PASSWORD'
+
+	# set MARIADB_ from MYSQL_ when it is unset and then make them the same value
+	: "${MARIADB_ALLOW_EMPTY_ROOT_PASSWORD:=${MYSQL_ALLOW_EMPTY_PASSWORD:-}}"
+	export MYSQL_ALLOW_EMPTY_PASSWORD="$MARIADB_ALLOW_EMPTY_ROOT_PASSWORD" MARIADB_ALLOW_EMPTY_ROOT_PASSWORD
+	: "${MARIADB_RANDOM_ROOT_PASSWORD:=${MYSQL_RANDOM_ROOT_PASSWORD:-}}"
+	export MYSQL_RANDOM_ROOT_PASSWORD="$MARIADB_RANDOM_ROOT_PASSWORD" MARIADB_RANDOM_ROOT_PASSWORD
+	: "${MARIADB_INITDB_SKIP_TZINFO:=${MYSQL_INITDB_SKIP_TZINFO:-}}"
+	export MYSQL_INITDB_SKIP_TZINFO="$MARIADB_INITDB_SKIP_TZINFO" MARIADB_INITDB_SKIP_TZINFO
 
 	declare -g DATABASE_ALREADY_EXISTS
 	if [ -d "$DATADIR/mysql" ]; then
@@ -202,7 +230,7 @@ docker_process_sql() {
 # Initializes database with timezone info and root password, plus optional extra db/user
 docker_setup_db() {
 	# Load timezone info into database
-	if [ -z "$MYSQL_INITDB_SKIP_TZINFO" ]; then
+	if [ -z "$MARIADB_INITDB_SKIP_TZINFO" ]; then
 		{
 			# Aria in 10.4+ is slow due to "transactional" (crash safety)
 			# https://jira.mariadb.org/browse/MDEV-23326
@@ -223,30 +251,31 @@ docker_setup_db() {
 		# tell docker_process_sql to not use MYSQL_ROOT_PASSWORD since it is not set yet
 	fi
 	# Generate random root password
-	if [ -n "$MYSQL_RANDOM_ROOT_PASSWORD" ]; then
-		export MYSQL_ROOT_PASSWORD="$(pwgen -1 32)"
-		mysql_note "GENERATED ROOT PASSWORD: $MYSQL_ROOT_PASSWORD"
+	if [ -n "$MARIADB_RANDOM_ROOT_PASSWORD" ]; then
+		export MARIADB_ROOT_PASSWORD="$(pwgen -1 32)"
+		export MYSQL_ROOT_PASSWORD=$MARIADB_ROOT_PASSWORD
+		mysql_note "GENERATED ROOT PASSWORD: $MARIADB_ROOT_PASSWORD"
 	fi
 	# Sets root password and creates root users for non-localhost hosts
 	local rootCreate=
 	# default root to listen for connections from anywhere
-	if [ -n "$MYSQL_ROOT_HOST" ] && [ "$MYSQL_ROOT_HOST" != 'localhost' ]; then
+	if [ -n "$MARIADB_ROOT_HOST" ] && [ "$MARIADB_ROOT_HOST" != 'localhost' ]; then
 		# no, we don't care if read finds a terminating character in this heredoc
 		# https://unix.stackexchange.com/questions/265149/why-is-set-o-errexit-breaking-this-read-heredoc-expression/265151#265151
 		read -r -d '' rootCreate <<-EOSQL || true
-			CREATE USER 'root'@'${MYSQL_ROOT_HOST}' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' ;
-			GRANT ALL ON *.* TO 'root'@'${MYSQL_ROOT_HOST}' WITH GRANT OPTION ;
+			CREATE USER 'root'@'${MARIADB_ROOT_HOST}' IDENTIFIED BY '${MARIADB_ROOT_PASSWORD}' ;
+			GRANT ALL ON *.* TO 'root'@'${MARIADB_ROOT_HOST}' WITH GRANT OPTION ;
 		EOSQL
 	fi
 
-	# tell docker_process_sql to not use MYSQL_ROOT_PASSWORD since it is just now being set
+	# tell docker_process_sql to not use MARIADB_ROOT_PASSWORD since it is just now being set
 	docker_process_sql --dont-use-mysql-root-password --database=mysql <<-EOSQL
 		-- What's done in this file shouldn't be replicated
 		--  or products like mysql-fabric won't work
 		SET @@SESSION.SQL_LOG_BIN=0;
 
 		DELETE FROM mysql.user WHERE user NOT IN ('mysql.sys', 'mariadb.sys', 'mysqlxsys', 'root') OR host NOT IN ('localhost') ;
-		SET PASSWORD FOR 'root'@'localhost'=PASSWORD('${MYSQL_ROOT_PASSWORD}') ;
+		SET PASSWORD FOR 'root'@'localhost'=PASSWORD('${MARIADB_ROOT_PASSWORD}') ;
 		-- 10.1: https://github.com/MariaDB/server/blob/d925aec1c10cebf6c34825a7de50afe4e630aff4/scripts/mysql_secure_installation.sh#L347-L365
 		-- 10.5: https://github.com/MariaDB/server/blob/00c3a28820c67c37ebbca72691f4897b57f2eed5/scripts/mysql_secure_installation.sh#L351-L369
 		DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%' ;
@@ -258,18 +287,18 @@ docker_setup_db() {
 	EOSQL
 
 	# Creates a custom database and user if specified
-	if [ -n "$MYSQL_DATABASE" ]; then
-		mysql_note "Creating database ${MYSQL_DATABASE}"
-		docker_process_sql --database=mysql <<<"CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` ;"
+	if [ -n "$MARIADB_DATABASE" ]; then
+		mysql_note "Creating database ${MARIADB_DATABASE}"
+		docker_process_sql --database=mysql <<<"CREATE DATABASE IF NOT EXISTS \`$MARIADB_DATABASE\` ;"
 	fi
 
-	if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
-		mysql_note "Creating user ${MYSQL_USER}"
-		docker_process_sql --database=mysql <<<"CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD' ;"
+	if [ -n "$MARIADB_USER" ] && [ -n "$MARIADB_PASSWORD" ]; then
+		mysql_note "Creating user ${MARIADB_USER}"
+		docker_process_sql --database=mysql <<<"CREATE USER '$MARIADB_USER'@'%' IDENTIFIED BY '$MARIADB_PASSWORD' ;"
 
-		if [ -n "$MYSQL_DATABASE" ]; then
-			mysql_note "Giving user ${MYSQL_USER} access to schema ${MYSQL_DATABASE}"
-			docker_process_sql --database=mysql <<<"GRANT ALL ON \`${MYSQL_DATABASE//_/\\_}\`.* TO '$MYSQL_USER'@'%' ;"
+		if [ -n "$MARIADB_DATABASE" ]; then
+			mysql_note "Giving user ${MARIADB_USER} access to schema ${MARIADB_DATABASE}"
+			docker_process_sql --database=mysql <<<"GRANT ALL ON \`${MARIADB_DATABASE//_/\\_}\`.* TO '$MARIADB_USER'@'%' ;"
 		fi
 	fi
 }
@@ -278,10 +307,10 @@ _mysql_passfile() {
 	# echo the password to the "file" the client uses
 	# the client command will use process substitution to create a file on the fly
 	# ie: --defaults-extra-file=<( _mysql_passfile )
-	if [ '--dont-use-mysql-root-password' != "$1" ] && [ -n "$MYSQL_ROOT_PASSWORD" ]; then
+	if [ '--dont-use-mysql-root-password' != "$1" ] && [ -n "$MARIADB_ROOT_PASSWORD" ]; then
 		cat <<-EOF
 			[client]
-			password="${MYSQL_ROOT_PASSWORD}"
+			password="${MARIADB_ROOT_PASSWORD}"
 		EOF
 	fi
 }
