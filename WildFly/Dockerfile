@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for WildFly (JBoss) version 22.0.1 ##########################
+################# Dockerfile for WildFly (JBoss) version 23.0.0 ##########################
 #
 # This Dockerfile builds a basic installation of WildFly.
 #
@@ -37,7 +37,7 @@ RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s
 
 
 # Set the WILDFLY_VERSION env variable
-ENV WILDFLY_VERSION 22.0.1.Final
+ENV WILDFLY_VERSION 23.0.0.Final
 ENV JBOSS_HOME=/opt/jboss/wildfly-${WILDFLY_VER}
 ENV JAVA_HOME=/opt/jdk-11.0.10+9
 ENV PWD=`pwd`
