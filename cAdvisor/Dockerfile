@@ -46,8 +46,8 @@ RUN apt-get update && apt-get install -y \
         make \
         sudo \
 # Install go
- && export GO_INSTALL_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Go/1.15.8/build_go.sh" \
- && curl $GO_INSTALL_URL | bash \
+ && export GO_INSTALL_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Go/1.16.2/build_go.sh" \
+ && curl $GO_INSTALL_URL | bash -s -- -v 1.13.15 \
 # Create directory and Change the work directory
  && mkdir -p $GOPATH/src/github.com/google && cd $GOPATH/src/github.com/google \
 # Checkout the code from repository
