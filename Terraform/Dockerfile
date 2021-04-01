@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Terraform - 0.14.7 ########################
+########## Dockerfile for Terraform - 0.14.8 ########################
 #
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -24,7 +24,8 @@ FROM s390x/ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG TERRAFORM_VERSION=0.14.7
+ARG TERRAFORM_VERSION=0.14.8
+ARG GO_VERSION=1.16.2
 
 # Set PATH
 ENV GOPATH=/root
@@ -33,8 +34,8 @@ ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
 RUN apt-get update && apt-get install -y git wget tar gcc && \
 # Install go
     cd $GOPATH && \
-    wget https://golang.org/dl/go1.15.3.linux-s390x.tar.gz && \
-    tar -C /usr/local -xvzf go1.15.3.linux-s390x.tar.gz && \
+    wget https://golang.org/dl/go${GO_VERSION}.linux-s390x.tar.gz && \
+    tar -C /usr/local -xvzf go${GO_VERSION}.linux-s390x.tar.gz && \
 # build Terraform
     mkdir -p $GOPATH/src/github.com/hashicorp && \
     cd $GOPATH/src/github.com/hashicorp && \
@@ -57,5 +58,5 @@ COPY --from=builder /usr/bin/terraform /usr/bin/terraform
 # Command to execute
 ENTRYPOINT ["/usr/bin/terraform"]
 
-# End of Dockerfile                                                                                           
+# End of Dockerfile
 
