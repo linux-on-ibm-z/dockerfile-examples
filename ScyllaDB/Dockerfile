@@ -153,8 +153,9 @@ RUN apt-get update \
   && cd "$SOURCE_ROOT" \
   && mkdir cryptopp \
   && cd cryptopp \
-  && curl -ksSLO https://www.cryptopp.com/cryptopp820.zip \
-  && unzip cryptopp820.zip \
+  && curl -ksSLO https://github.com/weidai11/cryptopp/archive/refs/tags/CRYPTOPP_8_2_0.zip \
+  && unzip CRYPTOPP_8_2_0.zip \
+  && cd cryptopp-CRYPTOPP_8_2_0 \
   && CXXFLAGS="-std=c++11 -g -O2" make \
   && make install \
 #######################################################################
