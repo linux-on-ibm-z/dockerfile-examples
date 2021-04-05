@@ -23,6 +23,8 @@
 # To start redis server run below command.
 # docker run --name <container_name>  -v /home/redis.conf:/home/redis.conf --rm=true -d <image_name> redis-server /home/redis.conf
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 #####################################################################
 
 # Base image
