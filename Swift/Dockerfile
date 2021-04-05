@@ -25,6 +25,8 @@
 # Note: 1) The above command creates the swift executable in mounted volume.
 #       2) Mounted folder within container must not be /root/ to avoid overwriting of data
 #
+# This Dockerfile is no longer maintained. For the list of maintained Build Instructions and Dockerfiles,
+# please refer to https://www.ibm.com/community/z/open-source-software/
 ##################################################################################################################
 
 FROM s390x/ubuntu:18.04
