@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for Consul - 1.9.3 ########################
+###################### Dockerfile for Consul - 1.9.4 ########################
 # 
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter 
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV CONSUL_VERSION=1.9.3
+ENV CONSUL_VERSION=1.9.4
 
 # Set GO environment variables
 ENV SOURCE_DIR=/tmp/source
@@ -70,6 +70,8 @@ RUN addgroup consul && \
 
 RUN set -eux && \
     apk add --no-cache ca-certificates curl dumb-init gnupg libcap openssl su-exec iputils jq libc6-compat
+
+RUN apk update && apk add bash
 
 COPY --from=builder /tmp/source/src/github.com/hashicorp/consul/bin/consul /usr/local/bin/
 RUN mkdir -p /consul/data && \
