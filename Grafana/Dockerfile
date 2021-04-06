@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 7.4.1 ############################################
+############################ Dockerfile for Grafana 7.4.3 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -21,7 +21,7 @@
 ARG BASE_IMAGE=s390x/ubuntu:20.04
 FROM ${BASE_IMAGE} AS builder
 
-ARG GRAFANA_VER=7.4.1
+ARG GRAFANA_VER=7.4.3
 ARG NODE_JS_VERSION=14.15.1
 ARG GO_VERSION=1.15.1
 # The author
@@ -59,7 +59,7 @@ RUN apt-get update -y && apt-get install -y \
 # Build frontend and edit configuration
  && cd $GOPATH/src/github.com/grafana/grafana \
  && make deps-js \
- && make build-js 
+ && make build-js
 
 # Build a fresh image without all the build requirements
 
@@ -67,7 +67,7 @@ FROM ${BASE_IMAGE}
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV BASE=/opt/src/github.com/grafana 
+ENV BASE=/opt/src/github.com/grafana
 ENV PATH=$PATH:/usr/share/nodejs/bin
 # Set DEBIAN_FRONTEND=noninteractive in environment at build-time
 ARG DEBIAN_FRONTEND=noninteractive
