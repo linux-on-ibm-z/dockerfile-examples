@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for CockroachDB version 20.2.5 ####################################
+#################################### Dockerfile for CockroachDB version 20.2.7 ####################################
 #
 # To build CockroachDB image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -10,8 +10,6 @@
 # To start a single node CockroachDB server for testing run the below command
 # docker run --name <container_name> -p <port_number>:26257 -p <port_number>:8080 -d <image_name> start-single-node --insecure
 #
-# To start CockroachDB server run the below command
-# docker run --name <container_name> -p <port_number>:26257 -p <port_number>:8080 -d <image_name> start --insecure
 #
 # To see the UI, go to http://<hostname>:<port_number>/ on web browser.
 # For more information to setup cluster, visit https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html
@@ -22,7 +20,7 @@
 FROM s390x/ubuntu:18.04 AS builder
 
 # CockroachDB version
-ARG CRDB_VER=20.2.5
+ARG CRDB_VER=20.2.7
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
