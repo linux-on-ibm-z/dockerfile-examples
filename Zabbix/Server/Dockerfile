@@ -23,11 +23,12 @@
 # Base Image
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG ZBX_SERVER_VER=5.0.4
+ARG ZBX_SERVER_VER=5.2.6
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
+ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Zabbix/5.2.6/patch/"
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH=$PATH:/usr/local/sbin/
 ENV SOURCE_DIR=/
@@ -38,6 +39,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
         && apt-get -y install \
                 ceph \
                 gcc \
+                git \
                 pkg-config \
                 libcurl4 \
                 libcurl4-openssl-dev \
@@ -53,9 +55,11 @@ RUN     apt-get update && apt-get install -y mysql-server \
                 libpcre3-dev \
 # Download and install Zabbix server
         &&      cd $SOURCE_DIR \
-        &&      wget https://cdn.zabbix.com/zabbix/sources/stable/5.0/zabbix-${ZBX_SERVER_VER}.tar.gz \
+        &&      wget https://cdn.zabbix.com/zabbix/sources/stable/5.2/zabbix-${ZBX_SERVER_VER}.tar.gz \
         &&      tar -zxf zabbix-${ZBX_SERVER_VER}.tar.gz \
         &&      cd zabbix-${ZBX_SERVER_VER}/ \
+        &&      sed -i '94s/field_size/new_field_size/' src/zabbix_server/preprocessor/preprocessing.c
+        &&      sed -i '94i/\t\t\t\tzbx_uint32_t new_field_size = (zbx_uint32_t)field_size;' src/zabbix_server/preprocessor/preprocessing.c
         &&      ./configure --enable-server --with-mysql --enable-ipv6 --with-net-snmp --with-libcurl --with-libxml2 \
         &&      make install \
         &&      cat /zabbix-${ZBX_SERVER_VER}/database/mysql/schema.sql > /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql \
@@ -65,7 +69,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG ZBX_SERVER_VER=5.0.4
+ARG ZBX_SERVER_VER=5.2.6
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -119,7 +123,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
         &&      mkdir -p /var/www/html/zabbix \
         &&      cp -rf * /var/www/html/zabbix/ \
         &&      cd /var/www/html/zabbix \
-        &&      chown -R zabbix:zabbix conf \
+        &&      chown -R www-data:www-data conf \
 # Create database and grant privileges to zabbix user
         &&      service mysql start  \
         &&      /usr/bin/mysql -e "create user 'zabbix'@'localhost'" \
