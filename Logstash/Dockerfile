@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 7.10.1 #####################################################
+############################ Dockerfile for Logstash version 7.11.2 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -26,7 +26,7 @@ RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
 FROM s390x/ubuntu:18.04
 
-ARG LOGSTASH_VER=7.10.1
+ARG LOGSTASH_VER=7.11.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -40,16 +40,16 @@ RUN apt-get update && apt-get install -y openjdk-11-jdk locales \
     tar \
     wget \
     curl \
-    gzip && \
+    gzip
 
 # Provide a non-root user to run the process.
-    groupadd --gid 1000 logstash && \
+ RUN groupadd --gid 1000 logstash && \
     /usr/sbin/useradd --uid 1000 --gid 1000 \
       --home-dir /usr/share/logstash --no-create-home \
-      logstash && \
+      logstash
 
 # Add Logstash itself.
-    curl -Lo - https://artifacts.elastic.co/downloads/logstash/logstash-oss-${LOGSTASH_VER}-linux-aarch64.tar.gz  | \
+ RUN curl -Lo - https://artifacts.elastic.co/downloads/logstash/logstash-oss-${LOGSTASH_VER}-linux-aarch64.tar.gz  | \
     tar zxf - -C /usr/share && \
     mv /usr/share/logstash-${LOGSTASH_VER} /usr/share/logstash && \
     rm -rf logstash-oss-${LOGSTASH_VER}-linux-aarch64.tar.gz && \
