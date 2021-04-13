@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.10.1 ########################################
+##################################### Dockerfile for Elasticsearch version 7.11.2 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -11,15 +11,17 @@
 # The vm_max_map_count kernel setting needs to be set to at least 262144 for production use using the below command.(See "https://github.com/docker-library/elasticsearch/issues/111")
 # sysctl -w vm.max_map_count=262144
 #
+# For more information, see https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
+#
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
 #
 # Start Elasticsearch container using the below command
-# docker run --name <container_name> -p 9200:9200 -d <image_name>
+# docker run --name <container_name> -p <port>:9200 -p <port>:9300 -e "discovery.type=single-node" -d <image_name>
 #
 # Start Elastic search with configuration file
-# For ex. docker run --name <container_name> -v <path_on_host>/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -p <port>:9200 -d <image_name>
+# For ex. docker run --name <container_name> -v <path_on_host>/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -p <port>:9200 -p <port>:9300 -e "discovery.type=single-node" -d <image_name>
 #
 ##############################################################################################################
 ################################################################################
@@ -30,7 +32,7 @@
 
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG ELASTICSEARCH_VER=7.10.1
+ARG ELASTICSEARCH_VER=7.11.2
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -62,7 +64,7 @@ RUN set -eux ; \
     case "$(arch)" in \
         aarch64) tini_bin='tini-arm64' ;; \
         x86_64)  tini_bin='tini-amd64' ;; \
-		s390x)   tini_bin='tini-s390x' ;; \
+        s390x)   tini_bin='tini-s390x' ;; \
         *) echo >&2 ; echo >&2 "Unsupported architecture $(arch)" ; echo >&2 ; exit 1 ;; \
     esac ; \
     curl --retry 8 -S -L -O https://github.com/krallin/tini/releases/download/v0.19.0/${tini_bin} ; \
@@ -78,7 +80,7 @@ RUN /usr/sbin/groupadd -g 1000 elasticsearch && \
     /usr/sbin/useradd --uid 1000 --gid 1000 -d /usr/share/elasticsearch elasticsearch
 
 WORKDIR /usr/share/elasticsearch
-	  
+
 # Set up locale
 RUN apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
@@ -100,7 +102,7 @@ RUN apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && wget -O - $PATCH_URL/diff.patch | git apply \
  && ./gradlew :distribution:archives:oss-linux-s390x-tar:assemble --parallel \
 # Create distributions as deb, rpm and docker
- && ./gradlew :distribution:docker:oss-docker-s390x-build-context:assemble \ 
+ && ./gradlew :distribution:docker:oss-docker-s390x-build-context:assemble \
 # Install Elasticsearch
  && mkdir -p /usr/share/elasticsearch \
  && tar -xzf distribution/archives/oss-linux-s390x-tar/build/distributions/elasticsearch-oss-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1
@@ -125,12 +127,12 @@ ENV PATH=$JAVA_HOME/bin:$PATH
 ENV ELASTIC_CONTAINER true
 
 COPY --from=builder /tini /tini
-	
+
 RUN apt-get update && apt-get install -y gzip bzip2 netcat openjdk-11-jdk
 
 RUN /usr/sbin/groupadd -g 1000 elasticsearch && \
     /usr/sbin/useradd --uid 1000 --gid 1000 -G 0 -d /usr/share/elasticsearch elasticsearch
-    
+
 WORKDIR /usr/share/elasticsearch
 COPY --from=builder --chown=1000:0 /usr/share/elasticsearch /usr/share/elasticsearch
 
