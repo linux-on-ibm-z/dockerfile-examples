@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2019, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################### Dockerfile for Apache Ignite 2.9.1 ################################
+############################### Dockerfile for Apache Ignite 2.10.0 ################################
 #
 # This Dockerfile builds a basic installation of Apache Ignite.
 #
@@ -20,14 +20,14 @@
 # Base Image
 FROM  s390x/ubuntu:18.04
 
-ARG IGNITE_VER=2.9.1
+ARG IGNITE_VER=2.10.0
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Set Environment Variables
 ENV WORKDIR /root
-ENV JAVA_HOME=$WORKDIR/jdk-11.0.7+10
+ENV JAVA_HOME=$WORKDIR/jdk-11.0.10+9
 ENV IGNITE_HOME=$WORKDIR/apache-ignite-${IGNITE_VER}-bin
 ENV PATH=$JAVA_HOME/bin:$WORKDIR/apache-ignite-${IGNITE_VER}-bin/bin:$PATH
 
@@ -38,8 +38,8 @@ RUN apt-get update &&  apt-get install -y \
         unzip \
 # Download AdoptOpenJDK 8
  && cd $WORKDIR  \
- && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.7%2B10_openj9-0.20.0/OpenJDK11U-jdk_s390x_linux_openj9_11.0.7_10_openj9-0.20.0.tar.gz \
- && tar xvf OpenJDK11U-jdk_s390x_linux_openj9_11.0.7_10_openj9-0.20.0.tar.gz \
+ && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9_openj9-0.24.0/OpenJDK11U-jdk_s390x_linux_openj9_11.0.10_9_openj9-0.24.0.tar.gz \
+ && tar xvf OpenJDK11U-jdk_s390x_linux_openj9_11.0.10_9_openj9-0.24.0.tar.gz \
 # Install Apache Ignite
  && cd $WORKDIR  \
  && wget https://archive.apache.org/dist/ignite/${IGNITE_VER}/apache-ignite-${IGNITE_VER}-bin.zip \
