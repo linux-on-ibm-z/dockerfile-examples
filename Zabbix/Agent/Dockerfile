@@ -34,7 +34,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG ZBX_AGENT_VER=5.0.4
+ARG ZBX_AGENT_VER=5.2.6
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -52,7 +52,7 @@ RUN apt-get update && apt-get -y install \
                 wget \
                 libpcre3-dev \
 # Download Zabbix agent
-        && wget https://cdn.zabbix.com/zabbix/sources/stable/5.0/zabbix-${ZBX_AGENT_VER}.tar.gz  \
+        && wget https://cdn.zabbix.com/zabbix/sources/stable/5.2/zabbix-${ZBX_AGENT_VER}.tar.gz  \
         && tar -xf zabbix-${ZBX_AGENT_VER}.tar.gz \
 # Install Zabbix agent
         && cd $SOURCE_DIR/zabbix-${ZBX_AGENT_VER}\
