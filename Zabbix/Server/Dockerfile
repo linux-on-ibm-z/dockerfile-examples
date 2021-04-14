@@ -28,7 +28,6 @@ ARG ZBX_SERVER_VER=5.2.6
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Zabbix/5.2.6/patch/"
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH=$PATH:/usr/local/sbin/
 ENV SOURCE_DIR=/
