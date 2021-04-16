@@ -57,8 +57,8 @@ RUN     apt-get update && apt-get install -y mysql-server \
         &&      wget https://cdn.zabbix.com/zabbix/sources/stable/5.2/zabbix-${ZBX_SERVER_VER}.tar.gz \
         &&      tar -zxf zabbix-${ZBX_SERVER_VER}.tar.gz \
         &&      cd zabbix-${ZBX_SERVER_VER}/ \
-        &&      sed -i '94s/field_size/new_field_size/' src/zabbix_server/preprocessor/preprocessing.c
-        &&      sed -i '94i/\t\t\t\tzbx_uint32_t new_field_size = (zbx_uint32_t)field_size;' src/zabbix_server/preprocessor/preprocessing.c
+        &&      sed -i '94s/field_size/new_field_size/' src/zabbix_server/preprocessor/preprocessing.c \
+        &&      sed -i '94i\ \t\t\t\tzbx_uint32_t new_field_size = (zbx_uint32_t)field_size;' src/zabbix_server/preprocessor/preprocessing.c \
         &&      ./configure --enable-server --with-mysql --enable-ipv6 --with-net-snmp --with-libcurl --with-libxml2 \
         &&      make install \
         &&      cat /zabbix-${ZBX_SERVER_VER}/database/mysql/schema.sql > /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql \
