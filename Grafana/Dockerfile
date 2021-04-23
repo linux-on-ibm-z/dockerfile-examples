@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 7.4.3 ############################################
+############################ Dockerfile for Grafana 7.5.3 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -21,7 +21,7 @@
 ARG BASE_IMAGE=s390x/ubuntu:20.04
 FROM ${BASE_IMAGE} AS builder
 
-ARG GRAFANA_VER=7.4.3
+ARG GRAFANA_VER=7.5.3
 ARG NODE_JS_VERSION=14.15.1
 ARG GO_VERSION=1.15.1
 # The author
@@ -32,13 +32,11 @@ ENV PATH=$PATH:/usr/local/node-v${NODE_JS_VERSION}-linux-s390x/bin:/usr/local/go
 
 # Install dependencies
 RUN apt-get update -y && apt-get install -y \
-    build-essential \
     gcc \
     git \
     make \
-    python \
     wget \
-    unzip \
+    xz-utils \
 # Install go
  && cd $GOPATH \
  && wget https://dl.google.com/go/go${GO_VERSION}.linux-s390x.tar.gz \
