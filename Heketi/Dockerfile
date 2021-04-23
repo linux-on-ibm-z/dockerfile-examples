@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################### Dockerfile for Heketi 10.2.0 ########################
+##################### Dockerfile for Heketi 10.3.0 ########################
 #
 # This Dockerfile builds a basic installation of heketi.
 #
@@ -26,7 +26,7 @@
 FROM s390x/ubuntu:18.04
 # Maintainer
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-ARG HEKETI_VERSION=v10.2.0
+ARG HEKETI_VERSION=v10.3.0
 COPY heketi-start.sh /heketi-start.sh
 COPY heketi.json /heketi.json
 
