@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Geode version 1.13.1 #####################
+########## Dockerfile for Apache Geode version 1.13.2 #####################
 #
 # This Dockerfile builds a basic installation of Apache Geode.
 #
@@ -28,11 +28,11 @@ FROM s390x/ubuntu:18.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG GEODE_VER=1.13.1
+ARG GEODE_VER=1.13.2
 ARG file=apache-geode-$GEODE_VER.tgz
 
 ENV WORKDIR=/root
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
 ENV PATH=$JAVA_HOME/bin:$WORKDIR/apache-geode-$GEODE_VER/bin:$PATH
 
 WORKDIR /root
@@ -40,7 +40,7 @@ WORKDIR /root
 RUN apt-get update && apt-get install -y \
     tar \
     wget \
-    openjdk-11-jdk 
+    openjdk-8-jdk 
  # Download and extract apache geode
 RUN  for url in \
 			"https://www.apache.org/dyn/closer.cgi?action=download&filename=geode/$GEODE_VER/$file" \
