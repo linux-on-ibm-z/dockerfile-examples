@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation  2017, 2020
+# © Copyright IBM Corporation  2017, 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############### Dockerfile for Couchbase version 6.0.4 ############
@@ -59,7 +59,7 @@ RUN apt-get update  && apt-get install -y \
  && curl -SLO https://raw.githubusercontent.com/linux-on-ibm-z/dockerfile-examples/master/Couchbase/couchbase-6.0.4.patch \
  && curl -SLO https://raw.githubusercontent.com/linux-on-ibm-z/dockerfile-examples/master/Couchbase/flatbuffers.patch \
  && git clone https://github.com/nlohmann/json \
- && wget https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.gz \
+ && wget https://boostorg.jfrog.io/artifactory/main/release/1.69.0/source/boost_1_69_0.tar.gz \
  && tar -xzf boost_1_69_0.tar.gz \
  && ln -s $SOURCE_ROOT/boost_1_69_0/boost /usr/include/boost \
  && cd $SOURCE_ROOT && git clone https://github.com/couchbasedeps/erlang.git \
