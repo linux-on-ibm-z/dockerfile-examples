@@ -1,10 +1,10 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for Consul - 1.9.4 ########################
-# 
+###################### Dockerfile for Consul - 1.9.5 ########################
+#
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
-# Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter 
+# Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter
 #
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV CONSUL_VERSION=1.9.4
+ENV CONSUL_VERSION=1.9.5
 
 # Set GO environment variables
 ENV SOURCE_DIR=/tmp/source
@@ -51,8 +51,8 @@ RUN apt-get update &&  apt-get install -y \
  && service rsyslog start \
 # Install go and get source code of consul
  && cd $SOURCE_DIR \
- && wget https://golang.org/dl/go1.15.7.linux-s390x.tar.gz \
- && tar -xzf go1.15.7.linux-s390x.tar.gz \ 
+ && wget https://golang.org/dl/go1.16.3.linux-s390x.tar.gz \
+ && tar -xzf go1.16.3.linux-s390x.tar.gz \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/consul.git \
@@ -76,8 +76,8 @@ RUN apk update && apk add bash
 COPY --from=builder /tmp/source/src/github.com/hashicorp/consul/bin/consul /usr/local/bin/
 RUN mkdir -p /consul/data && \
     mkdir -p /consul/config && \
-    chown -R consul:consul /consul 
-    
+    chown -R consul:consul /consul
+
 # set up nsswitch.conf for Go's "netgo" implementation which is used by Consul,
 # otherwise DNS supercedes the container's hosts file, which we don't want.
 RUN test -e /etc/nsswitch.conf || echo 'hosts: files dns' > /etc/nsswitch.conf
