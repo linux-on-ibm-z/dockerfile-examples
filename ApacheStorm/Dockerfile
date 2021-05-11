@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2018, 2020.
+# © Copyright IBM Corporation 2018, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ########## Dockerfile for Apache Storm version 2.2.0 #########
@@ -62,13 +62,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && ln -sf /usr/bin/g++-7 /usr/bin/g++ \
  && ln -sf /usr/bin/gcc /usr/bin/cc \
  && mkdir -p /rockdb_contents \
- && cd $SOURCE_DIR \
- && echo "deb https://dl.bintray.com/sbt/debian /" |  tee -a /etc/apt/sources.list.d/sbt.list \
- && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823 \
- && apt-get update &&  apt-get install -y  sbt \
- && git clone https://github.com/luben/zstd-jni.git \
- && cd zstd-jni && git checkout v1.3.8-2 \
- && sbt compile test package \
  #Build and Create Rocksdb Jar
  && cd $SOURCE_DIR && git clone git://github.com/facebook/rocksdb.git \
  && cd rocksdb && git checkout v5.18.4 \
