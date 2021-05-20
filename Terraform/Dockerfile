@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Terraform - 0.15.1 ########################
+########## Dockerfile for Terraform - 0.15.3 ########################
 #
 # Terraform is a tool for building, changing, and combining infrastructure safely and efficiently.
 #
@@ -24,8 +24,8 @@ FROM s390x/ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG TERRAFORM_VERSION=0.15.1
-ARG GO_VERSION=1.16.2
+ARG TERRAFORM_VERSION=0.15.3
+ARG GO_VERSION=1.16.3
 
 # Set PATH
 ENV GOPATH=/root
