@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2019, 2020.
+# © Copyright IBM Corporation 2019, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Jenkins JNLP Slave version 3.40 ###################
+################ Dockerfile for Jenkins JNLP Slave version 4.7 ###################
 #
 # This Dockerfile builds an image for Jenkins slave node.
 #
@@ -20,12 +20,12 @@
 ##################################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The Author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG VERSION=3.40
+ARG VERSION=4.7
 ARG user=jenkins
 ARG group=jenkins
 ARG uid=1000
@@ -33,16 +33,17 @@ ARG gid=1000
 
 # Set Environment Variables
 ENV HOME /home/${user}
-ENV JAVA_HOME=/usr/share/jdk8u242-b08
+ENV JAVA_HOME=/opt/adopt/java
 ENV PATH=$JAVA_HOME/bin:$PATH
 
 # Install dependencies
 RUN apt-get update &&  apt-get install -y tar wget libfontconfig1 curl \
 # Download AdoptJDK8
-&& wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u242-b08_openj9-0.18.1/OpenJDK8U-jdk_s390x_linux_openj9_8u242b08_openj9-0.18.1.tar.gz \
-&& tar -C /usr/share/ -xzvf OpenJDK8U-jdk_s390x_linux_openj9_8u242b08_openj9-0.18.1.tar.gz \
+&& mkdir -p /opt/adopt/java && curl -SL -o adoptjdk.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u292-b10_openj9-0.26.0/OpenJDK8U-jdk_s390x_linux_openj9_8u292b10_openj9-0.26.0.tar.gz \
+&& tar -zxvf adoptjdk.tar.gz -C /opt/adopt/java --strip-components 1  \
+&& rm -rf adoptjdk.tar.gz \
 && groupadd -g ${gid} ${group} \
-&& useradd -c "Jenkins user" -d $HOME -u ${uid} -g ${gid} -m ${user} 
+&& useradd -c "Jenkins user" -d $HOME -u ${uid} -g ${gid} -m ${user}
 
 LABEL Description="This is a base image, which provides the Jenkins agent executable (slave.jar)" Vendor="Jenkins project" Version="${VERSION}"
 
@@ -53,7 +54,7 @@ RUN curl --create-dirs -fsSLo /usr/share/jenkins/agent.jar https://repo.jenkins-
   && chmod 755 /usr/share/jenkins \
   && chmod 644 /usr/share/jenkins/agent.jar \
 # Download JNLP jenkins agent script
-  && curl -o /usr/local/bin/jenkins-agent https://raw.githubusercontent.com/jenkinsci/docker-jnlp-slave/3.40-1/jenkins-agent \
+  && curl -o /usr/local/bin/jenkins-agent https://raw.githubusercontent.com/jenkinsci/docker-jnlp-slave/4.7-1/jenkins-agent \
   && chmod 755 /usr/local/bin/jenkins-agent \
   && ln -fs /usr/local/bin/jenkins-agent /usr/local/bin/jenkins-slave
 
