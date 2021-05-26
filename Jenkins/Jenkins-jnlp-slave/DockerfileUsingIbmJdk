@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2019, 2020.
+# © Copyright IBM Corporation 2019, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################ Dockerfile for Jenkins JNLP Slave version 3.40 ###################
+################ Dockerfile for Jenkins JNLP Slave version 4.7 ###################
 #
 # This Dockerfile builds an image for Jenkins slave node.
 #
@@ -20,12 +20,12 @@
 ##################################################################################
 
 # Base image
-FROM s390x/ubuntu:16.04
+FROM s390x/ubuntu:18.04
 
 # The Author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG VERSION=3.40
+ARG VERSION=4.7
 ARG user=jenkins
 ARG group=jenkins
 ARG uid=1000
@@ -39,13 +39,12 @@ ENV HOME /home/${user}
 # Install dependencies
 RUN apt-get update &&  apt-get install -y wget curl \
 # Download IBMJDK
-&& wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.6.7/linux/s390x/ibm-java-s390x-sdk-8.0-6.7.bin \
-&& wget https://raw.githubusercontent.com/zos-spark/scala-workbench/master/files/installer.properties.java \
-&& tail -n +3 installer.properties.java | tee installer.properties \
-&& chmod +x ibm-java-s390x-sdk-8.0-6.7.bin \
-&& ./ibm-java-s390x-sdk-8.0-6.7.bin -r installer.properties \
+&& wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.6.26/linux/s390x/ibm-java-s390x-sdk-8.0-6.26.bin \
+&& chmod +x ibm-java-s390x-sdk-8.0-6.26.bin \
+&& echo -en 'INSTALLER_UI=silent\nUSER_INSTALL_DIR=/opt/ibm/java\nLICENSE_ACCEPTED=TRUE' > installer.properties \
+&& bash ibm-java-s390x-sdk-8.0-6.26.bin -i silent -f installer.properties \
 && groupadd -g ${gid} ${group} \
-&& useradd -c "Jenkins user" -d $HOME -u ${uid} -g ${gid} -m ${user} 
+&& useradd -c "Jenkins user" -d $HOME -u ${uid} -g ${gid} -m ${user}
 
 LABEL Description="This is a base image, which provides the Jenkins agent executable (slave.jar)" Vendor="Jenkins project" Version="${VERSION}"
 
@@ -56,7 +55,7 @@ RUN curl --create-dirs -fsSLo /usr/share/jenkins/agent.jar https://repo.jenkins-
   && chmod 755 /usr/share/jenkins \
   && chmod 644 /usr/share/jenkins/agent.jar \
 # Download JNLP jenkins agent script
-  && curl -o /usr/local/bin/jenkins-agent https://raw.githubusercontent.com/jenkinsci/docker-jnlp-slave/3.40-1/jenkins-agent \
+  && curl -o /usr/local/bin/jenkins-agent https://raw.githubusercontent.com/jenkinsci/docker-jnlp-slave/4.7-1/jenkins-agent \
   && chmod 755 /usr/local/bin/jenkins-agent \
   && ln -fs /usr/local/bin/jenkins-agent /usr/local/bin/jenkins-slave
 
