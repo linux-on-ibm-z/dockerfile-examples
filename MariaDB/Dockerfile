@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Mariadb Server version 10.5.9 #########
+########## Dockerfile for Mariadb Server version 10.5.10 #########
 #
 # This Dockerfile builds a basic installation of Mariadb Server.
 #
@@ -24,7 +24,7 @@
 # Base Image
 FROM s390x/ubuntu:20.04 AS builder
 
-ARG MARIADB_VER=10.5.9
+ARG MARIADB_VER=10.5.10
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -44,7 +44,7 @@ RUN set -ex; \
 	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git devscripts equivs; \
 	git clone https://github.com/codership/galera.git; \
 	cd galera; \
-	git checkout release_26.4.7; \
+	git checkout release_26.4.8; \
 	git submodule init; \
 	git submodule update; \
 # Build Galera debian packages
