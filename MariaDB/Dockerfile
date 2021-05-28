@@ -41,7 +41,7 @@ RUN set -ex; \
 		echo tzdata tzdata/Areas select America; \
 		echo tzdata tzdata/Zones/America select Toronto; \
 	} | debconf-set-selections; \
-	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git devscripts equivs; \
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends dh-systemd git devscripts equivs; \
 	git clone https://github.com/codership/galera.git; \
 	cd galera; \
 	git checkout release_26.4.8; \
