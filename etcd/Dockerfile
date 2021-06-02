@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for etcd 3.4.15 ####################
+################## Dockerfile for etcd 3.4.16 ####################
 #
 # This Dockerfile builds a basic installation of etcd.
 #
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:18.04 as builder
 
-ARG ETCD_VER=v3.4.15
+ARG ETCD_VER=v3.4.16
 ARG GO_VER=1.13.15
 
 # Maintainer
