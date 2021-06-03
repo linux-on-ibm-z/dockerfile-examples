@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############### Dockerfile for CouchDB version 3.1.1 ############
@@ -32,7 +32,7 @@ ENV PATH=$PATH:/usr/share/couchdb/dev  LD_LIBRARY_PATH=/usr/lib
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CouchDB/${COUCHDB_VER}/patch"
 # Install following build dependencies
 RUN apt-get update \
- && apt-get install -y build-essential pkg-config ncurses-base g++-5 gcc-5 python python3 python3-pip python3-venv curl git patch wget tar make zip autoconf2.13 automake libicu-dev libcurl4-openssl-dev libncurses5-dev locales libncurses-dev libssl-dev unixodbc-dev libwxgtk3.0-dev openjdk-8-jdk xsltproc fop libxml2-utils\
+ && apt-get install -y build-essential pkg-config ncurses-base g++-5 gcc-5 python python3 python3-pip python3-venv python3-markupsafe curl git patch wget tar make zip autoconf2.13 automake libicu-dev libcurl4-openssl-dev libncurses5-dev locales libncurses-dev libssl-dev unixodbc-dev libwxgtk3.0-dev openjdk-8-jdk xsltproc fop libxml2-utils\
  && rm -rf /usr/bin/gcc /usr/bin/g++ /usr/bin/cc \
  && ln -s /usr/bin/gcc-5 /usr/bin/gcc \
  && ln -s /usr/bin/g++-5 /usr/bin/g++ \
