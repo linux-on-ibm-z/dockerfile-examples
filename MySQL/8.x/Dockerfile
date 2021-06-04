@@ -1,17 +1,17 @@
-# © Copyright IBM Corporation 2018, 2020.
+# © Copyright IBM Corporation 2018, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################################ Dockerfile for MySQL 8.0 #################################################
+############################################ Dockerfile for MySQL 8.0.25 #################################################
 # To build this image, run docker build from the directory containing this Dockerfile:
 # 
-#       docker build -t mysql:8.0 .
+#       docker build -t mysql:8.0.25 .
 #
 # Start a mysql server instance examples:
 # You can specify one of MYSQL_ROOT_PASSWORD, MYSQL_ALLOW_EMPTY_PASSWORD and MYSQL_RANDOM_ROOT_PASSWORD like shown below
 # 
-#       docker run --name <container_name> -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:8.0
-#       docker run --name <container_name> -e MYSQL_RANDOM_ROOT_PASSWORD=true -d mysql:8.0
-#       docker run --name <container_name> -e MYSQL_ALLOW_EMPTY_PASSWORD=true -d mysql:8.0
+#       docker run --name <container_name> -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:8.0.25
+#       docker run --name <container_name> -e MYSQL_RANDOM_ROOT_PASSWORD=true -d mysql:8.0.25
+#       docker run --name <container_name> -e MYSQL_ALLOW_EMPTY_PASSWORD=true -d mysql:8.0.25
 #
 # To connect MySQL Server from within the Container run below command 
 #       docker exec -it <container_name> mysql -uroot -p
