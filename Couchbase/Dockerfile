@@ -48,11 +48,11 @@ RUN apt-get update  && apt-get install -y \
  && make && make install \
 # Install Java
  && cd $SOURCE_ROOT \
- && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.6.16/linux/s390x/ibm-java-s390x-sdk-8.0-6.16.bin \
+ && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.6.31/linux/s390x/ibm-java-s390x-sdk-8.0-6.31.bin \
  && wget https://raw.githubusercontent.com/zos-spark/scala-workbench/master/files/installer.properties.java \
  && tail -n +3 installer.properties.java | tee installer.properties \
- && chmod +x ibm-java-s390x-sdk-8.0-6.16.bin \
- && ./ibm-java-s390x-sdk-8.0-6.16.bin -r installer.properties \
+ && chmod +x ibm-java-s390x-sdk-8.0-6.31.bin \
+ && ./ibm-java-s390x-sdk-8.0-6.31.bin -r installer.properties \
  && java -version \
 # Install additional dependencies
  && cd $SOURCE_ROOT \
