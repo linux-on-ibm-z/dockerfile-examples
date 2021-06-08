@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
-################# Dockerfile for Puppet server version 7.1.0 ####################
+################# Dockerfile for Puppet server version 7.1.2 ####################
 #
 # This Dockerfile builds a basic installation of Puppet server.
 #
@@ -23,7 +23,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 ENV SOURCE_ROOT="/root/"
 WORKDIR ${SOURCE_ROOT}
 
-ENV LANG=en_US.UTF-8 SERVER_VERSION="7.1.0" JRUBY_VERSION="9.2.14.0"
+ENV LANG=en_US.UTF-8 SERVER_VERSION="7.1.2" JRUBY_VERSION="9.2.14.0"
 
 ENV JDK11_URL="https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.10_9.tar.gz"
 
