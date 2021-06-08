@@ -4,14 +4,14 @@
 ############################################## Dockerfile for MySQL 5.x ##################################################
 # To build this image, run docker build from the directory containing this Dockerfile:
 #
-#       docker build -t mysql:5.7 .
+#       docker build -t mysql:5.7.x .
 #
 # Start a mysql server instance examples:
 # You can specify one of MYSQL_ROOT_PASSWORD, MYSQL_ALLOW_EMPTY_PASSWORD and MYSQL_RANDOM_ROOT_PASSWORD like shown below
 #
-#       docker run --name <container_name> -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:5.7
-#       docker run --name <container_name> -e MYSQL_RANDOM_ROOT_PASSWORD=true -d mysql:5.7
-#       docker run --name <container_name> -e MYSQL_ALLOW_EMPTY_PASSWORD=true -d mysql:5.7
+#       docker run --name <container_name> -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:5.7.x
+#       docker run --name <container_name> -e MYSQL_RANDOM_ROOT_PASSWORD=true -d mysql:5.7.x
+#       docker run --name <container_name> -e MYSQL_ALLOW_EMPTY_PASSWORD=true -d mysql:5.7.x
 #
 # To connect MySQL Server from within the Container run below command
 #       docker exec -it <container_name> mysql -uroot -p
@@ -31,7 +31,7 @@ FROM s390x/ubuntu:18.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG MYSQL_VERSION=5.7.33
+ARG MYSQL_VERSION=5.7.34
 ENV DEBIAN_FRONTEND noninteractive
 
 # Add mysql user and group
