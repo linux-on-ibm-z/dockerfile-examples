@@ -52,7 +52,7 @@ RUN apt-get update -y && apt-get install -y \
  && cd $GOPATH/src/github.com/grafana/grafana && git checkout v${GRAFANA_VER} \
 # Fix wrong target version while compiling v7.5.7
 # https://github.com/grafana/grafana/issues/34887
- && sudo sed -i 's/7.5.6/7.5.7/g' ./package.json \
+ && sed -i 's/7.5.6/7.5.7/g' ./package.json \
  && make deps-go \
  && make build-go \
 # Install yarn
