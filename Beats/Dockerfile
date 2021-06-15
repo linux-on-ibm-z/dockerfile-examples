@@ -9,16 +9,22 @@
 # docker build -t <image_name> .
 #
 # To create a container of Beats image run the below command:
-# docker run --name <container_name> -it  <image_name> /bin/bash
+# docker run --name <container_name> -it <image_name> /bin/bash
 #
-# The following modules are present in beats: heartbeat ,filebeat ,metricbeat , packetbeat, libbeat, auditbeat journalbeat
-# docker run --name <container_name> -e BEATSNAME=<beat_name> -d <image_name>
+# The following beats are present: heartbeat, filebeat, metricbeat, packetbeat, auditbeat, journalbeat
+# To run:
+# docker run --name <container_name> -e BEATNAME=<beat_name> -d <image_name> <flag/command>
 #
-# To run a particular module like heartbeat run the following command:
-# docker run --name <container_name> -e BEATSNAME=heartbeat -d <image_name>
+# For example, run the following command for heartbeat:
+# docker run --name <container_name> -e BEATNAME=heartbeat -d <image_name> help
+#
+# To configure beat, provide "<beat_name>.docker.yml" via a volume mount to /usr/share/beats, for example:
+# docker run --name <container_name> --user=beats --volume="$(pwd)/heartbeat.docker.yml:/usr/share/beats/heartbeat.yml:ro" -e BEATNAME=heartbeat -d <image_name> <flag/command>
 #
 # Note : To run auditbeat use options : --cap-add=AUDIT_CONTROL --cap-add=AUDIT_READ --pid=host to docker run
-# docker run --cap-add=AUDIT_CONTROL --cap-add=AUDIT_READ --pid=host -e --strict.perms=false --name <container_name> -e BEATSNAME=auditbeat -d <image_name>
+# docker run --cap-add=AUDIT_CONTROL --cap-add=AUDIT_READ --pid=host --name <container_name> -e BEATNAME=auditbeat -d <image_name> <flag/command>
+#
+# For more information, see "Run <beat_name> on Docker" guide available at https://www.elastic.co/guide/index.html
 ###########################################################################################################
 
 # Base image
@@ -125,25 +131,39 @@ RUN apt-get update && apt-get install -y \
  && make update \
  && make fmt
 
-FROM s390x/ubuntu:18.04
+# Setup directory layout
+COPY directory-setup.sh $SOURCE_DIR
+RUN chmod +x $SOURCE_DIR/directory-setup.sh \
+ && $SOURCE_DIR/directory-setup.sh
 
-WORKDIR /Beats
+
+FROM s390x/ubuntu:18.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-COPY --from=builder /tmp/source/src/github.com/elastic/beats/heartbeat/heartbeat /usr/bin/heartbeat
-COPY --from=builder /tmp/source/src/github.com/elastic/beats/packetbeat/packetbeat /usr/bin/packetbeat
-COPY --from=builder /tmp/source/src/github.com/elastic/beats/libbeat/libbeat /usr/bin/libbeat
-COPY --from=builder /tmp/source/src/github.com/elastic/beats/metricbeat/metricbeat /usr/bin/metricbeat
-COPY --from=builder /tmp/source/src/github.com/elastic/beats/filebeat/filebeat /usr/bin/filebeat
-COPY --from=builder /tmp/source/src/github.com/elastic/beats/auditbeat/auditbeat /usr/bin/auditbeat
-COPY --from=builder /tmp/source/src/github.com/elastic/beats/journalbeat/journalbeat /usr/bin/journalbeat
-COPY --from=builder /tmp/source/src/github.com/elastic/beats/**/*.yml /Beats/
+ENV ELASTIC_CONTAINER "true"
+ENV PATH=/usr/share/beats:$PATH
 
-RUN apt-get update && apt-get install -y libpcap0.8
+RUN apt-get update && apt-get install -y libpcap0.8 curl \
+ && curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/v0.19.0/tini-s390x" \
+ && mv tini-s390x /usr/bin/tini \
+ && chmod +x /usr/bin/tini
 
-# Create mount point for configuration files
-VOLUME /Beats
+COPY docker-entrypoint /usr/local/bin/docker-entrypoint
+RUN chmod 755 /usr/local/bin/docker-entrypoint
 
-CMD $BEATSNAME -e -c /Beats/${BEATSNAME}.yml -d "publish"
+COPY --from=builder /usr/share/beats /usr/share/beats
+
+RUN groupadd --gid 1000 beats \
+ && useradd -M --uid 1000 --gid 1000 --groups 0 --home /usr/share/beats beats
+
+USER beats
+
+ENV LIBBEAT_MONITORING_CGROUPS_HIERARCHY_OVERRIDE=/
+ENV BEATNAME="filebeat"
+
+WORKDIR /usr/share/beats
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-entrypoint"]
+CMD ["-environment", "container"]
+
 #End of Dockerfile
