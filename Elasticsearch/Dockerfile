@@ -113,12 +113,9 @@ RUN sed -i -e 's/ES_DISTRIBUTION_TYPE=tar/ES_DISTRIBUTION_TYPE=docker/' bin/elas
 
 FROM s390x/ubuntu:20.04
 
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
-ENV JAVA11_HOME=/usr/lib/jvm/java-11-openjdk-s390x
-ENV PATH=$JAVA_HOME/bin:$PATH
 ENV ELASTIC_CONTAINER true
 
-RUN apt-get update && apt-get install -y gzip bzip2 netcat openjdk-11-jdk
+RUN apt-get update && apt-get install -y netcat libvshadow-utils zip unzip
 
 WORKDIR /usr/share/elasticsearch
 COPY --from=builder --chown=1000:0 /usr/share/elasticsearch /usr/share/elasticsearch
@@ -139,7 +136,9 @@ COPY bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod g=u /etc/passwd && \
     chmod 0775 /usr/local/bin/docker-entrypoint.sh && \
     find / -xdev -perm -4000 -exec chmod ug-s {} + && \
-    ln -sf /etc/pki/ca-trust/extracted/java/cacerts /usr/share/elasticsearch/jdk/lib/security/cacerts
+    ln -sf /etc/pki/ca-trust/extracted/java/cacerts /usr/share/elasticsearch/jdk/lib/security/cacerts && \
+    apt-get autoremove -y && apt-get clean && \
+    rm -rf /var/lib/apt/lists/* $HOME/.cache
 
 EXPOSE 9200 9300
 
