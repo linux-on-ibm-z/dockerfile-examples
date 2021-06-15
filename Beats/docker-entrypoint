@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Check if the the user has invoked the image with flags.
+# eg. "$BEATNAME -c $BEATNAME.yml"
+if [[ -z $1 ]] || [[ ${1:0:1} == '-' ]] ; then
+  exec "$BEATNAME" "$@"
+else
+  # They may be looking for a Beat subcommand, like "$BEATNAME setup".
+  subcommands=$($BEATNAME help \
+                  | awk 'BEGIN {RS=""; FS="\n"} /Available Commands:/' \
+                  | awk '(NR>1) {print $1}')
+
+  # If we _did_ get a subcommand, pass it to $BEATNAME.
+  for subcommand in $subcommands; do
+      if [[ $1 == $subcommand ]]; then
+        exec "$BEATNAME" "$@"
+      fi
+  done
+fi
+
+# If neither of those worked, then they have specified the binary they want, so
+# just do exactly as they say.
+exec "$@"
