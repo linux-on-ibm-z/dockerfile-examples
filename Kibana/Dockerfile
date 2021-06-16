@@ -168,6 +168,7 @@ COPY --chown=1000:0 bin/kibana-docker /usr/local/bin/
 
 # Ensure gid 0 write permissions for OpenShift.
 RUN chmod g+ws /usr/share/kibana && \
+    chmod +x /usr/local/bin/kibana-docker && \
     find /usr/share/kibana -gid 0 -and -not -perm /g+w -exec chmod g+w {} \;
 
 # Remove the suid bit everywhere to mitigate "Stack Clash"
