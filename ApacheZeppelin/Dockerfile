@@ -69,6 +69,8 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     apt-get install -y libblas-dev libatlas-base-dev  liblapack-dev && \
     # font, image
     apt-get install -y libpng-dev libfreetype6-dev libxft-dev libjpeg-dev && \
+    # for matplotlib
+    apt-get install -y python3-matplotlib && \
     # for tkinter
     apt-get install -y python3-tk libxml2-dev libxslt-dev zlib1g-dev && \
     apt-get -y install libcurl4-openssl-dev libssl-dev && \
@@ -86,10 +88,9 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     python -m pip install -q 'protobuf==3.*' && \
     python -m pip install -q pandasql==0.7.3 && \
     python -m pip install -q 'ipython==7.*' && \
-    python -m pip install -q 'matplotlib==3.*' && \
     python -m pip install -q 'ipykernel==5.*' && \
     python -m pip install -q 'jupyter_client==5.*' && \
-    python -m pip install -q 'bokeh==2.2.*' && \
+    python -m pip install -q 'bokeh==2.3.*' && \
     python -m pip install -q panel && \
     python -m pip install -q holoviews && \
     python -m pip install -q 'pyyaml==3.*' && \
