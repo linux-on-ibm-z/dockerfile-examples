@@ -23,7 +23,7 @@ FROM ${BASE_IMAGE} AS builder
 
 ARG GRAFANA_VER=7.5.7
 ARG NODE_JS_VERSION=16.1.0
-ARG GO_VERSION=1.16.3
+ARG GO_VERSION=1.16.5
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
