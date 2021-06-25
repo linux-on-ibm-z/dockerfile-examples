@@ -129,7 +129,10 @@ RUN set -eux; \
         ddist 'cassandra-bin.tgz.asc' "cassandra/$CASSANDRA_VERSION/apache-cassandra-$CASSANDRA_VERSION-bin.tar.gz.asc"; \
         export GNUPGHOME="$(mktemp -d)"; \
         for key in $GPG_KEYS; do \
-                gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+        	gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "$key" || \
+                gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" || \
+                gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
+                gpg --keyserver keyserver.pgp.com --recv-keys "$key" ;\
         done; \
         gpg --batch --verify cassandra-bin.tgz.asc cassandra-bin.tgz; \
         rm -rf "$GNUPGHOME"; \
@@ -206,4 +209,3 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 # 9160: thrift service
 EXPOSE 7000 7001 7199 9042 9160
 CMD ["cassandra", "-f"]
-
