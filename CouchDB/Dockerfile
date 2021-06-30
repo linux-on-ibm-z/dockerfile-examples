@@ -137,6 +137,8 @@ RUN set -ex; \
     echo "disable-ipv6" >> ${GNUPGHOME}/dirmngr.conf; \
     for server in $(shuf -e pgpkeys.mit.edu \
         ha.pool.sks-keyservers.net \
+        hkp://keyserver.ubuntu.com:80 \
+        keyserver.pgp.com \
         hkp://p80.pool.sks-keyservers.net:80 \
         pgp.mit.edu) ; do \
     gpg --batch --keyserver $server --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && break || : ; \
@@ -153,6 +155,8 @@ RUN set -ex; \
     echo "disable-ipv6" >> ${GNUPGHOME}/dirmngr.conf; \
     for server in $(shuf -e pgpkeys.mit.edu \
         ha.pool.sks-keyservers.net \
+        hkp://keyserver.ubuntu.com:80 \
+        keyserver.pgp.com \
         hkp://p80.pool.sks-keyservers.net:80 \
         pgp.mit.edu) ; do \
     gpg --batch --keyserver $server --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 && break || : ; \
@@ -172,6 +176,8 @@ RUN set -xe; \
     echo "disable-ipv6" >> ${GNUPGHOME}/dirmngr.conf; \
     for server in $(shuf -e pgpkeys.mit.edu \
         ha.pool.sks-keyservers.net \
+        hkp://keyserver.ubuntu.com:80 \
+        keyserver.pgp.com \
         hkp://p80.pool.sks-keyservers.net:80 \
         pgp.mit.edu) ; do \
         gpg --batch --keyserver $server --recv-keys $GPG_COUCH_KEY && break || : ; \
