@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2021.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 4.2.7 ##################################
+########## Dockerfile for Neo4j version 4.3.1 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -31,12 +31,12 @@ FROM s390x/ubuntu:18.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG NEO4J_VER=4.2.7
+ARG NEO4J_VER=4.3.1
 ENV NEO4J_EDITION=community
 ENV NEO4J_HOME=/var/lib/neo4j
 ENV NEO4J_TARBALL=neo4j-community-${NEO4J_VER}-unix.tar.gz
-ENV JAVA_HOME=/usr/local/jdk-11.0.10+9
-ENV JDK_TARBALL=OpenJDK11U-jdk_s390x_linux_openj9_11.0.10_9_openj9-0.24.0.tar.gz
+ENV JAVA_HOME=/usr/local/jdk-11.0.11+9
+ENV JDK_TARBALL=OpenJDK11U-jdk_s390x_linux_openj9_11.0.11_9_openj9-0.26.0.tar.gz
 ENV TINI_VERSION="v0.18.0"
 
 RUN addgroup --system neo4j && adduser --system --no-create-home --home "${NEO4J_HOME}" --ingroup neo4j neo4j
@@ -53,7 +53,7 @@ RUN  apt-get update  \
                 gosu \
                 jq \
 # Download adoptopenjdk
-  && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9_openj9-0.24.0/${JDK_TARBALL} \
+  && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9_openj9-0.26.0/${JDK_TARBALL} \
   && tar -zxf ${JDK_TARBALL} --directory /usr/local\
 # Download tini
   && curl -L --fail --silent --show-error "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-s390x" > /sbin/tini \
