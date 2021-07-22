@@ -78,6 +78,10 @@ RUN apt-get update \
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
  && git checkout ${COUCHDB_VER} \
+ && curl -o logfile-uploader.py.diff $PATCH_URL/logfile-uploader.py.diff \
+ && patch "$SOURCE_ROOT/couchdb/build-aux/logfile-uploader.py" logfile-uploader.py.diff \
+ && curl -o show-test-results.py.diff $PATCH_URL/show-test-results.py.diff \
+ && patch "$SOURCE_ROOT/couchdb/build-aux/show-test-results.py" show-test-results.py.diff \
  && ./configure --dev \
  && make  \
  && make release \
