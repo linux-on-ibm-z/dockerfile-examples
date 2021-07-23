@@ -25,8 +25,8 @@ ARG COUCHDB_VER=3.1.1
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV SOURCE_DIR=/tmp/source
-WORKDIR $SOURCE_DIR
+ENV SOURCE_ROOT=/tmp/source
+WORKDIR $SOURCE_ROOT
 
 ENV PATH=$PATH:/usr/share/couchdb/dev  LD_LIBRARY_PATH=/usr/lib
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CouchDB/${COUCHDB_VER}/patch"
@@ -38,11 +38,11 @@ RUN apt-get update \
  && ln -s /usr/bin/g++-5 /usr/bin/g++ \
  && ln -s /usr/bin/gcc /usr/bin/cc \
 # Download and Install Erlang
- && cd $SOURCE_DIR \
+ && cd $SOURCE_ROOT \
  && wget http://www.erlang.org/download/otp_src_22.2.tar.gz \
  && tar zxf otp_src_22.2.tar.gz && rm otp_src_22.2.tar.gz \
  && cd otp_src_22.2 \
- && export ERL_TOP=$SOURCE_DIR/otp_src_22.2 \
+ && export ERL_TOP=$SOURCE_ROOT/otp_src_22.2 \
  && ./configure --prefix=/usr \
  && make \
  && make install \
@@ -55,26 +55,26 @@ RUN apt-get update \
  && make \
  && make install \
 # Download and Install Spider Monkey
- && cd $SOURCE_DIR \
+ && cd $SOURCE_ROOT \
  && wget http://ftp.mozilla.org/pub/mozilla.org/js/js185-1.0.0.tar.gz \
  && tar zxf js185-1.0.0.tar.gz  \
  && cd js-1.8.5 \
- && cd $SOURCE_DIR \
+ && cd $SOURCE_ROOT \
  && curl -o jsval.h.diff $PATCH_URL/jsval.h.diff \
- && patch "$SOURCE_DIR/js-1.8.5/js/src/jsval.h" jsval.h.diff \
+ && patch "$SOURCE_ROOT/js-1.8.5/js/src/jsval.h" jsval.h.diff \
  && curl -o jsvalue.h.diff $PATCH_URL/jsvalue.h.diff \
- && patch "$SOURCE_DIR/js-1.8.5/js/src/jsvalue.h" jsvalue.h.diff \
+ && patch "$SOURCE_ROOT/js-1.8.5/js/src/jsvalue.h" jsvalue.h.diff \
  && curl -o Makefile.in.diff $PATCH_URL/Makefile.in.diff \
- && patch "$SOURCE_DIR/js-1.8.5/js/src/Makefile.in" Makefile.in.diff \
- && cd "$SOURCE_DIR/js-1.8.5/js/src"    \
+ && patch "$SOURCE_ROOT/js-1.8.5/js/src/Makefile.in" Makefile.in.diff \
+ && cd "$SOURCE_ROOT/js-1.8.5/js/src"    \
  && autoconf2.13 \
- && mkdir $SOURCE_DIR/js-1.8.5/js/src/build_OPT.OBJ \
- && cd $SOURCE_DIR/js-1.8.5/js/src/build_OPT.OBJ \
+ && mkdir $SOURCE_ROOT/js-1.8.5/js/src/build_OPT.OBJ \
+ && cd $SOURCE_ROOT/js-1.8.5/js/src/build_OPT.OBJ \
  && ../configure --prefix=/usr \
  && make \
  && make install \
 # Download and install CouchDB
- && cd $SOURCE_DIR \
+ && cd $SOURCE_ROOT \
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
  && git checkout ${COUCHDB_VER} \
@@ -85,7 +85,7 @@ RUN apt-get update \
  && ./configure --dev \
  && make  \
  && make release \
- && cp -r $SOURCE_DIR/couchdb/rel/couchdb /usr/share/couchdb
+ && cp -r $SOURCE_ROOT/couchdb/rel/couchdb /usr/share/couchdb
 
 
 FROM s390x/ubuntu:18.04
@@ -93,8 +93,8 @@ FROM s390x/ubuntu:18.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV SOURCE_DIR=/tmp/source
-WORKDIR $SOURCE_DIR
+ENV SOURCE_ROOT=/tmp/source
+WORKDIR $SOURCE_ROOT
 ENV PATH=$PATH:/usr/share/couchdb/dev:/usr/bin/:/usr/local/bin/:/usr/lib/  LD_LIBRARY_PATH=/usr/lib
 
 COPY --from=builder /usr/share/couchdb /opt/couchdb
