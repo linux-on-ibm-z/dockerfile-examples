@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 7.5.7 ############################################
+############################ Dockerfile for Grafana 8.0.3 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -21,8 +21,8 @@
 ARG BASE_IMAGE=s390x/ubuntu:20.04
 FROM ${BASE_IMAGE} AS builder
 
-ARG GRAFANA_VER=7.5.7
-ARG NODE_JS_VERSION=16.1.0
+ARG GRAFANA_VER=8.0.3
+ARG NODE_JS_VERSION=16.3.0
 ARG GO_VERSION=1.16.5
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -50,9 +50,6 @@ RUN apt-get update -y && apt-get install -y \
 # Get the Grafana Soure code and build Grafana backend
  && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
  && cd $GOPATH/src/github.com/grafana/grafana && git checkout v${GRAFANA_VER} \
-# Fix wrong target version while compiling v7.5.7
-# https://github.com/grafana/grafana/issues/34887
- && sed -i 's/7.5.6/7.5.7/g' ./package.json \
  && make deps-go \
  && make build-go \
 # Install yarn
@@ -74,7 +71,7 @@ ENV PATH=$PATH:/usr/share/nodejs/bin
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GF_UID="472"
 ARG GF_GID="472"
-ARG NODE_JS_VERSION=16.1.0
+ARG NODE_JS_VERSION=16.3.0
 
 ENV PATH=/usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     GF_PATHS_CONFIG="/etc/grafana/grafana.ini" \
