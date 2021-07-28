@@ -35,8 +35,7 @@ ARG NEO4J_VER=4.3.1
 ENV NEO4J_EDITION=community
 ENV NEO4J_HOME=/var/lib/neo4j
 ENV NEO4J_TARBALL=neo4j-community-${NEO4J_VER}-unix.tar.gz
-ENV JAVA_HOME=/usr/local/jdk-11.0.11+9
-ENV JDK_TARBALL=OpenJDK11U-jdk_s390x_linux_openj9_11.0.11_9_openj9-0.26.0.tar.gz
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 ENV TINI_VERSION="v0.18.0"
 
 RUN addgroup --system neo4j && adduser --system --no-create-home --home "${NEO4J_HOME}" --ingroup neo4j neo4j
@@ -52,9 +51,7 @@ RUN  apt-get update  \
                 curl \
                 gosu \
                 jq \
-# Download adoptopenjdk
-  && wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9_openj9-0.26.0/${JDK_TARBALL} \
-  && tar -zxf ${JDK_TARBALL} --directory /usr/local\
+                openjdk-11-jdk \
 # Download tini
   && curl -L --fail --silent --show-error "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-s390x" > /sbin/tini \
   && chmod +x /sbin/tini \
@@ -82,7 +79,7 @@ RUN  apt-get update  \
   && apt-get autoremove -y \
   && apt autoremove -y \
   && apt-get clean \
-  && rm -rf /${JDK_TARBALL} /${NEO4J_TARBALL} /var/lib/apt/lists/*
+  && rm -rf /${NEO4J_TARBALL} /var/lib/apt/lists/*
 
 ENV PATH "${NEO4J_HOME}"/bin:"$JAVA_HOME"/bin:$PATH
 
