@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for TensorFlow Serving version 2.4.0 #########
+########## Dockerfile for TensorFlow Serving version 2.5.1 #########
 #
 # This Dockerfile builds a basic installation of TensorFlow Serving.
 #
@@ -18,8 +18,8 @@
 #
 # Please run the following command as an example of the TensorFlow Serving image:
 #
-# git clone -b 2.4.0 https://github.com/tensorflow/serving
-# TESTDATA="$(pwd)/tensorflow_serving/servables/tensorflow/testdata"
+# git clone -b 2.5.1 https://github.com/tensorflow/serving
+# TESTDATA="$(pwd)/serving/tensorflow_serving/servables/tensorflow/testdata"
 # docker run -t --rm -p 8501:8501 \
 #   -v "$TESTDATA/saved_model_half_plus_two_cpu:/models/half_plus_two" \
 #   -e MODEL_NAME=half_plus_two <image_name> &
@@ -51,7 +51,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 ENV SOURCE_ROOT=/tmp/source
 ENV PATH=$SOURCE_ROOT/bazel/output/:$PATH \
 PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True \
-PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/TensorflowServing/2.4.0/patch"
+PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/TensorflowServing/2.5.1/patch"
 
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -70,71 +70,58 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libblas-dev  \
     liblapack-dev \
     gfortran \
-    cython3 \
     && ldconfig \
     && pip3 install --upgrade pip \
     && pip3 install --no-cache-dir \
     numpy==1.19.5 \
     wheel \
-    scipy \
+    scipy==1.6.3 \
     portpicker \
     protobuf==3.13.0 \
     grpcio \
     && pip3 install --no-cache-dir \
     keras_preprocessing --no-deps \
-    && ln -sf /usr/bin/python3 /usr/bin/python \
-
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3 40 \
 # Build Bazel
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
-    && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/3.4.1/build_bazel.sh \
+    && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/3.7.2/build_bazel.sh \
     && sed -i "s/\"ubuntu-18.04\"/\"ubuntu-18.04\" | \"ubuntu-20.04\"/g" build_bazel.sh \
     && bash build_bazel.sh -y \
-    && mv bazel-s390x/ bazel/ \
-
 # Download source code
     && cd $SOURCE_ROOT \
     && git clone https://github.com/linux-on-ibm-z/tensorflow.git \
     && cd tensorflow \
-    && git checkout v2.4.0-s390x \
-    && curl -o tf_patch.diff $PATCH_URL/tf_patch.diff \
-    && git apply tf_patch.diff \
-
+    && git checkout v2.5.0-s390x \
+    && curl -sSL $PATCH_URL/tf_patch.diff | git apply \
 # Configure
-    && yes "" | ./configure \
-
+    && yes "" | ./configure || true \
 # Build TensorFlow
     && bazel --host_jvm_args="-Xms1024m" --host_jvm_args="-Xmx2048m" build //tensorflow/tools/pip_package:build_pip_package \
-
-# Build and install TensorFlow wheel
+# Build TensorFlow wheel
     && cd $SOURCE_ROOT/tensorflow \
     && mkdir -p /tensorflow_wheel \
     && bazel-bin/tensorflow/tools/pip_package/build_pip_package /tensorflow_wheel \
-    && pip3 install /tensorflow_wheel/tensorflow-2.4.0-cp*-linux_s390x.whl \
-
+    && pip3 install /tensorflow_wheel/tensorflow-2.5.0-cp*-linux_s390x.whl \
 # Install BoringSSL
     && cd $SOURCE_ROOT \
-    && wget https://github.com/google/boringssl/archive/7f634429a04abc48e2eb041c81c5235816c96514.tar.gz \
-    && tar -zxvf 7f634429a04abc48e2eb041c81c5235816c96514.tar.gz \
-    && mv boringssl-7f634429a04abc48e2eb041c81c5235816c96514/ boringssl/ \
+    && wget https://github.com/google/boringssl/archive/80ca9f9f6ece29ab132cce4cf807a9465a18cfac.tar.gz \
+    && tar -zxvf 80ca9f9f6ece29ab132cce4cf807a9465a18cfac.tar.gz \
+    && mv boringssl-80ca9f9f6ece29ab132cce4cf807a9465a18cfac/ boringssl/ \
     && cd boringssl/ \
     && sed -i '/set(ARCH "ppc64le")/a \elseif (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "s390x")\n\ set(ARCH "s390x")' src/CMakeLists.txt \
     && sed -i '/OPENSSL_PNACL/a \#elif defined(__s390x__)\n\#define OPENSSL_64_BIT' src/include/openssl/base.h \
-
 # Install Tensorflow Serving
     && mkdir $SOURCE_ROOT/serving && cd $SOURCE_ROOT/serving \
-    && git clone -b 2.4.0 https://github.com/tensorflow/serving . \
+    && git clone -b 2.5.1 https://github.com/tensorflow/serving . \
     && curl -o tfs_patch.diff $PATCH_URL/tfs_patch.diff \
     && sed -i "s?source_root?$SOURCE_ROOT?" tfs_patch.diff \
     && git apply tfs_patch.diff \
-
 # Build, and install TensorFlow Serving
-    && bazel --host_jvm_args="-Xms1024m" --host_jvm_args="-Xmx2048m" build --host_javabase="@local_jdk//:jdk" -c opt tensorflow_serving/model_servers:tensorflow_model_server \
-
+    && bazel --host_jvm_args="-Xms1024m" --host_jvm_args="-Xmx2048m" build -c opt tensorflow_serving/model_servers:tensorflow_model_server \
     && cd $SOURCE_ROOT/serving \
     && mkdir /tfs_bin \
     && cp bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server /tfs_bin \
-
 # Cleanup
     && apt-get -y remove \
     git \
