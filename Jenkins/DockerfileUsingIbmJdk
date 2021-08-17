@@ -35,10 +35,10 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends wget git curl gnupg fontconfig unzip nano  ca-certificates \
   && curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && apt-get install -y git-lfs && git lfs install \
   && rm -rf /var/lib/apt/lists/* \
-  && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.6.26/linux/s390x/ibm-java-s390x-sdk-8.0-6.26.bin \
-  && chmod +x ibm-java-s390x-sdk-8.0-6.26.bin \
+  && wget http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/8.0.6.35/linux/s390x/ibm-java-s390x-sdk-8.0-6.35.bin \
+  && chmod +x ibm-java-s390x-sdk-8.0-6.35.bin \
   && echo -en 'INSTALLER_UI=silent\nUSER_INSTALL_DIR=/opt/ibm/java\nLICENSE_ACCEPTED=TRUE' > installer.properties \
-  && bash ibm-java-s390x-sdk-8.0-6.26.bin -i silent -f installer.properties
+  && bash ibm-java-s390x-sdk-8.0-6.35.bin -i silent -f installer.properties
 
 ARG user=jenkins
 ARG group=jenkins
