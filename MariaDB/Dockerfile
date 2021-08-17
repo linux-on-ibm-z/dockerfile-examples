@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Mariadb Server version 10.5.10 #########
+########## Dockerfile for Mariadb Server version 10.6.3 #########
 #
 # This Dockerfile builds a basic installation of Mariadb Server.
 #
@@ -24,7 +24,7 @@
 # Base Image
 FROM s390x/ubuntu:20.04 AS builder
 
-ARG MARIADB_VER=10.5.10
+ARG MARIADB_VER=10.6.3
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -44,7 +44,7 @@ RUN set -ex; \
 	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends dh-systemd git devscripts equivs; \
 	git clone https://github.com/codership/galera.git; \
 	cd galera; \
-	git checkout release_26.4.8; \
+	git checkout release_26.4.9; \
 	git submodule init; \
 	git submodule update; \
 # Build Galera debian packages
@@ -57,6 +57,7 @@ RUN set -ex; \
 	git checkout mariadb-${MARIADB_VER}; \
 	git submodule update --init --recursive; \
 # Build MariaDB debian packages
+	sed -i '39d' debian/control; \
 	DEBIAN_FRONTEND=noninteractive mk-build-deps --install --remove --tool="apt-get -y --no-install-recommends" debian/control; \
 	./debian/autobake-deb.sh; \
 # Cleanup
@@ -86,7 +87,7 @@ RUN set -ex; \
 
 # add gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
-ENV GOSU_VERSION 1.12
+ENV GOSU_VERSION 1.13
 RUN set -eux; \
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
@@ -121,7 +122,7 @@ RUN set -ex; \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
-ENV MARIADB_MAJOR 10.5
+ENV MARIADB_MAJOR 10.6
 
 COPY --from=builder /tmp/source/*.deb ./
 
