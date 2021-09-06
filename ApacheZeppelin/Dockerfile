@@ -73,7 +73,8 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     apt-get install -y python3-matplotlib && \
     # for tkinter
     apt-get install -y python3-tk libxml2-dev libxslt-dev zlib1g-dev && \
-    apt-get -y install libcurl4-openssl-dev libssl-dev && \
+    apt-get install -y python3-ipykernel && \
+    apt-get install -y libzmq3-dev libcurl4-openssl-dev libssl-dev jupyter-core jupyter-client && \
     hash -r && \
     echo "$LOG_TAG Install python modules. This may take some time." && \
     python -m pip install -q pycodestyle && \
