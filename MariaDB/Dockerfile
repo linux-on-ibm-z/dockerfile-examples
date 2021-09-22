@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Mariadb Server version 10.6.3 #########
+########## Dockerfile for Mariadb Server version 10.6.4 #########
 #
 # This Dockerfile builds a basic installation of Mariadb Server.
 #
@@ -24,7 +24,7 @@
 # Base Image
 FROM s390x/ubuntu:20.04 AS builder
 
-ARG MARIADB_VER=10.6.3
+ARG MARIADB_VER=10.6.4
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
