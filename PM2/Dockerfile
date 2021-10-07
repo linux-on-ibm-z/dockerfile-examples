@@ -24,7 +24,7 @@
 ###################################################################################
 
 # Base image
-FROM node:16.3.0-alpine
+FROM node:16.8.0-alpine
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
