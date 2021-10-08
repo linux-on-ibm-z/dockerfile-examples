@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################### Dockerfile for Heketi 10.3.0 ########################
+##################### Dockerfile for Heketi 10.4.0 ########################
 #
 # This Dockerfile builds a basic installation of heketi.
 #
@@ -13,8 +13,10 @@
 #  Create the configuration and pass it to heketi
 #  mkdir -p heketi/config
 #  mkdir -p heketi/db
+#  touch heketi/db/heketi.db
 #  cp heketi.json heketi/config
 #  cp myprivate_key heketi/config
+#  chown 1000:1000 -R heketi
 #  Use below command to pass the configuration using volume and start the heketi service
 #  docker run  --name <container_name> -v $PWD/heketi/config:/etc/heketi -v $PWD/heketi/db:/var/lib/heketi -p 8080:8080 -d <image_name>
 #
@@ -26,15 +28,15 @@
 FROM s390x/ubuntu:18.04
 # Maintainer
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-ARG HEKETI_VERSION=v10.3.0
+ARG HEKETI_VERSION=v10.4.0
 COPY heketi-start.sh /heketi-start.sh
 COPY heketi.json /heketi.json
 
 # Install dependencies
 RUN apt-get update && apt-get install -y wget tar \
     && apt-get -y clean all \
-    && wget https://github.com/heketi/heketi/releases/download/$HEKETI_VERSION/heketi-$HEKETI_VERSION.linux.s390x.tar.gz \
-    && tar -xvf heketi-$HEKETI_VERSION.linux.s390x.tar.gz \
+    && wget https://github.com/heketi/heketi/releases/download/$HEKETI_VERSION/heketi-$HEKETI_VERSION-release-10.linux.s390x.tar.gz \
+    && tar -xvf heketi-$HEKETI_VERSION-release-10.linux.s390x.tar.gz \
     && mkdir  /etc/heketi /var/lib/heketi  \
     && cp heketi/heketi /usr/bin/heketi \
     && cp heketi/heketi-cli /usr/bin/heketi-cli \
