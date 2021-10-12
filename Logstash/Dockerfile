@@ -18,7 +18,7 @@
 # Logstash can be started with custom configuration by changing the pipeline/default.conf file
 ###############################################################################################################
 
-FROM golang:1.8 AS builder
+FROM golang:1.15 AS builder
 
 ADD env2yaml/env2yaml.go /go/
 RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
