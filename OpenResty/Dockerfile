@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for OpenResty version 1.19.3.1 #########
+########## Dockerfile for OpenResty version 1.19.3.2 #########
 #
 # This Dockerfile builds a basic installation of OpenResty.
 #
@@ -29,7 +29,7 @@ FROM ubuntu:20.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG RESTY_VERSION="1.19.3.1"
+ARG RESTY_VERSION="1.19.3.2"
 ARG ROLLBACK_VERSION="1.17.8.2"
 ARG RESTY_CONFIG_OPTIONS="\
 	--with-pcre-jit \
