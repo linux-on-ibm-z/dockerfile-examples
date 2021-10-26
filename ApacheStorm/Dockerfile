@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Storm version 2.2.0 #########
+########## Dockerfile for Apache Storm version 2.3.0 #########
 #
 # This Dockerfile builds a basic installation of Apache Storm.
 #
@@ -126,8 +126,8 @@ RUN set -eux; \
 # Verify that gosu binary works
     gosu nobody true
 
-ARG GPG_KEY=79B03D059E628478FC9F1D8B152CAD0C46E87B61
-ARG DISTRO_NAME=apache-storm-2.2.0
+ARG GPG_KEY=5167DE337E7370373499FC1DA4A672F11B5050C8
+ARG DISTRO_NAME=apache-storm-2.3.0
 # Download Apache Storm, verify its PGP signature, untar and clean up
 RUN set -eux; \
     ddist() { \
