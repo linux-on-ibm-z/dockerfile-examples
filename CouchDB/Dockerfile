@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for CouchDB version 3.1.1 ############
+############### Dockerfile for CouchDB version 3.2.0 ############
 #
 # CouchDB, is open source database software.
 #
@@ -20,7 +20,7 @@
 
 # Base image
 FROM s390x/ubuntu:18.04 AS builder
-ARG COUCHDB_VER=3.1.1
+ARG COUCHDB_VER=3.2.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -32,7 +32,7 @@ ENV PATH=$PATH:/usr/share/couchdb/dev  LD_LIBRARY_PATH=/usr/lib
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CouchDB/${COUCHDB_VER}/patch"
 # Install following build dependencies
 RUN apt-get update \
- && apt-get install -y build-essential pkg-config ncurses-base g++-5 gcc-5 python python3 python3-pip python3-venv python3-markupsafe curl git patch wget tar make zip autoconf2.13 automake libicu-dev libcurl4-openssl-dev libncurses5-dev locales libncurses-dev libssl-dev unixodbc-dev libwxgtk3.0-dev openjdk-8-jdk xsltproc fop libxml2-utils\
+ && apt-get install -y build-essential pkg-config ncurses-base g++-5 gcc-5 python python3 python3-pip python3-venv python3-markupsafe curl git patch wget tar make zip autoconf2.13 automake libicu-dev libcurl4-openssl-dev libncurses5-dev locales libncurses-dev libssl-dev unixodbc-dev libwxgtk3.0-dev openjdk-8-jdk xsltproc fop libxml2-utils \
  && rm -rf /usr/bin/gcc /usr/bin/g++ /usr/bin/cc \
  && ln -s /usr/bin/gcc-5 /usr/bin/gcc \
  && ln -s /usr/bin/g++-5 /usr/bin/g++ \
@@ -60,11 +60,11 @@ RUN apt-get update \
  && tar zxf js185-1.0.0.tar.gz  \
  && cd js-1.8.5 \
  && cd $SOURCE_ROOT \
- && curl -o jsval.h.diff $PATCH_URL/jsval.h.diff \
+ && curl -o jsval.h.diff $PATCH_URL/jsval.h.diff \ 
  && patch "$SOURCE_ROOT/js-1.8.5/js/src/jsval.h" jsval.h.diff \
- && curl -o jsvalue.h.diff $PATCH_URL/jsvalue.h.diff \
+ && curl -o jsvalue.h.diff  $PATCH_URL/jsvalue.h.diff \
  && patch "$SOURCE_ROOT/js-1.8.5/js/src/jsvalue.h" jsvalue.h.diff \
- && curl -o Makefile.in.diff $PATCH_URL/Makefile.in.diff \
+ && curl -o Makefile.in.diff  $PATCH_URL/Makefile.in.diff \
  && patch "$SOURCE_ROOT/js-1.8.5/js/src/Makefile.in" Makefile.in.diff \
  && cd "$SOURCE_ROOT/js-1.8.5/js/src"    \
  && autoconf2.13 \
@@ -73,16 +73,19 @@ RUN apt-get update \
  && ../configure --prefix=/usr \
  && make \
  && make install \
+ && pip3 install --upgrade wheel sphinx==3.5.4 sphinx_rtd_theme docutils==0.16 nose requests hypothesis virtualenv \
+ # Install nodejs
+ && cd $SOURCE_ROOT \
+ && mkdir -p /usr/local/lib/nodejs  \
+ && wget https://nodejs.org/dist/v14.2.0/node-v14.2.0-linux-s390x.tar.gz \
+ && tar xzvf node-v14.2.0-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
+ && ln -s /usr/local/lib/nodejs/node-v14.2.0-linux-s390x/bin/* /usr/bin/ \
 # Download and install CouchDB
  && cd $SOURCE_ROOT \
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
  && git checkout ${COUCHDB_VER} \
- && curl -o logfile-uploader.py.diff $PATCH_URL/logfile-uploader.py.diff \
- && patch "$SOURCE_ROOT/couchdb/build-aux/logfile-uploader.py" logfile-uploader.py.diff \
- && curl -o show-test-results.py.diff $PATCH_URL/show-test-results.py.diff \
- && patch "$SOURCE_ROOT/couchdb/build-aux/show-test-results.py" show-test-results.py.diff \
- && ./configure --dev \
+ && ./configure \
  && make  \
  && make release \
  && cp -r $SOURCE_ROOT/couchdb/rel/couchdb /usr/share/couchdb
@@ -191,7 +194,7 @@ RUN set -xe; \
     rm -rf "$GNUPGHOME"; \
     apt-key list
 
-ENV COUCHDB_VERSION 3.1.1
+ENV COUCHDB_VERSION 3.2.0
 
 # https://github.com/apache/couchdb-pkg/blob/master/debian/README.Debian
 RUN set -xe; \
