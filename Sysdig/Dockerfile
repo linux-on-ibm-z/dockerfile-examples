@@ -51,6 +51,7 @@ RUN cd $SOURCE_ROOT \
         && git clone https://github.com/draios/sysdig.git \
         && cd sysdig      \
         && git checkout ${SYSDIG_VER}  \
+        && sed -i 's/master/main/g' CMakeListsGtestInclude.cmake \
         && mkdir build \
 # Configure Sysdig
         && cd build \
