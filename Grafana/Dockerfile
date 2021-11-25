@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 8.1.4 ############################################
+############################ Dockerfile for Grafana 8.2.3 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -21,9 +21,9 @@
 ARG BASE_IMAGE=s390x/ubuntu:20.04
 FROM ${BASE_IMAGE} AS builder
 
-ARG GRAFANA_VER=8.1.4
+ARG GRAFANA_VER=8.2.3
 ARG NODE_JS_VERSION=16.8.0
-ARG GO_VERSION=1.16.5
+ARG GO_VERSION=1.17.1
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -50,6 +50,7 @@ RUN apt-get update -y && apt-get install -y \
 # Get the Grafana Soure code and build Grafana backend
  && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
  && cd $GOPATH/src/github.com/grafana/grafana && git checkout v${GRAFANA_VER} \
+ && make gen-go \
  && make deps-go \
  && make build-go \
 # Install yarn
@@ -57,6 +58,7 @@ RUN apt-get update -y && apt-get install -y \
 # Build frontend and edit configuration
  && cd $GOPATH/src/github.com/grafana/grafana \
  && make deps-js \
+ && export NODE_OPTIONS="--max-old-space-size=8192" \
  && make build-js
 
 # Build a fresh image without all the build requirements
