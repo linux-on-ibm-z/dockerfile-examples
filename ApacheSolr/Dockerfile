@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Apache Solr version 8.9.0 #########################
+############### Dockerfile for Apache Solr version 8.10.0 #########################
 #
 # To build Apache Solr image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -18,9 +18,9 @@ FROM s390x/ubuntu:20.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG SOLR_VERSION="8.9.0"
-ARG SOLR_SHA512="15150b7f191fd9e8d2c1bd8bb619dd4b3f27af2e0e94b7609031f7e745a2e263391c30f68865c208afb97ccaa9bde6d16050200e9bfccef65f762c2ed743c242"
-ARG SOLR_KEYS="9722F25F650057E26C803B60A6D064D833B3A969"
+ARG SOLR_VERSION="8.10.0"
+ARG SOLR_SHA512="7bd884f9bb2ee0a632156996c710e8d755db34408b503093570bcef43c085d814b27e1f39fd78e6af7349e390b20e084923188a05876badedbad07e21e3a1757"
+ARG SOLR_KEYS="FBC25D7E1712025294FE66590A6AA179B9BBF45E"
 # If specified, this will override SOLR_DOWNLOAD_SERVER and all ASF mirrors. Typically used downstream for custom builds
 ARG SOLR_DOWNLOAD_URL
 ENV JAVA_HOME=/opt/adopt/java PATH=$JAVA_HOME/bin:$PATH
@@ -34,8 +34,10 @@ RUN set -ex; \
   rm -rf /var/lib/apt/lists/*; \
   # Download AdoptOpenJDK 11 with OpenJ9
   mkdir -p /opt/adopt/java; \
-  wget -O adoptjdk.tar.gz https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9_openj9-0.24.0/OpenJDK11U-jdk_s390x_linux_openj9_11.0.10_9_openj9-0.24.0.tar.gz; \
-  tar -zxvf adoptjdk.tar.gz -C /opt/adopt/java --strip-components 1
+  wget -O semeru_runtime.tar.gz https://github.com/ibmruntimes/semeru11-binaries/releases/download/jdk-11.0.12%2B7_openj9-0.27.0/ibm-semeru-open-jdk_s390x_linux_11.0.12_7_openj9-0.27.0.tar.gz; \
+  tar -zxvf semeru_runtime.tar.gz -C /opt/adopt/java --strip-components 1; \
+  rm semeru_runtime.tar.gz
+
 
 ENV SOLR_USER="solr" \
     SOLR_UID="8983" \
