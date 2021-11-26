@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for WildFly (JBoss) version 24.0.1 ##########################
+################# Dockerfile for WildFly (JBoss) version 25.0.1 ##########################
 #
 # This Dockerfile builds a basic installation of WildFly.
 #
@@ -37,9 +37,9 @@ RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s
 
 
 # Set the WILDFLY_VERSION env variable
-ENV WILDFLY_VERSION 24.0.1.Final
+ENV WILDFLY_VERSION 25.0.1.Final
 ENV JBOSS_HOME=/opt/jboss/wildfly-${WILDFLY_VER}
-ENV JAVA_HOME=/opt/jdk-11.0.11+9
+ENV JAVA_HOME=/opt/jdk-11.0.13+8
 ENV PWD=`pwd`
 ENV PATH=$JAVA_HOME/bin:$JBOSS_HOME/bin:$PATH
 
@@ -49,11 +49,11 @@ USER root
 RUN apt-get update && apt-get install -y \
     tar \
     wget  \
- && wget  https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9_openj9-0.26.0/OpenJDK11U-jdk_s390x_linux_openj9_11.0.11_9_openj9-0.26.0.tar.gz \
- && tar -xf OpenJDK11U-jdk_s390x_linux_openj9_11.0.11_9_openj9-0.26.0.tar.gz -C /opt \
- && rm -rf  OpenJDK11U-jdk_s390x_linux_openj9_11.0.11_9_openj9-0.26.0.tar.gz \
+ && wget  https://github.com/ibmruntimes/semeru11-binaries/releases/download/jdk-11.0.13%2B8_openj9-0.29.0/ibm-semeru-open-jdk_s390x_linux_11.0.13_8_openj9-0.29.0.tar.gz \
+ && tar -xf ibm-semeru-open-jdk_s390x_linux_11.0.13_8_openj9-0.29.0.tar.gz -C /opt \
+ && rm -rf  ibm-semeru-open-jdk_s390x_linux_11.0.13_8_openj9-0.29.0.tar.gz \
  && cd /opt/jboss/ \
- && wget https://download.jboss.org/wildfly/${WILDFLY_VERSION}/wildfly-${WILDFLY_VERSION}.tar.gz \
+ && wget https://github.com/wildfly/wildfly/releases/download/${WILDFLY_VERSION}/wildfly-${WILDFLY_VERSION}.tar.gz \
  && tar -xvzf wildfly-${WILDFLY_VERSION}.tar.gz \
  # Move the WildFly distribution to /opt, and make wildfly the owner of the extracted tar content
  && mv wildfly-$WILDFLY_VERSION $JBOSS_HOME \
