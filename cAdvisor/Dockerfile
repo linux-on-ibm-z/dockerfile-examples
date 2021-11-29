@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for cAdvisor 0.37.5 #################################
+######################## Dockerfile for cAdvisor 0.38.8 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG CADVISOR_VER=0.37.5
+ARG CADVISOR_VER=0.38.8
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
@@ -44,24 +44,17 @@ RUN apt-get update && apt-get install -y \
         curl \
         patch \
         make \
+        gcc \
         sudo \
 # Install go
- && export GO_INSTALL_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Go/1.16.5/build_go.sh" \
- && curl $GO_INSTALL_URL | bash -s -- -v 1.16.5 \
+ && export GO_INSTALL_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Go/1.17.3/build_go.sh" \
+ && curl $GO_INSTALL_URL | bash -s -- -v 1.17.3 \
 # Create directory and Change the work directory
  && mkdir -p $GOPATH/src/github.com/google && cd $GOPATH/src/github.com/google \
 # Checkout the code from repository
  && git clone https://github.com/google/cadvisor.git \
  && cd $GOPATH/src/github.com/google/cadvisor/ \
  && git checkout v$CADVISOR_VER \
-
-# Apply patches 
- && cd $GOPATH/src/github.com/google/cadvisor/cmd \
- && export PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/cAdvisor/${CADVISOR_VER}/patch" \
- && curl -o "go_mod.patch" $PATCH_URL/go_mod.patch \
- && curl -o "go_sum.patch" $PATCH_URL/go_sum.patch \
- && patch --ignore-whitespace go.mod < go_mod.patch \
- && patch --ignore-whitespace go.sum < go_sum.patch \
 # Build cadvisor
  && cd $GOPATH/src/github.com/google/cadvisor \
  && sed -i "s|-short -race|-short|" Makefile \
