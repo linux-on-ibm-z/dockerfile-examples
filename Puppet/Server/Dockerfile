@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
-################# Dockerfile for Puppet server version 7.1.2 ####################
+################# Dockerfile for Puppet server version 7.4.1 ####################
 #
 # This Dockerfile builds a basic installation of Puppet server.
 #
@@ -23,16 +23,16 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 ENV SOURCE_ROOT="/root/"
 WORKDIR ${SOURCE_ROOT}
 
-ENV LANG=en_US.UTF-8 SERVER_VERSION="7.1.2" JRUBY_VERSION="9.2.14.0"
+ENV LANG=en_US.UTF-8 SERVER_VERSION="7.4.1" JRUBY_VERSION="9.2.17.0"
 
-ENV JDK11_URL="https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.10_9.tar.gz"
+ENV JDK11_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.13%2B8/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.13_8.tar.gz"
 
 # Setting SERVER
 ARG SERVER=puppet
 ENV MASTERHOST="${SERVER}"
 
 # Setting Java environment
-ENV JAVA_HOME="${SOURCE_ROOT}/adoptjdk11"
+ENV JAVA_HOME="${SOURCE_ROOT}/adoptium11"
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/usr/lib/s390x-linux-gnu/jni/${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
@@ -51,11 +51,11 @@ RUN apt-get update \
  ant \
  zip \
  libjffi-jni \
-# Install AdoptJDK11
- && wget -O ${SOURCE_ROOT}/adoptjdk11.tar.gz "$JDK11_URL" \
- && mkdir adoptjdk11 \
- && tar -zxvf adoptjdk11.tar.gz -C adoptjdk11/ --strip-components 1 \
- && rm adoptjdk11.tar.gz
+# Install Eclipse Adoptium Temurin Runtime (Java 11)
+ && wget -O ${SOURCE_ROOT}/adoptium11.tar.gz "$JDK11_URL" \
+ && mkdir adoptium11 \
+ && tar -zxvf adoptium11.tar.gz -C adoptium11/ --strip-components 1 \
+ && rm adoptium11.tar.gz
 
 # Install lein
 ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/bin/lein
