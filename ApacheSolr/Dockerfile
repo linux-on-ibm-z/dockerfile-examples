@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Apache Solr version 8.10.0 #########################
+############### Dockerfile for Apache Solr version 8.11.1 #########################
 #
 # To build Apache Solr image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -18,9 +18,9 @@ FROM s390x/ubuntu:20.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG SOLR_VERSION="8.10.0"
-ARG SOLR_SHA512="7bd884f9bb2ee0a632156996c710e8d755db34408b503093570bcef43c085d814b27e1f39fd78e6af7349e390b20e084923188a05876badedbad07e21e3a1757"
-ARG SOLR_KEYS="FBC25D7E1712025294FE66590A6AA179B9BBF45E"
+ARG SOLR_VERSION="8.11.1"
+ARG SOLR_SHA512="4893f836aec84b03d7bfe574e59e305c03b5ede4a48020034fbe81440b8feee79e55fd9ead230e5b89b3f25124e9b56c1ddc4bb5c7f631cf4e846b9cab5f9a45"
+ARG SOLR_KEYS="2CECBFBA181601547B654B9FFA81AC8A490F538E"
 # If specified, this will override SOLR_DOWNLOAD_SERVER and all ASF mirrors. Typically used downstream for custom builds
 ARG SOLR_DOWNLOAD_URL
 ENV JAVA_HOME=/opt/adopt/java PATH=$JAVA_HOME/bin:$PATH
