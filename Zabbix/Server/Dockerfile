@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Zabbix-server version 5.0.15 #########
+########## Dockerfile for Zabbix-server version 5.0.17 #########
 #
 # This Dockerfile builds a basic installation of Zabbix-server.
 #
@@ -23,7 +23,7 @@
 # Base Image
 FROM s390x/ubuntu:18.04 AS builder
 
-ARG ZBX_SERVER_VER=5.0.15
+ARG ZBX_SERVER_VER=5.0.17
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -57,8 +57,6 @@ RUN     apt-get update && apt-get install -y mysql-server \
         &&      wget https://cdn.zabbix.com/zabbix/sources/stable/5.0/zabbix-${ZBX_SERVER_VER}.tar.gz \
         &&      tar -zxf zabbix-${ZBX_SERVER_VER}.tar.gz \
         &&      cd zabbix-${ZBX_SERVER_VER}/ \
-        &&      sed -i '94s/field_size/new_field_size/' src/zabbix_server/preprocessor/preprocessing.c \
-        &&      sed -i '94i\ \t\t\t\tzbx_uint32_t new_field_size = (zbx_uint32_t)field_size;' src/zabbix_server/preprocessor/preprocessing.c \
         &&      ./configure --enable-server --with-mysql --enable-ipv6 --with-net-snmp --with-libcurl --with-libxml2 \
         &&      make install \
         &&      cat /zabbix-${ZBX_SERVER_VER}/database/mysql/schema.sql > /zabbix-${ZBX_SERVER_VER}/database/mysql/create.sql \
@@ -68,7 +66,7 @@ RUN     apt-get update && apt-get install -y mysql-server \
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG ZBX_SERVER_VER=5.0.15
+ARG ZBX_SERVER_VER=5.0.17
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
