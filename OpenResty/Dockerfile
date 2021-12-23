@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for OpenResty version 1.19.3.2 #########
+########## Dockerfile for OpenResty version 1.19.9.1 #########
 #
 # This Dockerfile builds a basic installation of OpenResty.
 #
@@ -29,8 +29,8 @@ FROM ubuntu:20.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG RESTY_VERSION="1.19.3.2"
-ARG ROLLBACK_VERSION="1.17.8.2"
+ARG RESTY_VERSION="1.19.9.1"
+
 ARG RESTY_CONFIG_OPTIONS="\
 	--with-pcre-jit \
 	--with-ipv6 \
@@ -38,7 +38,7 @@ ARG RESTY_CONFIG_OPTIONS="\
 	--with-http_iconv_module \
 	--with-http_postgres_module"
 
-ENV SOURCE_ROOT=/tmp/source PATH=$PATH:/usr/local/openresty/bin
+ENV SOURCE_ROOT=/tmp/source PATH=/usr/local/openresty/nginx/sbin:/usr/local/openresty/bin:$PATH
 
 WORKDIR $SOURCE_ROOT
 
@@ -65,18 +65,12 @@ RUN	DEBIAN_FRONTEND=noninteractive apt-get update \
 	&& cd $SOURCE_ROOT \
 	&& wget https://openresty.org/download/openresty-${RESTY_VERSION}.tar.gz \
 	&& tar -xvf openresty-${RESTY_VERSION}.tar.gz \
-# Comment out the below lines in file /<source_root>/openresty-1.17.8.1/configure
-	&& cd $SOURCE_ROOT \
-	&& wget https://openresty.org/download/openresty-${ROLLBACK_VERSION}.tar.gz \
-	&& tar -xvf openresty-${ROLLBACK_VERSION}.tar.gz \
-	&& rm -rf openresty-${RESTY_VERSION}/bundle/LuaJIT-2.1-* \
-	&& rm -rf openresty-${RESTY_VERSION}/bundle/lua-resty-core-* \
-	&& rm -rf openresty-${RESTY_VERSION}/bundle/ngx_lua-* \
-	&& rm -rf openresty-${RESTY_VERSION}/bundle/ngx_stream_lua-* \
-	&& cp -r openresty-${ROLLBACK_VERSION}/bundle/LuaJIT-2.1-* openresty-${RESTY_VERSION}/bundle/ \
-	&& cp -r openresty-${ROLLBACK_VERSION}/bundle/lua-resty-core-* openresty-${RESTY_VERSION}/bundle/ \
-	&& cp -r openresty-${ROLLBACK_VERSION}/bundle/ngx_lua-* openresty-${RESTY_VERSION}/bundle/ \
-	&& cp -r openresty-${ROLLBACK_VERSION}/bundle/ngx_stream_lua-* openresty-${RESTY_VERSION}/bundle/ \
+# Replace source luajit2 with latest luajit2
+	&& rm -rf $SOURCE_ROOT/openresty-${RESTY_VERSION}/bundle/LuaJIT-2.1-20210510  \
+        && mkdir $SOURCE_ROOT/openresty-${RESTY_VERSION}/bundle/LuaJIT-2.1-20210510 \
+        && wget https://github.com/openresty/luajit2/archive/refs/tags/v2.1-20211210.tar.gz \
+        && tar -xvzf v2.1-20211210.tar.gz \
+        && mv luajit2-2.1-20211210/* openresty-${RESTY_VERSION}/bundle/LuaJIT-2.1-20210510 \ 
 # Build and install OpenResty
 	&& cd $SOURCE_ROOT/openresty-${RESTY_VERSION} \
 	&& ./configure $RESTY_CONFIG_OPTIONS \
@@ -99,5 +93,4 @@ RUN	DEBIAN_FRONTEND=noninteractive apt-get update \
 EXPOSE 80
 
 CMD ["openresty", "-g", "daemon off;"]
-
 # End of Dockerfile
