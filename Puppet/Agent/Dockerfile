@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Puppetagent version 7.12.0 #########
+########## Dockerfile for Puppetagent version 7.13.1 #########
 #
 # This Dockerfile builds a basic installation of Puppet agent.
 #
@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y ruby
 
 # Install Puppet
 RUN gem install bundler rake-compiler \
- && gem install puppet -v 7.12.0
+ && gem install puppet -v 7.13.1
 
 # Configure address of Puppet server
 RUN mkdir -p "$(puppet config print confdir)" \
