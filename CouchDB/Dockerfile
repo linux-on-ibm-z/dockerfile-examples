@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2021.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for CouchDB version 3.2.0 ############
+############### Dockerfile for CouchDB version 3.2.1 ############
 #
 # CouchDB, is open source database software.
 #
@@ -20,7 +20,7 @@
 
 # Base image
 FROM s390x/ubuntu:18.04 AS builder
-ARG COUCHDB_VER=3.2.0
+ARG COUCHDB_VER=3.2.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -32,24 +32,24 @@ ENV PATH=$PATH:/usr/share/couchdb/dev  LD_LIBRARY_PATH=/usr/lib
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CouchDB/${COUCHDB_VER}/patch"
 # Install following build dependencies
 RUN apt-get update \
- && apt-get install -y build-essential pkg-config ncurses-base g++-5 gcc-5 python python3 python3-pip python3-venv python3-markupsafe curl git patch wget tar make zip autoconf2.13 automake libicu-dev libcurl4-openssl-dev libncurses5-dev locales libncurses-dev libssl-dev unixodbc-dev libwxgtk3.0-dev openjdk-8-jdk xsltproc fop libxml2-utils \
+ && apt-get install -y build-essential pkg-config ncurses-base g++-5 gcc-5 python python3 python3-pip python3-venv python3-markupsafe curl git patch wget tar make zip autoconf2.13 automake libicu-dev libcurl4-openssl-dev libncurses5-dev locales libncurses-dev libssl-dev unixodbc-dev libwxgtk3.0-dev openjdk-8-jdk xsltproc libxml2-utils \
  && rm -rf /usr/bin/gcc /usr/bin/g++ /usr/bin/cc \
  && ln -s /usr/bin/gcc-5 /usr/bin/gcc \
  && ln -s /usr/bin/g++-5 /usr/bin/g++ \
  && ln -s /usr/bin/gcc /usr/bin/cc \
 # Download and Install Erlang
  && cd $SOURCE_ROOT \
- && wget http://www.erlang.org/download/otp_src_22.2.tar.gz \
- && tar zxf otp_src_22.2.tar.gz && rm otp_src_22.2.tar.gz \
- && cd otp_src_22.2 \
- && export ERL_TOP=$SOURCE_ROOT/otp_src_22.2 \
+ && wget http://www.erlang.org/download/otp_src_24.0.tar.gz \
+ && tar zxf otp_src_24.0.tar.gz && rm otp_src_24.0.tar.gz \
+ && cd otp_src_24.0 \
+ && export ERL_TOP=$SOURCE_ROOT/otp_src_24.0 \
  && ./configure --prefix=/usr \
  && make \
  && make install \
 # Download and Install Elixir
  && git clone https://github.com/elixir-lang/elixir.git \
  && cd elixir \
- && git checkout v1.10.2 \
+ && git checkout v1.12.3 \
  && export LANG=en_US.UTF-8 \
  && locale-gen en_US.UTF-8 \
  && make \
@@ -77,9 +77,9 @@ RUN apt-get update \
  # Install nodejs
  && cd $SOURCE_ROOT \
  && mkdir -p /usr/local/lib/nodejs  \
- && wget https://nodejs.org/dist/v14.2.0/node-v14.2.0-linux-s390x.tar.gz \
- && tar xzvf node-v14.2.0-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
- && ln -s /usr/local/lib/nodejs/node-v14.2.0-linux-s390x/bin/* /usr/bin/ \
+ && wget https://nodejs.org/dist/v16.13.0/node-v16.13.0-linux-s390x.tar.gz \
+ && tar xzvf node-v16.13.0-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
+ && ln -s /usr/local/lib/nodejs/node-v16.13.0-linux-s390x/bin/* /usr/bin/ \
 # Download and install CouchDB
  && cd $SOURCE_ROOT \
  && git clone https://github.com/apache/couchdb.git \
@@ -194,7 +194,7 @@ RUN set -xe; \
     rm -rf "$GNUPGHOME"; \
     apt-key list
 
-ENV COUCHDB_VERSION 3.2.0
+ENV COUCHDB_VERSION 3.2.1
 
 # https://github.com/apache/couchdb-pkg/blob/master/debian/README.Debian
 RUN set -xe; \
