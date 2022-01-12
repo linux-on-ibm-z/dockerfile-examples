@@ -10,7 +10,7 @@
 FROM docker.mirror.hashicorp.services/golang:alpine AS builder
 LABEL maintainer="HashiCorp Terraform Team <terraform@hashicorp.com>"
 
-ARG TERRAFORM_VERSION=v1.0.11
+ARG TERRAFORM_VERSION=v1.1.2
 RUN apk add --no-cache git bash openssh \
     && git clone -b ${TERRAFORM_VERSION} https://github.com/hashicorp/terraform.git $GOPATH/src/github.com/hashicorp/terraform
 
