@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2020, 2021.
+# © Copyright IBM Corporation 2020, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for CockroachDB version 21.1.12 ####################################
+#################################### Dockerfile for CockroachDB version 21.2.4 ####################################
 #
 # To build CockroachDB image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -20,7 +20,7 @@
 FROM s390x/ubuntu:18.04 AS builder
 
 # CockroachDB version
-ARG CRDB_VER=21.1.12
+ARG CRDB_VER=21.2.4
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -36,8 +36,8 @@ RUN apt-get update \
 && apt-get install -y g++ autoconf automake cmake wget libncurses5-dev bison xz-utils patch git curl python ccache \
 # Install Golang
 && cd $SOURCE_DIR \
-&& wget https://storage.googleapis.com/golang/go1.15.14.linux-s390x.tar.gz \
-&& tar -C /usr/local -xzf go1.15.14.linux-s390x.tar.gz \
+&& wget https://storage.googleapis.com/golang/go1.16.5.linux-s390x.tar.gz \
+&& tar -C /usr/local -xzf go1.16.5.linux-s390x.tar.gz \
 # Install Nodejs and yarn
 && wget https://nodejs.org/dist/v12.20.1/node-v12.20.1-linux-s390x.tar.xz \
 && chmod ugo+r node-v12.20.1-linux-s390x.tar.xz \
