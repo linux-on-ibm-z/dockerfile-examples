@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2021.
+# © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.12.1 ########################################
+##################################### Dockerfile for Elasticsearch version 7.16.3 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -31,7 +31,7 @@
 
 FROM s390x/ubuntu:20.04 AS builder
 
-ARG ELASTICSEARCH_VER=7.12.1
+ARG ELASTICSEARCH_VER=7.16.3
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -39,10 +39,10 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 ENV LANG="en_US.UTF-8"
 ENV SOURCE_DIR="/tmp/"
 ENV JAVA_HOME=/opt/adopt/java
-ENV JAVA15_HOME=/opt/adopt/java
+ENV JAVA16_HOME=/opt/adopt/java
 ENV PATH=$JAVA_HOME/bin:$PATH
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch"
-ENV ADOPTJDK_URL="https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk-15.0.2%2B7/OpenJDK15U-jdk_s390x_linux_hotspot_15.0.2_7.tar.gz"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch/elasticsearch.patch"
+ENV ADOPTJDK_URL="https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_s390x_linux_hotspot_16.0.2_7.tar.gz"
 
 RUN apt-get update && apt-get install -y \
     curl \
@@ -78,23 +78,23 @@ RUN /usr/sbin/groupadd -g 1000 elasticsearch && \
     /usr/sbin/useradd --uid 1000 --gid 1000 -d /usr/share/elasticsearch elasticsearch
 
 WORKDIR /usr/share/elasticsearch
-
 # Set up locale
 RUN apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
-# Install AdoptOpenJDK 15 (with hotspot)
+# Install AdoptOpenJDK 16 (with hotspot)
  && cd $SOURCE_DIR && mkdir -p /opt/adopt/java && curl -SL -o adoptjdk.tar.gz $ADOPTJDK_URL \
  && tar -zxf adoptjdk.tar.gz -C /opt/adopt/java --strip-components 1 \
 # Download and Build Elasticsearch
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
- && curl -sSL $PATCH_URL/elasticsearch.patch | git apply \
+ && curl -o elasticsearch.patch  $PATCH_URL  \
+ && git apply elasticsearch.patch \
  && ./gradlew :distribution:archives:oss-linux-s390x-tar:assemble --parallel \
 # Install Elasticsearch
  && mkdir -p /usr/share/elasticsearch \
- && tar -xzf distribution/archives/oss-linux-s390x-tar/build/distributions/elasticsearch-oss-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1
+ && tar -xzf distribution/archives/oss-linux-s390x-tar/build/distributions/elasticsearch-oss-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1 
 
 # The distribution includes a `config` directory, no need to create it
-COPY config/elasticsearch.yml config/log4j2.properties config/
+COPY config/elasticsearch.yml  config/
 
 RUN sed -i -e 's/ES_DISTRIBUTION_TYPE=tar/ES_DISTRIBUTION_TYPE=docker/' bin/elasticsearch-env && \
     mkdir -p config/jvm.options.d data logs plugins && \
