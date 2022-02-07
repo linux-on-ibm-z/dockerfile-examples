@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2021.
+# © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############################################## Dockerfile for MySQL 5.x ##################################################
@@ -31,7 +31,7 @@ FROM s390x/ubuntu:18.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG MYSQL_VERSION=5.7.36
+ARG MYSQL_VERSION=5.7.37
 ENV DEBIAN_FRONTEND noninteractive
 
 # Add mysql user and group
