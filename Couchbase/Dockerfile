@@ -139,7 +139,7 @@ RUN apt-get update  && apt-get install -y \
  && cd $SOURCE_ROOT/couchbase \
  && make \
 # Clean up cache data and remove dependencies which are not required
- && apt-get -y remove autoconf automake check cmake curl flex gcc-5 git g++-5 libcurl4-openssl-dev libevent-dev libglib2.0-dev libncurses5-dev libsnappy-dev libssl-dev libtool libxml2-utils make openssl pkg-config python python-dev ruby sqlite3 subversion unixodbc unixodbc-dev wget xsltproc golang-1.10 patch xinetd xutils-dev \
+ && apt-get -y remove autoconf automake check cmake curl flex gcc-5 git g++-5 libcurl4-openssl-dev libglib2.0-dev libncurses5-dev libssl-dev libtool libxml2-utils make openssl pkg-config python python-dev ruby sqlite3 subversion unixodbc unixodbc-dev wget xsltproc golang-1.10 patch xinetd xutils-dev \
  && apt autoremove -y \
  && apt-get autoremove -y \
  && apt-get clean \
