@@ -10,7 +10,7 @@ set -euo pipefail
 # All beat binaries and configuration files are located in /usr/share/beats
 # for s390x docker image
 
-beats="auditbeat filebeat heartbeat journalbeat metricbeat packetbeat"
+beats="auditbeat filebeat heartbeat metricbeat packetbeat"
 BEATSHOME=/usr/share/beats
 mkdir -p $BEATSHOME
 
