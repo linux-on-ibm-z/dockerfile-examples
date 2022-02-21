@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2021.
+# © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.12.1 #############################
+#################### Dockerfile for Beats 7.16.3 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -33,7 +33,7 @@ FROM s390x/ubuntu:18.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BEATS_VER=7.12.1
+ARG BEATS_VER=7.16.3
 
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Beats/${BEATS_VER}/patch"
 
@@ -83,9 +83,9 @@ RUN apt-get update && apt-get install -y \
  && rustup toolchain install 1.49.0 \
  &&	rustup default 1.49.0 \
  && python3 -m pip install appdirs pyparsing packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv pillow \
- && wget https://dl.google.com/go/go1.15.8.linux-s390x.tar.gz \
- && chmod ugo+r go1.15.8.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.15.8.linux-s390x.tar.gz \
+ && wget https://go.dev/dl/go1.17.6.linux-s390x.tar.gz \
+ && chmod ugo+r go1.17.6.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.17.6.linux-s390x.tar.gz \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
@@ -120,11 +120,6 @@ RUN apt-get update && apt-get install -y \
  && make libbeat \
  && make update \
  && make fmt \
-# Building journalbeat
- && cd $GOPATH/src/github.com/elastic/beats/journalbeat  \
- && make journalbeat \
- && make update \
- && make fmt \
 # Building auditbeat
  && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
  && make auditbeat \
@@ -144,7 +139,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 ENV ELASTIC_CONTAINER "true"
 ENV PATH=/usr/share/beats:$PATH
 
-RUN apt-get update && apt-get install -y libpcap0.8 curl \
+RUN apt-get update && apt-get install -y libpcap0.8 curl sudo \
  && curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/v0.19.0/tini-s390x" \
  && mv tini-s390x /usr/bin/tini \
  && chmod +x /usr/bin/tini
@@ -155,7 +150,8 @@ RUN chmod 755 /usr/local/bin/docker-entrypoint
 COPY --from=builder /usr/share/beats /usr/share/beats
 
 RUN groupadd --gid 1000 beats \
- && useradd -M --uid 1000 --gid 1000 --groups 0 --home /usr/share/beats beats
+ && useradd -M --uid 1000 --gid 1000 --groups sudo --home /usr/share/beats beats \
+ && passwd -d beats
 
 USER beats
 
