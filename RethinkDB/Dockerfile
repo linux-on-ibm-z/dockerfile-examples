@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2020.
+# © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############################ Dockerfile for RethinkDB 2.4.1 ############################################
@@ -37,6 +37,10 @@ m4 \
 libssl-dev \
 git \
 curl \
+python3-pip \
+
+#Install httplib2
+&& pip3 install httplib2 \
 
 #Install gcc-5.4.0
 && cd $SOURCE_ROOT \
@@ -83,29 +87,20 @@ curl \
 && cd rethinkdb/ \
 && git checkout v2.4.1 \
 
-#Changed for V8
- &&  cp mk/support/pkg/v8.sh mk/support/pkg/v8.sh.orig \
- && sed -i '67 i export CXXFLAGS="-fno-delete-null-pointer-checks"' mk/support/pkg/v8.sh \
- && sed -i '67 s/^/        /' mk/support/pkg/v8.sh \
- && sed -i '69d ' mk/support/pkg/v8.sh \
- && sed -i '69 i make dependencies || true'  mk/support/pkg/v8.sh \
- && sed -i '69 s/^/        /' mk/support/pkg/v8.sh \
- && sed -i '70d ' mk/support/pkg/v8.sh \
- && sed -i '70 i make s390x -j4 werror=no snapshot=off library=static'  mk/support/pkg/v8.sh \
- && sed -i '70 s/^/        /' mk/support/pkg/v8.sh \
- && sed -i '172d ' mk/support/pkg/v8.sh \
- && sed -i '172 i  for lib in libv8_{base,libbase,nosnapshot,libplatform}; do'  mk/support/pkg/v8.sh \
- && sed -i '172 s/^/        /' mk/support/pkg/v8.sh \
+#Apply the patches in mk/support/pkg/v8.sh
+&& export PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/RethinkDB/2.4.1/patch \
+&& curl -o v8_ubuntu.patch $PATCH_URL/v8_ubuntu.patch \
+&& patch mk/support/pkg/v8.sh v8_ubuntu.patch \
  
 
- && ./configure --allow-fetch \ 
- && make -j 4 \ 
+&& ./configure --allow-fetch \ 
+&& make -j 4 \ 
 
 #Install RethinkDB
- && make install \
+&& make install \
 
 # Clean up cache data and remove dependencies that are not required
- && apt-get remove -y \
+&& apt-get remove -y \
     build-essential \
     git \
     make \
@@ -113,6 +108,7 @@ curl \
     protobuf-compiler \
     python \
     wget \
+    python3-pip \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*  /$SOURCE_ROOT
 
