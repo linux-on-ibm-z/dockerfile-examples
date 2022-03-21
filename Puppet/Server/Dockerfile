@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2021
+# © Copyright IBM Corporation 2021, 2022
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
-################# Dockerfile for Puppet server version 7.5.0 ####################
+################# Dockerfile for Puppet server version 7.6.0 ####################
 #
 # This Dockerfile builds a basic installation of Puppet server.
 #
@@ -23,9 +23,9 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 ENV SOURCE_ROOT="/root/"
 WORKDIR ${SOURCE_ROOT}
 
-ENV LANG=en_US.UTF-8 SERVER_VERSION="7.5.0" JRUBY_VERSION="9.2.17.0"
+ENV LANG=en_US.UTF-8 SERVER_VERSION="7.6.0" JRUBY_VERSION="9.2.17.0"
 
-ENV JDK11_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.13%2B8/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.13_8.tar.gz"
+ENV JDK11_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.14.1%2B1/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.14.1_1.tar.gz"
 
 # Setting SERVER
 ARG SERVER=puppet
@@ -62,7 +62,7 @@ ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr
 RUN chmod +x /usr/bin/lein \
     && gem install bundler rake-compiler \
 # Get puppetserver code
-    && git clone --recursive --branch $SERVER_VERSION git://github.com/puppetlabs/puppetserver \
+    && git clone --recursive --branch $SERVER_VERSION https://github.com/puppetlabs/puppetserver \
     && cd puppetserver \
 # Update puppet.conf to set autosign to true. Remove this line if you don't want autosign setting
     && sed  -i '47i autosign=true' dev-setup \
