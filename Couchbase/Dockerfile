@@ -107,7 +107,7 @@ RUN apt-get update  && apt-get install -y \
 # Clone Couchbase
  && git config --global user.email your@email.addr  \
  && git config --global user.name  your_docker_name \
- && ../repo init -u git://github.com/couchbase/manifest -m released/couchbase-server/6.0.4.xml \
+ && ../repo init -u https://github.com/couchbase/manifest -m released/couchbase-server/6.0.4.xml \
  && ../repo sync \
  && cd $SOURCE_ROOT \
 # Patch files
