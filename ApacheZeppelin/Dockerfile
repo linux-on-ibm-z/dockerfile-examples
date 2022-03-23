@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2021.
+# © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############## Dockerfile for Apache Zeppelin version 0.10.0 ###############
+############## Dockerfile for Apache Zeppelin version 0.10.1 ###############
 #
 # This Dockerfile builds a basic installation of Apache Zeppelin.
 #
@@ -17,7 +17,7 @@
 # We can view the Apache Zeppelin UI at http://<zeppelin-host-ip>:<port_number>
 #
 # Reference:
-# http://zeppelin.apache.org/docs/0.10.0/index.html
+# http://zeppelin.apache.org/docs/0.10.1/index.html
 #
 #################################################################################
 
@@ -27,7 +27,7 @@ FROM s390x/ubuntu:20.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV Z_VERSION=0.10.0
+ENV Z_VERSION=0.10.1
 
 ENV LOG_TAG="[ZEPPELIN_${Z_VERSION}]:" \
     Z_HOME="/zeppelin" \
