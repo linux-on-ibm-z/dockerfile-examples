@@ -7,7 +7,7 @@
 # the officially-released binary from releases.hashicorp.com and are
 # built by the (closed-source) official release process.
 
-FROM docker.mirror.hashicorp.services/golang:alpine AS builder
+FROM docker.mirror.hashicorp.services/golang:1.17-alpine AS builder
 LABEL maintainer="HashiCorp Terraform Team <terraform@hashicorp.com>"
 
 ARG TERRAFORM_VERSION=v1.1.7
@@ -20,7 +20,7 @@ ENV TF_RELEASE=1
 WORKDIR $GOPATH/src/github.com/hashicorp/terraform
 RUN /bin/bash ./scripts/build.sh
 
-FROM docker.mirror.hashicorp.services/golang:alpine
+FROM docker.mirror.hashicorp.services/golang:1.17-alpine
 LABEL maintainer="HashiCorp Terraform Team <terraform@hashicorp.com>"
 copy --from=builder $GOPATH/bin $GOPATH/bin
 WORKDIR $GOPATH
