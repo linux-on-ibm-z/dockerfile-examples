@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 7.16.3 #####################################################
+############################ Dockerfile for Logstash version 8.1.0 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -25,13 +25,13 @@ RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
 FROM s390x/ubuntu:18.04
 
-ARG LOGSTASH_VER=7.16.3
+ARG LOGSTASH_VER=8.1.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV LD_LIBRARY_PATH=/usr/lib/s390x-linux-gnu/jni/:$LD_LIBRARY_PATH
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
+ENV LS_JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 # Install Dependencies
 RUN apt-get update && apt-get install -y openjdk-11-jdk locales \
     libjffi-jni \
@@ -62,7 +62,7 @@ RUN apt-get update && apt-get install -y openjdk-11-jdk locales \
 WORKDIR /usr/share/logstash
 
 ENV ELASTIC_CONTAINER true
-ENV PATH=/usr/share/logstash/bin:$JAVA_HOME/bin:$PATH
+ENV PATH=/usr/share/logstash/bin:$LS_JAVA_HOME/bin:$PATH
 
 # Provide a minimal configuration, so that simple invocations will provide
 # a good experience.
