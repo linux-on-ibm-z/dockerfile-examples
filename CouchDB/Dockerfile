@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2021.
+# © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############### Dockerfile for CouchDB version 3.2.1 ############
@@ -39,10 +39,10 @@ RUN apt-get update \
  && ln -s /usr/bin/gcc /usr/bin/cc \
 # Download and Install Erlang
  && cd $SOURCE_ROOT \
- && wget http://www.erlang.org/download/otp_src_24.0.tar.gz \
- && tar zxf otp_src_24.0.tar.gz && rm otp_src_24.0.tar.gz \
- && cd otp_src_24.0 \
- && export ERL_TOP=$SOURCE_ROOT/otp_src_24.0 \
+ && wget http://www.erlang.org/download/otp_src_24.1.tar.gz \
+ && tar zxf otp_src_24.1.tar.gz && rm otp_src_24.1.tar.gz \
+ && cd otp_src_24.1 \
+ && export ERL_TOP=$SOURCE_ROOT/otp_src_24.1 \
  && ./configure --prefix=/usr \
  && make \
  && make install \
@@ -73,7 +73,7 @@ RUN apt-get update \
  && ../configure --prefix=/usr \
  && make \
  && make install \
- && pip3 install --upgrade wheel sphinx==3.5.4 sphinx_rtd_theme docutils==0.16 nose requests hypothesis virtualenv \
+ && pip3 install --upgrade wheel sphinx==3.5.4 sphinx_rtd_theme docutils==0.16 nose requests hypothesis virtualenv jinja2==3.0.0 \
  # Install nodejs
  && cd $SOURCE_ROOT \
  && mkdir -p /usr/local/lib/nodejs  \
