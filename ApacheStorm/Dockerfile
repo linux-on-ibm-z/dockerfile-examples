@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2018, 2021.
+# © Copyright IBM Corporation 2018, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Storm version 2.3.0 #########
+########## Dockerfile for Apache Storm version 2.4.0 #########
 #
 # This Dockerfile builds a basic installation of Apache Storm.
 #
@@ -36,52 +36,29 @@ FROM s390x/ubuntu:18.04 as builder
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x \
     PATH=$JAVA_HOME/bin:$PATH \
-    SOURCE_DIR=/tmp/source \
-    LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SOURCE_DIR/zstd-jni/target/classes/linux/s390x/
+    SOURCE_DIR=/tmp/source     
 
 WORKDIR $SOURCE_DIR
 
 # Install required packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
-    gnupg \
     procps \
     git \
     wget \
     ca-certificates \
     openjdk-8-jdk \
     dirmngr \
-    gcc-7 \
-    curl \
-    g++-7 \
-    make \
-    lbzip2; \
+    curl; \
     rm -rf /var/lib/apt/lists/*; \
-    rm -rf /usr/bin/gcc /usr/bin/g++ /usr/bin/cc \
- && ln -sf /usr/bin/gcc-7 /usr/bin/gcc \
- && ln -sf /usr/bin/g++-7 /usr/bin/g++ \
- && ln -sf /usr/bin/gcc /usr/bin/cc \
  && mkdir -p /rockdb_contents \
- #Build and Create Rocksdb Jar
- && cd $SOURCE_DIR && git clone git://github.com/facebook/rocksdb.git \
- && cd rocksdb && git checkout v5.18.4 \
- && sed -i -e "s/-march=native/-march=z196/" build_tools/build_detect_platform \
- && sed -i -e "s/-momit-leaf-frame-pointer/-DDUMBDUMMY/" Makefile \
- && PORTABLE=1 make shared_lib && make rocksdbjava \
- && cd $SOURCE_DIR/rocksdb/java/target \
- && cp rocksdbjni-5.18.4-linux64.jar  rocksdbjni-5.18.4-linux64.jar.backup \
- && jar -xf rocksdbjni-5.18.4-linux64.jar \
- && jar -xf rocksdbjni-5.18.4-linux64.jar \
- && cp librocksdbjni-linux64.so librocksdbjni-linuxs390x.so \
- && jar -ufv rocksdbjni-5.18.4-linux64.jar librocksdbjni-linuxs390x.so \
- && cp rocksdbjni-5.18.4-linux64.jar  rocksdbjni-5.18.4.jar \
- && mv  $SOURCE_DIR/rocksdb/java/target/rocksdbjni-5.18.4.jar  /rockdb_contents/rocksdbjni-5.18.4.jar \
+ && cd $SOURCE_DIR && && wget https://repo1.maven.org/maven2/org/rocksdb/rocksdbjni/6.27.3/rocksdbjni-6.27.3.jar \
+ && mv $SOURCE_DIR/rocksdbjni-6.27.3.jar /rockdb_contents/rocksdbjni-6.27.3.jar \
  && apt-get remove -y \
      git \
      wget \
-     make \
  && apt autoremove -y \
- && apt-get clean && rm -rf $SOURCE_DIR/zstd-jni && rm -rf $SOURCE_DIR/rocksdb
+ && apt-get clean 
 
 
 
@@ -114,20 +91,16 @@ RUN set -eux; \
      ca-certificates \
      dirmngr \
      gosu \
-     gnupg \
      python \
      procps \
      wget \
-     libsnappy-dev \
-     libbz2-dev \
-     libffi-dev \
      tar; \
      rm -rf /var/lib/apt/lists/*; \
 # Verify that gosu binary works
-    gosu nobody true
+     gosu nobody true
 
-ARG GPG_KEY=5167DE337E7370373499FC1DA4A672F11B5050C8
-ARG DISTRO_NAME=apache-storm-2.3.0
+ARG GPG_KEY=51379DA8A7AE5B02674EF15C134716AF768D9B6E
+ARG DISTRO_NAME=apache-storm-2.4.0
 # Download Apache Storm, verify its PGP signature, untar and clean up
 RUN set -eux; \
     ddist() { \
@@ -166,7 +139,7 @@ RUN set -eux; \
  && apt-get clean && apt autoremove -y
 
 WORKDIR $SOURCE_DIR/$DISTRO_NAME
-COPY --from=builder /rockdb_contents/rocksdbjni-5.18.4.jar  $SOURCE_DIR/$DISTRO_NAME/lib/rocksdbjni-5.18.4.jar
+COPY --from=builder /rockdb_contents/rocksdbjni-6.27.3.jar  $SOURCE_DIR/$DISTRO_NAME/lib/rocksdbjni-6.27.3.jar
 ENV PATH $PATH:$SOURCE_DIR/$DISTRO_NAME/bin
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
