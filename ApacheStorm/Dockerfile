@@ -48,13 +48,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     ca-certificates \
     openjdk-8-jdk \
+    gnupg \	
     dirmngr \
     curl; \
     rm -rf /var/lib/apt/lists/*; \
- && mkdir -p /rockdb_contents \
- && cd $SOURCE_DIR && && wget https://repo1.maven.org/maven2/org/rocksdb/rocksdbjni/6.27.3/rocksdbjni-6.27.3.jar \
- && mv $SOURCE_DIR/rocksdbjni-6.27.3.jar /rockdb_contents/rocksdbjni-6.27.3.jar \
- && apt-get remove -y \
+    mkdir -p /rockdb_contents \
+    wget https://repo1.maven.org/maven2/org/rocksdb/rocksdbjni/6.27.3/rocksdbjni-6.27.3.jar \
+  mv $SOURCE_DIR/rocksdbjni-6.27.3.jar /rockdb_contents/rocksdbjni-6.27.3.jar \
+  && apt-get remove -y \
      git \
      wget \
  && apt autoremove -y \
@@ -89,6 +90,7 @@ RUN set -eux; \
      openjdk-8-jdk \
      bash \
      ca-certificates \
+     gnupg \
      dirmngr \
      gosu \
      python \
