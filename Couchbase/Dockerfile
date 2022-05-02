@@ -26,25 +26,9 @@ ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Co
 
 SHELL ["/bin/bash", "-c"]
 
-RUN apt-get update && apt-get install -y sudo \
-&& mkdir -p $SOURCE_ROOT/patch \
+RUN apt-get update && apt-get install -y sudo wget \
 && cd $SOURCE_ROOT \
-&& wget PATCH_URL/build_couchbase.sh \
-&& wget PATCH_URL/installDeps.sh \
-&& wget PATCH_URL/patch/couchdb.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/couchstore.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/crc32-s390x.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/flatbuffers.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/folly.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/forestdb.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/kv_engine.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/platform.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/tlm-rhel7.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/tlm-rhel8.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/tlm-sles.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/tlm-ub18.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/tlm-ub20.diff -P $SOURCE_ROOT/patch \
-&& wget PATCH_URL/patch/v8.diff -P $SOURCE_ROOT/patch \
+&& wget $PATCH_URL/build_couchbase.sh \
 && bash build_couchbase.sh -y -p /opt/couchbase \
 && apt-get -y remove autoconf automake autotools-dev \
 binutils-dev bison ccache clang-12 cmake curl flex \
@@ -64,6 +48,7 @@ re2c texinfo unzip wget \
 && rm -rf /root/.cbdepscache \
 && rm -rf /root/.ccache \
 && rm -rf /root/.cache \
+&& rm -rf /root/go/src/github.com/prometheus \
 && rm -rf /usr/local/lib/libv8*.so \
 && rm -rf /usr/local/lib/icu* \
 && rm -rf /usr/local/lib//libchrome*.so \
