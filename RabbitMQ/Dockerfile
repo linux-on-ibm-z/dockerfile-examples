@@ -3,7 +3,7 @@
 #
 # This dockerfile is no longer supported. Please find latest information from https://www.ibm.com/community/z/open-source-software/
 #
-################# Dockerfile for RabbitMQ version 3.9.14 ################################
+################# Dockerfile for RabbitMQ version 3.9.16 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -25,9 +25,9 @@
 # Base image
 FROM s390x/ubuntu:18.04
 
-ARG RABBITMQ_VER=3.9.14
-ARG ELIXIR_VERSION=1.12.3
-ARG HEX_VERSION=1.0.1
+ARG RABBITMQ_VER=3.9.16
+ARG ERLANG_VERSION=24.3.3
+ARG ELIXIR_VERSION=1.13.4
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
@@ -84,8 +84,8 @@ RUN apt-get update && apt-get install -y \
 	wget \
 	xsltproc \
 # Download and build Erlang
- && wget https://github.com/erlang/otp/releases/download/OTP-24.2.2/otp_src_24.2.2.tar.gz \
- && tar zxf otp_src_24.2.2.tar.gz && cd otp_src_24.2.2 \
+ && wget https://github.com/erlang/otp/releases/download/OTP-$ERLANG_VERSION/otp_src_$ERLANG_VERSION.tar.gz \
+ && tar zxf otp_src_$ERLANG_VERSION.tar.gz && cd otp_src_$ERLANG_VERSION \
  && export ERL_TOP=$(pwd) && ./configure --prefix=/usr \
  && make && make install \
 # Download and install rabbitmq
@@ -94,10 +94,7 @@ RUN apt-get update && apt-get install -y \
  && localedef -c -f UTF-8 -i en_US en_US.UTF-8 \
  && git clone https://github.com/elixir-lang/elixir \
  && cd elixir && git checkout v$ELIXIR_VERSION && make && make install \
- && cd ../ && git clone https://github.com/hexpm/hex.git \
- && cd hex &&  git checkout v$HEX_VERSION && mix install \
  && cd /opt && tar xf $SOURCE_DIR/rabbitmq-server-$RABBITMQ_VER.tar.xz \
- && cp $SOURCE_DIR/hex/_build/dev/lib/hex/ebin/*  rabbitmq-server-$RABBITMQ_VER/deps/.mix/archives/hex-$HEX_VERSION/hex-$HEX_VERSION/ebin/ \
  && cd rabbitmq-server-$RABBITMQ_VER  && make && make install \
  && mkdir -p /etc/rabbitmq \
  && echo "[{rabbit, [{loopback_users, []}]}]." | tee /etc/rabbitmq/rabbitmq.config \
@@ -108,7 +105,7 @@ RUN apt-get update && apt-get install -y \
     ant \
     curl \
     git \
-    make \            
+    make \
     rsync \
     wget \
     xsltproc \
