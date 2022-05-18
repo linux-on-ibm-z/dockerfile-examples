@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2020, 2021
+# © Copyright IBM Corporation 2020, 2022
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for InfluxDB 2.1.1 ############################s
+#################### Dockerfile for InfluxDB 2.2.0 ############################s
 #
 # Builds InfluxDB
 #
@@ -28,12 +28,11 @@ FROM s390x/ubuntu:20.04 as builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Environment
-ARG VERSION=2.1.1
+ARG VERSION=2.2.0
 ENV DEBIAN_FRONTEND noninteractive
 ENV SOURCE_ROOT=/tmp
 ENV GOPATH=$HOME/go
 ENV PATH=$PATH:$GOPATH/bin
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/InfluxDB/${VERSION}/patch"
 
 WORKDIR /tmp
 
@@ -55,8 +54,6 @@ RUN apt-get update \
 &&  go get github.com/influxdata/pkg-config \
 &&  git clone https://github.com/influxdata/influxdb.git \
 &&  cd influxdb && git checkout v${VERSION} \
-&&  wget $PATCH_URL/influxdb.diff \
-&&  git apply influxdb.diff \
 &&  export NODE_OPTIONS=--max_old_space_size=4096 \
 &&  make
 
