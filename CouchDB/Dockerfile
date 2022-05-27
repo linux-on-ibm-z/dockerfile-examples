@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for CouchDB version 3.2.1 ############
+############### Dockerfile for CouchDB version 3.2.2 ############
 #
 # CouchDB, is open source database software.
 #
@@ -20,7 +20,7 @@
 
 # Base image
 FROM s390x/ubuntu:18.04 AS builder
-ARG COUCHDB_VER=3.2.1
+ARG COUCHDB_VER=3.2.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -39,10 +39,10 @@ RUN apt-get update \
  && ln -s /usr/bin/gcc /usr/bin/cc \
 # Download and Install Erlang
  && cd $SOURCE_ROOT \
- && wget http://www.erlang.org/download/otp_src_24.1.tar.gz \
- && tar zxf otp_src_24.1.tar.gz && rm otp_src_24.1.tar.gz \
- && cd otp_src_24.1 \
- && export ERL_TOP=$SOURCE_ROOT/otp_src_24.1 \
+ && wget http://www.erlang.org/download/otp_src_24.2.tar.gz \
+ && tar zxf otp_src_24.2.tar.gz && rm otp_src_24.2.tar.gz \
+ && cd otp_src_24.2 \
+ && export ERL_TOP=$SOURCE_ROOT/otp_src_24.2 \
  && ./configure --prefix=/usr \
  && make \
  && make install \
@@ -194,7 +194,7 @@ RUN set -xe; \
     rm -rf "$GNUPGHOME"; \
     apt-key list
 
-ENV COUCHDB_VERSION 3.2.1
+ENV COUCHDB_VERSION 3.2.2
 
 # https://github.com/apache/couchdb-pkg/blob/master/debian/README.Debian
 RUN set -xe; \
