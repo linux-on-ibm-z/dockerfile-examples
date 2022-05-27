@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for RethinkDB 2.4.1 ############################################
+############################ Dockerfile for RethinkDB 2.4.2 ############################################
 #
 # This Dockerfile builds a basic installation of RethinkDB
 #
@@ -25,92 +25,45 @@ FROM s390x/ubuntu:18.04
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 ENV SOURCE_ROOT=/tmp/source
 WORKDIR $SOURCE_ROOT
-RUN apt-get update -y && apt-get install -y \ 
-clang \
-build-essential \
+RUN apt-get update -y && apt-get install -y \
+protobuf-compiler \
 python \
+libprotobuf-dev \
+curl \
 libcurl4-openssl-dev \
-libboost-all-dev \
 libncurses5-dev \
+libjemalloc-dev \
 wget \
 m4 \
-libssl-dev \
+g++ \
 git \
-curl \
-python3-pip \
-
-#Install httplib2
-&& pip3 install httplib2 \
-
-#Install gcc-5.4.0
-&& cd $SOURCE_ROOT \
-&& mkdir gcc \
-&& cd gcc \
-&& wget https://ftp.gnu.org/gnu/gcc/gcc-5.4.0/gcc-5.4.0.tar.gz \
-&& tar -xzf gcc-5.4.0.tar.gz \
-&& cd gcc-5.4.0/ \
-&& ./contrib/download_prerequisites \
-&& mkdir objdir \
-&& cd objdir \
-&& ../configure --prefix=/opt/gcc --enable-languages=c,c++ --with-arch=zEC12 --with-long-double-128 \
-  	   --build=s390x-linux-gnu --host=s390x-linux-gnu --target=s390x-linux-gnu                  \
-  	   --enable-threads=posix --with-system-zlib --disable-multilib \
-&& make -j 8 \
-&& make install \
-&& ln -sf /opt/gcc/bin/gcc /usr/bin/gcc \
-&& ln -sf /opt/gcc/bin/g++ /usr/bin/g++ \
-&& ln -sf /opt/gcc/bin/g++ /usr/bin/c++ \
-&& export PATH=/opt/gcc/bin:"$PATH" \
-&& export LD_LIBRARY_PATH=/opt/gcc/lib64:"$LD_LIBRARY_PATH" \
-&& export C_INCLUDE_PATH=/opt/gcc/lib/gcc/s390x-linux-gnu/5.4.0/include \
-&& export CPLUS_INCLUDE_PATH=/opt/gcc/lib/gcc/s390x-linux-gnu/5.4.0/include \
-
-#Install Protobuf 2.6.0 
-&& cd $SOURCE_ROOT \
-&& wget https://github.com/google/protobuf/releases/download/v2.6.0/protobuf-2.6.0.tar.gz \
-&& tar zxvf protobuf-2.6.0.tar.gz \
-&& cd protobuf-2.6.0 \
-&& sed -i '/elif defined(GOOGLE_PROTOBUF_ARCH_MIPS)/i #elif defined(GOOGLE_PROTOBUF_ARCH_S390)' src/google/protobuf/stubs/atomicops.h \
-&& sed -i '/elif defined(GOOGLE_PROTOBUF_ARCH_MIPS)/i #include <google/protobuf/stubs/atomicops_internals_generic_gcc.h>' src/google/protobuf/stubs/atomicops.h \
-&& sed -i '/#define GOOGLE_PROTOBUF_ARCH_64_BIT 1/a #elif defined(__s390x__)' src/google/protobuf/stubs/platform_macros.h \
-&& sed -i '/#elif defined(__s390x__)/a #define GOOGLE_PROTOBUF_ARCH_S390 1' src/google/protobuf/stubs/platform_macros.h \
-&& sed -i '/#define GOOGLE_PROTOBUF_ARCH_S390/a #define GOOGLE_PROTOBUF_ARCH_64_BIT 1' src/google/protobuf/stubs/platform_macros.h \
-&& ./configure \
-&& make \
-&& make install \
-&& export LD_LIBRARY_PATH=/usr/local/lib \
-&& protoc --version \
+make \
+libssl-dev \
+tar \
+bzip2 \
+patch \
 #Clone and build RethinkDB
-&& export VPYTHON_BYPASS="manually managed python not supported by chrome operations" \
 && cd $SOURCE_ROOT \
 && git clone https://github.com/rethinkdb/rethinkdb \
 && cd rethinkdb/ \
-&& git checkout v2.4.1 \
-
-#Apply the patches in mk/support/pkg/v8.sh
-&& export PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/RethinkDB/2.4.1/patch \
-&& curl -o v8_ubuntu.patch $PATCH_URL/v8_ubuntu.patch \
-&& patch mk/support/pkg/v8.sh v8_ubuntu.patch \
- 
-
+&& git checkout v2.4.2 \
 && ./configure --allow-fetch \ 
-&& make -j 4 \ 
-
+&& make -j4 \ 
 #Install RethinkDB
 && make install \
-
 # Clean up cache data and remove dependencies that are not required
 && apt-get remove -y \
-    build-essential \
-    git \
-    make \
-    m4 \
-    protobuf-compiler \
-    python \
-    wget \
-    python3-pip \
- && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*  /$SOURCE_ROOT
+git \
+curl \
+m4 \
+wget \
+make \
+bzip2 \
+g++ \
+python \
+protobuf-compiler \
+&& apt autoremove -y \
+&& apt-get clean && rm -rf /var/lib/apt/lists/*  $SOURCE_ROOT
 
 VOLUME ["/data"]
 
