@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Sysdig version 0.28.0 #########
+########## Dockerfile for Sysdig version 0.29.3 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -17,7 +17,7 @@
 # To guarantee a smooth deployment, the kernel headers must be installed in the host operating system, before running sysdig.
 #
 # To run sysdig in a Docker container use below command
-#  docker run -it --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v
+#  docker run -it --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/dev -v /proc:/host/proc:ro -v
 #   /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:rw -v /usr:/host/usr:ro --name <container_name> <image_name>
 #
 # The official website
@@ -27,10 +27,10 @@
 # Base Image
 FROM s390x/ubuntu:18.04
 
-ARG SYSDIG_VER=0.28.0
+ARG SYSDIG_VER=0.29.3
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-LABEL RUN="docker run -i -t --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:rw -v /usr:/host/usr:ro --name NAME IMAGE"
+LABEL RUN="docker run -i -t --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:rw -v /usr:/host/usr:ro --name NAME IMAGE"
 
 ENV SYSDIG_HOST_ROOT /host
 
@@ -45,7 +45,10 @@ WORKDIR $SOURCE_ROOT
 # Install dependencies
 RUN apt-get update \
         && apt-get install -y git cmake build-essential pkg-config autoconf \
-        wget patch kmod curl libtool libelf-dev linux-headers-$(uname -r) dkms
+        wget curl patch libtool libelf-dev linux-headers-$(uname -r) kmod dkms \
+        libz-dev libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext gcc \
+        libgrpc++-dev protobuf-compiler-grpc libprotobuf-dev
+        
 # Download source code
 RUN cd $SOURCE_ROOT \
         && git clone https://github.com/draios/sysdig.git \
@@ -54,18 +57,15 @@ RUN cd $SOURCE_ROOT \
         && mkdir build \
 # Configure Sysdig
         && cd build \
-        && cmake .. -DSYSDIG_VERSION=${SYSDIG_VER} \
+        && cmake -DUSE_BUNDLED_PROTOBUF=Off -DUSE_BUNDLED_GRPC=Off \
+                -DSYSDIG_VERSION=${SYSDIG_VER} .. \
 # Build and Install Sysdig
-        && cd $SOURCE_ROOT/sysdig/build/falcosecurity-libs-repo/falcosecurity-libs-prefix/src/falcosecurity-libs/cmake/modules \
-        && sed -i 's+http://download.sysdig.com/dependencies/protobuf-cpp-3.5.0.tar.gz+https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protobuf-cpp-3.13.0.tar.gz+g' protobuf.cmake \
-        && sed -i 's/e4ba8284a407712168593e79e6555eb2/6425d7466db2efe5a80de1e38899f317/g' protobuf.cmake \
-        && sed -i 's/PATCH_COMMAND wget http/#PATCH_COMMAND wget http/g' protobuf.cmake \
-        && cd $SOURCE_ROOT/sysdig/build/ \
         && make \
         && make install \
 # Copy important content from build
-        #&& cp $SOURCE_ROOT/sysdig/build/driver/scap.ko $HOME \
+        && cp $SOURCE_ROOT/sysdig/build/driver/scap.ko $HOME \
         && cp -r /usr/local/bin/sysdig* /usr/bin/ \
+        && cp -r /usr/local/bin/csysdig /usr/bin/ \
         && cp -r /usr/local/bin/scap-driver-loader /usr/bin/ \
         && mkdir -p /usr/src/sysdig-${SYSDIG_VER} \
         && cp $SOURCE_ROOT/sysdig/build/driver/src/* /usr/src/sysdig-${SYSDIG_VER}/
