@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 7.16.3 #############################
+#################### Dockerfile for Beats 8.2.2 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -28,20 +28,21 @@
 ###########################################################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04 AS builder
+FROM s390x/ubuntu:20.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BEATS_VER=7.16.3
-
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Beats/${BEATS_VER}/patch"
+ARG BEATS_VER=8.2.2
 
 # Set environment variable
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH=$SOURCE_DIR
 ENV PATH=$PATH:/usr/local/go/bin/:$GOPATH/bin:/usr/local/bin
+ENV GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=true
+ENV PYTHON_EXE=python3
+ENV PYTHON_ENV=/tmp/venv3
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -51,6 +52,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     tar \
     gcc \
+    g++ \
     libcap-dev \
     libpcap0.8-dev \
     openssl \
@@ -68,6 +70,7 @@ RUN apt-get update && apt-get install -y \
     python3.8-venv \
     python3-lib2to3 \
     python3.8-distutils \
+    python3-testresources \
 # Install go and download beats source code
  && /usr/bin/update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 10 \
  && /usr/bin/update-alternatives --set python3 /usr/bin/python3.8 \
@@ -82,19 +85,15 @@ RUN apt-get update && apt-get install -y \
  && export PATH=$PATH:$HOME/.cargo/bin \
  && rustup toolchain install 1.49.0 \
  &&	rustup default 1.49.0 \
- && python3 -m pip install appdirs pyparsing packaging setuptools wheel PyYAML termcolor ordereddict nose-timer MarkupSafe virtualenv pillow \
- && wget https://go.dev/dl/go1.17.6.linux-s390x.tar.gz \
- && chmod ugo+r go1.17.6.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.17.6.linux-s390x.tar.gz \
+ && wget https://go.dev/dl/go1.17.9.linux-s390x.tar.gz \
+ && chmod ugo+r go1.17.9.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.17.9.linux-s390x.tar.gz \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
  && git clone https://github.com/elastic/beats.git  \
  && cd beats  \
  && git checkout v${BEATS_VER}  \
-# Patching Beats dir
- && wget ${PATCH_URL}/beats.patch \
- && git apply --ignore-whitespace beats.patch \
 # Building heartbeat
  && cd $GOPATH/src/github.com/elastic/beats/heartbeat  \
  && make heartbeat \
@@ -115,11 +114,6 @@ RUN apt-get update && apt-get install -y \
  && mage build \
  && mage update \
  && mage fmt \
-# Building libbeat
- && cd $GOPATH/src/github.com/elastic/beats/libbeat  \
- && make libbeat \
- && make update \
- && make fmt \
 # Building auditbeat
  && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
  && make auditbeat \
@@ -132,7 +126,7 @@ RUN chmod +x $SOURCE_DIR/directory-setup.sh \
  && $SOURCE_DIR/directory-setup.sh
 
 
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:20.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
