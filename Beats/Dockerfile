@@ -144,7 +144,7 @@ RUN chmod 755 /usr/local/bin/docker-entrypoint
 COPY --from=builder /usr/share/beats /usr/share/beats
 
 RUN groupadd --gid 1000 beats \
- && useradd -M --uid 1000 --gid 1000 --groups sudo --home /usr/share/beats beats \
+ && useradd -M --uid 1000 --gid 1000 --groups 0 --home /usr/share/beats beats \
  && passwd -d beats
 
 USER beats
