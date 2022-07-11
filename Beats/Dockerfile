@@ -1,31 +1,15 @@
 # © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Beats 8.2.2 #############################
+#################### Dockerfile for Auditbeat 8.2.2 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
 # docker build -t <image_name> .
 #
-# To create a container of Beats image run the below command:
-# docker run --name <container_name> -it <image_name> /bin/bash
-#
-# The following beats are present: heartbeat, filebeat, metricbeat, packetbeat, auditbeat, journalbeat
-# To run:
-# docker run --name <container_name> -e BEATNAME=<beat_name> -d <image_name> <flag/command>
-#
-# For example, run the following command for heartbeat:
-# docker run --name <container_name> -e BEATNAME=heartbeat -d <image_name> help
-#
-# To configure beat, provide "<beat_name>.docker.yml" via a volume mount to /usr/share/beats, for example:
-# docker run --name <container_name> --user=beats --volume="$(pwd)/heartbeat.docker.yml:/usr/share/beats/heartbeat.yml:ro" -e BEATNAME=heartbeat -d <image_name> <flag/command>
-#
-# Note : To run auditbeat use options : --cap-add=AUDIT_CONTROL --cap-add=AUDIT_READ --pid=host to docker run
-# docker run --cap-add=AUDIT_CONTROL --cap-add=AUDIT_READ --pid=host --name <container_name> -e BEATNAME=auditbeat -d <image_name> <flag/command>
-#
-# For more information, see "Run <beat_name> on Docker" guide available at https://www.elastic.co/guide/index.html
-###########################################################################################################
+# To run, see "Run Auditbeat on Docker" guide available at https://www.elastic.co/guide/en/beats/auditbeat/current/running-on-docker.html
+#################################################################################
 
 # Base image
 FROM s390x/ubuntu:20.04 AS builder
@@ -36,6 +20,8 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 ARG BEATS_VER=8.2.2
 
 # Set environment variable
+ENV BEATNAME=auditbeat
+ENV BEATHOME=/usr/share/$BEATNAME
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH=$SOURCE_DIR
@@ -94,44 +80,36 @@ RUN apt-get update && apt-get install -y \
  && git clone https://github.com/elastic/beats.git  \
  && cd beats  \
  && git checkout v${BEATS_VER}  \
-# Building heartbeat
- && cd $GOPATH/src/github.com/elastic/beats/heartbeat  \
- && make heartbeat \
- && make update \
- && make fmt \
-# Building filebeat
- && cd $GOPATH/src/github.com/elastic/beats/filebeat  \
- && make filebeat \
- && make update \
- && make fmt \
-# Building packetbeat
- && cd $GOPATH/src/github.com/elastic/beats/packetbeat  \
- && make packetbeat \
- && make update \
- && make fmt \
-# Building metricbeat
- && cd $GOPATH/src/github.com/elastic/beats/metricbeat \
- && mage build \
- && mage update \
- && mage fmt \
 # Building auditbeat
- && cd $GOPATH/src/github.com/elastic/beats/auditbeat \
- && make auditbeat \
+ && cd $GOPATH/src/github.com/elastic/beats/${BEATNAME} \
+ && make \
  && make update \
  && make fmt
 
 # Setup directory layout
-COPY directory-setup.sh $SOURCE_DIR
-RUN chmod +x $SOURCE_DIR/directory-setup.sh \
- && $SOURCE_DIR/directory-setup.sh
-
+RUN mkdir -p $BEATHOME \
+ && cp $GOPATH/src/github.com/elastic/beats/${BEATNAME}/${BEATNAME} $BEATHOME \
+ && cp $GOPATH/src/github.com/elastic/beats/${BEATNAME}/${BEATNAME}.yml $BEATHOME \
+ && cp $GOPATH/src/github.com/elastic/beats/${BEATNAME}/${BEATNAME}.reference.yml $BEATHOME \
+ && cp $GOPATH/src/github.com/elastic/beats/${BEATNAME}/build/fields/fields.all.yml $BEATHOME/fields.yml \
+ && mkdir -p $BEATHOME/audit.rules.d \
+ && cp $GOPATH/src/github.com/elastic/beats/${BEATNAME}/module/auditd/_meta/audit.rules.d/sample-rules-linux-64bit.conf $BEATHOME/audit.rules.d/sample-rules.conf.disabled \
+ && cp -r $GOPATH/src/github.com/elastic/beats/${BEATNAME}/build/kibana $BEATHOME \
+ && mkdir -p $BEATHOME/data $BEATHOME/logs \
+ && chown -R root:root $BEATHOME \
+ && find $BEATHOME -type d -exec chmod 0755 {} \; \
+ && find $BEATHOME -type f -exec chmod 0644 {} \; \
+ && chmod 0775 $BEATHOME/data $BEATHOME/logs \
+ && chmod 0755 $BEATHOME/$BEATNAME
 
 FROM s390x/ubuntu:20.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV ELASTIC_CONTAINER "true"
-ENV PATH=/usr/share/beats:$PATH
+ENV BEATNAME=auditbeat
+ENV BEATHOME=/usr/share/$BEATNAME
+ENV PATH=$BEATHOME:$PATH
 
 RUN apt-get update && apt-get install -y libpcap0.8 curl sudo \
  && curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/v0.19.0/tini-s390x" \
@@ -141,18 +119,17 @@ RUN apt-get update && apt-get install -y libpcap0.8 curl sudo \
 COPY docker-entrypoint /usr/local/bin/docker-entrypoint
 RUN chmod 755 /usr/local/bin/docker-entrypoint
 
-COPY --from=builder /usr/share/beats /usr/share/beats
+COPY --from=builder /usr/share/$BEATNAME /usr/share/$BEATNAME
 
-RUN groupadd --gid 1000 beats \
- && useradd -M --uid 1000 --gid 1000 --groups 0 --home /usr/share/beats beats \
- && passwd -d beats
+RUN groupadd --gid 1000 $BEATNAME \
+ && useradd -M --uid 1000 --gid 1000 --groups 0 --home /usr/share/$BEATHOME $BEATNAME \
+ && passwd -d $BEATNAME
 
-USER beats
+#USER $BEATNAME
 
 ENV LIBBEAT_MONITORING_CGROUPS_HIERARCHY_OVERRIDE=/
-ENV BEATNAME="filebeat"
 
-WORKDIR /usr/share/beats
+WORKDIR $BEATHOME
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-entrypoint"]
 CMD ["-environment", "container"]
 
