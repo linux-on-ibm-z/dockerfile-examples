@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 9.4 ##############################
+################################ Dockerfile for SonarQube 9.5 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -44,7 +44,7 @@ RUN set -eux; \
 #
 # SonarQube setup
 #
-ARG SONARQUBE_VERSION=9.4.0.54424
+ARG SONARQUBE_VERSION=9.5.0.56709
 ARG SONARQUBE_ZIP_URL=https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-${SONARQUBE_VERSION}.zip
 ENV JAVA_HOME=/opt/java/openjdk \
     PATH="/opt/java/openjdk/bin:$PATH" \
