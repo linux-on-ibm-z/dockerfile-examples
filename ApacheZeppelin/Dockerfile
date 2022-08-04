@@ -60,13 +60,12 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     apt-add-repository universe && \
     apt-get -y update && \
     apt-get install -y python3 python3-dev python3-pip python-is-python3 && \
-    python -m pip install --upgrade pip && \
     apt-get install -y bzip2 ca-certificates \
-    libglib2.0-0 libxext6 libsm6 libxrender1 \
+    libglib2.0-0 libxext6 libsm6 libxrender1 libssl-dev \
     git mercurial subversion cmake && \
     apt-get install -y gfortran && \
     # numerical/algebra packages
-    apt-get install -y libblas-dev libatlas-base-dev  liblapack-dev && \
+    apt-get install -y libblas-dev libatlas-base-dev  liblapack-dev libopenblas-dev && \
     # font, image
     apt-get install -y libpng-dev libfreetype6-dev libxft-dev libjpeg-dev && \
     # for matplotlib
@@ -91,7 +90,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     python -m pip install -q 'ipython==7.*' && \
     python -m pip install -q 'ipykernel==5.*' && \
     python -m pip install -q 'jupyter_client==5.*' && \
-    python -m pip install -q 'bokeh==2.3.*' && \
+    python -m pip install -q 'bokeh==2.4.*' && \
     python -m pip install -q panel && \
     python -m pip install -q holoviews && \
     python -m pip install -q 'pyyaml==3.*' && \
@@ -100,7 +99,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     python -m pip install -q intake && \
     python -m pip install -q altair && \
     echo "$LOG_TAG Install R related packages" && \
-    apt-get -y --allow-unauthenticated install r-base r-base-dev libzmq3-dev libgit2-dev && \
+    apt-get -y --allow-unauthenticated install r-base r-base-dev libzmq3-dev libgit2-dev r-cran-devtools && \
     R -e "install.packages('evaluate', repos = 'https://cloud.r-project.org')" && \
     R -e "install.packages('knitr', repos='http://cran.us.r-project.org')" && \
     R -e "install.packages('ggplot2', repos='http://cran.us.r-project.org')" && \
@@ -109,7 +108,6 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     R -e "install.packages('IRkernel', repos = 'https://cloud.r-project.org');IRkernel::installspec(user = FALSE)" && \
     R -e "install.packages('shiny', repos = 'https://cloud.r-project.org')" && \
     echo "$LOG_TAG Install R related packages2" && \
-    R -e "install.packages('devtools', repos='http://cran.us.r-project.org')" && \
     R -e "install.packages('Rcpp', repos='http://cran.us.r-project.org')" && \
     Rscript -e "library('devtools'); library('Rcpp'); install_github('ramnathv/rCharts')" && \
     echo "$LOG_TAG Cleanup" && \
