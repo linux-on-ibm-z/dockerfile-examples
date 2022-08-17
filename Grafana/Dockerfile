@@ -1,7 +1,7 @@
-# Copyright IBM Corporation 2017, 2021.
+# Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 8.2.3 ############################################
+############################ Dockerfile for Grafana 9.0.5 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -21,9 +21,9 @@
 ARG BASE_IMAGE=s390x/ubuntu:20.04
 FROM ${BASE_IMAGE} AS builder
 
-ARG GRAFANA_VER=8.2.3
-ARG NODE_JS_VERSION=16.8.0
-ARG GO_VERSION=1.17.1
+ARG GRAFANA_VER=9.0.5
+ARG NODE_JS_VERSION=16.14.0
+ARG GO_VERSION=1.17.2
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -47,17 +47,21 @@ RUN apt-get update -y && apt-get install -y \
  && wget https://nodejs.org/dist/v${NODE_JS_VERSION}/node-v${NODE_JS_VERSION}-linux-s390x.tar.xz \
  && chmod ugo+r node-v${NODE_JS_VERSION}-linux-s390x.tar.xz \
  && tar -C /usr/local -xf node-v${NODE_JS_VERSION}-linux-s390x.tar.xz \
+ # Install yarn
+ && chmod ugo+w -R /usr/local/node-v${NODE_JS_VERSION}-linux-s390x/ \
+ && npm install -g yarn \
+ && yarn set version canary \
 # Get the Grafana Soure code and build Grafana backend
- && git clone https://github.com/grafana/grafana.git $GOPATH/src/github.com/grafana/grafana \
- && cd $GOPATH/src/github.com/grafana/grafana && git checkout v${GRAFANA_VER} \
+ && git clone https://github.com/grafana/grafana.git \
+ && cd grafana && git checkout v${GRAFANA_VER} \
+ && wget -O yarnrc.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Grafana/9.0.5/patch/yarnrc.patch \
+ &&	git apply yarnrc.patch \
  && make gen-go \
  && make deps-go \
  && make build-go \
-# Install yarn
- && npm install -g yarn \
 # Build frontend and edit configuration
- && cd $GOPATH/src/github.com/grafana/grafana \
- && make deps-js \
+ && cd $GOPATH/grafana \
+ && yarn install \
  && export NODE_OPTIONS="--max-old-space-size=8192" \
  && make build-js
 
@@ -67,13 +71,13 @@ FROM ${BASE_IMAGE}
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV BASE=/opt/src/github.com/grafana
+ENV BASE=/opt
 ENV PATH=$PATH:/usr/share/nodejs/bin
 # Set DEBIAN_FRONTEND=noninteractive in environment at build-time
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GF_UID="472"
 ARG GF_GID="472"
-ARG NODE_JS_VERSION=16.8.0
+ARG NODE_JS_VERSION=16.14.0
 
 ENV PATH=/usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     GF_PATHS_CONFIG="/etc/grafana/grafana.ini" \
