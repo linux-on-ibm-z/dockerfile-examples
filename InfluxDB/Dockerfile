@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2022
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for InfluxDB 2.2.0 ############################s
+#################### Dockerfile for InfluxDB 2.4.0 ############################s
 #
 # Builds InfluxDB
 #
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:20.04 as builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Environment
-ARG VERSION=2.2.0
+ARG VERSION=2.4.0
 ENV DEBIAN_FRONTEND noninteractive
 ENV SOURCE_ROOT=/tmp
 ENV GOPATH=$HOME/go
@@ -46,12 +46,12 @@ RUN apt-get update \
 &&  export PATH="$HOME/.cargo/bin:$PATH" \
 &&  rustup default 1.53.0 \
 ### Install Go ##########################################
-&&  wget https://golang.org/dl/go1.17.3.linux-s390x.tar.gz \
-&&  tar -C /usr/local -xzf go1.17.3.linux-s390x.tar.gz \
+&&  wget https://golang.org/dl/go1.18.4.linux-s390x.tar.gz \
+&&  tar -C /usr/local -xzf go1.18.4.linux-s390x.tar.gz \
 &&  export PATH=/usr/local/go/bin:$PATH \
 ### Build InfluxDB ###########################################
 &&  export GO111MODULE=on \
-&&  go get github.com/influxdata/pkg-config \
+&&  go install github.com/influxdata/pkg-config@v0.2.11 \
 &&  git clone https://github.com/influxdata/influxdb.git \
 &&  cd influxdb && git checkout v${VERSION} \
 &&  export NODE_OPTIONS=--max_old_space_size=4096 \
