@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2019, 2021.
+# © Copyright IBM Corporation 2019, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for ScyllaDB version 4.4.1 #########
+########## Dockerfile for ScyllaDB version 5.0.0 #########
 #
 # This Dockerfile builds a basic installation of ScyllaDB.
 #
@@ -32,7 +32,7 @@
 #######################################################################
 
 # Base Image
-FROM ubuntu:18.04 AS builder
+FROM ubuntu:20.04 AS builder
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -41,13 +41,13 @@ ENV PATH=/usr/local/bin:/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/lib64:/usr/local/lib:/usr/lib64:$LD_LIBRARY_PATH
 ENV LD_RUN_PATH=/usr/local/lib64:/usr/local/lib:/usr/lib64:$LD_RUN_PATH
 ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
-ENV CC=/usr/local/bin/gcc
-ENV CXX=/usr/local/bin/g++
+ENV CC=clang-14
+ENV CXX=clang++-14
 ENV ver=1.0
 ENV URL=https
 ENV LC_ALL=C
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/4.4.1/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/5.0.0/patch/"
 
 ARG TARGET=native
 
@@ -75,21 +75,22 @@ RUN apt-get update \
     pigz ragel rapidjson-dev stow patch locales valgrind libudev-dev \
     net-tools ethtool gnutls-bin patchelf util-linux \
     gawk gzip \
-# packaging scripts expect lsblk to be in /usr/bin/
-  && ln -s /bin/lsblk /usr/bin/ \
 #######################################################################
-  && ver=2.36 \
+  && ver=2.38 \
   && cd "$SOURCE_ROOT" \
   && URL="http://ftpmirror.gnu.org/binutils/binutils-${ver}.tar.gz" \
   && curl -sSL $URL | tar xzf - \
   && cd binutils-${ver} \
   && mkdir objdir \
   && cd objdir \
-  && CC=/usr/bin/gcc ../configure --prefix=/usr/local --build=s390x-linux-gnu \
+  && CC=/usr/bin/gcc ../configure --prefix=/usr --build=s390x-linux-gnu \
   && make -j 8 \
   && make install \
+  && rm /usr/bin/s390x-linux-gnu-ld /usr/bin/s390x-linux-gnu-ld.bfd \
+  && ln -s /usr/bin/ld /usr/bin/s390x-linux-gnu-ld \
+  && ln -s /usr/bin/ld.bfd /usr/bin/s390x-linux-gnu-ld.bfd \
 #######################################################################
-  && ver=10.2.0 \
+  && ver=12.1.0 \
   && cd "$SOURCE_ROOT" \
   && URL="https://ftp.gnu.org/gnu/gcc/gcc-${ver}/gcc-${ver}.tar.gz" \
   && curl -sSL $URL | tar xzf - \
@@ -100,11 +101,14 @@ RUN apt-get update \
   && CC=/usr/bin/gcc CXX=/usr/bin/g++ ../configure --enable-languages=c,c++ --prefix=/usr/local \
     --enable-shared --enable-threads=posix \
     --disable-multilib --disable-libmpx \
-    --with-system-zlib --with-long-double-128 --with-arch=zEC12 \
+    --with-system-zlib --with-long-double-128 --with-arch=z14 \
     --disable-libphobos --disable-werror \
     --build=s390x-linux-gnu --host=s390x-linux-gnu --target=s390x-linux-gnu \
   && make -j 8 bootstrap \
   && make install \
+  && ln -s /usr/local/lib/gcc/s390x-linux-gnu/${ver} /usr/lib/gcc/s390x-linux-gnu/${ver} \
+#######################################################################
+  && curl -sSL https://apt.llvm.org/llvm.sh | bash -s 14 \ 
 #######################################################################
   && ver=3.8.6 \
   && cd "$SOURCE_ROOT" \
@@ -218,27 +222,31 @@ RUN apt-get update \
   && ./configure \
   && make install \
 #######################################################################
+  && ver=3.19.0 \
+  && cd "$SOURCE_ROOT" \
+  && URL=https://sourceware.org/pub/valgrind/valgrind-${ver}.tar.bz2 \
+  && curl -sSL $URL | tar -xj || error "Valgrind $ver" \
+  && cd valgrind-${ver} \
+  && ./configure CC=gcc CXX=g++ \
+  && make \
+  && make install \
+#######################################################################
   && cd "$SOURCE_ROOT" \
   && git clone https://github.com/scylladb/scylla.git \
   && cd scylla \
-  && git checkout scylla-4.4.1 \
+  && git checkout scylla-5.0.0 \
   && git submodule update --init --force --recursive \
   && curl -sSL ${PATCH_URL}/seastar.diff | patch -d seastar -p1 \
   && curl -sSL ${PATCH_URL}/scylla.diff | patch -p1  \
   && sed -i 's/boost\/function_output_iterator\.hpp/boost\/iterator\/function_output_iterator\.hpp/g' \
     /usr/local/include/boost/signals2/detail/null_output_iterator.hpp \
   && ./configure.py --mode=release --target=${TARGET} --debuginfo=0 \
-  --cflags="-I/usr/local/include -I/usr/local/include/boost -L/usr/local/lib -L/usr/local/lib64 -fcoroutines " \
-    --ldflags="-Wl,--build-id=sha1" --static-thrift \
+  --cflags="-I/usr/local/include -I/usr/local/include/boost" \
     --compiler="${CXX}" --c-compiler="${CC}"\
   && ninja build -j 2 \
   && mkdir -p /opt/scylladb/dependencies/ \
   && (cd /opt/scylladb/dependencies/ && curl -L -O https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-s390x.tar.gz) \
   && ln -s /usr/local/bin/hwloc-* /usr/bin/ \
-  && ln -s /bin/gzip /usr/bin/gzip \
-  && ln -s /sbin/ifconfig /usr/sbin/ifconfig \
-  && ln -s /sbin/ethtool /usr/sbin/ethtool \
-  && ln -s /bin/netstat /usr/bin/netstat \
   && mkdir -p /lib64 \
   && ln -s /lib/s390x-linux-gnu/libthread_db-1.0.so /lib64/libthread_db-1.0.so \
   && mkdir -p /etc/crypto-policies/back-ends \
@@ -258,6 +266,8 @@ RUN apt-get update \
       $SOURCE_ROOT/binutils-* \
       $SOURCE_ROOT/gcc-* \
       $SOURCE_ROOT/hwloc-* \
+      $SOURCE_ROOT/xxHash-* \
+      $SOURCE_ROOT/valgrind-* \
       $HOME/.m2 $HOME/.cache \
   && apt-get autoremove -y \
   && apt-get clean \
@@ -265,7 +275,7 @@ RUN apt-get update \
 
 
 #######################################################################
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -277,10 +287,10 @@ ENV SOURCE_ROOT=/tmp/source
 WORKDIR $SOURCE_ROOT
 
 
-COPY --from=builder $SOURCE_ROOT/scylla/build/release/dist/tar/scylla-package.tar.gz $SOURCE_ROOT/
+COPY --from=builder $SOURCE_ROOT/scylla/build/release/dist/tar/scylla-s390x-package.tar.gz $SOURCE_ROOT/
 
 RUN mkdir -p $PREFIX && cd $PREFIX \
-    && tar xzf $SOURCE_ROOT/scylla-package.tar.gz \
+    && tar xzf $SOURCE_ROOT/scylla-s390x-package.tar.gz \
     && rm -rf $SOURCE_ROOT
 
 WORKDIR /root
@@ -291,3 +301,4 @@ CMD ["/opt/scylladb/scylla/libexec/scylla", \
      "--max-io-requests", "65"]
 
 # End of Dockerfile
+
