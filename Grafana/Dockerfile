@@ -56,7 +56,7 @@ RUN apt-get update -y && apt-get install -y \
 # Get the Grafana Soure code and build Grafana backend
  && git clone https://github.com/grafana/grafana.git \
  && cd grafana && git checkout v${GRAFANA_VER} \
- && wget -O yarnrc.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Grafana/9.0.5/patch/yarnrc.patch \
+ && wget -O yarnrc.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Grafana/${GRAFANA_VER}/patch/yarnrc.patch \
  &&	git apply yarnrc.patch \
  && make gen-go \
  && make deps-go \
