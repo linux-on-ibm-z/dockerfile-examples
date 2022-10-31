@@ -1,83 +1,81 @@
 # © Copyright IBM Corporation 2020, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for CockroachDB version 21.2.6 ####################################
+#################################### Dockerfile for CockroachDB version 22.1.7 ####################################
 #
 # To build CockroachDB image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
 # docker build -t <image_name> .
 #
-# To start a single node CockroachDB server for testing run the below command
-# docker run --name <container_name> -p <port_number>:26257 -p <port_number>:8080 -d <image_name> start-single-node --insecure
-#
-#
-# To see the UI, go to http://<hostname>:<port_number>/ on web browser.
-# For more information to setup cluster, visit https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html
+# For more information to setup cluster, visit
+# https://www.cockroachlabs.com/docs/stable/start-a-local-cluster-in-docker-linux.html
 #
 ####################################################################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04 AS builder
+FROM s390x/ubuntu:20.04 AS builder
 
 # CockroachDB version
-ARG CRDB_VER=21.2.6
+ARG CRDB_VER=22.1.7
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Set PATH
 ENV SOURCE_DIR=/root
-ENV PATH=/usr/local/node-v12.20.1-linux-s390x/bin:/usr/local/go/bin:$PATH GOPATH=$WORKDIR
+ENV PATH=$PATH:$SOURCE_DIR/dist/bazel/output/
 
 WORKDIR $SOURCE_DIR
 
 # Install following build dependencies
 RUN apt-get update \
-&& apt-get install -y autoconf automake wget make libssl-dev libncurses5-dev bison xz-utils patch g++ curl git ccache python \
-# Install Golang
+&& DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y autoconf automake wget make \
+libssl-dev libncurses5-dev bison xz-utils patch g++ curl git python libresolv-wrapper sudo tzdata \
+# Install CMake
 && cd $SOURCE_DIR \
-&& wget https://storage.googleapis.com/golang/go1.16.6.linux-s390x.tar.gz \
-&& tar -C /usr/local -xzf go1.16.6.linux-s390x.tar.gz \
-# Install Nodejs and yarn
-&& wget https://nodejs.org/dist/v12.20.1/node-v12.20.1-linux-s390x.tar.xz \
-&& chmod ugo+r node-v12.20.1-linux-s390x.tar.xz \
-&& tar -C /usr/local -xf node-v12.20.1-linux-s390x.tar.xz \
-&& env PATH=$PATH npm install -g yarn \
-# Install Cmake
-&& cd $SOURCE_DIR \
-&& wget https://github.com/Kitware/CMake/releases/download/v3.20.3/cmake-3.20.3.tar.gz \
-&& tar -xvzf cmake-3.20.3.tar.gz \
-&& cd cmake-3.20.3 \
+&& wget https://github.com/Kitware/CMake/releases/download/v3.23.3/cmake-3.23.3.tar.gz \
+&& tar -xzf cmake-3.23.3.tar.gz \
+&& cd cmake-3.23.3 \
 && ./bootstrap \
 && make \
 && make install \
+# Install Bazel
+&& wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/5.1.1/build_bazel.sh \
+&& bash build_bazel.sh -y \
 # Download and Install CockroachDB
 && cd $SOURCE_DIR \
-&& mkdir -p $(go env GOPATH)/src/github.com/cockroachdb \
-&& cd $(go env GOPATH)/src/github.com/cockroachdb \
 && git clone https://github.com/cockroachdb/cockroach \
 && cd cockroach \
 && git checkout v$CRDB_VER \
 && git submodule update --init --recursive \
-&& curl -sSL https://github.com/apache/arrow/commit/aca707086160afd92da62aa2f9537a284528e48a.patch | git apply --directory=vendor/github.com/apache/arrow --exclude '**/array/bufferbuilder_numeric_test.go' - \
-&& make build \
-&& make install \
+&& wget -O $SOURCE_DIR/cockroachdb.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CockroachDB/$CRDB_VER/patch/crdb.patch \
+&& git apply --reject --whitespace=fix $SOURCE_DIR/cockroachdb.patch \
+&& cd $SOURCE_DIR/cockroach \
+&& echo 'build --remote_cache=http://127.0.0.1:9867' > ~/.bazelrc \
+&& printf 'build --config=dev \nbuild --config nolintonbuild\n' >> .bazelrc.user \
+&& ./dev doctor \
+&& ./dev build \
+&& cp cockroach /usr/local/bin \
+&& bazel build c-deps:libgeos \
 && mkdir -p /usr/local/lib/cockroach \
-&& cp lib/libgeos.so /usr/local/lib/cockroach/ \
-&& cp lib/libgeos_c.so /usr/local/lib/cockroach/
+&& cp _bazel/bin/c-deps/libgeos/lib/libgeos.so /usr/local/lib/cockroach/ \
+&& cp _bazel/bin/c-deps/libgeos/lib/libgeos_c.so /usr/local/lib/cockroach/
 
 # Build a fresh image without all the build requirements
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:20.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV PATH=/usr/local/go/bin:/cockroach:$PATH
 
-RUN apt-get update && apt-get install -y tzdata hostname tar \
+RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get update && apt-get install -y tzdata hostname tar wget \
     && mkdir -p /cockroach \
-    && mkdir -p /usr/local/lib/cockroach
-COPY cockroach.sh /cockroach/
+    && mkdir -p /usr/local/lib/cockroach \
+    && mkdir -p /docker-entrypoint-initdb.d
+
+RUN wget -O /cockroach/cockroach.sh https://raw.githubusercontent.com/cockroachdb/cockroach/v22.1.7/build/deploy/cockroach.sh
+
 COPY --from=builder /usr/local/bin/cockroach  /cockroach/
 COPY --from=builder /usr/local/lib/cockroach/libgeos.so /usr/local/lib/cockroach/
 COPY --from=builder /usr/local/lib/cockroach/libgeos_c.so /usr/local/lib/cockroach/
@@ -91,5 +89,4 @@ ENV PATH=/cockroach:$PATH
 
 # Expose ports
 EXPOSE 26257 8080
-
 ENTRYPOINT ["/cockroach/cockroach.sh"]
