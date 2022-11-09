@@ -40,6 +40,7 @@ libssl-dev libncurses5-dev bison xz-utils patch g++ curl git python libresolv-wr
 && make \
 && make install \
 # Install Bazel
+&& cd $SOURCE_DIR \
 && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/5.1.1/build_bazel.sh \
 && bash build_bazel.sh -y \
 # Download and Install CockroachDB
