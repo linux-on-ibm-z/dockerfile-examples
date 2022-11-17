@@ -56,7 +56,7 @@ RUN apt-get update \
  && make install \
 # Download and Install Spider Monkey
  && cd $SOURCE_ROOT \
- && wget http://ftp.mozilla.org/pub/mozilla.org/js/js185-1.0.0.tar.gz \
+ && wget http://ftp.mozilla.org/pub/spidermonkey/releases/1.8.5/js185-1.0.0.tar.gz \
  && tar zxf js185-1.0.0.tar.gz  \
  && cd js-1.8.5 \
  && cd $SOURCE_ROOT \
