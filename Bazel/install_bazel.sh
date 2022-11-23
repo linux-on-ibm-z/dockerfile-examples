@@ -6,7 +6,7 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 export PATH=$JAVA_HOME/bin:$PATH
 WORK_ROOT=$(pwd)
 SOURCE_ROOT=$(pwd)/build
-PACKAGE_VERSION="5.1.1"
+PACKAGE_VERSION="5.3.2"
 PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/${PACKAGE_VERSION}/patch"
 
 function buildNetty() {
@@ -76,11 +76,11 @@ cp $SOURCE_ROOT/netty/buffer/target/netty-buffer-4.1.69.Final.jar \
    	$SOURCE_ROOT/bazel/third_party/netty/
 cd $SOURCE_ROOT/bazel
 curl -sSL $PATCH_URL/bazel-netty.patch | git apply
-${SOURCE_ROOT}/dist/bazel/output/bazel build -c opt --stamp --embed_label "5.1.1" //src:bazel
+${SOURCE_ROOT}/dist/bazel/output/bazel build -c opt --stamp --embed_label "5.3.2" //src:bazel
 mkdir -p output
 cp bazel-bin/src/bazel output/bazel
 # Rebuild bazel using itself
-./output/bazel build -c opt --stamp --embed_label "5.1.1" //src:bazel
+./output/bazel build -c opt --stamp --embed_label "5.3.2" //src:bazel
 
 cd $WORK_ROOT
 cp $SOURCE_ROOT/bazel/bazel-bin/src/bazel ./
