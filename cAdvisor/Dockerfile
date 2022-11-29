@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for cAdvisor 0.45.0 #################################
+######################## Dockerfile for cAdvisor 0.46.0 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -15,7 +15,7 @@
 #
 # To Start cAdvisor server create a container from the image created from Dockerfile and
 # link 8080 to the port.
-# docker run --name <container_name> -p <port_number>:8080 -d <image_name>
+# docker run --privileged --name <container_name> -p <port_number>:8080 -d <image_name>
 #
 # Access cAdvisor web user interface from browser
 # http://<hostname>:<port_number>
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG CADVISOR_VER=0.45.0
+ARG CADVISOR_VER=0.46.0
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
@@ -41,11 +41,11 @@ ENV DEBIAN_FRONTEND noninteractive
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     git \
-        curl \
-        patch \
-        make \
-        gcc \
-        sudo \
+    curl \
+    patch \
+    make \
+    gcc \
+    sudo \
 # Install go
  && export GO_INSTALL_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Go/1.18.4/build_go.sh" \
  && curl $GO_INSTALL_URL | bash -s -- -v 1.18.4 \
@@ -74,8 +74,11 @@ COPY --from=builder /usr/bin/cadvisor /usr/bin/cadvisor
 # Port for cAdvisor
 EXPOSE 8080
 
-# Command to execute
-CMD ["/usr/bin/cadvisor"]
+ENV CADVISOR_HEALTHCHECK_URL=http://localhost:8080/healthz
+
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget --quiet --tries=1 --spider $CADVISOR_HEALTHCHECK_URL || exit 1
+
+ENTRYPOINT ["/usr/bin/cadvisor", "-logtostderr"]
 
 # End of Dockerfile
-
