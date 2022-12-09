@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 9.1.7 ############################################
+############################ Dockerfile for Grafana 9.2.5 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -21,9 +21,9 @@
 ARG BASE_IMAGE=s390x/ubuntu:20.04
 FROM ${BASE_IMAGE} AS builder
 
-ARG GRAFANA_VER=9.1.7
+ARG GRAFANA_VER=9.2.5
 ARG NODE_JS_VERSION=16.14.0
-ARG GO_VERSION=1.17.2
+ARG GO_VERSION=1.19
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
