@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 8.4.2 #####################################################
+############################ Dockerfile for Logstash version 8.5.2 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -23,9 +23,9 @@ FROM golang:1.15 AS builder
 ADD env2yaml/env2yaml.go /go/
 RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:20.04
 
-ARG LOGSTASH_VER=8.4.2
+ARG LOGSTASH_VER=8.5.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -42,8 +42,8 @@ RUN apt-get update && apt-get install -y openjdk-11-jdk locales \
     gzip && \
 # Provide a non-root user to run the process.
     groupadd --gid 1000 logstash && \
-    /usr/sbin/useradd --uid 1000 --gid 1000 \
-      --home-dir /usr/share/logstash --no-create-home \
+    adduser --uid 1000 --gid 1000 \
+       --home /usr/share/logstash --no-create-home \
       logstash && \
 # Add Logstash itself.
     curl -Lo - https://artifacts.elastic.co/downloads/logstash/logstash-oss-${LOGSTASH_VER}-linux-aarch64.tar.gz  | \
@@ -60,7 +60,6 @@ RUN apt-get update && apt-get install -y openjdk-11-jdk locales \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/share/logstash
-
 ENV ELASTIC_CONTAINER true
 ENV PATH=/usr/share/logstash/bin:$LS_JAVA_HOME/bin:$PATH
 
