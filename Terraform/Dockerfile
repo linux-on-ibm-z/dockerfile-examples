@@ -7,10 +7,10 @@
 # the officially-released binary from releases.hashicorp.com and are
 # built by the (closed-source) official release process.
 
-FROM docker.mirror.hashicorp.services/golang:1.19-alpine AS builder
+FROM docker.mirror.hashicorp.services/golang:1.19.3-alpine AS builder
 LABEL maintainer="HashiCorp Terraform Team <terraform@hashicorp.com>"
 
-ARG TERRAFORM_VERSION=v1.3.0
+ARG TERRAFORM_VERSION=v1.3.6
 RUN apk add --no-cache git bash openssh \
     && git clone -b ${TERRAFORM_VERSION} https://github.com/hashicorp/terraform.git $GOPATH/src/github.com/hashicorp/terraform
 
@@ -20,7 +20,7 @@ ENV TF_RELEASE=1
 WORKDIR $GOPATH/src/github.com/hashicorp/terraform
 RUN /bin/bash ./scripts/build.sh
 
-FROM docker.mirror.hashicorp.services/golang:1.19-alpine
+FROM docker.mirror.hashicorp.services/golang:1.19.3-alpine
 LABEL maintainer="HashiCorp Terraform Team <terraform@hashicorp.com>"
 copy --from=builder $GOPATH/bin $GOPATH/bin
 WORKDIR $GOPATH
