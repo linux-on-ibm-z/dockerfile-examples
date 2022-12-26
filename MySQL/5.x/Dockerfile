@@ -32,7 +32,7 @@ FROM s390x/ubuntu:18.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG MYSQL_VERSION=5.7.39
+ARG MYSQL_VERSION=5.7.40
 ENV DEBIAN_FRONTEND noninteractive
 
 # Add mysql user and group
