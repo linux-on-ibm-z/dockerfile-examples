@@ -39,6 +39,7 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  g++ \
+ sudo \
  tar \
  git \
  make \
@@ -46,16 +47,30 @@ RUN apt-get update \
  locales \
  locales-all \
  unzip \
- ruby-dev \
  zip \
  gzip \
  gawk \
+ ant \
+ bison \
+ flex \
+ openssl \
+ libssl-dev \
+ libdb-dev \
+ libgdbm-dev \
+ libreadline-dev \
+ zlib1g \ 
+ zlib1g-dev \
 # Install Eclipse Adoptium Temurin Runtime (Java 11)
  && wget -O ${SOURCE_ROOT}/adoptium11.tar.gz "$JDK11_URL" \
  && mkdir adoptium11 \
  && tar -zxvf adoptium11.tar.gz -C adoptium11/ --strip-components 1 \
- && rm adoptium11.tar.gz
-
+ && rm adoptium11.tar.gz \
+# Install ruby
+&& cd ${SOURCE_ROOT} \
+&& wget https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.6.tar.gz \
+&& tar -xzf ruby-2.7.6.tar.gz \
+&& cd ruby-2.7.6 \
+&& ./configure && make && sudo -E env PATH="$PATH" make install
 # Install lein
 ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/bin/lein
 RUN chmod +x /usr/bin/lein \
