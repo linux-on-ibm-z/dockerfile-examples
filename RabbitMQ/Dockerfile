@@ -1,9 +1,8 @@
 # © Copyright IBM Corporation 2022.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
-# This dockerfile is no longer supported. Please find latest information from https://www.ibm.com/community/z/open-source-software/
 #
-################# Dockerfile for RabbitMQ version 3.9.16 ################################
+################# Dockerfile for RabbitMQ version 3.11.4 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -25,8 +24,8 @@
 # Base image
 FROM s390x/ubuntu:18.04
 
-ARG RABBITMQ_VER=3.9.16
-ARG ERLANG_VERSION=24.3.3
+ARG RABBITMQ_VER=3.11.4
+ARG ERLANG_VERSION=25.1.2
 ARG ELIXIR_VERSION=1.13.4
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
