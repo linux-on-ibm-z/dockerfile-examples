@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2022.
+# © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for Consul - 1.14.2 ########################
+###################### Dockerfile for Consul - 1.14.3 ########################
 #
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV CONSUL_VERSION=1.14.2
+ENV CONSUL_VERSION=1.14.3
 ENV TERM=xterm
 
 # Set GO environment variables
@@ -53,8 +53,8 @@ RUN apt-get update &&  apt-get install -y \
  && service rsyslog start \
 # Install go and get source code of consul
  && cd $SOURCE_DIR \
- && wget https://golang.org/dl/go1.18.2.linux-s390x.tar.gz \
- && tar -xzf go1.18.2.linux-s390x.tar.gz \
+ && wget https://golang.org/dl/go1.19.4.linux-s390x.tar.gz \
+ && tar -xzf go1.19.4.linux-s390x.tar.gz \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/consul.git \
@@ -73,7 +73,7 @@ RUN addgroup consul && \
 RUN set -eux && \
     apk add --no-cache ca-certificates curl dumb-init gnupg libcap openssl su-exec iputils jq libc6-compat
 
-RUN apk update && apk add bash
+RUN apk update && apk add bash wget
 
 COPY --from=builder /tmp/source/src/github.com/hashicorp/consul/bin/consul /usr/local/bin/
 RUN mkdir -p /consul/data && \
@@ -103,7 +103,7 @@ EXPOSE 8500 8600 8600/udp
 # Consul doesn't need root privileges so we run it as the consul user from the
 # entry point script. The entry point script also uses dumb-init as the top-level
 # process to reap any zombie processes created by Consul sub-processes.
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN wget -O /usr/local/bin/docker-entrypoint.sh https://raw.githubusercontent.com/hashicorp/docker-consul/master/0.X/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
