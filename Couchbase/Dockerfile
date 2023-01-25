@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation  2017, 2022
+# © Copyright IBM Corporation  2017, 2023
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Couchbase version 7.0.2 ###################################
+############### Dockerfile for Couchbase version 7.1.1 ###################################
 #
 # Couchbase is open source database software.
 #
@@ -10,57 +10,39 @@
 # docker build -t <image_name> .
 #
 # To start Couchbase server run the below command
-# docker run --name <container_name> -p <port_numbers>:8091-8094 -p <port_number>:11210 -d <image_name>
+# docker run --name <container_name> -p <port_numbers>:8091-8094 -p <port_number>:9123 -p <port_number>:11210 -d <image_name>
 #
 # View Couchbase UI at http://localhost:8091 on host machine to start Couchbase Server setup
 #
 ##########################################################################################
 
-FROM s390x/ubuntu:20.04
+FROM s390x/ubuntu:20.04 as builder
 
-# The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 ENV SOURCE_ROOT=/tmp/source
 WORKDIR $SOURCE_ROOT
-ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Couchbase/7.0.2
+ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Couchbase/7.1.1
 
 SHELL ["/bin/bash", "-c"]
 
-RUN apt-get update && apt-get install -y sudo wget \
-&& cd $SOURCE_ROOT \
-&& wget $PATCH_URL/build_couchbase.sh \
-&& bash build_couchbase.sh -y -p /opt/couchbase \
-&& apt-get -y remove autoconf automake autotools-dev \
-binutils-dev bison ccache clang-12 cmake curl flex \
-g++-10 gcc-10 gcc-10-multilib g++-10-multilib git gnome-keyring \
-libev-dev libevent-dev libiberty-dev liblz4-dev liblz4-tool liblzma-dev libnss3-dev \
-libpango1.0-dev libsnappy-dev libssl-dev libtool libuv1 libuv1-dev locales locales-all \
-make ncurses-dev ninja-build pkg-config \
-python python3 python3-httplib2 python3-six \
-re2c texinfo unzip wget \
-&& apt autoremove -y \
-&& apt-get autoremove -y \
-&& apt-get clean \
-&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-&& rm -rf $SOURCE_ROOT/couchbase \
-&& rm -rf $SOURCE_ROOT/patch \
-&& rm -rf $SOURCE_ROOT/*.sh \
-&& rm -rf /root/.cbdepscache \
-&& rm -rf /root/.ccache \
-&& rm -rf /root/.cache \
-&& rm -rf /root/go/src/github.com/prometheus \
-&& rm -rf /usr/local/lib/libv8*.so \
-&& rm -rf /usr/local/lib/icu* \
-&& rm -rf /usr/local/lib//libchrome*.so \
-&& rm -rf /usr/local/lib/libicu* \
-&& rm -rf /usr/local/lib//libssl* \
-&& rm -rf /usr/local/lib//libproto* \
-&& rm -rf /usr/local/lib//libgrpc* \
-&& rm -rf /usr/local/lib/python* \
-&& rm -rf /usr/local/lib/erlang \
-&& rm -rf /usr/local/bin/prometheus \
-&& rm -rf /usr/local/go
+RUN apt-get update && apt-get install -y sudo wget locales
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8  
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8
 
+RUN cd $SOURCE_ROOT \
+&& wget $PATCH_URL/build_couchbase.sh \
+&& bash build_couchbase.sh -p /opt/couchbase 
+
+FROM s390x/ubuntu:20.04
+
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+WORKDIR /opt
+
+COPY --from=builder /opt/couchbase ./couchbase
+
+SHELL ["/bin/bash", "-c"]
 # Install dependencies:
 #  runit: for container process management
 #  wget: for downloading .deb
@@ -71,13 +53,19 @@ re2c texinfo unzip wget \
 #  lshw: lshw
 #  sysstat: iostat, sar, mpstat
 #  net-tools: ifconfig, arp, netstat
-#  numactl: numactl
 RUN set -x && \
     apt-get update && \
-    apt-get install -yq runit wget chrpath patchelf tzdata \
-    lsof lshw sysstat net-tools numactl bzip2 && \
+    apt-get install -yq runit wget chrpath patchelf tzdata locales libgflags2.2 \
+    lsof lshw sysstat net-tools bzip2 && \
     apt-get autoremove && apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#config locales
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8  
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8
 
 # http://smarden.org/runit/useinit.html#sysv - at some point the script
 # runsvdir-start was moved/renamed to this odd name, so we put it back
@@ -126,6 +114,7 @@ CMD ["couchbase-server"]
 # 8094: Full-text Search (4.5+)
 # 8095: Analytics (5.5+)
 # 8096: Eventing (5.5+)
+# 9123: Prometheus
 # 11207: Smart client library data node access (SSL)
 # 11210: Smart client library/moxi data node access
 # 11211: Legacy non-smart client library data node access
@@ -135,5 +124,5 @@ CMD ["couchbase-server"]
 # 18094: Full-text Search (SSL) (4.5+)
 # 18095: Analytics (SSL) (5.5+)
 # 18096: Eventing (SSL) (5.5+)
-EXPOSE 8091 8092 8093 8094 8095 8096 11207 11210 11211 18091 18092 18093 18094 18095 18096
+EXPOSE 8091 8092 8093 8094 8095 8096 9123 11207 11210 11211 18091 18092 18093 18094 18095 18096
 VOLUME /opt/couchbase/var
