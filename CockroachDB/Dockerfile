@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2020, 2022.
+# © Copyright IBM Corporation 2020, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for CockroachDB version 22.1.7 ####################################
+#################################### Dockerfile for CockroachDB version 22.2.2 ####################################
 #
 # To build CockroachDB image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -16,21 +16,31 @@
 FROM s390x/ubuntu:20.04 AS builder
 
 # CockroachDB version
-ARG CRDB_VER=22.1.7
+ARG CRDB_VER=22.2.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
+RUN apt-get update \
+&& apt-get install -y sudo \
+&& useradd -m build_user \
+&& usermod -aG sudo build_user \
+# disable sudo password
+&& echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# CockroachDB dev script cannot be run by root user
+USER build_user
+
 # Set PATH
-ENV SOURCE_DIR=/root
+ENV SOURCE_DIR=/home/build_user
 ENV PATH=$PATH:$SOURCE_DIR/dist/bazel/output/
 
 WORKDIR $SOURCE_DIR
 
 # Install following build dependencies
-RUN apt-get update \
-&& DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y autoconf automake wget make \
-libssl-dev libncurses5-dev bison xz-utils patch g++ curl git python libresolv-wrapper sudo tzdata \
+RUN sudo apt-get update \
+&& sudo DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y autoconf automake wget make \
+libssl-dev libncurses5-dev bison xz-utils patch g++ curl git python libresolv-wrapper tzdata libkeyutils-dev \
 # Install CMake
 && cd $SOURCE_DIR \
 && wget https://github.com/Kitware/CMake/releases/download/v3.23.3/cmake-3.23.3.tar.gz \
@@ -38,7 +48,7 @@ libssl-dev libncurses5-dev bison xz-utils patch g++ curl git python libresolv-wr
 && cd cmake-3.23.3 \
 && ./bootstrap \
 && make \
-&& make install \
+&& sudo make install \
 # Install Bazel
 && cd $SOURCE_DIR \
 && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/5.1.1/build_bazel.sh \
@@ -54,13 +64,14 @@ libssl-dev libncurses5-dev bison xz-utils patch g++ curl git python libresolv-wr
 && cd $SOURCE_DIR/cockroach \
 && echo 'build --remote_cache=http://127.0.0.1:9867' > ~/.bazelrc \
 && printf 'build --config=dev \nbuild --config nolintonbuild\n' >> .bazelrc.user \
+&& echo "test --test_tmpdir=$SOURCE_DIR/cockroach/tmp" >> .bazelrc.user \
 && ./dev doctor \
 && ./dev build \
-&& cp cockroach /usr/local/bin \
-&& bazel build c-deps:libgeos \
-&& mkdir -p /usr/local/lib/cockroach \
-&& cp _bazel/bin/c-deps/libgeos/lib/libgeos.so /usr/local/lib/cockroach/ \
-&& cp _bazel/bin/c-deps/libgeos/lib/libgeos_c.so /usr/local/lib/cockroach/
+&& sudo cp cockroach /usr/local/bin \
+&& bazel build c-deps:libgeos --config force_build_cdeps \
+&& sudo mkdir -p /usr/local/lib/cockroach \
+&& sudo cp _bazel/bin/c-deps/libgeos_foreign/lib/libgeos.so /usr/local/lib/cockroach/ \
+&& sudo cp _bazel/bin/c-deps/libgeos_foreign/lib/libgeos_c.so /usr/local/lib/cockroach/
 
 # Build a fresh image without all the build requirements
 FROM s390x/ubuntu:20.04
@@ -71,11 +82,12 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 ENV PATH=/usr/local/go/bin:/cockroach:$PATH
 
 RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get update && apt-get install -y tzdata hostname tar wget \
+libresolv-wrapper libkeyutils-dev \
     && mkdir -p /cockroach \
     && mkdir -p /usr/local/lib/cockroach \
     && mkdir -p /docker-entrypoint-initdb.d
 
-RUN wget -O /cockroach/cockroach.sh https://raw.githubusercontent.com/cockroachdb/cockroach/v22.1.7/build/deploy/cockroach.sh
+RUN wget -O /cockroach/cockroach.sh https://raw.githubusercontent.com/cockroachdb/cockroach/v22.2.2/build/deploy/cockroach.sh
 
 COPY --from=builder /usr/local/bin/cockroach  /cockroach/
 COPY --from=builder /usr/local/lib/cockroach/libgeos.so /usr/local/lib/cockroach/
