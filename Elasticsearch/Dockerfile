@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2022.
+# © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.16.3 ########################################
+##################################### Dockerfile for Elasticsearch version 7.17.7 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -31,18 +31,18 @@
 
 FROM s390x/ubuntu:20.04 AS builder
 
-ARG ELASTICSEARCH_VER=7.16.3
+ARG ELASTICSEARCH_VER=7.17.7
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV LANG="en_US.UTF-8"
 ENV SOURCE_DIR="/tmp/"
-ENV JAVA_HOME=/opt/adopt/java
-ENV JAVA16_HOME=/opt/adopt/java
+ENV JAVA_HOME=/opt/temurin/java
+ENV JAVA17_HOME=/opt/temurin/java
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch/elasticsearch.patch"
-ENV ADOPTJDK_URL="https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_s390x_linux_hotspot_16.0.2_7.tar.gz"
+ENV TEMURIN_URL="https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.5%2B8/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.5_8.tar.gz"
 
 RUN apt-get update && apt-get install -y \
     curl \
@@ -78,12 +78,13 @@ RUN /usr/sbin/groupadd -g 1000 elasticsearch && \
     /usr/sbin/useradd --uid 1000 --gid 1000 -d /usr/share/elasticsearch elasticsearch
 
 WORKDIR /usr/share/elasticsearch
+
 # Set up locale
 RUN apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
-# Install AdoptOpenJDK 16 (with hotspot)
- && cd $SOURCE_DIR && mkdir -p /opt/adopt/java && curl -SL -o adoptjdk.tar.gz $ADOPTJDK_URL \
- && tar -zxf adoptjdk.tar.gz -C /opt/adopt/java --strip-components 1 \
+# Install Temurin 17
+ && cd $SOURCE_DIR && mkdir -p /opt/temurin/java && curl -SL -o temurin.tar.gz $TEMURIN_URL \
+ && tar -zxf temurin.tar.gz -C /opt/temurin/java --strip-components 1 \
 # Download and Build Elasticsearch
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
  && curl -o elasticsearch.patch  $PATCH_URL  \
@@ -91,18 +92,21 @@ RUN apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && ./gradlew :distribution:archives:oss-linux-s390x-tar:assemble --parallel \
 # Install Elasticsearch
  && mkdir -p /usr/share/elasticsearch \
- && tar -xzf distribution/archives/oss-linux-s390x-tar/build/distributions/elasticsearch-oss-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1 
+ && tar -xzf distribution/archives/oss-linux-s390x-tar/build/distributions/elasticsearch-oss-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1
 
 # The distribution includes a `config` directory, no need to create it
-COPY config/elasticsearch.yml  config/
+COPY config/elasticsearch.yml config/
+COPY config/log4j2.properties config/log4j2.docker.properties
 
 RUN sed -i -e 's/ES_DISTRIBUTION_TYPE=tar/ES_DISTRIBUTION_TYPE=docker/' bin/elasticsearch-env && \
-    mkdir -p config/jvm.options.d data logs plugins && \
-    chmod 0775 config config/jvm.options.d data logs plugins && \
-    chmod 0660 config/elasticsearch.yml config/log4j2.properties && \
-    find ./jdk -type d -exec chmod 0755 {} + && \
-    find . -xdev -perm -4000 -exec chmod ug-s {} + && \
-    find . -type f -exec chmod o+r {} +
+    mkdir data && \
+    mv config/log4j2.properties config/log4j2.file.properties && \
+    mv config/log4j2.docker.properties config/log4j2.properties && \
+    find . -type d -exec chmod 0555 {} + && \
+    find . -type f -exec chmod 0444 {} + && \
+    chmod 0555 bin/* jdk/bin/* jdk/lib/jspawnhelper && \
+    chmod 0775 bin config config/jvm.options.d data logs plugins && \
+    find config -type f -exec chmod 0664 {} +
 
 ################################################################################
 # Build stage 1 (the actual Elasticsearch image):
@@ -115,33 +119,43 @@ FROM s390x/ubuntu:20.04
 
 ENV ELASTIC_CONTAINER true
 
-RUN apt-get update && apt-get install -y netcat libvshadow-utils zip unzip
-
-WORKDIR /usr/share/elasticsearch
-COPY --from=builder --chown=1000:0 /usr/share/elasticsearch /usr/share/elasticsearch
-COPY --from=builder --chown=0:0 /bin/tini /bin/tini
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates netcat p11-kit libvshadow-utils zip unzip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN /usr/sbin/groupadd -g 1000 elasticsearch && \
-    /usr/sbin/useradd -u 1000 -g 1000 -G 0 -d /usr/share/elasticsearch elasticsearch && \
-    chmod 0775 /usr/share/elasticsearch && \
-    chown -R 1000:0 /usr/share/elasticsearch
+    adduser --uid 1000 --gid 1000 --home /usr/share/elasticsearch elasticsearch && \
+    adduser elasticsearch root && \
+    chown -R 0:0 /usr/share/elasticsearch
+
+WORKDIR /usr/share/elasticsearch
+
+COPY --from=builder --chown=0:0 /usr/share/elasticsearch /usr/share/elasticsearch
+COPY --from=builder --chown=0:0 /bin/tini /bin/tini
 
 ENV PATH /usr/share/elasticsearch/bin:$PATH
 
 COPY bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-# Replace OpenJDK's built-in CA certificate keystore with the one from the OS
-# vendor. The latter is superior in several ways.
-# REF: https://github.com/elastic/elasticsearch-docker/issues/171
+# Update "cacerts" bundle to use Ubuntu's CA certificates (and make sure it
+# stays up-to-date with changes to Ubuntu's store)
 RUN chmod g=u /etc/passwd && \
-    chmod 0775 /usr/local/bin/docker-entrypoint.sh && \
+    chmod 0555 /usr/local/bin/docker-entrypoint.sh && \
     find / -xdev -perm -4000 -exec chmod ug-s {} + && \
-    ln -sf /etc/pki/ca-trust/extracted/java/cacerts /usr/share/elasticsearch/jdk/lib/security/cacerts && \
-    apt-get autoremove -y && apt-get clean && \
-    rm -rf /var/lib/apt/lists/* $HOME/.cache
+    chmod 0775 /usr/share/elasticsearch && \
+    chown elasticsearch bin config config/jvm.options.d data logs plugins
+
+COPY bin/docker-openjdk /etc/ca-certificates/update.d/docker-openjdk
+
+RUN chmod 0555 /etc/ca-certificates/update.d/docker-openjdk && \
+    /etc/ca-certificates/update.d/docker-openjdk
 
 EXPOSE 9200 9300
 
+# Our actual entrypoint is `tini`, a minimal but functional init program. It
+# calls the entrypoint we provide, while correctly forwarding signals.
 ENTRYPOINT ["/bin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
 # Dummy overridable parameter parsed by entrypoint
 CMD ["eswrapper"]
