@@ -1,7 +1,7 @@
-# Copyright IBM Corporation 2017, 2022.
+# Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Cassandra version 4.0.6 #########
+########## Dockerfile for Cassandra version 4.1.0 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -18,16 +18,13 @@
 #
 #################################################################################
 
-FROM ubuntu:20.04 as builder
+FROM eclipse-temurin:11-jdk-focal as builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV SOURCE_ROOT=/tmp/source
-ENV JAVA_HOME=$SOURCE_ROOT/jdk-11.0.14.1+1
-ENV PATH=$JAVA_HOME/bin:$PATH
-
-ENV LANG="en_US.UTF-8" JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8" CASSANDRA_USE_JDK11=true
+ENV SOURCE_ROOT=/tmp/source \
+    CASSANDRA_USE_JDK11=true
 
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -58,31 +55,24 @@ maven \
     && cd $SOURCE_ROOT \
     && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/netty-tcnative/2.0.52/build_netty.sh  \
     && bash build_netty.sh -y -j Temurin11 \
-# Install Java
-    && cd $SOURCE_ROOT \
-    && wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.14.1%2B1/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.14.1_1.tar.gz \
-    && tar -xf OpenJDK11U-jdk_s390x_linux_hotspot_11.0.14.1_1.tar.gz \
 # Build netty
     && cd $SOURCE_ROOT \
-    && git clone https://github.com/netty/netty.git \
+    && git clone -b netty-4.1.58.Final https://github.com/netty/netty.git \
     && cd netty\
-    && git checkout netty-4.1.58.Final \
     && curl -o netty.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/4.0.6/patch/netty.patch \
     && git apply --ignore-whitespace netty.patch \
     && mvn install -DskipTests -Dmaven.javadoc.skip=true \
 # Build Chronicle-core
     && cd $SOURCE_ROOT \
-    && git clone https://github.com/OpenHFT/Chronicle-Bytes \
+    && git clone -b chronicle-bytes-2.20.111 https://github.com/OpenHFT/Chronicle-Bytes \
     && cd Chronicle-Bytes \
-    && git checkout chronicle-bytes-2.20.111 \
     && curl -o bytes.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/4.0.6/patch/bytes.patch \
     && git apply --ignore-whitespace bytes.patch \
     && mvn install -DskipTests -Dmaven.javadoc.skip=true \
 # Build Apache Cassandra
     && cd $SOURCE_ROOT \
-    && git clone https://github.com/apache/cassandra.git \
+    && git clone -b cassandra-4.1.0 https://github.com/apache/cassandra.git \
     && cd cassandra \
-    && git checkout cassandra-4.0.6 \
     && curl -o cassandra.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/4.0.6/patch/cassandra.patch \
     && git apply --ignore-whitespace cassandra.patch \
     && ant \
@@ -102,12 +92,9 @@ maven \
     && rm -rf /root/.cache/ \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-#End of builder stage
+#End of builder stage    
 
-FROM ubuntu:20.04
-
-# The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+FROM eclipse-temurin:11-jre-focal
 
 # explicitly set user/group IDs
 RUN set -eux; \
@@ -154,28 +141,35 @@ RUN set -eux; \
 	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
 	apt-mark auto '.*' > /dev/null; \
 	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark > /dev/null; \
+	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
 	chmod +x /usr/local/bin/gosu; \
 	gosu --version; \
-	gosu nobody true; 
-
-ENV JAVA_HOME /opt/java/openjdk
-ENV PATH $JAVA_HOME/bin:$PATH
+	gosu nobody true
 
 ENV CASSANDRA_HOME /opt/cassandra
 ENV CASSANDRA_CONF /etc/cassandra
 ENV PATH $CASSANDRA_HOME/bin:$PATH
+ENV CASSANDRA_VERSION 4.1.0
 
-RUN mkdir -p "$CASSANDRA_HOME"; 
+
+RUN mkdir -p "$CASSANDRA_HOME";
 
 # COPY the required libs, binaries from builder stage
-COPY --from=builder /cassandra_libs/cassandra/ $CASSANDRA_HOME/
+COPY --from=builder /cassandra_libs/cassandra/bin $CASSANDRA_HOME/bin
+COPY --from=builder /cassandra_libs/cassandra/conf $CASSANDRA_HOME/conf
+COPY --from=builder /cassandra_libs/cassandra/doc $CASSANDRA_HOME/doc
+COPY --from=builder /cassandra_libs/cassandra/lib $CASSANDRA_HOME/lib
+COPY --from=builder /cassandra_libs/cassandra/pylib $CASSANDRA_HOME/pylib
+COPY --from=builder /cassandra_libs/cassandra/tools $CASSANDRA_HOME/tools
+COPY --from=builder /cassandra_libs/cassandra/build $CASSANDRA_HOME/build
+COPY --from=builder /cassandra_libs/cassandra/*.txt $CASSANDRA_HOME/
 COPY --from=builder /cassandra_libs/libnetty_tcnative_linux_s390_64.so  /usr/lib/
 COPY --from=builder /cassandra_libs/libnetty_transport_native_epoll_s390_64.so  /usr/lib/	
 
 RUN	[ ! -e "$CASSANDRA_CONF" ]; \
 	mv "$CASSANDRA_HOME/conf" "$CASSANDRA_CONF"; \
 	ln -sT "$CASSANDRA_CONF" "$CASSANDRA_HOME/conf"; \
-        \
+	\
 	mkdir -p "$CASSANDRA_CONF" /var/lib/cassandra /var/log/cassandra; \
 	chown -R cassandra:cassandra "$CASSANDRA_CONF" /var/lib/cassandra /var/log/cassandra; \
 	chmod 777 "$CASSANDRA_CONF" /var/lib/cassandra /var/log/cassandra; \
@@ -183,16 +177,13 @@ RUN	[ ! -e "$CASSANDRA_CONF" ]; \
 	ln -sT /var/lib/cassandra "$CASSANDRA_HOME/data"; \
 	ln -sT /var/log/cassandra "$CASSANDRA_HOME/logs"; \
 	\
-	mkdir -p "$JAVA_HOME";  \
-        wget -O jdk.tar.gz https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.14.1%2B1/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.14.1_1.tar.gz; \
-        tar -xf jdk.tar.gz -C "$JAVA_HOME" --strip-components=1; \
-    	\
+# smoke test
 	cassandra -v
-	
+
 VOLUME /var/lib/cassandra
 
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod 755 /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # 7000: intra-node communication
@@ -202,4 +193,3 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 # 9160: thrift service
 EXPOSE 7000 7001 7199 9042 9160
 CMD ["cassandra", "-f"]
-
