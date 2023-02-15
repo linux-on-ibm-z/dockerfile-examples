@@ -6,24 +6,35 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 export PATH=$JAVA_HOME/bin:$PATH
 WORK_ROOT=$(pwd)
 SOURCE_ROOT=$(pwd)/build
-PACKAGE_VERSION="5.3.2"
+PACKAGE_VERSION="6.0.0"
+NETTY_TCNATIVE_VERSION="2.0.51"
+NETTY_TCNATIVE_PREVIOUS_VERSION="2.0.50"
+NETTY_VERSION="4.1.75"
 PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/${PACKAGE_VERSION}/patch"
 
 function buildNetty() {
-	# Install netty-tcnative 2.0.44
+	# Install netty-tcnative 2.0.51
 	cd $SOURCE_ROOT
 	git clone https://github.com/netty/netty-tcnative.git
-	cd netty-tcnative
-	git checkout netty-tcnative-parent-2.0.44.Final
-	curl -sSL $PATCH_URL/netty-tcnative.patch | git apply
+	cp -r netty-tcnative netty-tcnative_$NETTY_TCNATIVE_PREVIOUS_VERSION
+	mv netty-tcnative netty-tcnative_$NETTY_TCNATIVE_VERSION
+	cd netty-tcnative_$NETTY_TCNATIVE_VERSION
+	git checkout netty-tcnative-parent-$NETTY_TCNATIVE_VERSION.Final
+	curl -sSL $PATCH_URL/netty-tcnative_$NETTY_TCNATIVE_VERSION.patch | patch -p1
 	mvn install
 
-	# Install netty 4.1.69 Final
+	# Install netty-tcnative 2.0.50
+	cd $SOURCE_ROOT
+	cd netty-tcnative_$NETTY_TCNATIVE_PREVIOUS_VERSION
+	git checkout netty-tcnative-parent-$NETTY_TCNATIVE_PREVIOUS_VERSION.Final
+	curl -sSL $PATCH_URL/netty-tcnative_$NETTY_TCNATIVE_PREVIOUS_VERSION.patch | patch -p1
+	mvn install
+
+	# Install netty 4.1.75 Final
 	cd $SOURCE_ROOT
 	git clone https://github.com/netty/netty.git
 	cd netty
-	git checkout netty-4.1.69.Final
-	curl -sSL $PATCH_URL/netty.patch | git apply
+	git checkout netty-$NETTY_VERSION.Final
 	./mvnw clean install -DskipTests
 }
 
@@ -49,38 +60,38 @@ cd $SOURCE_ROOT
 git clone https://github.com/bazelbuild/bazel.git
 cd bazel
 git checkout "$PACKAGE_VERSION"
-curl -sSL $PATCH_URL/bazel.patch | git apply
+curl -sSL $PATCH_URL/bazel.patch | patch -p1
 
 cd $SOURCE_ROOT
 buildNetty
 
 # Copy netty and netty-tcnative jar to respective bazel directory and apply a patch to use them
-cp $SOURCE_ROOT/netty-tcnative/boringssl-static/target/netty-tcnative-boringssl-static-2.0.44.Final-linux-s390_64.jar \
-   	$SOURCE_ROOT/bazel/third_party/netty_tcnative/netty-tcnative-boringssl-static-2.0.44.Final.jar
-cp $SOURCE_ROOT/netty/buffer/target/netty-buffer-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/codec/target/netty-codec-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/codec-http/target/netty-codec-http-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/codec-http2/target/netty-codec-http2-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/common/target/netty-common-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/handler/target/netty-handler-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/handler-proxy/target/netty-handler-proxy-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/resolver/target/netty-resolver-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/resolver-dns/target/netty-resolver-dns-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/transport/target/netty-transport-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/transport-sctp/target/netty-transport-sctp-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/transport-native-unix-common/target/netty-transport-native-unix-common-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/transport-native-unix-common/target/netty-transport-native-unix-common-4.1.69.Final-linux-s390_64.jar \
-   	$SOURCE_ROOT/netty/transport-native-kqueue/target/netty-transport-native-kqueue-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/transport-native-epoll/target/netty-transport-native-epoll-4.1.69.Final.jar \
-   	$SOURCE_ROOT/netty/transport-native-epoll/target/netty-transport-native-epoll-4.1.69.Final-linux-s390_64.jar \
-   	$SOURCE_ROOT/bazel/third_party/netty/
+cp $SOURCE_ROOT/netty-tcnative_$NETTY_TCNATIVE_VERSION/boringssl-static/target/netty-tcnative-boringssl-static-$NETTY_TCNATIVE_VERSION.Final-linux-s390_64.jar \
+	$SOURCE_ROOT/bazel/third_party/netty_tcnative/
+cp $SOURCE_ROOT/netty/buffer/target/netty-buffer-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/codec/target/netty-codec-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/codec-http/target/netty-codec-http-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/codec-http2/target/netty-codec-http2-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/common/target/netty-common-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/handler/target/netty-handler-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/handler-proxy/target/netty-handler-proxy-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/resolver/target/netty-resolver-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/resolver-dns/target/netty-resolver-dns-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/transport/target/netty-transport-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/transport-sctp/target/netty-transport-sctp-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/transport-native-unix-common/target/netty-transport-native-unix-common-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/transport-native-unix-common/target/netty-transport-native-unix-common-$NETTY_VERSION.Final-linux-s390_64.jar \
+    $SOURCE_ROOT/netty/transport-native-kqueue/target/netty-transport-native-kqueue-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/transport-native-epoll/target/netty-transport-native-epoll-$NETTY_VERSION.Final.jar \
+    $SOURCE_ROOT/netty/transport-native-epoll/target/netty-transport-native-epoll-$NETTY_VERSION.Final-linux-s390_64.jar \
+    $SOURCE_ROOT/bazel/third_party/netty/
 cd $SOURCE_ROOT/bazel
-curl -sSL $PATCH_URL/bazel-netty.patch | git apply
-${SOURCE_ROOT}/dist/bazel/output/bazel build -c opt --stamp --embed_label "5.3.2" //src:bazel
+curl -sSL $PATCH_URL/bazel-netty.patch | patch -p1
+${SOURCE_ROOT}/dist/bazel/output/bazel build -c opt --stamp --embed_label "6.0.0" //src:bazel
 mkdir -p output
 cp bazel-bin/src/bazel output/bazel
 # Rebuild bazel using itself
-./output/bazel build -c opt --stamp --embed_label "5.3.2" //src:bazel
+./output/bazel build -c opt --stamp --embed_label "6.0.0" //src:bazel
 
 cd $WORK_ROOT
 cp $SOURCE_ROOT/bazel/bazel-bin/src/bazel ./
