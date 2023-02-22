@@ -55,17 +55,10 @@ SHELL ["/bin/bash", "-c"]
 #  net-tools: ifconfig, arp, netstat
 RUN set -x && \
     apt-get update && \
-    apt-get install -yq runit wget chrpath patchelf tzdata locales libgflags2.2 \
+    apt-get install -yq runit wget chrpath patchelf tzdata libgflags2.2 \
     lsof lshw sysstat net-tools bzip2 && \
     apt-get autoremove && apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-#config locales
-RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
-    locale-gen
-ENV LANG en_US.UTF-8  
-ENV LANGUAGE en_US:en  
-ENV LC_ALL en_US.UTF-8
 
 # http://smarden.org/runit/useinit.html#sysv - at some point the script
 # runsvdir-start was moved/renamed to this odd name, so we put it back
