@@ -35,10 +35,8 @@ RUN apt-get update && apt-get install -y ruby
 
 # Install Puppet
 RUN gem install bundler rake-compiler \
- && gem install puppet -v 7.18.0 \
- && gem uninstall -I concurrent-ruby \
- && gem install concurrent-ruby -v 1.1.10
- 
+ && gem install puppet -v 7.18.0
+
 # Configure address of Puppet server
 RUN mkdir -p "$(puppet config print confdir)" \
  && puppet config set server "$SERVER"
