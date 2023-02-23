@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2022.
+# © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for CouchDB version 3.2.2 ############
+############### Dockerfile for CouchDB version 3.3.1 ############
 #
 # CouchDB, is open source database software.
 #
@@ -20,7 +20,7 @@
 
 # Base image
 FROM s390x/ubuntu:18.04 AS builder
-ARG COUCHDB_VER=3.2.2
+ARG COUCHDB_VER=3.3.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -32,24 +32,32 @@ ENV PATH=$PATH:/usr/share/couchdb/dev  LD_LIBRARY_PATH=/usr/lib
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CouchDB/${COUCHDB_VER}/patch"
 # Install following build dependencies
 RUN apt-get update \
- && apt-get install -y build-essential pkg-config ncurses-base g++-5 gcc-5 python python3 python3-pip python3-venv python3-markupsafe curl git patch wget tar make zip autoconf2.13 automake libicu-dev libcurl4-openssl-dev libncurses5-dev locales libncurses-dev libssl-dev unixodbc-dev libwxgtk3.0-dev openjdk-8-jdk xsltproc libxml2-utils \
+ && apt-get install -y build-essential pkg-config ncurses-base g++-5 gcc-5 python python3 python3-pip python3-venv python3-markupsafe hostname curl git patch wget tar make zip autoconf2.13 automake libicu-dev libcurl4-openssl-dev libncurses5-dev locales libncurses-dev libssl-dev unixodbc-dev libwxgtk3.0-dev openjdk-8-jdk xsltproc libxml2-utils libbz2-dev libdb-dev libffi-dev libgdbm-dev liblzma-dev libncurses-dev libreadline-dev libsqlite3-dev libssl-dev make tar tk-dev uuid-dev wget xz-utils zlib1g-dev \
  && rm -rf /usr/bin/gcc /usr/bin/g++ /usr/bin/cc \
  && ln -s /usr/bin/gcc-5 /usr/bin/gcc \
  && ln -s /usr/bin/g++-5 /usr/bin/g++ \
  && ln -s /usr/bin/gcc /usr/bin/cc \
+# Download and Install Python
+ && cd $SOURCE_ROOT \
+ && wget https://www.python.org/ftp/python/3.8.2/Python-3.8.2.tgz \
+ && tar -xzf Python-3.8.2.tgz \
+ && cd Python-3.8.2 \
+ && ./configure --prefix=/usr --exec-prefix=/usr \
+ && make \
+ && sudo make install \
 # Download and Install Erlang
  && cd $SOURCE_ROOT \
- && wget http://www.erlang.org/download/otp_src_24.2.tar.gz \
- && tar zxf otp_src_24.2.tar.gz && rm otp_src_24.2.tar.gz \
- && cd otp_src_24.2 \
- && export ERL_TOP=$SOURCE_ROOT/otp_src_24.2 \
+ && wget http://www.erlang.org/download/otp_src_24.3.tar.gz \
+ && tar zxf otp_src_24.3.tar.gz && rm otp_src_24.3.tar.gz \
+ && cd otp_src_24.3 \
+ && export ERL_TOP=$SOURCE_ROOT/otp_src_24.3 \
  && ./configure --prefix=/usr \
  && make \
  && make install \
 # Download and Install Elixir
  && git clone https://github.com/elixir-lang/elixir.git \
  && cd elixir \
- && git checkout v1.12.3 \
+ && git checkout v1.14.3 \
  && export LANG=en_US.UTF-8 \
  && locale-gen en_US.UTF-8 \
  && make \
@@ -73,7 +81,7 @@ RUN apt-get update \
  && ../configure --prefix=/usr \
  && make \
  && make install \
- && pip3 install --upgrade wheel sphinx==3.5.4 sphinx_rtd_theme docutils==0.16 nose requests hypothesis virtualenv jinja2==3.0.0 \
+ && pip3 install --upgrade wheel sphinx==5.3.0 sphinx_rtd_theme docutils==0.17 nose requests hypothesis virtualenv jinja2 \
  # Install nodejs
  && cd $SOURCE_ROOT \
  && mkdir -p /usr/local/lib/nodejs  \
@@ -85,6 +93,7 @@ RUN apt-get update \
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
  && git checkout ${COUCHDB_VER} \
+ && sed -i '151,151 s/v1.2.9/v1.2.8/g' rebar.config.script \
  && ./configure \
  && make  \
  && make release \
@@ -194,7 +203,7 @@ RUN set -xe; \
     rm -rf "$GNUPGHOME"; \
     apt-key list
 
-ENV COUCHDB_VERSION 3.2.2
+ENV COUCHDB_VERSION 3.3.1
 
 # https://github.com/apache/couchdb-pkg/blob/master/debian/README.Debian
 RUN set -xe; \
