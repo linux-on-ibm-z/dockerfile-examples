@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2021.
+# © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 7.12.1 ############################################
+###################################### Dockerfile for Kibana version 8.6.0 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -32,8 +32,8 @@
 # Base Image
 FROM s390x/ubuntu:20.04 AS builder
 
-ARG KIBANA_VER=7.12.1
-ARG NODE_JS_VERSION=14.16.1
+ARG KIBANA_VER=8.6.0
+ARG NODE_JS_VERSION=16.18.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -67,32 +67,43 @@ RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -
     wget \
     patch \
     xz-utils \
+    build-essential \
+    pkg-config \
+    libglib2.0-dev \
+    libexpat1-dev \
 # Installing Bazel \
- && cd $WORKDIR && mkdir bazel && cd bazel \
- && wget https://github.com/bazelbuild/bazel/releases/download/4.0.0/bazel-4.0.0-dist.zip \
- && unzip bazel-4.0.0-dist.zip \
- && chmod -R +w . \
- && curl -sSL https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/4.0.0/patch/bazel.patch | patch -p1 \
- && bash ./compile.sh \
+ && cd $WORKDIR \
+ && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/5.1.1/build_bazel.sh \
+ && bash build_bazel.sh -y \
 # Installing Go \
- && cd $WORKDIR && wget -q https://storage.googleapis.com/golang/go1.16.3.linux-s390x.tar.gz \
- && sudo tar -C /usr/local -xzf go1.16.3.linux-s390x.tar.gz \
- && sudo ln -sf /usr/local/go/bin/go /usr/bin/ \
+ && cd $WORKDIR && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Go/1.18.4/build_go.sh \
+ && bash build_go.sh -y \
 # Building Bazelisk binary \
  && cd $WORKDIR && git clone https://github.com/bazelbuild/bazelisk.git \
- && cd bazelisk && git checkout v1.7.5 \
+ && cd bazelisk && git checkout v1.12.1 \
  && curl -sSL $PATCH_URL/bazelisk_patch.diff | git apply --ignore-whitespace \
  && go build && ./bazelisk build --config=release //:bazelisk-linux-s390x \
 # Installing Node.js
  && sudo mkdir -p /usr/local/lib/nodejs \
- && cd $WORKDIR && wget https://nodejs.org/dist/v${NODE_JS_VERSION}/node-v${NODE_JS_VERSION}-linux-s390x.tar.gz \
- && sudo tar xzf node-v${NODE_JS_VERSION}-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
+ && cd $WORKDIR && wget https://nodejs.org/dist/v${NODE_JS_VERSION}/node-v${NODE_JS_VERSION}-linux-s390x.tar.xz \
+ && sudo tar xf node-v${NODE_JS_VERSION}-linux-s390x.tar.xz -C /usr/local/lib/nodejs \
 # Install Yarn and patch Bazelisk
  && sudo chmod ugo+w -R /usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x \
- && npm install -g yarn @bazel/bazelisk@1.7.5 \
+ && npm install -g yarn @bazel/bazelisk@1.12.1 \
  && BAZELISK_DIR=/usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x/lib/node_modules/@bazel/bazelisk \
  && curl -sSL $PATCH_URL/bazelisk.js.diff | patch $BAZELISK_DIR/bazelisk.js \
  && cp $WORKDIR/bazelisk/bazel-out/s390x-opt-*/bin/bazelisk-linux_s390x $BAZELISK_DIR \
+# Install libvips
+ && cd $WORKDIR && wget https://github.com/libvips/libvips/releases/download/v8.13.2/vips-8.13.2.tar.gz \
+ && tar xf vips-8.13.2.tar.gz && cd vips-8.13.2/ \
+ && ./configure && make && sudo make install \
+ && mkdir $WORKDIR/libvips-8.13.2-linux-s390x && cd $WORKDIR/libvips-8.13.2-linux-s390x \
+ && wget https://github.com/lovell/sharp-libvips/releases/download/v8.13.2/libvips-8.13.2-linux-x64.tar.gz \
+ && tar -xzf libvips-8.13.2-linux-x64.tar.gz && rm -rf libvips-8.13.2-linux-x64.tar.gz \
+ && cp /usr/local/lib/libvips-cpp.so.42 $WORKDIR/libvips-8.13.2-linux-s390x/lib/ \
+ && sed -i 's/linux-x64/linux-s390x/g' $WORKDIR/libvips-8.13.2-linux-s390x/platform.json \
+ && cd $WORKDIR && tar -czf libvips-8.13.2-linux-s390x.tar.br $WORKDIR/libvips-8.13.2-linux-s390x \
+ && npm config set sharp_libvips_local_prebuilds "$WORKDIR/libvips-8.13.2-linux-s390x.tar.br" \
 # Download and Install Kibana
  && cd $WORKDIR && git clone -b v${KIBANA_VER} https://github.com/elastic/kibana.git \
  && cd $WORKDIR/kibana \
@@ -100,19 +111,29 @@ RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -
  && curl -sSL $PATCH_URL/kibana_patch.diff | git apply \
 # Build re2
  && cd $WORKDIR && git clone https://github.com/uhop/node-re2.git \
- && cd node-re2 && git checkout 1.15.4 \
+ && cd node-re2 && git checkout 1.17.4 \
  && git submodule update --init --recursive \
  && npm install \
- && gzip -c build/Release/re2.node > $WORKDIR/linux-s390x-83.gz \
+ && gzip -c build/Release/re2.node > $WORKDIR/linux-s390x-93.gz \
  && mkdir -p $WORKDIR/kibana/.native_modules/re2/ \
- && cp $WORKDIR/linux-s390x-83.gz $WORKDIR/kibana/.native_modules/re2/ \
+ && cp $WORKDIR/linux-s390x-93.gz $WORKDIR/kibana/.native_modules/re2/ \
 # Bootstrap Kibana
  && cd $WORKDIR/kibana \
  && yarn kbn bootstrap --oss \
- && yarn build --skip-os-packages --oss \
+ && yarn build --skip-os-packages \
  && sudo mkdir /usr/share/kibana/ \
- && sudo tar xzf target/kibana-oss-${KIBANA_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/kibana --strip-components 1 \
+ && sudo tar xzf target/kibana-${KIBANA_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/kibana --strip-components 1 \
  && sudo chown kibana:kibana -R /usr/share/kibana/ \
+ && set -e ; \
+  TINI_VERSION='v0.19.0' ; \
+  TINI_BIN='tini-s390x' ; \
+  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
+  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
+  sha256sum -c "${TINI_BIN}.sha256sum" ; \
+  rm "${TINI_BIN}.sha256sum" ; \
+  sudo mv "${TINI_BIN}" /bin/tini ; \
+  chmod +x /bin/tini \
+
 # Cleanup Cache data, unused packages and source files
  && sudo apt-get remove -y \
     curl \
@@ -121,38 +142,19 @@ RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -
     wget \
  && sudo apt-get autoremove -y && sudo apt-get clean \
  && sudo rm -rf $WORKDIR/kibana* $WORKDIR/node-v${NODE_JS_VERSION}-linux-s390x.tar.gz \
- && sudo rm -rf $WORKDIR/Bazel $WORKDIR/Bazelisk $WORKDIR/go1.16.3.linux-s390x.tar.gz \
+ && sudo rm -rf $WORKDIR/Bazel $WORKDIR/Bazelisk $WORKDIR/vips-8.13.2.tar.gz  $WORKDIR/build_go.sh \
  && sudo rm -rf /var/lib/apt/lists/* $HOME/.cache
 
+# Add an init process, check the checksum to make sure it's a match
 FROM s390x/ubuntu:20.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 # Expose 5601 port used by Kibana
 EXPOSE 5601
 
-ARG NODE_JS_VERSION=14.16.1
-
-RUN apt-get update && apt-get install -yq sudo wget tar curl \
-&& mkdir -p /usr/local/lib/nodejs \
-&& wget https://nodejs.org/dist/v${NODE_JS_VERSION}/node-v${NODE_JS_VERSION}-linux-s390x.tar.gz \
-&& tar xzf node-v${NODE_JS_VERSION}-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
-&& rm node-v${NODE_JS_VERSION}-linux-s390x.tar.gz \
-&& ln -s /usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x/bin/* /usr/bin/
-
-
-# Add an init process, check the checksum to make sure it's a match
-RUN set -e ; \
-  TINI_VERSION='v0.19.0' ; \
-  TINI_BIN='tini-s390x' ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
-  sha256sum -c "${TINI_BIN}.sha256sum" ; \
-  rm "${TINI_BIN}.sha256sum" ; \
-  mv "${TINI_BIN}" /bin/tini ; \
-  chmod +x /bin/tini
-
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
+COPY --from=builder --chown=1000:0 /bin/tini /bin/tini
 WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
 
@@ -180,8 +182,8 @@ RUN groupadd --gid 1000 kibana && \
       --home-dir /usr/share/kibana --no-create-home \
       kibana \
 && echo "kibana ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-&& sudo apt-get autoremove -y && sudo apt-get clean \
-&& sudo rm -rf /var/lib/apt/lists/* $HOME/.cache
+&& apt-get autoremove -y && apt-get clean \
+&& rm -rf /var/lib/apt/lists/* $HOME/.cache
 
 USER kibana
 
