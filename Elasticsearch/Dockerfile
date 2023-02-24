@@ -1,7 +1,8 @@
 # © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-##################################### Dockerfile for Elasticsearch version 7.17.7 ########################################
+
+##################################### Dockerfile for Elasticsearch version 8.6.0 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -31,7 +32,7 @@
 
 FROM s390x/ubuntu:20.04 AS builder
 
-ARG ELASTICSEARCH_VER=7.17.7
+ARG ELASTICSEARCH_VER=8.6.0
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -41,6 +42,7 @@ ENV SOURCE_DIR="/tmp/"
 ENV JAVA_HOME=/opt/temurin/java
 ENV JAVA17_HOME=/opt/temurin/java
 ENV PATH=$JAVA_HOME/bin:$PATH
+ENV GRADLE_USER_HOME="/tmp/.gradle"
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch/elasticsearch.patch"
 ENV TEMURIN_URL="https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.5%2B8/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.5_8.tar.gz"
 
@@ -49,7 +51,11 @@ RUN apt-get update && apt-get install -y \
     git \
     gzip \
     tar \
-    wget
+    wget \
+    locales \
+    make \
+    gcc \
+    g++
 
 # `tini` is a tiny but valid init for containers. This is used to cleanly
 # control how ES and any child processes are shut down.
@@ -85,14 +91,32 @@ RUN apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
 # Install Temurin 17
  && cd $SOURCE_DIR && mkdir -p /opt/temurin/java && curl -SL -o temurin.tar.gz $TEMURIN_URL \
  && tar -zxf temurin.tar.gz -C /opt/temurin/java --strip-components 1 \
+# Build JANSI v2.4.0
+ && cd $SOURCE_DIR && git clone https://github.com/fusesource/jansi.git && cd jansi && git checkout jansi-2.4.0 \
+ && make clean-native native OS_NAME=Linux OS_ARCH=s390x \
+ && mkdir -p $SOURCE_DIR/jansi-jar \
+ && cd $SOURCE_DIR/jansi-jar \
+ && wget https://repo1.maven.org/maven2/org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar \
+ && jar xvf jansi-2.4.0.jar \
+ && cd org/fusesource/jansi/internal/native/Linux \
+ && mkdir s390x \
+ && cp $SOURCE_DIR/jansi/target/native-Linux-s390x/libjansi.so s390x/ \
+ && cd $SOURCE_DIR/jansi-jar \
+ && jar cvf jansi-2.4.0.jar . \
+ && mkdir -p $SOURCE_DIR/.gradle/caches/modules-2/files-2.1/org.fusesource.jansi/jansi/2.4.0/321c614f85f1dea6bb08c1817c60d53b7f3552fd/ \
+ && cp jansi-2.4.0.jar $SOURCE_DIR/.gradle/caches/modules-2/files-2.1/org.fusesource.jansi/jansi/2.4.0/321c614f85f1dea6bb08c1817c60d53b7f3552fd/ \
+ && export sha256=$(sha256sum $SOURCE_DIR/.gradle/caches/modules-2/files-2.1/org.fusesource.jansi/jansi/2.4.0/321c614f85f1dea6bb08c1817c60d53b7f3552fd/jansi-2.4.0.jar | awk '{print $1}') \
 # Download and Build Elasticsearch
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
- && curl -o elasticsearch.patch  $PATCH_URL  \
+ && curl -o elasticsearch.patch $PATCH_URL  \
  && git apply elasticsearch.patch \
- && ./gradlew :distribution:archives:oss-linux-s390x-tar:assemble --parallel \
+ && sed -i '3284,3284 s|6cd91991323dd7b2fb28ca93d7ac12af5a86a2f53279e2b35827b30313fd0b9f|'"${sha256}"'|g' ${SOURCE_DIR}/elasticsearch/gradle/verification-metadata.xml \
+ && sed -i '28,32d' ${SOURCE_DIR}/elasticsearch/server/src/main/java/org/elasticsearch/common/util/BigIntArray.java \
+ && sed -i '29,33d' ${SOURCE_DIR}/elasticsearch/server/src/main/java/org/elasticsearch/common/util/BigDoubleArray.java \
+ && ./gradlew :distribution:archives:linux-s390x-tar:assemble --parallel \
 # Install Elasticsearch
  && mkdir -p /usr/share/elasticsearch \
- && tar -xzf distribution/archives/oss-linux-s390x-tar/build/distributions/elasticsearch-oss-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1
+ && tar -xzf distribution/archives/linux-s390x-tar/build/distributions/elasticsearch-${ELASTICSEARCH_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/elasticsearch --strip-components 1
 
 # The distribution includes a `config` directory, no need to create it
 COPY config/elasticsearch.yml config/
@@ -129,7 +153,7 @@ RUN /usr/sbin/groupadd -g 1000 elasticsearch && \
     adduser --uid 1000 --gid 1000 --home /usr/share/elasticsearch elasticsearch && \
     adduser elasticsearch root && \
     chown -R 0:0 /usr/share/elasticsearch
-
+    
 WORKDIR /usr/share/elasticsearch
 
 COPY --from=builder --chown=0:0 /usr/share/elasticsearch /usr/share/elasticsearch
