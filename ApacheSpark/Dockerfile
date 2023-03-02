@@ -1,6 +1,6 @@
-# © Copyright IBM Corporation 2022.
+# © Copyright IBM Corporation 2022, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-##################### Dockerfile for Apache Spark version 3.3.0 ###################################################
+##################### Dockerfile for Apache Spark version 3.3.1 ###################################################
 #
 # This Dockerfile builds a basic installation of Apache Spark.
 #
@@ -15,12 +15,12 @@
 # Base Image
 FROM s390x/ubuntu:20.04 AS builder
 
-ARG SPARK_VER=v3.3.0
+ARG SPARK_VER=v3.3.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/3.3.0/patch/"
+ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/3.3.1/patch/"
 ARG JDK11_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.15%2B10/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.15_10.tar.gz"
 ARG JDK8_URL="https://github.com/ibmruntimes/semeru8-binaries/releases/download/jdk8u332-b09_openj9-0.32.0/ibm-semeru-open-jdk_s390x_linux_8u332b09_openj9-0.32.0.tar.gz"
 
