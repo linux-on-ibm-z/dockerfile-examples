@@ -29,8 +29,7 @@
 # Kibana can be accessed by browser via http://localhost:5601 or http://host-ip:5601
 #
 ##############################################################################################################
-# Base Image
-FROM s390x/ubuntu:20.04 AS builder
+FROM ubuntu:20.04 AS builder
 
 ARG KIBANA_VER=8.6.0
 ARG NODE_JS_VERSION=16.18.1
@@ -39,20 +38,15 @@ ARG NODE_JS_VERSION=16.18.1
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Set Environment Variable
-ENV WORKDIR=/home/kibana
+ENV WORKDIR=/home
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 ENV PATH=/usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x/bin:/usr/share/kibana/bin:$JAVA_HOME/bin:$WORKDIR/bazel/output/:$PATH
 ENV USE_BAZEL_VERSION=$WORKDIR/bazel/output/bazel
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Kibana/${KIBANA_VER}/patch"
 ENV NODE_OPTIONS="--max_old_space_size=4096"
 
-# Set up Kibana user
-RUN apt-get update && apt-get install sudo && groupadd -r kibana \
- && useradd -g kibana -m kibana \
- && echo "kibana ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-USER kibana
-# Install the dependencies
-RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+    sudo \
     curl \
     git \
     g++ \
@@ -84,11 +78,11 @@ RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -
  && curl -sSL $PATCH_URL/bazelisk_patch.diff | git apply --ignore-whitespace \
  && go build && ./bazelisk build --config=release //:bazelisk-linux-s390x \
 # Installing Node.js
- && sudo mkdir -p /usr/local/lib/nodejs \
+ && mkdir -p /usr/local/lib/nodejs \
  && cd $WORKDIR && wget https://nodejs.org/dist/v${NODE_JS_VERSION}/node-v${NODE_JS_VERSION}-linux-s390x.tar.xz \
- && sudo tar xf node-v${NODE_JS_VERSION}-linux-s390x.tar.xz -C /usr/local/lib/nodejs \
+ && tar xf node-v${NODE_JS_VERSION}-linux-s390x.tar.xz -C /usr/local/lib/nodejs \
 # Install Yarn and patch Bazelisk
- && sudo chmod ugo+w -R /usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x \
+ && chmod ugo+w -R /usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x \
  && npm install -g yarn @bazel/bazelisk@1.12.1 \
  && BAZELISK_DIR=/usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x/lib/node_modules/@bazel/bazelisk \
  && curl -sSL $PATCH_URL/bazelisk.js.diff | patch $BAZELISK_DIR/bazelisk.js \
@@ -96,7 +90,7 @@ RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -
 # Install libvips
  && cd $WORKDIR && wget https://github.com/libvips/libvips/releases/download/v8.13.2/vips-8.13.2.tar.gz \
  && tar xf vips-8.13.2.tar.gz && cd vips-8.13.2/ \
- && ./configure && make && sudo make install \
+ && ./configure && make && make install \
  && mkdir $WORKDIR/libvips-8.13.2-linux-s390x && cd $WORKDIR/libvips-8.13.2-linux-s390x \
  && wget https://github.com/lovell/sharp-libvips/releases/download/v8.13.2/libvips-8.13.2-linux-x64.tar.gz \
  && tar -xzf libvips-8.13.2-linux-x64.tar.gz && rm -rf libvips-8.13.2-linux-x64.tar.gz \
@@ -119,42 +113,48 @@ RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -
  && cp $WORKDIR/linux-s390x-93.gz $WORKDIR/kibana/.native_modules/re2/ \
 # Bootstrap Kibana
  && cd $WORKDIR/kibana \
- && yarn kbn bootstrap --oss \
+ && yarn kbn bootstrap --oss --allow-root\
  && yarn build --skip-os-packages \
- && sudo mkdir /usr/share/kibana/ \
- && sudo tar xzf target/kibana-${KIBANA_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/kibana --strip-components 1 \
- && sudo chown kibana:kibana -R /usr/share/kibana/ \
- && set -e ; \
+ && mkdir /usr/share/kibana/ \
+ && tar xzf target/kibana-${KIBANA_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/kibana --strip-components 1
+
+WORKDIR /usr/share/kibana
+RUN chmod -R g=u /usr/share/kibana
+
+# Add an init process, check the checksum to make sure it's a match
+FROM ubuntu:20.04
+EXPOSE 5601
+
+RUN for iter in {1..10}; do \
+      export DEBIAN_FRONTEND=noninteractive && \
+      apt-get update  && \
+      apt-get upgrade -y  && \
+      apt-get install -y --no-install-recommends \
+       fontconfig fonts-liberation libnss3 libfontconfig1 ca-certificates curl && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
+      sleep 10; \
+    done; \
+    (exit $exit_code)
+
+# Add an init process, check the checksum to make sure it's a match
+RUN set -e ; \
   TINI_VERSION='v0.19.0' ; \
   TINI_BIN='tini-s390x' ; \
   curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
   curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
   sha256sum -c "${TINI_BIN}.sha256sum" ; \
   rm "${TINI_BIN}.sha256sum" ; \
-  sudo mv "${TINI_BIN}" /bin/tini ; \
-  chmod +x /bin/tini \
+  mv "${TINI_BIN}" /bin/tini ; \
+  chmod +x /bin/tini
 
-# Cleanup Cache data, unused packages and source files
- && sudo apt-get remove -y \
-    curl \
-    git \
-    g++ \
-    wget \
- && sudo apt-get autoremove -y && sudo apt-get clean \
- && sudo rm -rf $WORKDIR/kibana* $WORKDIR/node-v${NODE_JS_VERSION}-linux-s390x.tar.gz \
- && sudo rm -rf $WORKDIR/Bazel $WORKDIR/Bazelisk $WORKDIR/vips-8.13.2.tar.gz  $WORKDIR/build_go.sh \
- && sudo rm -rf /var/lib/apt/lists/* $HOME/.cache
-
-# Add an init process, check the checksum to make sure it's a match
-FROM s390x/ubuntu:20.04
-# The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-# Expose 5601 port used by Kibana
-EXPOSE 5601
+RUN mkdir /usr/share/fonts/local
+RUN curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
+RUN echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
+RUN fc-cache -v
 
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
-COPY --from=builder --chown=1000:0 /bin/tini /bin/tini
 WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
 
@@ -180,13 +180,10 @@ RUN find / -xdev -perm -4000 -exec chmod u-s {} +
 RUN groupadd --gid 1000 kibana && \
     useradd --uid 1000 --gid 1000 -G 0 \
       --home-dir /usr/share/kibana --no-create-home \
-      kibana \
-&& echo "kibana ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-&& apt-get autoremove -y && apt-get clean \
-&& rm -rf /var/lib/apt/lists/* $HOME/.cache
-
-USER kibana
+      kibana
 
 ENTRYPOINT ["/bin/tini", "--"]
 
 CMD ["/usr/local/bin/kibana-docker"]
+
+USER kibana
