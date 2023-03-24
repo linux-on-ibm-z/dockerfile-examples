@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2022.
+# © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 9.8 ##############################
+################################ Dockerfile for SonarQube 9.9 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -25,8 +25,8 @@ FROM ubuntu:20.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG ESUM=75da5925db6f6158707bf59e1c56de55f0ff7b3494bb9797cc9d1e783552833c
-ARG BINARY_URL=https://github.com/ibmruntimes/semeru11-binaries/releases/download/jdk-11.0.17%2B8_openj9-0.35.0/ibm-semeru-open-jdk_s390x_linux_11.0.17_8_openj9-0.35.0.tar.gz
+ARG ESUM=ed7651d153fc876bb43ca6ac0f880a405060da71faae6bc198b235094fe381af
+ARG BINARY_URL=https://github.com/ibmruntimes/semeru17-binaries/releases/download/jdk-17.0.6%2B10_openj9-0.36.0/ibm-semeru-open-jdk_s390x_linux_17.0.6_10_openj9-0.36.0.tar.gz
 #
 # Java setup
 #
@@ -44,7 +44,7 @@ RUN set -eux; \
 #
 # SonarQube setup
 #
-ARG SONARQUBE_VERSION=9.8.0.63668
+ARG SONARQUBE_VERSION=9.9.0.65466
 ARG SONARQUBE_ZIP_URL=https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-${SONARQUBE_VERSION}.zip
 ENV JAVA_HOME='/opt/java/openjdk' \
     PATH="/opt/java/openjdk/bin:$PATH" \
