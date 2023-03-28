@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2022.
+# © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Packetbeat 8.5.2 #############################
+#################### Dockerfile for Packetbeat 8.6.2 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -12,12 +12,12 @@
 #################################################################################
 
 # Base image
-FROM s390x/ubuntu:20.04 AS builder
+FROM ubuntu:20.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BEATS_VER=8.5.2
+ARG BEATS_VER=8.6.2
 
 # Set environment variable
 ENV BEATNAME=packetbeat
@@ -52,30 +52,44 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libffi-dev \
     libsystemd-dev \
     libjpeg-dev \
-    libpython3-dev \
-    python3.9 \
-    python3.9-dev \
-    python3.9-venv \
-    python3-lib2to3 \
-    python3.9-distutils \
-    python3-testresources \
-# Install go and download beats source code
- && /usr/bin/update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 10 \
- && /usr/bin/update-alternatives --set python3 /usr/bin/python3.9 \
+    libbz2-dev \
+    libdb-dev \
+    libgdbm-dev \
+    liblzma-dev \
+    libncurses-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    tk-dev \
+    uuid-dev \
+    xz-utils \
+    zlib1g-dev \
+# Install Python 3.9.13
+ && cd $SOURCE_DIR \
+ && wget https://www.python.org/ftp/python/3.9.13/Python-3.9.13.tgz \
+ && tar -xzf Python-3.9.13.tgz \
+ && cd Python-3.9.13 \
+ && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
+ && make \
+ && make install \
+ && /usr/bin/update-alternatives --install /usr/bin/python python /usr/local/bin/python3.9 10 \
+ && /usr/bin/update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.9 10 \
  && /usr/bin/update-alternatives --display python3 \
  && python3 -V \
+ && cd $SOURCE_DIR \
  && wget https://bootstrap.pypa.io/get-pip.py \
  && python3 get-pip.py \
  && rm get-pip.py \
- && cd $SOURCE_DIR \
+ && rm -rf Python* \
  && wget -O rustup-init.sh https://sh.rustup.rs \
  && bash rustup-init.sh -y \
  && export PATH=$PATH:$HOME/.cargo/bin \
  && rustup toolchain install 1.65.0 \
- &&	rustup default 1.65.0 \
- && wget https://go.dev/dl/go1.18.7.linux-s390x.tar.gz \
- && chmod ugo+r go1.18.7.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.18.7.linux-s390x.tar.gz \
+ && rustup default 1.65.0 \
+# Install go and download beats source code
+ && wget https://go.dev/dl/go1.18.10.linux-s390x.tar.gz \
+ && chmod ugo+r go1.18.10.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.18.10.linux-s390x.tar.gz \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
@@ -104,7 +118,7 @@ RUN mkdir -p $BEATHOME \
  && chmod 0775 $BEATHOME/data $BEATHOME/logs \
  && chmod 0755 $BEATHOME/$BEATNAME
 
-FROM s390x/ubuntu:20.04
+FROM ubuntu:20.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
