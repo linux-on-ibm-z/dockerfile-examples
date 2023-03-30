@@ -55,6 +55,7 @@ RUN apt-get update && apt-get install -y \
  && git clone https://github.com/google/cadvisor.git \
  && cd $GOPATH/src/github.com/google/cadvisor/ \
  && git checkout v$CADVISOR_VER \
+ && curl -sSL https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/cAdvisor/0.47.0/patch/assets.patch | git apply \
 # Build cadvisor
  && cd $GOPATH/src/github.com/google/cadvisor \
  && sed -i "s|,-race||" Makefile \
