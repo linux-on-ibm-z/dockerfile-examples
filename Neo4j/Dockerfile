@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2018, 2022.
+# © Copyright IBM Corporation 2018, 2023.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 4.4.10 ##################################
+########## Dockerfile for Neo4j version 5.6.0 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -31,11 +31,11 @@ FROM s390x/ubuntu:18.04
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG NEO4J_VER=4.4.10
+ARG NEO4J_VER=5.6.0
 ENV NEO4J_EDITION=community
 ENV NEO4J_HOME=/var/lib/neo4j
 ENV NEO4J_TARBALL=neo4j-community-${NEO4J_VER}-unix.tar.gz
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-s390x
 ENV TINI_VERSION="v0.18.0"
 
 RUN addgroup --system neo4j && adduser --system --no-create-home --home "${NEO4J_HOME}" --ingroup neo4j neo4j
@@ -45,13 +45,14 @@ COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 # Install dependencies
 RUN  apt-get update  \
+  && apt-get install -y ca-certificates-java \
   && apt-get install -y  \
                 tar \
                 wget \
                 curl \
                 gosu \
                 jq \
-                openjdk-11-jdk \
+                openjdk-17-jdk \
 # Download tini
   && curl -L --fail --silent --show-error "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-s390x" > /sbin/tini \
   && chmod +x /sbin/tini \
