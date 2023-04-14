@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2020
+# © Copyright IBM Corporation 2017, 2023
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############################# Dockerfile for Marathon 1.8.222 #####################################
@@ -25,13 +25,13 @@ FROM s390x/ubuntu:18.04 as builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
-ARG MESOS_VERSION=1.9.0
-ARG REPO_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheMesos/1.9.0/patch"
+ARG MESOS_VERSION=1.11.0
+ARG REPO_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheMesos/1.11.0/patch"
 
 # Set the Environmental Variables
 ENV SOURCE_DIR='/tmp'
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
-ENV JAVA_TOOL_OPTIONS='-Xmx2048M'
+ENV JAVA_HOME=$SOURCE_DIR/jdk8u352-b08
+ENV JAVA_TOOL_OPTIONS='-Xmx4096M'
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV MESOS_SYSTEMD_ENABLE_SUPPORT=false
 
@@ -42,7 +42,6 @@ RUN apt-get update && apt-get install -y \
         git \
         gcc \
         g++ \
-        openjdk-8-jdk \
         patch \
         tar \
         wget \
@@ -64,6 +63,13 @@ RUN apt-get update && apt-get install -y \
         python-six \
         python-virtualenv \
         checkinstall
+
+# Install IBM SEMERU JAVA 8 for Ubuntu 18.04
+RUN cd $SOURCE_DIR \
+    && wget https://github.com/ibmruntimes/semeru8-binaries/releases/download/jdk8u352-b08_openj9-0.35.0/ibm-semeru-open-jdk_s390x_linux_8u352b08_openj9-0.35.0.tar.gz \
+    && tar -xzf ibm-semeru-open-jdk_s390x_linux_8u352b08_openj9-0.35.0.tar.gz \
+    && java -version \
+    && javac -version
 
 # Install curl 7.64 for Ubuntu 18.04
 RUN cd $SOURCE_DIR \
@@ -101,21 +107,21 @@ RUN cd $SOURCE_DIR \
     && cd build \
     && ../configure \
     && make \
-    && checkinstall --pkgversion=1.9.0 -y
+    && checkinstall --pkgversion=1.11.0 -y
 
 FROM s390x/ubuntu:18.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 ENV SOURCE_DIR='/tmp'
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
+ENV JAVA_HOME=$SOURCE_DIR/jdk8u352-b08
 ENV JAVA_TOOL_OPTIONS='-Xmx2048M'
 ENV PATH=$PATH:$JAVA_HOME/bin:/usr/share/zookeeper-3.4.8/bin:/usr/share/marathon/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
 
 WORKDIR $SOURCE_DIR
 
-COPY --from=builder /tmp/mesos/build/build_1.9.0-1_s390x.deb ./
+COPY --from=builder /tmp/mesos/build/build_1.11.0-1_s390x.deb ./
 COPY --from=builder /tmp/mesos/build/src/python/dist ./
 COPY --from=builder /tmp/mesos/build/3rdparty/zookeeper-3.4.8 /usr/share/zookeeper-3.4.8/
 
@@ -128,13 +134,19 @@ RUN apt-get update && apt-get install -y \
     libssl1.0.0 \
     libsvn1 \
     zlib1g \
-    openjdk-8-jdk \
     wget \
     tar \
 # Install mesos and python packages
-    && apt install ./build_1.9.0-1_s390x.deb \
+    && apt install ./build_1.11.0-1_s390x.deb \
     && pip install mesos.*whl \
     && ldconfig
+
+# Install IBM SEMERU JAVA 8 for Ubuntu 18.04
+RUN cd $SOURCE_DIR \
+    && wget https://github.com/ibmruntimes/semeru8-binaries/releases/download/jdk8u352-b08_openj9-0.35.0/ibm-semeru-open-jdk_s390x_linux_8u352b08_openj9-0.35.0.tar.gz \
+    && tar -xzf ibm-semeru-open-jdk_s390x_linux_8u352b08_openj9-0.35.0.tar.gz \
+    && java -version \
+    && javac -version
 
 RUN cd $SOURCE_DIR \
 # install Marathon
@@ -171,3 +183,4 @@ RUN chmod +x run-marathon.sh
 CMD ./run-marathon.sh
 
 # End of Dockerfile
+
