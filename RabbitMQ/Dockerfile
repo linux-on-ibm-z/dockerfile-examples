@@ -1,8 +1,8 @@
-# © Copyright IBM Corporation 2022.
+# © Copyright IBM Corporation 2022, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
 #
-################# Dockerfile for RabbitMQ version 3.11.4 ################################
+################# Dockerfile for RabbitMQ version 3.11.9 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -22,11 +22,11 @@
 #########################################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:20.04 as builder
 
-ARG RABBITMQ_VER=3.11.4
-ARG ERLANG_VERSION=25.1.2
-ARG ELIXIR_VERSION=1.13.4
+ARG RABBITMQ_VER=3.11.9
+ARG ERLANG_VERSION=25.2
+ARG ELIXIR_VERSION=1.14.3
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
@@ -34,54 +34,54 @@ ENV SOURCE_DIR=/tmp/source
 
 ENV LC_ALL=en_US.UTF-8
 # Install the build dependencies for RabbitMQ
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     locales \
-	openssl \
-	wget \
-	tar \
-	xz-utils \
-	make \
-	python3 \
-	xsltproc \
-	rsync \
-	git \
-	zip \
-	sed \
-	wget \
-	tar \
-	make \
-	perl \
-	openssl \
-	gcc \
-	g++ \
-	libncurses-dev \
-	libncurses5-dev \
-	unixodbc \
-	unixodbc-dev \
-	libssl-dev \
-	openjdk-8-jdk \
-	libwxgtk3.0-dev \
-	xsltproc \
-	libxml2-utils \
- &&	ln -sf /usr/bin/python3 /usr/bin/python \
+        openssl \
+        wget \
+        tar \
+        xz-utils \
+        make \
+        python3 \
+        xsltproc \
+        rsync \
+        git \
+        zip \
+        sed \
+        wget \
+        tar \
+        make \
+        perl \
+        openssl \
+        gcc \
+        g++ \
+        libncurses-dev \
+        libncurses5-dev \
+        unixodbc \
+        unixodbc-dev \
+        libssl-dev \
+        openjdk-8-jdk \
+        libwxgtk3.0-gtk3-dev \
+        xsltproc \
+        libxml2-utils \
+ &&     ln -sf /usr/bin/python3 /usr/bin/python \
 # Install the build dependencies for Erlang
- && apt-get install -y \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     curl \
-	autoconf \
-	fop \
-	flex \
-	gawk \
-	gcc \
-	g++ \
-	gzip \
-	libncurses-dev \
-	libssl-dev \
-	libxml2-utils \
-	make \
-	tar \
-	unixodbc-dev \
-	wget \
-	xsltproc \
+        autoconf \
+        fop \
+        flex \
+        gawk \
+        gcc \
+        g++ \
+        gzip \
+        libncurses-dev \
+        libssl-dev \
+        libxml2-utils \
+        make \
+        tar \
+        unixodbc-dev \
+        wget \
+        xsltproc \
 # Download and build Erlang
  && wget https://github.com/erlang/otp/releases/download/OTP-$ERLANG_VERSION/otp_src_$ERLANG_VERSION.tar.gz \
  && tar zxf otp_src_$ERLANG_VERSION.tar.gz && cd otp_src_$ERLANG_VERSION \
@@ -95,9 +95,6 @@ RUN apt-get update && apt-get install -y \
  && cd elixir && git checkout v$ELIXIR_VERSION && make && make install \
  && cd /opt && tar xf $SOURCE_DIR/rabbitmq-server-$RABBITMQ_VER.tar.xz \
  && cd rabbitmq-server-$RABBITMQ_VER  && make && make install \
- && mkdir -p /etc/rabbitmq \
- && echo "[{rabbit, [{loopback_users, []}]}]." | tee /etc/rabbitmq/rabbitmq.config \
- && rm -rf deps/rabbit/plugins && ln -s  $PWD/plugins deps/rabbit/plugins \
 # Clean up of unused packages and source directory.
  && rm -rf $SOURCE_DIR \
  && apt-get remove -y \
@@ -114,12 +111,24 @@ RUN apt-get update && apt-get install -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt/rabbitmq-server-$RABBITMQ_VER
+FROM s390x/ubuntu:20.04
+ENV LC_ALL=en_US.UTF-8
+ARG RABBITMQ_VER=3.11.9
 
+RUN apt-get update \
+&& DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    locales \
+    openssl \
+&& mkdir -p /etc/rabbitmq \
+&& mkdir /opt/rabbitmq-server
+
+COPY --from=builder /opt/rabbitmq-server-$RABBITMQ_VER /opt/rabbitmq-server
+COPY --from=builder /usr/bin/erl /usr/bin/
+COPY --from=builder /usr/lib/erlang /usr/lib/erlang
+RUN echo "[{rabbit, [{loopback_users, []}]}]." | tee /etc/rabbitmq/rabbitmq.config
+WORKDIR /opt/rabbitmq-server
 # Expose RabbitMQ management console port and RabbitMQ server port
 EXPOSE 15672 5672
-
 # Enable RabbitMQ management plugin and start RabbitMQ server
 ENTRYPOINT sbin/rabbitmq-plugins enable rabbitmq_management && sbin/rabbitmq-server
-
 # End of Dockerfile
