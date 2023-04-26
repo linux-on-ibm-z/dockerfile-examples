@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2023
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for InfluxDB 2.6.1 ############################s
+#################### Dockerfile for InfluxDB 2.7.0 ############################s
 #
 # Builds InfluxDB
 #
@@ -15,8 +15,7 @@
 # can mount a host directory to that point to access persisted container data.
 # A typical invocation of the container might be:
 #
-# $ docker run -p <port>:8086 \
-#     <image_name>
+# $ docker run --name <container_name> -p <port>:8086 -d <image_name>
 #
 # For more information, see https://hub.docker.com/_/influxdb
 ###############################################################################
@@ -28,7 +27,7 @@ FROM s390x/ubuntu:20.04 as builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Environment
-ARG VERSION=2.6.1
+ARG VERSION=2.7.0
 ENV DEBIAN_FRONTEND noninteractive
 ENV SOURCE_ROOT=/tmp
 ENV GOPATH=$HOME/go
@@ -46,8 +45,8 @@ RUN apt-get update \
 &&  export PATH="$HOME/.cargo/bin:$PATH" \
 &&  rustup default 1.53.0 \
 ### Install Go ##########################################
-&&  wget https://golang.org/dl/go1.18.4.linux-s390x.tar.gz \
-&&  tar -C /usr/local -xzf go1.18.4.linux-s390x.tar.gz \
+&&  wget https://golang.org/dl/go1.20.linux-s390x.tar.gz \
+&&  tar -C /usr/local -xzf go1.20.linux-s390x.tar.gz \
 &&  export PATH=/usr/local/go/bin:$PATH \
 ### Build InfluxDB ###########################################
 &&  export GO111MODULE=on \
