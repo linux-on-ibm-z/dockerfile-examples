@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2022
+# © Copyright IBM Corporation 2017, 2023
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for TensorFlow version 2.9.1 #########
+########## Dockerfile for TensorFlow version 2.11.0 #########
 #
 # This Dockerfile builds a basic installation of TensorFlow.
 #
@@ -25,7 +25,7 @@ FROM ubuntu:20.04 as builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_ROOT=/tmp/source
-ENV PATH=$SOURCE_ROOT/bazel/output/:$PATH \
+ENV PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.11.0/patch \
 PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True JTOOLS=$SOURCE_ROOT/remote_java_tools_linux
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -44,36 +44,56 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libblas-dev  \
     liblapack-dev \
     gfortran \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3 40 \
     && ldconfig \
     && pip3 install --upgrade pip \
     && pip3 install --no-cache-dir \
-    numpy==1.22.3 \
+    numpy==1.22.4 \
     wheel \
-    scipy==1.6.3 \
+    scipy==1.7.3 \
     portpicker \
     protobuf==3.13.0 \
+    opt_einsum \
     grpcio \
     packaging \
-    && pip3 install --no-cache-dir \
-    keras_preprocessing --no-deps \
-    && update-alternatives --install /usr/bin/python python /usr/bin/python3 40 \
-# Build Bazel
+    requests \
+    psutil \
+#Build ICU data
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
-    && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/5.1.1/build_bazel.sh \
+    && git clone --depth 1 --single-branch --branch "release-69-1" https://github.com/unicode-org/icu.git \
+    && cd icu/icu4c/source/ \
+    && echo '{ "localeFilter": { "filterType": "language", "includelist": ["en"] } }' > filters.json \
+    && ICU_DATA_FILTER_FILE=filters.json ./runConfigureICU Linux \
+    && make clean && make \
+    && find data/out/build/ -name '*pool.res' -print0 | xargs -0 touch \
+    && make \
+    && cd data/out/tmp \
+    && LD_LIBRARY_PATH=../../../lib ../../../bin/genccode "icudt69b.dat" \
+    && echo "U_CAPI const void * U_EXPORT2 uprv_getICUData_conversion() { return icudt69b_dat.bytes; }" >> "icudt69b_dat.c" \
+    && cp icudt69b_dat.c icu_conversion_data_big_endian.c \
+    && gzip icu_conversion_data_big_endian.c \
+    && split -a 3 -b 100000 icu_conversion_data_big_endian.c.gz icu_conversion_data_big_endian.c.gz. \
+# Build Bazel
+    && cd $SOURCE_ROOT \
+    && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/5.3.2/build_bazel.sh \
+	&& sed -i 's/5.3.2/5.3.0/g' build_bazel.sh \
+	&& sed -i 's#Bazel/${PACKAGE_VERSION}/patch#Bazel/5.3.2/patch#g' build_bazel.sh \
+	&& sed -i 's/apt-get install/DEBIAN_FRONTEND=noninteractive apt-get install/g' build_bazel.sh \
     && bash build_bazel.sh -y \
+    && cp $SOURCE_ROOT/bazel/output/bazel /usr/local/bin/bazel \
 # Download source code
     && cd $SOURCE_ROOT \
     && git clone https://github.com/tensorflow/tensorflow \
     && cd tensorflow \
-    && git checkout v2.9.1 \
-    && curl -o build_patch.diff https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.9.1/patch/build_patch.diff \
-    && git apply --ignore-whitespace build_patch.diff \
-    && sed -i 's/float_t/float/g' tensorflow/stream_executor/tpu/c_api_decl.h \
+    && git checkout v2.11.0 \
+    && curl -o tf_v2.11.0.patch ${PATCH_URL}/tf_v2.11.0.patch \
+    && patch -p1 < tf_v2.11.0.patch \
+	&& cp ${SOURCE_ROOT}/icu/icu4c/source/data/out/tmp/icu_conversion_data_big_endian.c.gz.* third_party/icu/data/ \
 # Configure
     && yes "" | ./configure || true \
 # Build TensorFlow
-    && bazel --host_jvm_args="-Xms1024m" --host_jvm_args="-Xmx2048m" build  --define=tensorflow_mkldnn_contraction_kernel=0 --define tflite_with_xnnpack=false //tensorflow/tools/pip_package:build_pip_package \
+    && bazel build //tensorflow/tools/pip_package:build_pip_package \
 # Build tensorflow_io_gcs_filesystem wheel
     && sudo pip install --upgrade pip \
     && cd $SOURCE_ROOT \
@@ -83,31 +103,11 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && python3 setup.py -q bdist_wheel --project tensorflow_io_gcs_filesystem \
     && cd dist \
     && sudo pip3 install ./tensorflow_io_gcs_filesystem-0.23.1-cp*-cp*-linux_s390x.whl \
-#Build libclang wheel
-    && cd $SOURCE_ROOT \
-    && sudo apt-get install -y cmake \
-    && git clone https://github.com/llvm/llvm-project \
-    && cd llvm-project \
-    && git checkout llvmorg-9.0.1 \
-    && mkdir -p build \
-    && cd build \
-    && cmake ../llvm -DLLVM_ENABLE_PROJECTS=clang -DBUILD_SHARED_LIBS=OFF -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_TARGETS_TO_BUILD=SystemZ -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_CXX_FLAGS_MINSIZEREL="-Os -DNDEBUG -static-libgcc -static-libstdc++ -s" \
-    && make libclang -j$(nproc) \
-    && cd $SOURCE_ROOT \
-    && git clone https://github.com/sighingnow/libclang.git \
-    && cd libclang \
-    && cp $SOURCE_ROOT/llvm-project/build/lib/libclang.so.9 native/ \
-    && cp $SOURCE_ROOT/llvm-project/build/lib/libclang.so native/ \
-    && python3 setup.py -q bdist_wheel \
-    && cd dist \
-    && sudo pip3 install libclang-*-py2.py3-none-any.whl \
 # Build TensorFlow wheel
     && cd $SOURCE_ROOT/tensorflow \
     && mkdir -p /tensorflow_wheel \
     && bazel-bin/tensorflow/tools/pip_package/build_pip_package /tensorflow_wheel \
     && cp $SOURCE_ROOT/io/dist/tensorflow_io_gcs_filesystem-0.23.1-cp*-cp*-linux_s390x.whl /tensorflow_wheel \
-    && cp $SOURCE_ROOT/libclang/dist/libclang-*-py2.py3-none-any.whl  /tensorflow_wheel \
-
 # Cleanup
     && apt-get -y remove \
     git \
@@ -115,7 +115,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     wget \
     zip \
     && apt-get autoremove -y \
-    && apt autoremove -y \
     && rm -rf $SOURCE_ROOT \
     && rm -rf /root/.cache/ \
     && apt-get clean \
@@ -129,8 +128,7 @@ FROM ubuntu:20.04
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_ROOT=/tmp/source
-ENV PATH=$SOURCE_ROOT/bazel/output/:$PATH \
-PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
+ENV PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libhdf5-dev \
@@ -141,28 +139,32 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libblas-dev  \
     liblapack-dev \
     gfortran \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3 40 \
     && ldconfig \
     && pip3 install --upgrade pip \
     && pip3 install --no-cache-dir \
-    numpy==1.22.3 \
+    numpy==1.22.4 \
     wheel \
-    scipy==1.6.3 \
+    scipy==1.7.3 \
     portpicker \
     protobuf==3.13.0 \
+    opt_einsum \
     grpcio \
     packaging \
-    && pip3 install --no-cache-dir \
-    keras_preprocessing --no-deps \
-    && update-alternatives --install /usr/bin/python python /usr/bin/python3 40 \
+    requests \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /tensorflow_wheel
 # COPY the wheel from builder stage
-COPY --from=builder /tensorflow_wheel/tensorflow-2.9.1-cp*-linux_s390x.whl /tensorflow_wheel/tensorflow_io_gcs_filesystem-0.23.1-cp*-cp*-linux_s390x.whl /tensorflow_wheel/libclang-*-py2.py3-none-any.whl /tensorflow_wheel/
+COPY --from=builder /tensorflow_wheel/tensorflow-2.11.0-cp*-linux_s390x.whl /tensorflow_wheel/tensorflow_io_gcs_filesystem-0.23.1-cp*-cp*-linux_s390x.whl /tensorflow_wheel/
 # Install the wheel
-RUN pip3 install /tensorflow_wheel/tensorflow_io_gcs_filesystem-0.23.1-cp*-cp*-linux_s390x.whl /tensorflow_wheel/libclang-*-py2.py3-none-any.whl\
-    && pip3 install /tensorflow_wheel/tensorflow-2.9.1-cp*-linux_s390x.whl
-
-VOLUME /tensorflow_wheel
+RUN pip3 install --no-cache-dir /tensorflow_wheel/tensorflow_io_gcs_filesystem-0.23.1-cp*-cp*-linux_s390x.whl \
+    && pip3 install --no-cache-dir /tensorflow_wheel/tensorflow-2.11.0-cp*-linux_s390x.whl \
+    && rm -f /tensorflow_wheel/*.whl \
+    && rm -rf /root/.cache/
 
 COPY bashrc /etc/bash.bashrc
 RUN chmod a+rwx /etc/bash.bashrc
+CMD ["bash", "-c", "source /etc/bash.bashrc"]
 # End of Dockerfile
