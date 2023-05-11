@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 9.3.6 ############################################
+############################ Dockerfile for Grafana 9.5.1 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -21,9 +21,9 @@
 ARG BASE_IMAGE=s390x/ubuntu:20.04
 FROM ${BASE_IMAGE} AS builder
 
-ARG GRAFANA_VER=9.3.6
-ARG NODE_JS_VERSION=16.14.0
-ARG GO_VERSION=1.19.3
+ARG GRAFANA_VER=9.5.1
+ARG NODE_JS_VERSION=16.20.0
+ARG GO_VERSION=1.19.8
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -79,7 +79,7 @@ ENV PATH=$PATH:/usr/share/nodejs/bin
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GF_UID="472"
 ARG GF_GID="472"
-ARG NODE_JS_VERSION=16.14.0
+ARG NODE_JS_VERSION=16.20.0
 
 ENV PATH=/usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     GF_PATHS_CONFIG="/etc/grafana/grafana.ini" \
@@ -97,11 +97,9 @@ RUN apt-get update && apt-get install -y ca-certificates curl tzdata libatomic1 
     apt-get autoremove -y && rm -rf /var/lib/apt/lists/*;
 
 
-COPY --from=builder /usr/local/node-v${NODE_JS_VERSION}-linux-s390x/     /usr/share/nodejs
 COPY --from=builder $BASE/grafana/public/              /usr/share/grafana/public/
 COPY --from=builder $BASE/grafana/conf/                /usr/share/grafana/conf/
-COPY --from=builder $BASE/grafana/bin/linux-s390x/grafana-cli       /usr/sbin/
-COPY --from=builder $BASE/grafana/bin/linux-s390x/grafana-server    /usr/sbin/
+COPY --from=builder $BASE/grafana/bin/linux-s390x/*    /usr/share/grafana/bin/
 
 RUN mkdir -p "$GF_PATHS_HOME/.aws" && \
     addgroup --system --gid $GF_GID grafana && \
@@ -110,6 +108,8 @@ RUN mkdir -p "$GF_PATHS_HOME/.aws" && \
              "$GF_PATHS_PROVISIONING/dashboards" \
              "$GF_PATHS_PROVISIONING/notifiers" \
              "$GF_PATHS_PROVISIONING/plugins" \
+             "$GF_PATHS_PROVISIONING/access-control" \
+             "$GF_PATHS_PROVISIONING/alerting" \
              "$GF_PATHS_LOGS" \
              "$GF_PATHS_PLUGINS" \
              "$GF_PATHS_DATA" && \
