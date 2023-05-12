@@ -19,7 +19,7 @@
 ##################################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04 AS builder
+FROM s390x/ubuntu:20.04 AS builder
 ARG COUCHDB_VER=3.3.1
 
 # The author
@@ -29,78 +29,54 @@ ENV SOURCE_ROOT=/tmp/source
 WORKDIR $SOURCE_ROOT
 
 ENV PATH=$PATH:/usr/share/couchdb/dev  LD_LIBRARY_PATH=/usr/lib
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CouchDB/${COUCHDB_VER}/patch"
 # Install following build dependencies
 RUN apt-get update \
- && apt-get install -y build-essential pkg-config ncurses-base g++-5 gcc-5 python python3 python3-pip python3-venv python3-markupsafe hostname curl git patch wget tar make zip autoconf2.13 automake libicu-dev libcurl4-openssl-dev libncurses5-dev locales libncurses-dev libssl-dev unixodbc-dev libwxgtk3.0-dev openjdk-8-jdk xsltproc libxml2-utils libbz2-dev libdb-dev libffi-dev libgdbm-dev liblzma-dev libncurses-dev libreadline-dev libsqlite3-dev libssl-dev make tar tk-dev uuid-dev wget xz-utils zlib1g-dev \
- && rm -rf /usr/bin/gcc /usr/bin/g++ /usr/bin/cc \
- && ln -s /usr/bin/gcc-5 /usr/bin/gcc \
- && ln -s /usr/bin/g++-5 /usr/bin/g++ \
- && ln -s /usr/bin/gcc /usr/bin/cc \
-# Download and Install Python
- && cd $SOURCE_ROOT \
- && wget https://www.python.org/ftp/python/3.8.2/Python-3.8.2.tgz \
- && tar -xzf Python-3.8.2.tgz \
- && cd Python-3.8.2 \
- && ./configure --prefix=/usr --exec-prefix=/usr \
- && make \
- && sudo make install \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential pkg-config ncurses-base python3 python3-pip python3-venv hostname curl git patch wget tar make zip libicu-dev libcurl4-openssl-dev libncurses5-dev locales libssl-dev unixodbc-dev libwxgtk3.0-gtk3-dev openjdk-11-jdk xsltproc libxml2-utils libmozjs-68-dev \
+ && pip3 install --upgrade wheel sphinx==5.3.0 sphinx_rtd_theme docutils==0.17 nose requests hypothesis virtualenv jinja2 \
 # Download and Install Erlang
  && cd $SOURCE_ROOT \
- && wget http://www.erlang.org/download/otp_src_24.3.tar.gz \
- && tar zxf otp_src_24.3.tar.gz && rm otp_src_24.3.tar.gz \
- && cd otp_src_24.3 \
- && export ERL_TOP=$SOURCE_ROOT/otp_src_24.3 \
+ && wget https://github.com/erlang/otp/releases/download/OTP-24.3.4.10/otp_src_24.3.4.10.tar.gz \
+ &&  tar zxf otp_src_24.3.4.10.tar.gz && rm otp_src_24.3.4.10.tar.gz  \
+ && cd otp_src_24.3.4.10 \
+ && export ERL_TOP=$SOURCE_ROOT/otp_src_24.3.4.10 \
  && ./configure --prefix=/usr \
  && make \
  && make install \
 # Download and Install Elixir
  && git clone https://github.com/elixir-lang/elixir.git \
  && cd elixir \
- && git checkout v1.14.3 \
+ && git checkout v1.13.4 \
  && export LANG=en_US.UTF-8 \
  && locale-gen en_US.UTF-8 \
  && make \
  && make install \
-# Download and Install Spider Monkey
- && cd $SOURCE_ROOT \
- && wget http://ftp.mozilla.org/pub/spidermonkey/releases/1.8.5/js185-1.0.0.tar.gz \
- && tar zxf js185-1.0.0.tar.gz  \
- && cd js-1.8.5 \
- && cd $SOURCE_ROOT \
- && curl -o jsval.h.diff $PATCH_URL/jsval.h.diff \ 
- && patch "$SOURCE_ROOT/js-1.8.5/js/src/jsval.h" jsval.h.diff \
- && curl -o jsvalue.h.diff  $PATCH_URL/jsvalue.h.diff \
- && patch "$SOURCE_ROOT/js-1.8.5/js/src/jsvalue.h" jsvalue.h.diff \
- && curl -o Makefile.in.diff  $PATCH_URL/Makefile.in.diff \
- && patch "$SOURCE_ROOT/js-1.8.5/js/src/Makefile.in" Makefile.in.diff \
- && cd "$SOURCE_ROOT/js-1.8.5/js/src"    \
- && autoconf2.13 \
- && mkdir $SOURCE_ROOT/js-1.8.5/js/src/build_OPT.OBJ \
- && cd $SOURCE_ROOT/js-1.8.5/js/src/build_OPT.OBJ \
- && ../configure --prefix=/usr \
- && make \
- && make install \
- && pip3 install --upgrade wheel sphinx==5.3.0 sphinx_rtd_theme docutils==0.17 nose requests hypothesis virtualenv jinja2 \
- # Install nodejs
+# Install nodejs
  && cd $SOURCE_ROOT \
  && mkdir -p /usr/local/lib/nodejs  \
- && wget https://nodejs.org/dist/v16.13.0/node-v16.13.0-linux-s390x.tar.gz \
- && tar xzvf node-v16.13.0-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
- && ln -s /usr/local/lib/nodejs/node-v16.13.0-linux-s390x/bin/* /usr/bin/ \
+ && wget https://nodejs.org/dist/v14.21.3/node-v14.21.3-linux-s390x.tar.gz \
+ && tar xzvf node-v14.21.3-linux-s390x.tar.gz -C /usr/local/lib/nodejs \
+ && ln -s /usr/local/lib/nodejs/node-v14.21.3-linux-s390x/bin/* /usr/bin/ \
+# Build chromedriver 
+ && cd $SOURCE_ROOT \
+ && npm install @testim/chrome-version@^1.1.2 axios@^0.27.2 tcp-port-used@^1.0.1 del@^6.0.0 extract-zip@^2.0.1 https-proxy-agent@^5.0.0 proxy-from-env@^1.1.0 \
+ && git clone -b 105.0.0 https://github.com/giggio/node-chromedriver.git \
+ && cd node-chromedriver \
+ && sed -i "s#process.arch === 'arm64' || process.arch === 'x64'#process.arch === 'arm64' || process.arch === 's390x' || process.arch === 'x64'#g" install.js \
+ && npm pack \
 # Download and install CouchDB
  && cd $SOURCE_ROOT \
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
  && git checkout ${COUCHDB_VER} \
- && sed -i '151,151 s/v1.2.9/v1.2.8/g' rebar.config.script \
- && ./configure \
- && make  \
+ && ./configure  --spidermonkey-version 68 \
+ && cd src/fauxton/  \
+ && npm i $SOURCE_ROOT/node-chromedriver/chromedriver-105.0.0.tgz --unsafe-perm=true --allow-root \
+ && cd $SOURCE_ROOT/couchdb \
  && make release \
  && cp -r $SOURCE_ROOT/couchdb/rel/couchdb /usr/share/couchdb
 
 
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:20.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -114,7 +90,6 @@ COPY --from=builder /usr/lib/erlang /usr/lib/erlang
 COPY --from=builder /usr/bin/erlc /usr/bin/erlc
 COPY --from=builder /usr/bin/erl /usr/bin/erl
 COPY --from=builder /usr/local/bin/elixir /usr/local/bin/elixir
-COPY --from=builder /usr/lib/libmozjs185* /usr/lib/
 RUN apt-get update && apt-get install -y \
         python3 python3-pip python3-venv \
 && apt-get autoremove -y && apt autoremove -y \
