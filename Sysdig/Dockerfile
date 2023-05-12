@@ -5,6 +5,8 @@
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
+# This image should be built on Ubuntu 20.04.
+#
 # Sysdig is open source, system-level exploration: capture system state and activity from a running Linux instance, then save, filter and analyze.
 # Sysdig is scriptable in Lua and includes a command line interface and a powerful interactive UI, csysdig, that runs in your terminal.
 #
