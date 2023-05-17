@@ -5,8 +5,6 @@
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
-# This image should be built on Ubuntu 20.04.
-#
 # Sysdig is open source, system-level exploration: capture system state and activity from a running Linux instance, then save, filter and analyze.
 # Sysdig is scriptable in Lua and includes a command line interface and a powerful interactive UI, csysdig, that runs in your terminal.
 #
@@ -17,8 +15,9 @@
 # To guarantee a smooth deployment, the kernel headers must be installed in the host operating system, before running sysdig.
 #
 # To run sysdig in a Docker container use below command
-#  docker run -it --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v
-#   /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:rw -v /usr:/host/usr:ro --name <container_name> <image_name>
+#  "docker run --rm -i -t --privileged --net=host -v /var/run/docker.sock:/host/var/run/docker.sock 
+#  -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /src:/src -v /lib/modules:/host/lib/modules:ro 
+#  -v /usr:/host/usr:ro -v /etc:/host/etc:ro --name NAME IMAGE"
 #
 # For more details, see https://github.com/draios/sysdig/wiki/How-to-Install-Sysdig-for-Linux#installation-inside-a-docker-container
 #
@@ -40,8 +39,8 @@ WORKDIR $SOURCE_ROOT
 # Install dependencies
 RUN apt-get update \
         && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y git g++ \
-        linux-headers-$(uname -r) cmake libelf-dev pkg-config kmod
-        
+        linux-headers-$(uname -r) cmake libelf-dev pkg-config kmod rpm
+
 # Download source code
 RUN cd $SOURCE_ROOT \
         && git clone https://github.com/draios/sysdig.git \
@@ -50,65 +49,52 @@ RUN cd $SOURCE_ROOT \
         && mkdir build \
 # Configure Sysdig
         && cd build \
-        && cmake -DCMAKE_INSTALL_PREFIX=/opt/sysdig -DSYSDIG_VERSION=${SYSDIG_VER} .. \
+        && cmake -Wno-dev -DBUILD_DRIVER=OFF -DSYSDIG_VERSION=${SYSDIG_VER} .. \
         && cd $SOURCE_ROOT/sysdig/build/falcosecurity-libs-repo/falcosecurity-libs-prefix/src/falcosecurity-libs/cmake/modules \
         && sed -i 's+https://github.com/curl/curl/releases/download/curl-7_84_0/curl-7.84.0.tar.bz2+https://github.com/curl/curl/releases/download/curl-7_85_0/curl-7.85.0.tar.bz2+g' curl.cmake \
         && sed -i 's/702fb26e73190a3bd77071aa146f507b9817cc4dfce218d2ab87f00cd3bc059d/21a7e83628ee96164ac2b36ff6bf99d467c7b0b621c1f7e317d8f0d96011539c/g' curl.cmake \
         && sed -i '135{h;d};136G' grpc.cmake \
 # Build and Install Sysdig
         && cd $SOURCE_ROOT/sysdig/build \
-        && make \
-        && make install
-# Clean up cache data and remove dependencies which are not required
-RUN rm -rf $SOURCE_ROOT \
-        && apt-get clean \
-        && rm -rf /var/lib/apt/lists/*
+        && cmake --build . --target package --config Release
 
-FROM s390x/ubuntu:20.04
+FROM registry.access.redhat.com/ubi9/ubi
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-RUN cp /etc/skel/.bashrc /root && cp /etc/skel/.profile /root
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        bash-completion \
-        bc \
-        binutils \
-        clang-7 \
-        curl \
-        dkms \
-        gnupg2 \
-        ca-certificates \
-        gcc \
-        libc6-dev \
-        libelf-dev \
-        libelf1 \
-        less \
-        llvm-7 \
-        procps \
-        xz-utils \
-        kmod \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /opt/sysdig /opt/sysdig
-
-RUN for b in /opt/sysdig/bin/*; do ln -s "$b" /usr/bin/$(basename "$b"); done \
-    && for b in /opt/sysdig/src/*; do ln -s "$b" /usr/src/$(basename "$b"); done
-
-COPY ./docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
+ARG BUILD_VERSION=0.30.2
+ENV BUILD_VERSION=${BUILD_VERSION}
 
 ENV HOST_ROOT /host
-ENV SYSDIG_HOST_ROOT /host
 ENV HOME /root
 
-# Some base images have an empty /lib/modules by default
-# If it's not empty, docker build will fail instead of
-# silently overwriting the existing directory
-RUN rm -rf /lib/modules \
-    && ln -s $SYSDIG_HOST_ROOT/lib/modules /lib/modules
+RUN yum -y install \
+    make \
+    kmod \
+    gcc \
+    clang \
+    llvm-toolset \
+    less
 
+RUN mkdir -p /tmp/dkms \
+    && cd /tmp/dkms \
+    && curl --remote-name-all -L https://github.com/dell/dkms/archive/refs/tags/v2.8.5.tar.gz \
+    && tar --strip-components=1 -xf v2.8.5.tar.gz \
+    && make tarball \
+    && make install \
+    && cd /tmp \
+    && rm -fr /tmp/dkms
+
+COPY --from=builder /tmp/source/sysdig/build/sysdig-${BUILD_VERSION}-*.rpm /
+
+RUN rpm --nodeps --force -i /sysdig-${BUILD_VERSION}-$(uname -p).rpm && rm /sysdig-*.rpm
+
+COPY ./docker-entrypoint.sh /
+
+RUN rm -df /lib/modules \
+        && ln -s $HOST_ROOT/lib/modules /lib/modules
+
+RUN ["chmod", "+x", "/docker-entrypoint.sh"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 CMD ["bash"]
