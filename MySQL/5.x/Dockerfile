@@ -18,7 +18,7 @@
 #       docker exec -it <container_name> mysql -uroot -p
 #
 # To see randomly generated password for the root user; use below command
-# 		docker logs <container_name> 2>&1 | grep GENERATED
+#              docker logs <container_name> 2>&1 | grep GENERATED
 #
 # For more docker configuration, please visit the official mysql dockerhub webpage:
 #
@@ -27,7 +27,7 @@
 ####################################################################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:20.04
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -60,8 +60,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && chmod 1777 /var/run/mysqld /var/lib/mysql \
     # comment out a few problematic configuration values
     && find /etc/mysql/ -name '*.cnf' -print0 \
-	| xargs -0 grep -lZE '^(bind-address|log)' \
-	| xargs -rt -0 sed -Ei 's/^(bind-address|log)/#&/' \
+        | xargs -0 grep -lZE '^(bind-address|log)' \
+        | xargs -rt -0 sed -Ei 's/^(bind-address|log)/#&/' \
     # don't reverse lookup hostnames, they are usually another container
     && echo '[mysqld]\nskip-host-cache\nskip-name-resolve' > /etc/mysql/conf.d/docker.cnf \
     && apt autoremove -y \
