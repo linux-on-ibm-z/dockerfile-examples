@@ -27,7 +27,7 @@
 ####################################################################################################################
 
 # Base image
-FROM s390x/ubuntu:20.04
+FROM s390x/ubuntu:18.04
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
