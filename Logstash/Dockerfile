@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 8.6.2 #####################################################
+############################ Dockerfile for Logstash version 8.7.1 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -10,7 +10,7 @@
 #
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
-# docker build -t <image_name> .
+# docker build -t <image_name> --file Logstash.dockerfile .
 #
 # Start Logstash using below command
 # docker run --name <container name> -d <logstash_image>
@@ -25,12 +25,12 @@ RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
 FROM s390x/ubuntu:20.04
 
-ARG LOGSTASH_VER=8.6.2
+ARG LOGSTASH_VER=8.7.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV LS_JAVA_HOME=/opt/temurin/jdk-17.0.5+8
+ENV LS_JAVA_HOME=/opt/temurin/jdk-17.0.7+7
 # Install Dependencies
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
@@ -48,9 +48,9 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 # get Temurin 17
     mkdir /opt/temurin && \
     cd /opt/temurin && \
-    wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.5%2B8/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.5_8.tar.gz && \
-    tar -xzf OpenJDK17U-jdk_s390x_linux_hotspot_17.0.5_8.tar.gz && \
-    rm -rf OpenJDK17U-jdk_s390x_linux_hotspot_17.0.5_8.tar.gz && \
+    wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.7%2B7/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.7_7.tar.gz && \
+    tar -xzf OpenJDK17U-jdk_s390x_linux_hotspot_17.0.7_7.tar.gz && \
+    rm -rf OpenJDK17U-jdk_s390x_linux_hotspot_17.0.7_7.tar.gz && \
 # Add Logstash itself.
     cd /tmp && \
     curl -Lo - https://artifacts.elastic.co/downloads/logstash/logstash-oss-${LOGSTASH_VER}-linux-aarch64.tar.gz  | \
