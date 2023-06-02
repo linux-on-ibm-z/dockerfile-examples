@@ -26,7 +26,7 @@
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:20.04 AS builder
+FROM s390x/ubuntu:22.04 AS builder
 
 ARG SYSDIG_VER=0.30.2
 
@@ -56,43 +56,30 @@ RUN cd $SOURCE_ROOT \
         && sed -i '135{h;d};136G' grpc.cmake \
 # Build and Install Sysdig
         && cd $SOURCE_ROOT/sysdig/build \
+        && make -j $(nproc) \
+        && make install \
         && cmake --build . --target package --config Release
 
-FROM registry.access.redhat.com/ubi9/ubi
+
+FROM s390x/ubuntu:22.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ARG BUILD_VERSION=0.30.2
 ENV BUILD_VERSION=${BUILD_VERSION}
 
-ENV HOST_ROOT /host
-ENV HOME /root
+ENV SYSDIG_HOST_ROOT /host
 
-RUN yum -y install \
-    make \
-    kmod \
-    gcc \
-    clang \
-    llvm-toolset \
-    less
+COPY --from=builder /tmp/source/sysdig/build/sysdig-${BUILD_VERSION}-*.deb /
 
-RUN mkdir -p /tmp/dkms \
-    && cd /tmp/dkms \
-    && curl --remote-name-all -L https://github.com/dell/dkms/archive/refs/tags/v2.8.5.tar.gz \
-    && tar --strip-components=1 -xf v2.8.5.tar.gz \
-    && make tarball \
-    && make install \
-    && cd /tmp \
-    && rm -fr /tmp/dkms
+RUN apt-get update && apt-get install -y dkms libelf-dev curl
 
-COPY --from=builder /tmp/source/sysdig/build/sysdig-${BUILD_VERSION}-*.rpm /
+RUN dpkg -i /sysdig-${BUILD_VERSION}-$(uname -p).deb && rm /sysdig-*.deb
 
-RUN rpm --nodeps --force -i /sysdig-${BUILD_VERSION}-$(uname -p).rpm && rm /sysdig-*.rpm
+RUN rm -rf /lib/modules \
+    && ln -s $SYSDIG_HOST_ROOT/lib/modules /lib/modules
 
 COPY ./docker-entrypoint.sh /
-
-RUN rm -df /lib/modules \
-        && ln -s $HOST_ROOT/lib/modules /lib/modules
 
 RUN ["chmod", "+x", "/docker-entrypoint.sh"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
