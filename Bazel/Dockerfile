@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2022, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for Bazel version 6.0.0 ####################################
+#################################### Dockerfile for Bazel version 6.2.1 ####################################
 #
 # To build a Bazel image from the directory containing this Dockerfile:
 # (assuming that the file is named Dockerfile):

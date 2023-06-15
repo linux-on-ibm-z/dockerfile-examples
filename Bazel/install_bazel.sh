@@ -6,7 +6,7 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 export PATH=$JAVA_HOME/bin:$PATH
 WORK_ROOT=$(pwd)
 SOURCE_ROOT=$(pwd)/build
-PACKAGE_VERSION="6.0.0"
+PACKAGE_VERSION="6.2.1"
 NETTY_TCNATIVE_VERSION="2.0.51"
 NETTY_TCNATIVE_PREVIOUS_VERSION="2.0.50"
 NETTY_VERSION="4.1.75"
@@ -47,6 +47,13 @@ apt-get install --yes --no-install-recommends \
 apt-get install -y ninja-build cmake perl golang libssl-dev libapr1-dev autoconf automake libtool make tar git wget maven
 
 mkdir -p $SOURCE_ROOT/
+
+# Download and patch rules_java v5.5.0
+cd $SOURCE_ROOT
+git clone -b 5.5.0 https://github.com/bazelbuild/rules_java.git
+cd rules_java
+curl -sSL $PATCH_URL/rules_java_5.5.0.patch | git apply
+
 # Download Bazel distribution archive
 cd $SOURCE_ROOT
 wget https://github.com/bazelbuild/bazel/releases/download/$PACKAGE_VERSION/bazel-$PACKAGE_VERSION-dist.zip
@@ -60,7 +67,10 @@ cd $SOURCE_ROOT
 git clone https://github.com/bazelbuild/bazel.git
 cd bazel
 git checkout "$PACKAGE_VERSION"
-curl -sSL $PATCH_URL/bazel.patch | patch -p1
+curl -sSLO $PATCH_URL/bazel.patch
+sed -i "s#RULES_JAVA_ROOT_PATH#${SOURCE_ROOT}#g" bazel.patch
+patch -p1 < bazel.patch
+rm -f bazel.patch
 
 cd $SOURCE_ROOT
 buildNetty
@@ -87,11 +97,7 @@ cp $SOURCE_ROOT/netty/buffer/target/netty-buffer-$NETTY_VERSION.Final.jar \
     $SOURCE_ROOT/bazel/third_party/netty/
 cd $SOURCE_ROOT/bazel
 curl -sSL $PATCH_URL/bazel-netty.patch | patch -p1
-${SOURCE_ROOT}/dist/bazel/output/bazel build -c opt --stamp --embed_label "6.0.0" //src:bazel
-mkdir -p output
-cp bazel-bin/src/bazel output/bazel
-# Rebuild bazel using itself
-./output/bazel build -c opt --stamp --embed_label "6.0.0" //src:bazel
+${SOURCE_ROOT}/dist/bazel/output/bazel build -c opt --stamp --embed_label "${PACKAGE_VERSION}" //src:bazel
 
 cd $WORK_ROOT
 cp $SOURCE_ROOT/bazel/bazel-bin/src/bazel ./
