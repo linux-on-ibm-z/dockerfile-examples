@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Sysdig version 0.30.2 #########
+########## Dockerfile for Sysdig version 0.31.5 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -10,14 +10,13 @@
 #
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
-# docker build -t <image_name> .
+# docker build -t <IMAGE_NAME> .
 #
 # To guarantee a smooth deployment, the kernel headers must be installed in the host operating system, before running sysdig.
 #
 # To run sysdig in a Docker container use below command
-#  "docker run --rm -i -t --privileged --net=host -v /var/run/docker.sock:/host/var/run/docker.sock 
-#  -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /src:/src -v /lib/modules:/host/lib/modules:ro 
-#  -v /usr:/host/usr:ro -v /etc:/host/etc:ro --name NAME IMAGE"
+# "docker run --rm -i -t --privileged --net=host -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v 
+# /boot:/host/boot:ro -v /src:/src -v /lib/modules:/host/lib/modules:ro -v /usr:/host/usr:ro -v /etc:/host/etc:ro --name <NAME> <IMAGE-NAME>"
 #
 # For more details, see https://github.com/draios/sysdig/wiki/How-to-Install-Sysdig-for-Linux#installation-inside-a-docker-container
 #
@@ -28,7 +27,7 @@
 # Base Image
 FROM s390x/ubuntu:22.04 AS builder
 
-ARG SYSDIG_VER=0.30.2
+ARG SYSDIG_VER=0.31.5
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -65,7 +64,7 @@ FROM s390x/ubuntu:22.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BUILD_VERSION=0.30.2
+ARG BUILD_VERSION=0.31.5
 ENV BUILD_VERSION=${BUILD_VERSION}
 
 ENV SYSDIG_HOST_ROOT /host
