@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Cassandra version 4.1.0 #########
+########## Dockerfile for Cassandra version 4.1.1 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -71,7 +71,7 @@ maven \
     && mvn install -DskipTests -Dmaven.javadoc.skip=true \
 # Build Apache Cassandra
     && cd $SOURCE_ROOT \
-    && git clone -b cassandra-4.1.0 https://github.com/apache/cassandra.git \
+    && git clone -b cassandra-4.1.1 https://github.com/apache/cassandra.git \
     && cd cassandra \
     && curl -o cassandra.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/4.0.6/patch/cassandra.patch \
     && git apply --ignore-whitespace cassandra.patch \
@@ -149,7 +149,7 @@ RUN set -eux; \
 ENV CASSANDRA_HOME /opt/cassandra
 ENV CASSANDRA_CONF /etc/cassandra
 ENV PATH $CASSANDRA_HOME/bin:$PATH
-ENV CASSANDRA_VERSION 4.1.0
+ENV CASSANDRA_VERSION 4.1.1
 
 
 RUN mkdir -p "$CASSANDRA_HOME";
