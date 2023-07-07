@@ -2,7 +2,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 
-##################################### Dockerfile for Elasticsearch version 8.6.0 ########################################
+##################################### Dockerfile for Elasticsearch version 8.8.1 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -32,7 +32,7 @@
 
 FROM s390x/ubuntu:20.04 AS builder
 
-ARG ELASTICSEARCH_VER=8.6.0
+ARG ELASTICSEARCH_VER=8.8.1
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -44,7 +44,7 @@ ENV JAVA17_HOME=/opt/temurin/java
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV GRADLE_USER_HOME="/tmp/.gradle"
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Elasticsearch/${ELASTICSEARCH_VER}/patch/elasticsearch.patch"
-ENV TEMURIN_URL="https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.5%2B8/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.5_8.tar.gz"
+ENV TEMURIN_URL="https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.7%2B7/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.7_7.tar.gz"
 
 RUN apt-get update && apt-get install -y \
     curl \
@@ -110,9 +110,7 @@ RUN apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
  && curl -o elasticsearch.patch $PATCH_URL  \
  && git apply elasticsearch.patch \
- && sed -i '3284,3284 s|6cd91991323dd7b2fb28ca93d7ac12af5a86a2f53279e2b35827b30313fd0b9f|'"${sha256}"'|g' ${SOURCE_DIR}/elasticsearch/gradle/verification-metadata.xml \
- && sed -i '28,32d' ${SOURCE_DIR}/elasticsearch/server/src/main/java/org/elasticsearch/common/util/BigIntArray.java \
- && sed -i '29,33d' ${SOURCE_DIR}/elasticsearch/server/src/main/java/org/elasticsearch/common/util/BigDoubleArray.java \
+ && sed -i '3146,3146 s|6cd91991323dd7b2fb28ca93d7ac12af5a86a2f53279e2b35827b30313fd0b9f|'"${sha256}"'|g' ${SOURCE_DIR}/elasticsearch/gradle/verification-metadata.xml \
  && ./gradlew :distribution:archives:linux-s390x-tar:assemble --parallel \
 # Install Elasticsearch
  && mkdir -p /usr/share/elasticsearch \
