@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 10.0 ##############################
+################################ Dockerfile for SonarQube 10.1 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -17,7 +17,7 @@
 # docker run --name <container name> -p <port_number>:9000 -d <image name>
 # Link : http://<sonarQube-ip>:<port_number_9000>
 ######################################################################################
-ARG SONARQUBE_VERSION=10.0.0.68432
+ARG SONARQUBE_VERSION=10.1.0.73491
 
 FROM eclipse-temurin:17.0.7_7-jdk AS builder
 LABEL stage=builder
@@ -26,7 +26,7 @@ ARG SONARQUBE_ZIP_URL=https://binaries.sonarsource.com/Distribution/sonarqube/so
 ENV JAVA_HOME='/opt/java/openjdk' \
     ES_JAVA_HOME='/opt/java/openjdk' \
     PATH="/opt/java/openjdk/bin:$PATH" \
-    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/10.0/patch/elasticsearch.diff" \
+    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/10.1/patch/elasticsearch.diff" \
     LANG="en_US.UTF-8"
 
 RUN apt-get update; \
