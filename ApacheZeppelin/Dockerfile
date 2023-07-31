@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2022.
+# © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############## Dockerfile for Apache Zeppelin version 0.10.1 ###############
@@ -77,7 +77,8 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     hash -r && \
     echo "$LOG_TAG Install python modules. This may take some time." && \
     python -m pip install -q pycodestyle && \
-    python -m pip install -q Cython && \
+    #downgraded cython because of decpricated conditional compilation. Version should be changes to latest after grpcio community fix it.
+    python -m pip install -q Cython==0.29.33 && \
     GRPC_PYTHON_BUILD_WITH_CYTHON=1 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 python -m pip install -q grpcio && \
     python -m pip install -q pybind11 && \
     python -m pip install -q 'numpy==1.*' && \
@@ -90,7 +91,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     python -m pip install -q 'ipython==7.*' && \
     python -m pip install -q 'ipykernel==5.*' && \
     python -m pip install -q 'jupyter_client==5.*' && \
-    python -m pip install -q 'bokeh==2.4.*' && \
+    python -m pip install -q 'bokeh==3.1.1' && \
     python -m pip install -q panel && \
     python -m pip install -q holoviews && \
     python -m pip install -q 'pyyaml==3.*' && \
