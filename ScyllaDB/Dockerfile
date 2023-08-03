@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2019, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for ScyllaDB version 5.1.8 #########
+########## Dockerfile for ScyllaDB version 5.2.4 #########
 #
 # This Dockerfile builds a basic installation of ScyllaDB.
 #
@@ -33,7 +33,7 @@ ENV URL=https
 ENV LC_ALL=C
 ENV JAVA8_HOME=/usr/lib/jvm/java-8-openjdk-s390x
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/5.1.8/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/5.2.4/patch/"
 
 ARG TARGET=native
 
@@ -52,7 +52,7 @@ RUN apt-get update \
     protobuf-compiler libcrypto++-dev libtool perl ant libffi-dev rapidjson-dev automake \
     make git maven ninja-build unzip bzip2 wget curl xz-utils texinfo diffutils liblua5.3-dev \
     libnuma-dev libunistring-dev python3 python3-pip pigz ragel stow patch locales valgrind \
-    libudev-dev \
+    libudev-dev libdeflate-dev zlib1g-dev libabsl-dev \
     net-tools ethtool gnutls-bin patchelf util-linux \
     gawk gzip openjdk-11-jdk devscripts dh-make \
   && python3 -m pip install --user --upgrade pip \
@@ -197,7 +197,7 @@ RUN apt-get update \
   && cd "$SOURCE_ROOT" \
   && git clone https://github.com/scylladb/scylla.git \
   && cd scylla \
-  && git checkout scylla-5.1.8 \
+  && git checkout scylla-5.2.4 \
   && git submodule update --init --force --recursive \
   && curl -sSL ${PATCH_URL}/seastar.diff | patch -d seastar -p1 \
   && curl -sSL ${PATCH_URL}/python3.diff | patch -d tools/python3 -p1 \
@@ -217,10 +217,10 @@ RUN apt-get update \
 # Packaging
   && cd "$SOURCE_ROOT"/scylla \
   && mkdir -p /opt/scylladb/dependencies/ \
-  && (cd /opt/scylladb/dependencies/ && curl -L -O https://github.com/prometheus/node_exporter/releases/download/v1.3.1/node_exporter-1.3.1.linux-s390x.tar.gz) \
+  && (cd /opt/scylladb/dependencies/ && curl -L -O https://github.com/prometheus/node_exporter/releases/download/v1.4.0/node_exporter-1.4.0.linux-s390x.tar.gz) \
   && ln -s /usr/local/bin/hwloc-* /usr/bin/ \
   && mkdir -p /lib64 \
-  && ln -s /lib/s390x-linux-gnu/libthread_db.so.1 /lib64/libthread_db-1.0.so \
+  && ln -s /lib/s390x-linux-gnu/libthread_db.so /lib64/libthread_db.so \
   && mkdir -p /etc/crypto-policies/back-ends \
   && touch /etc/crypto-policies/back-ends/gnutls.config \
   && ninja dist-deb \
@@ -305,4 +305,3 @@ VOLUME /var/lib/scylla
 ENTRYPOINT ["/docker-entrypoint.py"]
 
 # End of Dockerfile
-
