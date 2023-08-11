@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2018, 2022.
+# © Copyright IBM Corporation 2018, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ########## Dockerfile for Apache Storm version 2.4.0 #########
@@ -14,7 +14,6 @@
 #
 # Setting up a minimal Storm cluster.
 # Apache Zookeeper is a must for running a Storm cluster.
-# Build Apache Zookeeper image using dockerfile at https://github.com/linux-on-ibm-z/dockerfile-examples/blob/master/ApacheZooKeeper/Dockerfile
 # docker run -d --restart always --name some-zookeeper zookeeper
 #
 # The Nimbus daemon has to be connected with the Zookeeper.
@@ -31,50 +30,17 @@
 #
 # Official website: http://storm.apache.org/
 
-# Base Image
-FROM s390x/ubuntu:18.04 as builder
+FROM eclipse-temurin:11-jre
 
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x \
-    PATH=$JAVA_HOME/bin:$PATH \
-    SOURCE_DIR=/tmp/source     
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-WORKDIR $SOURCE_DIR
-
-# Install required packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash \
-    procps \
-    git \
-    wget \
-    ca-certificates \
-    openjdk-8-jdk \
-    gnupg \	
-    dirmngr \
-    curl; \
-    rm -rf /var/lib/apt/lists/*; \
-    mkdir -p /rockdb_contents \
-    wget https://repo1.maven.org/maven2/org/rocksdb/rocksdbjni/6.27.3/rocksdbjni-6.27.3.jar \
-  mv $SOURCE_DIR/rocksdbjni-6.27.3.jar /rockdb_contents/rocksdbjni-6.27.3.jar \
-  && apt-get remove -y \
-     git \
-     wget \
- && apt autoremove -y \
- && apt-get clean 
-
-
-
-#######################################################################
-FROM ubuntu:18.04
 ENV STORM_CONF_DIR=/conf \
     STORM_DATA_DIR=/data \
-    STORM_LOG_DIR=/logs \
-    JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x \
-    PATH=$JAVA_HOME/bin:$PATH \
-    SOURCE_DIR=/tmp/source
+    STORM_LOG_DIR=/logs
 
-WORKDIR $SOURCE_DIR
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-#
+
 # Add a user with an explicit UID/GID and create necessary directories
 RUN set -eux \
  && groupadd -r storm --gid=1000 \
@@ -87,22 +53,24 @@ RUN set -eux; \
      apt-get update; \
      DEBIAN_FRONTEND=noninteractive \
      apt-get install -y --no-install-recommends \
-     openjdk-8-jdk \
      bash \
      ca-certificates \
-     gnupg \
      dirmngr \
      gosu \
-     python \
+     gnupg \
+     python2 \
      procps \
      wget \
      tar; \
      rm -rf /var/lib/apt/lists/*; \
 # Verify that gosu binary works
-     gosu nobody true
+     gosu nobody true; \
+# Set default version to Python 2
+    update-alternatives --install /usr/bin/python python /usr/bin/python2 0
 
 ARG GPG_KEY=51379DA8A7AE5B02674EF15C134716AF768D9B6E
 ARG DISTRO_NAME=apache-storm-2.4.0
+
 # Download Apache Storm, verify its PGP signature, untar and clean up
 RUN set -eux; \
     ddist() { \
@@ -113,7 +81,7 @@ RUN set -eux; \
         for distUrl in \
             'https://www.apache.org/dyn/closer.cgi?action=download&filename=' \
             https://www-us.apache.org/dist/ \
-                        https://www.apache.org/dist/ \
+            https://www.apache.org/dist/ \
             https://archive.apache.org/dist/ \
         ; do \
             if wget -q -O "$f" "$distUrl$distFile" && [ -s "$f" ]; then \
@@ -123,25 +91,45 @@ RUN set -eux; \
            done; \
            [ -n "$success" ]; \
     }; \
-    ddist "$DISTRO_NAME.tar.gz" "storm/$DISTRO_NAME/$DISTRO_NAME.tar.gz" \
- && ddist "$DISTRO_NAME.tar.gz.asc" "storm/$DISTRO_NAME/$DISTRO_NAME.tar.gz.asc" \
- && export GNUPGHOME="$(mktemp -d)" \
- && for key in "$GPG_KEY" ; do \
-        gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "$key" || \
-        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" || \
-        gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
-        gpg --keyserver keyserver.pgp.com --recv-keys "$key" ;\
-    done \
- && gpg --batch --verify "$DISTRO_NAME.tar.gz.asc" "$DISTRO_NAME.tar.gz" \
- && tar -xzf "$DISTRO_NAME.tar.gz" \
- && rm -rf "$GNUPGHOME" "$DISTRO_NAME.tar.gz" "$DISTRO_NAME.tar.gz.asc" \
- && chown -R storm:storm "$DISTRO_NAME" \
+    ddist "$DISTRO_NAME.tar.gz" "storm/$DISTRO_NAME/$DISTRO_NAME.tar.gz"; \
+    ddist "$DISTRO_NAME.tar.gz.asc" "storm/$DISTRO_NAME/$DISTRO_NAME.tar.gz.asc"; \
+    export GNUPGHOME="$(mktemp -d)"; \
+    gpg --keyserver hkps://keyserver.pgp.com --recv-key "$GPG_KEY" || \
+    gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys "$GPG_KEY" || \
+    gpg --keyserver hkps://pgp.mit.edu --recv-keys "$GPG_KEY"; \
+    gpg --batch --verify "$DISTRO_NAME.tar.gz.asc" "$DISTRO_NAME.tar.gz"; \
+    tar -xzf "$DISTRO_NAME.tar.gz"; \
+    rm -rf "$GNUPGHOME" "$DISTRO_NAME.tar.gz" "$DISTRO_NAME.tar.gz.asc"; \
+    chown -R storm:storm "$DISTRO_NAME" \
  && chmod +x /docker-entrypoint.sh \
- && apt-get remove -y wget \
  && apt-get clean && apt autoremove -y
 
-WORKDIR $SOURCE_DIR/$DISTRO_NAME
-COPY --from=builder /rockdb_contents/rocksdbjni-6.27.3.jar  $SOURCE_DIR/$DISTRO_NAME/lib/rocksdbjni-6.27.3.jar
-ENV PATH $PATH:$SOURCE_DIR/$DISTRO_NAME/bin
+WORKDIR $DISTRO_NAME
+
+# This is a workaround to make storm workers run in jdk-11 and above.
+# Thanks to Raul Negrean (raulnegrean) for the suggestion.
+# It should be removed once the fix is included into the storm distribution.
+# See more details at https://github.com/apache/storm/pull/3503 and https://github.com/31z4/storm-docker/issues/39
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        zip \
+        unzip; \
+    for jar in \
+        lib/storm-client-2.4.0.jar \
+        lib-worker/storm-client-2.4.0.jar \
+    ; do \
+        unzip "$jar" defaults.yaml; \
+        sed -i 's/worker.childopts: "/&-XX:+IgnoreUnrecognizedVMOptions /' defaults.yaml; \
+        zip -u "$jar" defaults.yaml; \
+        rm defaults.yaml; \
+    done; \
+    apt-get purge -y --auto-remove \
+        zip \
+        unzip; \
+    rm -rf /var/lib/apt/lists/* \
+ && wget https://repo1.maven.org/maven2/org/rocksdb/rocksdbjni/6.27.3/rocksdbjni-6.27.3.jar -O /$DISTRO_NAME/lib/rocksdbjni-5.18.4.jar
+
+ENV PATH $PATH:/$DISTRO_NAME/bin
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
