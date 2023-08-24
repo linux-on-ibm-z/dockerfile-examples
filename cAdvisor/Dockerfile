@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for cAdvisor 0.47.2 #################################
+######################## Dockerfile for cAdvisor 0.47.3 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG CADVISOR_VER=0.47.2
+ARG CADVISOR_VER=0.47.3
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
