@@ -1,6 +1,6 @@
-# © Copyright IBM Corporation 2022, 2023.
+# © Copyright IBM Corporation 2019, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-##################### Dockerfile for Apache Spark version 3.3.1 ###################################################
+##################### Dockerfile for Apache Spark version 3.4.0 ###################################################
 #
 # This Dockerfile builds a basic installation of Apache Spark.
 #
@@ -13,16 +13,16 @@
 #
 ##################################################################################################################
 # Base Image
-FROM s390x/ubuntu:20.04 AS builder
+FROM s390x/ubuntu:22.04 AS builder
 
-ARG SPARK_VER=v3.3.1
+ARG SPARK_VER=v3.4.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/3.3.1/patch/"
-ARG JDK11_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.15%2B10/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.15_10.tar.gz"
-ARG JDK8_URL="https://github.com/ibmruntimes/semeru8-binaries/releases/download/jdk8u332-b09_openj9-0.32.0/ibm-semeru-open-jdk_s390x_linux_8u332b09_openj9-0.32.0.tar.gz"
+ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/3.4.0/patch/spark.diff"
+ARG JDK11_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.19%2B7/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.19_7.tar.gz"
+ARG JDK8_URL="https://github.com/ibmruntimes/semeru8-binaries/releases/download/jdk8u372-b07_openj9-0.38.0/ibm-semeru-open-jdk_s390x_linux_8u372b07_openj9-0.38.0.tar.gz"
 
 ENV     SOURCE_DIR /root
 WORKDIR $SOURCE_DIR
@@ -80,10 +80,10 @@ RUN git clone -b s390x https://github.com/linux-on-ibm-z/leveldb.git \
 # Build Apache Spark
 RUN git clone -b "${SPARK_VER}" https://github.com/apache/spark.git \
 && cd spark \
-&& wget -O - "${PATCH_URL}/spark.diff" | git apply \
+&& curl -sSL "${PATCH_URL}" | git apply \
 && JAVA_HOME="/opt/openjdk/11/" PATH="/opt/openjdk/11/bin/:${PATH}" ./build/mvn -DskipTests clean package
 
-FROM s390x/ubuntu:20.04
+FROM s390x/ubuntu:22.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -92,10 +92,9 @@ ARG SPARK_SCALA_VERSION=2.12
 ARG spark_uid=185
 
 RUN set -ex && \
-    sed -i 's/http:\/\/deb.\(.*\)/https:\/\/deb.\1/g' /etc/apt/sources.list && \
     apt-get update && \
     ln -s /lib /lib64 && \
-    apt install -y bash tini libc6 libpam-modules krb5-user libnss3 procps && \
+    apt install -y bash tini libc6 libpam-modules krb5-user libnss3 procps net-tools && \
     mkdir -p /opt/spark && \
     mkdir -p /opt/spark/examples && \
     mkdir -p /opt/spark/work-dir && \
@@ -104,7 +103,7 @@ RUN set -ex && \
     ln -sv /bin/bash /bin/sh && \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
     chgrp root /etc/passwd && chmod ug+rw /etc/passwd && \
-    rm -rf /var/cache/apt/*
+    rm -rf /var/cache/apt/* && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /opt/openjdk/11/     /opt/openjdk/11/
 COPY --from=builder /root/spark/bin      /opt/spark/bin
@@ -119,7 +118,7 @@ COPY --from=builder /root/spark/assembly/target/scala-$SPARK_SCALA_VERSION/jars 
 
 COPY entrypoint.sh /opt/
 COPY decom.sh /opt/
- 
+
 # Set Environment
 ENV LD_LIBRARY_PATH "/opt/spark/lib_override/:${LD_LIBRARY_PATH}"
 ENV JAVA_HOME       "/opt/openjdk/11/"
