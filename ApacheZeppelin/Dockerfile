@@ -69,7 +69,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     # font, image
     apt-get install -y libpng-dev libfreetype6-dev libxft-dev libjpeg-dev && \
     # for matplotlib
-    apt-get install -y python3-matplotlib && \
+    python -m pip install matplotlib==3.3.4 && \
     # for tkinter
     apt-get install -y python3-tk libxml2-dev libxslt-dev zlib1g-dev && \
     apt-get install -y python3-ipykernel && \
@@ -82,7 +82,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     GRPC_PYTHON_BUILD_WITH_CYTHON=1 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 python -m pip install -q grpcio && \
     python -m pip install -q pybind11 && \
     python -m pip install -q 'numpy==1.*' && \
-    python -m pip install -q 'pandas==1.2.*' && \
+    python -m pip install -q 'pandas==1.3.*' && \
     python -m pip install -q 'scipy==1.*' && \
     python -m pip install -q bkzep==0.6.1 && \
     python -m pip install -q hvplot && \
@@ -94,9 +94,9 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     python -m pip install -q 'bokeh==3.1.1' && \
     python -m pip install -q panel && \
     python -m pip install -q holoviews && \
-    python -m pip install -q 'pyyaml==3.*' && \
+    python -m pip install -q 'pyyaml==5.3.*' && \
     python -m pip install -q seaborn && \
-    python -m pip install -q plotnine && \
+    python -m pip install -q plotnine==0.8.0 && \
     python -m pip install -q intake && \
     python -m pip install -q altair && \
     echo "$LOG_TAG Install R related packages" && \
