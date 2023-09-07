@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Sysdig version 0.32.0 #########
+########## Dockerfile for Sysdig version 0.33.1 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -27,7 +27,7 @@
 # Base Image
 FROM s390x/ubuntu:22.04 AS builder
 
-ARG SYSDIG_VER=0.32.0
+ARG SYSDIG_VER=0.33.1
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -38,10 +38,9 @@ WORKDIR $SOURCE_ROOT
 # Install dependencies
 RUN apt-get update \
         && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y git g++ \
-        linux-headers-$(uname -r) cmake libelf-dev pkg-config kmod rpm
-
+        linux-headers-$(uname -r) cmake libelf-dev pkg-config kmod rpm \
 # Download source code
-RUN cd $SOURCE_ROOT \
+	&& cd $SOURCE_ROOT \
         && git clone https://github.com/draios/sysdig.git \
         && cd sysdig      \
         && git checkout ${SYSDIG_VER}  \
@@ -49,10 +48,6 @@ RUN cd $SOURCE_ROOT \
 # Configure Sysdig
         && cd build \
         && cmake -Wno-dev -DBUILD_DRIVER=OFF -DSYSDIG_VERSION=${SYSDIG_VER} .. \
-        && cd $SOURCE_ROOT/sysdig/build/falcosecurity-libs-repo/falcosecurity-libs-prefix/src/falcosecurity-libs/cmake/modules \
-        && sed -i 's+https://github.com/curl/curl/releases/download/curl-7_84_0/curl-7.84.0.tar.bz2+https://github.com/curl/curl/releases/download/curl-7_85_0/curl-7.85.0.tar.bz2+g' curl.cmake \
-        && sed -i 's/702fb26e73190a3bd77071aa146f507b9817cc4dfce218d2ab87f00cd3bc059d/21a7e83628ee96164ac2b36ff6bf99d467c7b0b621c1f7e317d8f0d96011539c/g' curl.cmake \
-        && sed -i '135{h;d};136G' grpc.cmake \
 # Build and Install Sysdig
         && cd $SOURCE_ROOT/sysdig/build \
         && make -j $(nproc) \
@@ -64,18 +59,16 @@ FROM s390x/ubuntu:22.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BUILD_VERSION=0.32.0
+ARG BUILD_VERSION=0.33.1
 ENV BUILD_VERSION=${BUILD_VERSION}
 
 ENV SYSDIG_HOST_ROOT /host
 
 COPY --from=builder /tmp/source/sysdig/build/sysdig-${BUILD_VERSION}-*.deb /
 
-RUN apt-get update && apt-get install -y dkms libelf-dev curl
-
-RUN dpkg -i /sysdig-${BUILD_VERSION}-$(uname -p).deb && rm /sysdig-*.deb
-
-RUN rm -rf /lib/modules \
+RUN apt-get update && apt-get install -y dkms libelf-dev curl \
+    && dpkg -i /sysdig-${BUILD_VERSION}-$(uname -p).deb && rm /sysdig-*.deb \
+    && rm -rf /lib/modules \
     && ln -s $SYSDIG_HOST_ROOT/lib/modules /lib/modules
 
 COPY ./docker-entrypoint.sh /

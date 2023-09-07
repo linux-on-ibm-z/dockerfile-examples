@@ -20,7 +20,7 @@
 
 echo "* Setting up /usr/src links from host"
 
-if [ "ubuntu" == $(awk -F'=' '/^ID=/ {print tolower($2)}' $SYSDIG_HOST_ROOT/etc/os-release 2> /dev/null) ]
+if [[ "ubuntu" == $(awk -F'=' '/^ID=/ {print tolower($2)}' $SYSDIG_HOST_ROOT/etc/os-release 2> /dev/null) ]]
 then
         echo "Detected Ubuntu. Installing linux-headers...";
         apt-get update -y;
