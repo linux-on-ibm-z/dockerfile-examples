@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 10.1 ##############################
+################################ Dockerfile for SonarQube 10.2 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -17,7 +17,7 @@
 # docker run --name <container name> -p <port_number>:9000 -d <image name>
 # Link : http://<sonarQube-ip>:<port_number_9000>
 ######################################################################################
-ARG SONARQUBE_VERSION=10.1.0.73491
+ARG SONARQUBE_VERSION=10.2.0.77647
 
 FROM eclipse-temurin:17.0.7_7-jdk AS builder
 LABEL stage=builder
