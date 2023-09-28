@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for WildFly (JBoss) version 28.0.0 ##########################
+################# Dockerfile for WildFly (JBoss) version 29.0.1 ##########################
 #
 # This Dockerfile builds a basic installation of WildFly.
 #
@@ -29,17 +29,17 @@ FROM ubuntu:20.04 AS base
 
 FROM base AS branch-version-11
 RUN apt-get update && apt-get install -y tar wget \
-        && cd /opt && wget https://github.com/ibmruntimes/semeru11-binaries/releases/download/jdk-11.0.18%2B10_openj9-0.36.1/ibm-semeru-open-jdk_s390x_linux_11.0.18_10_openj9-0.36.1.tar.gz \
-        && tar -xf ibm-semeru-open-jdk_s390x_linux_11.0.18_10_openj9-0.36.1.tar.gz \
-        && rm ibm-semeru-open-jdk_s390x_linux_11.0.18_10_openj9-0.36.1.tar.gz
-ENV JAVA_HOME=/opt/jdk-11.0.18+10
+        && cd /opt && wget https://github.com/ibmruntimes/semeru11-binaries/releases/download/jdk-11.0.20.1%2B1_openj9-0.40.0/ibm-semeru-open-jdk_s390x_linux_11.0.20.1_1_openj9-0.40.0.tar.gz \
+        && tar -xf ibm-semeru-open-jdk_s390x_linux_11.0.20.1_1_openj9-0.40.0.tar.gz \
+        && rm ibm-semeru-open-jdk_s390x_linux_11.0.20.1_1_openj9-0.40.0.tar.gz
+ENV JAVA_HOME=/opt/jdk-11.0.20.1+1
 
 FROM base AS branch-version-17
 RUN apt-get update && apt-get install -y tar wget \
-        && cd /opt && wget https://github.com/ibmruntimes/semeru17-binaries/releases/download/jdk-17.0.6%2B10_openj9-0.36.0/ibm-semeru-open-jdk_s390x_linux_17.0.6_10_openj9-0.36.0.tar.gz \
-        && tar -xf ibm-semeru-open-jdk_s390x_linux_17.0.6_10_openj9-0.36.0.tar.gz \
-        && rm ibm-semeru-open-jdk_s390x_linux_17.0.6_10_openj9-0.36.0.tar.gz
-ENV JAVA_HOME=/opt/jdk-17.0.6+10
+        && cd /opt && wget https://github.com/ibmruntimes/semeru17-binaries/releases/download/jdk-17.0.8.1%2B1_openj9-0.40.0/ibm-semeru-open-jdk_s390x_linux_17.0.8.1_1_openj9-0.40.0.tar.gz \
+        && tar -xf ibm-semeru-open-jdk_s390x_linux_17.0.8.1_1_openj9-0.40.0.tar.gz \
+        && rm ibm-semeru-open-jdk_s390x_linux_17.0.8.1_1_openj9-0.40.0.tar.gz
+ENV JAVA_HOME=/opt/jdk-17.0.8.1+1
 
 FROM branch-version-${jdk} AS final
 
@@ -54,7 +54,7 @@ RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s
     chmod 755 /opt/jboss
 
 # Set the WILDFLY_VERSION env variable
-ENV WILDFLY_VERSION 28.0.0.Final
+ENV WILDFLY_VERSION 29.0.1.Final
 ENV JBOSS_HOME=/opt/jboss/wildfly-${WILDFLY_VER}
 ENV PWD=`pwd`
 ENV PATH=$JAVA_HOME/bin:$JBOSS_HOME/bin:$PATH
