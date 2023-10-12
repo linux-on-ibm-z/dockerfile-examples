@@ -2,7 +2,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 
-##################################### Dockerfile for Elasticsearch version 8.8.1 ########################################
+##################################### Dockerfile for Elasticsearch version 8.10.2 ########################################
 #
 # This Dockerfile builds a basic installation of Elasticsearch.
 #
@@ -32,7 +32,7 @@
 
 FROM s390x/ubuntu:20.04 AS builder
 
-ARG ELASTICSEARCH_VER=8.8.1
+ARG ELASTICSEARCH_VER=8.10.2
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -110,7 +110,32 @@ RUN apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
  && cd $SOURCE_DIR && git clone https://github.com/elastic/elasticsearch && cd elasticsearch && git checkout v${ELASTICSEARCH_VER} \
  && curl -o elasticsearch.patch $PATCH_URL  \
  && git apply elasticsearch.patch \
- && sed -i '3146,3146 s|6cd91991323dd7b2fb28ca93d7ac12af5a86a2f53279e2b35827b30313fd0b9f|'"${sha256}"'|g' ${SOURCE_DIR}/elasticsearch/gradle/verification-metadata.xml \
+ && sed -i 's|6cd91991323dd7b2fb28ca93d7ac12af5a86a2f53279e2b35827b30313fd0b9f|'"${sha256}"'|g' ${SOURCE_DIR}/elasticsearch/gradle/verification-metadata.xml \
+ && mkdir -p ${SOURCE_DIR}/elasticsearch/distribution/docker/ubi-docker-s390x-export/ \
+ && echo ' \
+                // This file is intentionally blank. All configuration of the \
+                // export is done in the parent project. \
+        ' | tee ${SOURCE_DIR}/elasticsearch/distribution/docker/ubi-docker-s390x-export/build.gradle \
+ && mkdir -p ${SOURCE_DIR}/elasticsearch/distribution/docker/cloud-docker-s390x-export/ \
+ && echo ' \
+                // This file is intentionally blank. All configuration of the \
+                // export is done in the parent project. \
+         ' | tee ${SOURCE_DIR}/elasticsearch/distribution/docker/cloud-docker-s390x-export/build.gradle \
+ && mkdir -p ${SOURCE_DIR}/elasticsearch/distribution/docker/cloud-ess-docker-s390x-export/ \
+ && echo ' \
+                // This file is intentionally blank. All configuration of the \
+                // export is done in the parent project. \
+         ' | tee ${SOURCE_DIR}/elasticsearch/distribution/docker/cloud-ess-docker-s390x-export/build.gradle \
+ && mkdir -p ${SOURCE_DIR}/elasticsearch/distribution/docker/docker-s390x-export/ \
+ && echo ' \
+                // This file is intentionally blank. All configuration of the \
+                // export is done in the parent project. \
+         ' | tee ${SOURCE_DIR}/elasticsearch/distribution/docker/docker-s390x-export/build.gradle \
+ && mkdir -p ${SOURCE_DIR}/elasticsearch/distribution/docker/ironbank-docker-s390x-export/ \
+ && echo ' \
+                // This file is intentionally blank. All configuration of the \
+                // export is done in the parent project. \
+         ' | tee ${SOURCE_DIR}/elasticsearch/distribution/docker/ironbank-docker-s390x-export/build.gradle \
  && ./gradlew :distribution:archives:linux-s390x-tar:assemble --parallel \
 # Install Elasticsearch
  && mkdir -p /usr/share/elasticsearch \
