@@ -53,11 +53,13 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     scipy==1.7.3 \
     portpicker \
     protobuf==3.13.0 \
-    opt_einsum \
-    grpcio \
+    opt_einsum \    
     packaging \
     requests \
     psutil \
+    setuptools==59.5.0 \
+    && pip3 install --no-cache-dir \
+    grpcio \
 #Build ICU data
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
@@ -148,10 +150,12 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     scipy==1.7.3 \
     portpicker \
     protobuf==3.13.0 \
-    opt_einsum \
-    grpcio \
+    opt_einsum \   
     packaging \
     requests \
+    setuptools==59.5.0 \
+    && pip3 install --no-cache-dir \
+    grpcio \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
