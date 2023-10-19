@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Cassandra version 4.1.1 #########
+########## Dockerfile for Cassandra version 4.1.3 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -22,6 +22,7 @@ FROM eclipse-temurin:11-jdk-focal as builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+ARG CASSANDRA_VER=4.1.3
 
 ENV SOURCE_ROOT=/tmp/source \
     CASSANDRA_USE_JDK11=true
@@ -53,27 +54,27 @@ maven \
 # Build netty-tcnative
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
-    && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/netty-tcnative/2.0.52/build_netty.sh  \
+    && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/build_netty.sh  \
     && bash build_netty.sh -y -j Temurin11 \
 # Build netty
     && cd $SOURCE_ROOT \
     && git clone -b netty-4.1.58.Final https://github.com/netty/netty.git \
     && cd netty\
-    && curl -o netty.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/4.0.6/patch/netty.patch \
+    && curl -o netty.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/netty.patch \
     && git apply --ignore-whitespace netty.patch \
     && mvn install -DskipTests -Dmaven.javadoc.skip=true \
 # Build Chronicle-core
     && cd $SOURCE_ROOT \
     && git clone -b chronicle-bytes-2.20.111 https://github.com/OpenHFT/Chronicle-Bytes \
     && cd Chronicle-Bytes \
-    && curl -o bytes.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/4.0.6/patch/bytes.patch \
+    && curl -o bytes.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/bytes.patch \
     && git apply --ignore-whitespace bytes.patch \
     && mvn install -DskipTests -Dmaven.javadoc.skip=true \
 # Build Apache Cassandra
     && cd $SOURCE_ROOT \
-    && git clone -b cassandra-4.1.1 https://github.com/apache/cassandra.git \
+    && git clone -b cassandra-$CASSANDRA_VER https://github.com/apache/cassandra.git \
     && cd cassandra \
-    && curl -o cassandra.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/4.0.6/patch/cassandra.patch \
+    && curl -o cassandra.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/cassandra.patch \
     && git apply --ignore-whitespace cassandra.patch \
     && ant \
 # Copy required libs
@@ -125,7 +126,7 @@ RUN set -eux; \
 
 # grab gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
-ENV GOSU_VERSION 1.14
+ENV GOSU_VERSION 1.16
 RUN set -eux; \
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
@@ -149,7 +150,7 @@ RUN set -eux; \
 ENV CASSANDRA_HOME /opt/cassandra
 ENV CASSANDRA_CONF /etc/cassandra
 ENV PATH $CASSANDRA_HOME/bin:$PATH
-ENV CASSANDRA_VERSION 4.1.1
+ENV CASSANDRA_VERSION 4.1.3
 
 
 RUN mkdir -p "$CASSANDRA_HOME";

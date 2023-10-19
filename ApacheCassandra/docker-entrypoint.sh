@@ -92,4 +92,3 @@ if [ "$1" = 'cassandra' ]; then
 fi
 
 exec "$@"
-
