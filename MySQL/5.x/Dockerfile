@@ -14,11 +14,8 @@
 #       docker run --name <container_name> -e MYSQL_RANDOM_ROOT_PASSWORD=true -d mysql:5.7.x
 #       docker run --name <container_name> -e MYSQL_ALLOW_EMPTY_PASSWORD=true -d mysql:5.7.x
 #
-# To connect MySQL Server from within the Container run below command
-#       docker exec -it <container_name> mysql -uroot -p
-#
-# To see randomly generated password for the root user; use below command
-#              docker logs <container_name> 2>&1 | grep GENERATED
+# To check MySQL version from within the Container run below command
+#       docker exec -it <container_name> bin/mysqld --version
 #
 # For more docker configuration, please visit the official mysql dockerhub webpage:
 #
@@ -27,15 +24,12 @@
 ####################################################################################################################
 
 # Base image
-FROM s390x/ubuntu:18.04
+FROM s390x/ubuntu:20.04 AS builder
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV DEBIAN_FRONTEND noninteractive
-
-# Add mysql user and group
-RUN groupadd -r mysql && useradd -r -g mysql mysql
+ENV DEBIAN_FRONTEND=noninteractive
 
 ENV TZ 'America/Toronto'
 RUN echo $TZ > /etc/timezone \
@@ -44,38 +38,55 @@ RUN echo $TZ > /etc/timezone \
     && dpkg-reconfigure tzdata
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gosu \
-    pwgen \
-    openssl \
-    perl \
-    xz-utils \
-    mysql-server \
-    # For mysql_ssl_rsa_setup
-    && gosu nobody true \
-    && mkdir /docker-entrypoint-initdb.d \
-    && rm -rf /var/lib/mysql \
-    && mkdir -p /var/lib/mysql /var/run/mysqld /var/lib/mysql-files && touch /mysql-init-complete \
-    && chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /etc/ /var/lib/mysql-files/ /mysql-init-complete \
-    && chmod 1777 /var/run/mysqld /var/lib/mysql \
-    # comment out a few problematic configuration values
-    && find /etc/mysql/ -name '*.cnf' -print0 \
-        | xargs -0 grep -lZE '^(bind-address|log)' \
-        | xargs -rt -0 sed -Ei 's/^(bind-address|log)/#&/' \
-    # don't reverse lookup hostnames, they are usually another container
-    && echo '[mysqld]\nskip-host-cache\nskip-name-resolve' > /etc/mysql/conf.d/docker.cnf \
-    && apt autoremove -y \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+bison \
+cmake \
+gcc \
+g++ \
+git \
+make \
+hostname \
+libssl-dev pkg-config \
+libncurses-dev \
+libssl-dev \
+tzdata \
+&& git clone https://github.com/mysql/mysql-server \
+&& cd mysql-server \
+&& git checkout mysql-5.7.43 \
+&& mkdir build \
+&& cd build \
+&& cmake .. -DDOWNLOAD_BOOST=1 -DWITH_BOOST=. -DWITH_SSL=system \
+&& make \
+&& make install \
+&& cd / \
+&& rm -rf /mysql-server
+
+# Stage 2
+FROM ubuntu:20.04
+
+# The Author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update &&  apt-get install -y \
+ libncurses-dev \
+ libssl-dev \
+&& apt-get clean && rm -rf /var/lib/apt/lists/* \
+&& groupadd -r mysql && useradd -r -g mysql mysql
+
+COPY --from=builder /usr/local/mysql/bin /usr/local/mysql/bin
+
+RUN mkdir -p /usr/local/mysql/mysql-files && chown mysql:mysql /usr/local/mysql/mysql-files && chmod 750 /usr/local/mysql/mysql-files
+
+WORKDIR /usr/local/mysql
+
+RUN bin/mysqld --initialize --user=mysql
 
 VOLUME /var/lib/mysql
-
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-ENTRYPOINT ["docker-entrypoint.sh"]
-
 # Expose the default port
 EXPOSE 3306 33060
 
-CMD ["mysqld"]
+CMD ["bin/mysqld_safe", "--user=mysql"]
+
 # End of dockerfile
