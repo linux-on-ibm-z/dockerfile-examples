@@ -82,7 +82,6 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     python -m pip install -q setuptools==59.5.0 && \
     GRPC_PYTHON_BUILD_WITH_CYTHON=1 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 python -m pip install -q grpcio && \
     python -m pip install setuptools==68.2.2 && \
-    python -m pip install matplotlib==3.7.3 && \
     python -m pip install -q pybind11 && \
     python -m pip install -q 'numpy==1.*' && \
     python -m pip install -q 'pandas==1.3.*' && \
