@@ -1,4 +1,7 @@
 #!/bin/bash
+# © Copyright IBM Corporation 2023
+# LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+#
 
 set -o errexit -o nounset -o pipefail
 
@@ -6,36 +9,35 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 export PATH=$JAVA_HOME/bin:$PATH
 WORK_ROOT=$(pwd)
 SOURCE_ROOT=$(pwd)/build
-PACKAGE_VERSION="6.2.1"
+PACKAGE_VERSION="6.3.2"
 NETTY_TCNATIVE_VERSION="2.0.51"
 NETTY_TCNATIVE_PREVIOUS_VERSION="2.0.50"
 NETTY_VERSION="4.1.75"
 PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/${PACKAGE_VERSION}/patch"
 
 function buildNetty() {
-	# Install netty-tcnative 2.0.51
-	cd $SOURCE_ROOT
-	git clone https://github.com/netty/netty-tcnative.git
-	cp -r netty-tcnative netty-tcnative_$NETTY_TCNATIVE_PREVIOUS_VERSION
-	mv netty-tcnative netty-tcnative_$NETTY_TCNATIVE_VERSION
-	cd netty-tcnative_$NETTY_TCNATIVE_VERSION
-	git checkout netty-tcnative-parent-$NETTY_TCNATIVE_VERSION.Final
-	curl -sSL $PATCH_URL/netty-tcnative_$NETTY_TCNATIVE_VERSION.patch | patch -p1
-	mvn install
+    # Install netty-tcnative 2.0.51
+    cd $SOURCE_ROOT
+    git clone https://github.com/netty/netty-tcnative.git
+    cp -r netty-tcnative netty-tcnative_$NETTY_TCNATIVE_PREVIOUS_VERSION
+    cd netty-tcnative
+    git checkout netty-tcnative-parent-$NETTY_TCNATIVE_VERSION.Final
+    curl -sSL $PATCH_URL/netty-tcnative_$NETTY_TCNATIVE_VERSION.patch | patch -p1
+    mvn install
 
-	# Install netty-tcnative 2.0.50
-	cd $SOURCE_ROOT
-	cd netty-tcnative_$NETTY_TCNATIVE_PREVIOUS_VERSION
-	git checkout netty-tcnative-parent-$NETTY_TCNATIVE_PREVIOUS_VERSION.Final
-	curl -sSL $PATCH_URL/netty-tcnative_$NETTY_TCNATIVE_PREVIOUS_VERSION.patch | patch -p1
-	mvn install
+    # Install netty-tcnative 2.0.50
+    cd $SOURCE_ROOT
+    cd netty-tcnative_$NETTY_TCNATIVE_PREVIOUS_VERSION
+    git checkout netty-tcnative-parent-$NETTY_TCNATIVE_PREVIOUS_VERSION.Final
+    curl -sSL $PATCH_URL/netty-tcnative_$NETTY_TCNATIVE_PREVIOUS_VERSION.patch | patch -p1
+    mvn install
 
-	# Install netty 4.1.75 Final
-	cd $SOURCE_ROOT
-	git clone https://github.com/netty/netty.git
-	cd netty
-	git checkout netty-$NETTY_VERSION.Final
-	./mvnw clean install -DskipTests
+    # Install netty 4.1.75 Final
+    cd $SOURCE_ROOT
+    git clone https://github.com/netty/netty.git
+    cd netty
+    git checkout netty-$NETTY_VERSION.Final
+    ./mvnw clean install -DskipTests
 }
 
 apt-get install --yes --no-install-recommends \
@@ -58,7 +60,7 @@ curl -sSL $PATCH_URL/rules_java_5.5.0.patch | git apply
 cd $SOURCE_ROOT
 wget https://github.com/bazelbuild/bazel/releases/download/$PACKAGE_VERSION/bazel-$PACKAGE_VERSION-dist.zip
 mkdir -p dist/bazel && cd dist/bazel
-unzip ../../bazel-$PACKAGE_VERSION-dist.zip
+unzip -p ../../bazel-$PACKAGE_VERSION-dist.zip
 chmod -R +w .
 curl -sSL $PATCH_URL/dist-md5.patch | git apply
 env EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
@@ -76,8 +78,8 @@ cd $SOURCE_ROOT
 buildNetty
 
 # Copy netty and netty-tcnative jar to respective bazel directory and apply a patch to use them
-cp $SOURCE_ROOT/netty-tcnative_$NETTY_TCNATIVE_VERSION/boringssl-static/target/netty-tcnative-boringssl-static-$NETTY_TCNATIVE_VERSION.Final-linux-s390_64.jar \
-	$SOURCE_ROOT/bazel/third_party/netty_tcnative/
+cp $SOURCE_ROOT/netty-tcnative/boringssl-static/target/netty-tcnative-boringssl-static-$NETTY_TCNATIVE_VERSION.Final-linux-s390_64.jar \
+    $SOURCE_ROOT/bazel/third_party/netty_tcnative/
 cp $SOURCE_ROOT/netty/buffer/target/netty-buffer-$NETTY_VERSION.Final.jar \
     $SOURCE_ROOT/netty/codec/target/netty-codec-$NETTY_VERSION.Final.jar \
     $SOURCE_ROOT/netty/codec-http/target/netty-codec-http-$NETTY_VERSION.Final.jar \
