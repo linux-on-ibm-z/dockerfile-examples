@@ -1,10 +1,10 @@
-# © Copyright IBM Corporation 2018, 2021.
+# © Copyright IBM Corporation 2018, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############################################ Dockerfile for MySQL 8.0.x #################################################
 # To build this image, run docker build from the directory containing this Dockerfile:
 # 
-#       docker build -t mysql:8.0.x .
+#       DOCKER_BUILDKIT=0 docker build -t mysql:8.0.x .
 #
 # Start a mysql server instance examples:
 # You can specify one of MYSQL_ROOT_PASSWORD, MYSQL_ALLOW_EMPTY_PASSWORD and MYSQL_RANDOM_ROOT_PASSWORD like shown below
@@ -43,10 +43,11 @@ RUN echo $TZ > /etc/timezone \
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
+    bzip2 \
     openssl \
-    pwgen \
     perl \
     xz-utils \
+    zstd \
     gosu \
     mysql-server-8.0 \   
     && gosu nobody true \
