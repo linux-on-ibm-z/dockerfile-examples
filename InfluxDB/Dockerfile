@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2023
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for InfluxDB 2.7.1 ############################s
+#################### Dockerfile for InfluxDB 2.7.3 ############################s
 #
 # Builds InfluxDB
 #
@@ -27,7 +27,7 @@ FROM s390x/ubuntu:20.04 as builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Environment
-ARG VERSION=2.7.1
+ARG VERSION=2.7.3
 ENV DEBIAN_FRONTEND noninteractive
 ENV SOURCE_ROOT=/tmp
 ENV GOPATH=$HOME/go
@@ -43,14 +43,13 @@ RUN apt-get update \
 ### Install Rust ##########################################
 &&  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
 &&  export PATH="$HOME/.cargo/bin:$PATH" \
-&&  rustup default 1.53.0 \
 ### Install Go ##########################################
-&&  wget https://golang.org/dl/go1.20.linux-s390x.tar.gz \
-&&  tar -C /usr/local -xzf go1.20.linux-s390x.tar.gz \
+&&  wget https://golang.org/dl/go1.21.3.linux-s390x.tar.gz \
+&&  tar -C /usr/local -xzf go1.21.3.linux-s390x.tar.gz \
 &&  export PATH=/usr/local/go/bin:$PATH \
 ### Build InfluxDB ###########################################
 &&  export GO111MODULE=on \
-&&  go install github.com/influxdata/pkg-config@v0.2.11 \
+&&  go install github.com/influxdata/pkg-config@v0.2.13 \
 &&  git clone https://github.com/influxdata/influxdb.git \
 &&  cd influxdb && git checkout v${VERSION} \
 &&  export NODE_OPTIONS=--max_old_space_size=4096 \
