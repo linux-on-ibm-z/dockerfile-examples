@@ -54,7 +54,7 @@ maven \
 # Build netty-tcnative
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
-    && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/build_netty.sh  \
+    && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/build_netty.sh  \
     && bash build_netty.sh -y -j Temurin11 \
 # Build netty
     && cd $SOURCE_ROOT \
