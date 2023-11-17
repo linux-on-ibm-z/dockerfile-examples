@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################# Dockerfile for WildFly (JBoss) version 29.0.1 ##########################
+################# Dockerfile for WildFly (JBoss) version 30.0.0 ##########################
 #
 # This Dockerfile builds a basic installation of WildFly.
 #
@@ -24,68 +24,43 @@
 ##############################################################################
 ARG jdk=17
 
-# Base Image
-FROM ubuntu:20.04 AS base
-
-FROM base AS branch-version-11
-RUN apt-get update && apt-get install -y tar wget \
-        && cd /opt && wget https://github.com/ibmruntimes/semeru11-binaries/releases/download/jdk-11.0.20.1%2B1_openj9-0.40.0/ibm-semeru-open-jdk_s390x_linux_11.0.20.1_1_openj9-0.40.0.tar.gz \
-        && tar -xf ibm-semeru-open-jdk_s390x_linux_11.0.20.1_1_openj9-0.40.0.tar.gz \
-        && rm ibm-semeru-open-jdk_s390x_linux_11.0.20.1_1_openj9-0.40.0.tar.gz
-ENV JAVA_HOME=/opt/jdk-11.0.20.1+1
-
-FROM base AS branch-version-17
-RUN apt-get update && apt-get install -y tar wget \
-        && cd /opt && wget https://github.com/ibmruntimes/semeru17-binaries/releases/download/jdk-17.0.8.1%2B1_openj9-0.40.0/ibm-semeru-open-jdk_s390x_linux_17.0.8.1_1_openj9-0.40.0.tar.gz \
-        && tar -xf ibm-semeru-open-jdk_s390x_linux_17.0.8.1_1_openj9-0.40.0.tar.gz \
-        && rm ibm-semeru-open-jdk_s390x_linux_17.0.8.1_1_openj9-0.40.0.tar.gz
-ENV JAVA_HOME=/opt/jdk-17.0.8.1+1
-
-FROM branch-version-${jdk} AS final
+FROM eclipse-temurin:${jdk}
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-# Create a user and group used to launch processes
-# The user ID 1000 is the default for the first "regular" user on
-# Ubuntu so there is a high chance that this ID will be equal to the current user
-# making it easier to use volumes (no permission issues)
+
+WORKDIR /opt/jboss
+
 RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s /sbin/nologin -c "JBoss user" jboss && \
     chmod 755 /opt/jboss
 
 # Set the WILDFLY_VERSION env variable
-ENV WILDFLY_VERSION 29.0.1.Final
-ENV JBOSS_HOME=/opt/jboss/wildfly-${WILDFLY_VER}
-ENV PWD=`pwd`
-ENV PATH=$JAVA_HOME/bin:$JBOSS_HOME/bin:$PATH
+ENV WILDFLY_VERSION 30.0.0.Final
+ENV WILDFLY_SHA1 15f56267c97f1b4e422f56b771075a2ae586dd34
+ENV JBOSS_HOME /opt/jboss/wildfly
 
 USER root
 
-# Install dependencies
-RUN cd /opt/jboss/ \
- && wget https://github.com/wildfly/wildfly/releases/download/${WILDFLY_VERSION}/wildfly-${WILDFLY_VERSION}.tar.gz \
- && tar -xvzf wildfly-${WILDFLY_VERSION}.tar.gz \
- # Move the WildFly distribution to /opt, and make wildfly the owner of the extracted tar content
- && mv wildfly-$WILDFLY_VERSION $JBOSS_HOME \
- && rm wildfly-$WILDFLY_VERSION.tar.gz \
- && chown -R jboss:0 ${JBOSS_HOME} \
- && chmod -R g+rw ${JBOSS_HOME} \
-# Clean up cache data and remove dependencies that are not required
- && apt-get remove -y \
-    wget \
- && apt-get autoremove -y \
- && apt autoremove -y \
- && apt-get clean && rm -rf /var/lib/apt/lists/*\
- && rm -rf $HOME/.m2
+# Add the WildFly distribution to /opt, and make wildfly the owner of the extracted tar content
+# Make sure the distribution is available from a well-known place
+RUN cd $HOME \
+    && curl -L -O https://github.com/wildfly/wildfly/releases/download/$WILDFLY_VERSION/wildfly-$WILDFLY_VERSION.tar.gz \
+    && sha1sum wildfly-$WILDFLY_VERSION.tar.gz | grep $WILDFLY_SHA1 \
+    && tar xf wildfly-$WILDFLY_VERSION.tar.gz \
+    && mv $HOME/wildfly-$WILDFLY_VERSION $JBOSS_HOME \
+    && rm wildfly-$WILDFLY_VERSION.tar.gz \
+    && chown -R jboss:0 ${JBOSS_HOME} \
+    && chmod -R g+rw ${JBOSS_HOME}
 
-# Ensure signals are forwarded to the JVM process correctly for graceful
-# shutdown
+# Ensure signals are forwarded to the JVM process correctly for graceful shutdown
 ENV LAUNCH_JBOSS_IN_BACKGROUND true
 
 USER jboss
 
-WORKDIR $JBOSS_HOME/bin
-
+# Expose the ports in which we're interested
 EXPOSE 8080 9990
 
-CMD ["standalone.sh","-b","0.0.0.0","-bmanagement","0.0.0.0"]
+# Set the default command to run on boot
+# This will boot WildFly in standalone mode and bind to all interfaces
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0"]
