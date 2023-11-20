@@ -60,7 +60,7 @@ curl -sSL $PATCH_URL/rules_java_5.5.0.patch | git apply
 cd $SOURCE_ROOT
 wget https://github.com/bazelbuild/bazel/releases/download/$PACKAGE_VERSION/bazel-$PACKAGE_VERSION-dist.zip
 mkdir -p dist/bazel && cd dist/bazel
-unzip -p ../../bazel-$PACKAGE_VERSION-dist.zip
+unzip -q ../../bazel-$PACKAGE_VERSION-dist.zip
 chmod -R +w .
 curl -sSL $PATCH_URL/dist-md5.patch | git apply
 env EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
