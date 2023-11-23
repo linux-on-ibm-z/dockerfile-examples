@@ -9,7 +9,7 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 export PATH=$JAVA_HOME/bin:$PATH
 WORK_ROOT=$(pwd)
 SOURCE_ROOT=$(pwd)/build
-PACKAGE_VERSION="6.3.2"
+PACKAGE_VERSION="6.4.0"
 NETTY_TCNATIVE_VERSION="2.0.51"
 NETTY_TCNATIVE_PREVIOUS_VERSION="2.0.50"
 NETTY_VERSION="4.1.75"
@@ -23,14 +23,14 @@ function buildNetty() {
     cd netty-tcnative
     git checkout netty-tcnative-parent-$NETTY_TCNATIVE_VERSION.Final
     curl -sSL $PATCH_URL/netty-tcnative_$NETTY_TCNATIVE_VERSION.patch | patch -p1
-    mvn install
+    mvn install -DskipTests
 
     # Install netty-tcnative 2.0.50
     cd $SOURCE_ROOT
     cd netty-tcnative_$NETTY_TCNATIVE_PREVIOUS_VERSION
     git checkout netty-tcnative-parent-$NETTY_TCNATIVE_PREVIOUS_VERSION.Final
     curl -sSL $PATCH_URL/netty-tcnative_$NETTY_TCNATIVE_PREVIOUS_VERSION.patch | patch -p1
-    mvn install
+    mvn install -DskipTests
 
     # Install netty 4.1.75 Final
     cd $SOURCE_ROOT
@@ -50,11 +50,11 @@ apt-get install -y ninja-build cmake perl golang libssl-dev libapr1-dev autoconf
 
 mkdir -p $SOURCE_ROOT/
 
-# Download and patch rules_java v5.5.0
+# Download and patch rules_java v5.5.1
 cd $SOURCE_ROOT
-git clone -b 5.5.0 https://github.com/bazelbuild/rules_java.git
+git clone -b 5.5.1 https://github.com/bazelbuild/rules_java.git
 cd rules_java
-curl -sSL $PATCH_URL/rules_java_5.5.0.patch | git apply
+curl -sSL $PATCH_URL/rules_java_5.5.1.patch | git apply
 
 # Download Bazel distribution archive
 cd $SOURCE_ROOT
