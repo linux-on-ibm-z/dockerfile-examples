@@ -52,7 +52,7 @@ libssl-dev \
 tzdata \
 && git clone https://github.com/mysql/mysql-server \
 && cd mysql-server \
-&& git checkout mysql-5.7.43 \
+&& git checkout mysql-5.7.44 \
 && mkdir build \
 && cd build \
 && cmake .. -DDOWNLOAD_BOOST=1 -DWITH_BOOST=. -DWITH_SSL=system \
