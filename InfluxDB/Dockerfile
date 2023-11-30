@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2023
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for InfluxDB 2.7.3 ############################s
+#################### Dockerfile for InfluxDB 2.7.4 ############################s
 #
 # Builds InfluxDB
 #
@@ -21,13 +21,13 @@
 ###############################################################################
 
 # Builder image
-FROM s390x/ubuntu:20.04 as builder
+FROM debian:bookworm-slim as builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Environment
-ARG VERSION=2.7.3
+ARG VERSION=2.7.4
 ENV DEBIAN_FRONTEND noninteractive
 ENV SOURCE_ROOT=/tmp
 ENV GOPATH=$HOME/go
@@ -44,8 +44,8 @@ RUN apt-get update \
 &&  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
 &&  export PATH="$HOME/.cargo/bin:$PATH" \
 ### Install Go ##########################################
-&&  wget https://golang.org/dl/go1.21.3.linux-s390x.tar.gz \
-&&  tar -C /usr/local -xzf go1.21.3.linux-s390x.tar.gz \
+&&  wget https://golang.org/dl/go1.21.4.linux-s390x.tar.gz \
+&&  tar -C /usr/local -xzf go1.21.4.linux-s390x.tar.gz \
 &&  export PATH=/usr/local/go/bin:$PATH \
 ### Build InfluxDB ###########################################
 &&  export GO111MODULE=on \
@@ -56,7 +56,7 @@ RUN apt-get update \
 &&  make
 
 # Base image
-FROM s390x/ubuntu:20.04
+FROM debian:bookworm-slim
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
