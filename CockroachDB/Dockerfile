@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for CockroachDB version 22.2.7 ####################################
+#################################### Dockerfile for CockroachDB version 23.1.2 ####################################
 #
 # To build CockroachDB image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -16,7 +16,7 @@
 FROM s390x/ubuntu:20.04 AS builder
 
 # CockroachDB version
-ARG CRDB_VER=22.2.7
+ARG CRDB_VER=23.1.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -87,7 +87,7 @@ libresolv-wrapper libkeyutils-dev \
     && mkdir -p /usr/local/lib/cockroach \
     && mkdir -p /docker-entrypoint-initdb.d
 
-RUN wget -O /cockroach/cockroach.sh https://raw.githubusercontent.com/cockroachdb/cockroach/v22.2.7/build/deploy/cockroach.sh
+RUN wget -O /cockroach/cockroach.sh https://raw.githubusercontent.com/cockroachdb/cockroach/v23.1.2/build/deploy/cockroach.sh
 
 COPY --from=builder /usr/local/bin/cockroach  /cockroach/
 COPY --from=builder /usr/local/lib/cockroach/libgeos.so /usr/local/lib/cockroach/
