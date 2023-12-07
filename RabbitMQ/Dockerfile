@@ -2,7 +2,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
 #
-################# Dockerfile for RabbitMQ version 3.12.3 ################################
+################# Dockerfile for RabbitMQ version 3.12.7 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -24,9 +24,9 @@
 # Base image
 FROM s390x/ubuntu:20.04 as builder
 
-ARG RABBITMQ_VER=3.12.3
-ARG ERLANG_VERSION=26.0
-ARG ELIXIR_VERSION=1.14.5
+ARG RABBITMQ_VER=3.12.7
+ARG ERLANG_VERSION=26.1.2
+ARG ELIXIR_VERSION=1.15.7
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
@@ -47,11 +47,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
         git \
         zip \
         sed \
-        wget \
-        tar \
-        make \
         perl \
-        openssl \
         gcc \
         g++ \
         libncurses-dev \
@@ -60,8 +56,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
         unixodbc-dev \
         libssl-dev \
         openjdk-8-jdk \
-        libwxgtk3.0-gtk3-dev \
-        xsltproc \
         libxml2-utils \
  &&     ln -sf /usr/bin/python3 /usr/bin/python \
 # Install the build dependencies for Erlang
@@ -71,17 +65,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
         fop \
         flex \
         gawk \
-        gcc \
-        g++ \
         gzip \
-        libncurses-dev \
-        libssl-dev \
-        libxml2-utils \
-        make \
-        tar \
-        unixodbc-dev \
-        wget \
-        xsltproc \
 # Download and build Erlang
  && wget https://github.com/erlang/otp/releases/download/OTP-$ERLANG_VERSION/otp_src_$ERLANG_VERSION.tar.gz \
  && tar zxf otp_src_$ERLANG_VERSION.tar.gz && cd otp_src_$ERLANG_VERSION \
@@ -113,7 +97,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 FROM s390x/ubuntu:20.04
 ENV LC_ALL=en_US.UTF-8
-ARG RABBITMQ_VER=3.11.9
+ARG RABBITMQ_VER=3.12.7
 
 RUN apt-get update \
 && DEBIAN_FRONTEND=noninteractive apt-get install -y \
