@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2019, 2023.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for ScyllaDB version 5.2.4 #########
+########## Dockerfile for ScyllaDB version 5.2.9 #########
 #
 # This Dockerfile builds a basic installation of ScyllaDB.
 #
@@ -33,7 +33,7 @@ ENV URL=https
 ENV LC_ALL=C
 ENV JAVA8_HOME=/usr/lib/jvm/java-8-openjdk-s390x
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/5.2.4/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/5.2.9/patch/"
 
 ARG TARGET=native
 
@@ -175,7 +175,7 @@ RUN apt-get update \
   && cd "$SOURCE_ROOT" \
   && git clone https://github.com/fmtlib/fmt.git \
   && cd fmt \
-  && git checkout 7.1.3 \
+  && git checkout 9.1.0 \
   && /usr/local/bin/cmake -DFMT_TEST=OFF -DCMAKE_CXX_STANDARD=17 -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_VISIBILITY_PRESET=hidden -DCMAKE_POSITION_INDEPENDENT_CODE=ON . \
   && make \
   && make install \
@@ -197,7 +197,7 @@ RUN apt-get update \
   && cd "$SOURCE_ROOT" \
   && git clone https://github.com/scylladb/scylla.git \
   && cd scylla \
-  && git checkout scylla-5.2.4 \
+  && git checkout scylla-5.2.9 \
   && git submodule update --init --force --recursive \
   && curl -sSL ${PATCH_URL}/seastar.diff | patch -d seastar -p1 \
   && curl -sSL ${PATCH_URL}/python3.diff | patch -d tools/python3 -p1 \
