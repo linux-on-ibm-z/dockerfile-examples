@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation  2017, 2023
+# © Copyright IBM Corporation  2017, 2024
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############### Dockerfile for Couchbase version 7.2.0 ###################################
@@ -10,7 +10,7 @@
 # docker build -t <image_name> .
 #
 # To start Couchbase server run the below command
-# docker run --name <container_name> -p <port_numbers>:8091-8094 -p <port_number>:9123 -p <port_number>:11210 -d <image_name>
+# docker run --name <container_name> -p <port_numbers>:8091-8097 -p <port_number>:9123 -p <port_number>:11207 -p <port_number>:11210 -p <port_number>:11280 -p <port_number>:18091-18097 -d <image_name>
 #
 # View Couchbase UI at http://localhost:8091 on host machine to start Couchbase Server setup
 #
@@ -81,7 +81,8 @@ RUN chmod a+x /etc/service/couchbase-server/run \
     && mkdir -p /etc/runit/runsvdir/default/couchbase-server/supervise \
     && chown -R couchbase:couchbase \
                 /etc/service \
-                /etc/runit/runsvdir/default/couchbase-server/supervise
+                /etc/runit/runsvdir/default/couchbase-server/supervise \
+                /opt/couchbase/etc
 
 # Add dummy script for commands invoked by cbcollect_info that
 # make no sense in a Docker container
@@ -101,21 +102,40 @@ RUN chmod a+x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["couchbase-server"]
 
-# 8091: Couchbase Web console, REST/HTTP interface
-# 8092: Views, queries, XDCR
-# 8093: Query services (4.0+)
-# 8094: Full-text Search (4.5+)
-# 8095: Analytics (5.5+)
-# 8096: Eventing (5.5+)
-# 9123: Prometheus
-# 11207: Smart client library data node access (SSL)
-# 11210: Smart client library/moxi data node access
-# 11211: Legacy non-smart client library data node access
-# 18091: Couchbase Web console, REST/HTTP interface (SSL)
-# 18092: Views, query, XDCR (SSL)
-# 18093: Query services (SSL) (4.0+)
-# 18094: Full-text Search (SSL) (4.5+)
-# 18095: Analytics (SSL) (5.5+)
-# 18096: Eventing (SSL) (5.5+)
-EXPOSE 8091 8092 8093 8094 8095 8096 9123 11207 11210 11211 18091 18092 18093 18094 18095 18096
+# 8091: Cluster administration REST/HTTP traffic, including Couchbase Web Console
+# 8092: Views and XDCR access
+# 8093: Query service REST/HTTP traffic
+# 8094: Search Service REST/HTTP traffic
+# 8095: Analytics service REST/HTTP traffic
+# 8096: Eventing service REST/HTTP traffic
+# 8097: Backup service REST/HTTP traffic
+# 9123: Analytics prometheus
+# 11207: Data Service (SSL)
+# 11210: Data Service
+# 11280: Data Service prometheus
+# 18091: Cluster administration REST/HTTP traffic, including Couchbase Web Console (SSL)
+# 18092: Views and XDCR access (SSL)
+# 18093: Query service REST/HTTP traffic (SSL)
+# 18094: Search Service REST/HTTP traffic (SSL)
+# 18095: Analytics service REST/HTTP traffic (SSL)
+# 18096: Eventing service REST/HTTP traffic (SSL)
+# 18097: Backup service REST/HTTP traffic (SSL)
+EXPOSE 8091 \
+       8092 \
+       8093 \
+       8094 \
+       8095 \
+       8096 \
+       8097 \
+       9123 \
+       11207 \
+       11210 \
+       11280 \
+       18091 \
+       18092 \
+       18093 \
+       18094 \
+       18095 \
+       18096 \
+       18097
 VOLUME /opt/couchbase/var
