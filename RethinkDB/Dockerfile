@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2023.
+# © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for RethinkDB 2.4.3 ############################################
+############################ Dockerfile for RethinkDB 2.4.4 ############################################
 #
 # This Dockerfile builds a basic installation of RethinkDB
 #
@@ -46,7 +46,7 @@ patch \
 && cd $SOURCE_ROOT \
 && git clone https://github.com/rethinkdb/rethinkdb \
 && cd rethinkdb/ \
-&& git checkout v2.4.3 \
+&& git checkout v2.4.4 \
 && ./configure --allow-fetch \ 
 && make -j4 \ 
 #Install RethinkDB
