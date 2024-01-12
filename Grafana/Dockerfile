@@ -1,7 +1,7 @@
-# Copyright IBM Corporation 2017, 2023.
+# Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 10.1.4 ############################################
+############################ Dockerfile for Grafana 10.2.2 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -18,12 +18,12 @@
 ################################################################################################################
 
 # Base Image
-ARG BASE_IMAGE=s390x/ubuntu:20.04
+ARG BASE_IMAGE=s390x/ubuntu:22.04
 FROM ${BASE_IMAGE} AS builder
 
-ARG GRAFANA_VER=10.1.4
-ARG NODE_JS_VERSION=18.18.0
-ARG GO_VERSION=1.21.1
+ARG GRAFANA_VER=10.2.2
+ARG NODE_JS_VERSION=18.18.2
+ARG GO_VERSION=1.21.4
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -79,7 +79,7 @@ ENV PATH=$PATH:/usr/share/nodejs/bin
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GF_UID="472"
 ARG GF_GID="472"
-ARG NODE_JS_VERSION=18.18.0
+ARG NODE_JS_VERSION=18.18.2
 
 ENV PATH=/usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     GF_PATHS_CONFIG="/etc/grafana/grafana.ini" \
