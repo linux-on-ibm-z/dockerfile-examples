@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2013-2018 Draios Inc dba Sysdig.
+# Copyright (C) 2013-2024 Draios Inc dba Sysdig.
 #
 # This file is part of sysdig .
 #
@@ -24,7 +24,7 @@ if [[ "ubuntu" == $(awk -F'=' '/^ID=/ {print tolower($2)}' $SYSDIG_HOST_ROOT/etc
 then
         echo "Detected Ubuntu. Installing linux-headers...";
         apt-get update -y;
-        apt-get install -y linux-headers-$(uname -r);
+        apt-get install -y linux-headers-generic;
         if [ $? -ne 0 ]
         then
                 echo "*** Unable to install linux-headers-$(uname -r) , the sysdig command may not work properly.";
