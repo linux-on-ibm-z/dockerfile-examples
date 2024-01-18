@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2023.
+# © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 8.8.1 ############################################
+###################################### Dockerfile for Kibana version 8.11.0 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -31,96 +31,37 @@
 ##############################################################################################################
 FROM ubuntu:20.04 AS builder
 
-ARG KIBANA_VER=8.8.1
-ARG NODE_JS_VERSION=16.19.1
+ARG KIBANA_VER=8.11.0
+ARG NODE_JS_VERSION=18.18.2
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Set Environment Variable
-ENV SOURCE_ROOT=/tmp
+ENV SOURCE_ROOT=/home/nonroot
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 ENV PATH=/usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x/bin:/usr/share/kibana/bin:$JAVA_HOME/bin:$SOURCE_ROOT/bazel/output/:$PATH
 ENV USE_BAZEL_VERSION=$SOURCE_ROOT/bazel/output/bazel
 ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Kibana/${KIBANA_VER}/patch"
 ENV NODE_OPTIONS="--max_old_space_size=4096"
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -yq \
     sudo \
-    curl \
     git \
-    g++ \
-    gzip \
-    make \
-    python \
-    python3 \
-    openjdk-11-jdk \
-    unzip \
-    zip \
-    tar \
-    wget \
-    patch \
-    xz-utils \
-    build-essential \
-    pkg-config \
-    libglib2.0-dev \
-    libexpat1-dev \
-# Installing Bazel \
- && cd $SOURCE_ROOT \
- && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/5.1.1/build_bazel.sh \
- && bash build_bazel.sh -y \
-# Installing Go \
- && cd $SOURCE_ROOT && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Go/1.18.4/build_go.sh \
- && bash build_go.sh -y \
-# Building Bazelisk binary \
- && cd $SOURCE_ROOT && git clone https://github.com/bazelbuild/bazelisk.git \
- && cd bazelisk && git checkout v1.12.1 \
- && curl -sSL $PATCH_URL/bazelisk_patch.diff | git apply --ignore-whitespace \
- && go build && ./bazelisk build --config=release //:bazelisk-linux-s390x \
-# Installing Node.js
- && mkdir -p /usr/local/lib/nodejs \
- && cd $SOURCE_ROOT && wget https://nodejs.org/dist/v${NODE_JS_VERSION}/node-v${NODE_JS_VERSION}-linux-s390x.tar.xz \
- && tar xf node-v${NODE_JS_VERSION}-linux-s390x.tar.xz -C /usr/local/lib/nodejs \
-# Install Yarn and patch Bazelisk
- && chmod ugo+w -R /usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x \
- && npm install -g yarn @bazel/bazelisk@1.12.1 \
- && BAZELISK_DIR=/usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x/lib/node_modules/@bazel/bazelisk \
- && curl -sSL $PATCH_URL/bazelisk.js.diff | patch $BAZELISK_DIR/bazelisk.js \
- && cp $SOURCE_ROOT/bazelisk/bazel-out/s390x-opt-*/bin/bazelisk-linux_s390x $BAZELISK_DIR \
-# Install libvips
- && cd $SOURCE_ROOT && wget https://github.com/libvips/libvips/releases/download/v8.13.2/vips-8.13.2.tar.gz \
- && tar xf vips-8.13.2.tar.gz && cd vips-8.13.2/ \
- && ./configure && make && make install \
- && mkdir $SOURCE_ROOT/libvips-8.13.2-linux-s390x && cd $SOURCE_ROOT/libvips-8.13.2-linux-s390x \
- && wget https://github.com/lovell/sharp-libvips/releases/download/v8.13.2/libvips-8.13.2-linux-x64.tar.gz \
- && tar -xzf libvips-8.13.2-linux-x64.tar.gz && rm -rf libvips-8.13.2-linux-x64.tar.gz \
- && cp /usr/local/lib/libvips-cpp.so.42 $SOURCE_ROOT/libvips-8.13.2-linux-s390x/lib/ \
- && sed -i 's/linux-x64/linux-s390x/g' $SOURCE_ROOT/libvips-8.13.2-linux-s390x/platform.json \
- && cd $SOURCE_ROOT && tar -czf libvips-8.13.2-linux-s390x.tar.br $SOURCE_ROOT/libvips-8.13.2-linux-s390x \
- && npm config set sharp_libvips_local_prebuilds "$SOURCE_ROOT/libvips-8.13.2-linux-s390x.tar.br" \
-# Build chromedriver
- && cd $SOURCE_ROOT && git clone https://github.com/giggio/node-chromedriver.git \
- && cd node-chromedriver && git checkout 113.0.0 \
- && sed -i "s#process.arch === 'arm64' || process.arch === 'x64'#process.arch === 'arm64' || process.arch === 's390x' || process.arch === 'x64'#g" install.js \
- && npm install \
-# Download and Install Kibana
- && cd $SOURCE_ROOT && git clone -b v${KIBANA_VER} https://github.com/elastic/kibana.git \
- && cd $SOURCE_ROOT/kibana \
-# Apply Kibana patch
- && curl -sSL $PATCH_URL/kibana_patch.diff | git apply \
-# Build re2
- && cd $SOURCE_ROOT && git clone https://github.com/uhop/node-re2.git \
- && cd node-re2 && git checkout 1.17.4 \
- && git submodule update --init --recursive \
- && npm install \
- && gzip -c build/Release/re2.node > $SOURCE_ROOT/linux-s390x-93.gz \
- && mkdir -p $SOURCE_ROOT/kibana/.native_modules/re2/ \
- && cp $SOURCE_ROOT/linux-s390x-93.gz $SOURCE_ROOT/kibana/.native_modules/re2/ \
-# Bootstrap Kibana
- && cd $SOURCE_ROOT/kibana \
- && yarn kbn bootstrap --allow-root\
- && yarn build --skip-os-packages \
- && mkdir /usr/share/kibana/ \
+  tzdata \
+ && useradd -s /bin/bash -d /home/nonroot/ -m -G sudo nonroot \
+ && echo "nonroot ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+# Kibana cannot be built as root
+USER nonroot
+
+RUN cd $SOURCE_ROOT \
+ && curl -o build_kibana.sh https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Kibana/$KIBANA_VER/build_kibana.sh \
+ && bash build_kibana.sh -y
+
+USER root
+RUN cd $SOURCE_ROOT/kibana \
+ && mkdir -p /usr/share/kibana/ \
  && tar xzf target/kibana-${KIBANA_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/kibana --strip-components 1
 
 WORKDIR /usr/share/kibana
