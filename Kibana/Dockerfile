@@ -48,7 +48,8 @@ ENV NODE_OPTIONS="--max_old_space_size=4096"
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -yq \
     sudo \
     git \
-  tzdata \
+    tzdata \
+    curl \
  && useradd -s /bin/bash -d /home/nonroot/ -m -G sudo nonroot \
  && echo "nonroot ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
