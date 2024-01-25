@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2018, 2023.
+# © Copyright IBM Corporation 2018, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############################################ Dockerfile for MySQL 8.0.x #################################################
@@ -35,6 +35,31 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
+RUN apt-get update && apt-get install -y --no-install-recommends gnupg && rm -rf /var/lib/apt/lists/*
+
+# add gosu for easy step-down from root
+# https://github.com/tianon/gosu/releases
+ENV GOSU_VERSION 1.16
+RUN set -eux; \
+	savedAptMark="$(apt-mark showmanual)"; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends ca-certificates wget; \
+	rm -rf /var/lib/apt/lists/*; \
+	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
+	wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
+	wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
+	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
+	apt-mark auto '.*' > /dev/null; \
+	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark > /dev/null; \
+	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+	chmod +x /usr/local/bin/gosu; \
+	gosu --version; \
+	gosu nobody true
+
 ENV TZ 'America/Toronto'
 RUN echo $TZ > /etc/timezone \
     && apt-get update && apt-get install -y tzdata \
@@ -48,9 +73,7 @@ RUN apt-get update && apt-get install -y \
     perl \
     xz-utils \
     zstd \
-    gosu \
-    mysql-server-8.0 \   
-    && gosu nobody true \
+    mysql-server-8.0 \
     && mkdir /docker-entrypoint-initdb.d \
     && rm -rf /var/lib/mysql \
     && mkdir -p /var/lib/mysql /var/run/mysqld /var/lib/mysql-files/ && touch /mysql-init-complete \
