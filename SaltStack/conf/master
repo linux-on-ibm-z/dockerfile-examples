@@ -1,0 +1,4 @@
+user: root
+root_dir: /local
+publish_port: 4505
+ret_port: 4506

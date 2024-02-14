@@ -1,0 +1,5 @@
+user: root
+root_dir: /local/
+master: localhost
+id: saltdev
+master_port: 4506
