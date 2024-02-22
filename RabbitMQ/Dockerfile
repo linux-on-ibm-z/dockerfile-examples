@@ -2,7 +2,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
 #
-################# Dockerfile for RabbitMQ version 3.12.10 ################################
+################# Dockerfile for RabbitMQ version 3.12.12 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:22.04 as builder
 
-ARG RABBITMQ_VER=3.12.10
+ARG RABBITMQ_VER=3.12.12
 ARG ERLANG_VERSION=26.2.1
 ARG ELIXIR_VERSION=1.15.7
 # The author
@@ -97,7 +97,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 FROM s390x/ubuntu:22.04
 ENV LC_ALL=en_US.UTF-8
-ARG RABBITMQ_VER=3.12.10
+ARG RABBITMQ_VER=3.12.12
 
 RUN apt-get update \
 && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -109,6 +109,7 @@ RUN apt-get update \
 COPY --from=builder /opt/rabbitmq-server-$RABBITMQ_VER /opt/rabbitmq-server
 COPY --from=builder /usr/bin/erl /usr/bin/
 COPY --from=builder /usr/lib/erlang /usr/lib/erlang
+COPY --from=builder /usr/bin/escript /usr/bin/
 RUN echo "[{rabbit, [{loopback_users, []}]}]." | tee /etc/rabbitmq/rabbitmq.config
 WORKDIR /opt/rabbitmq-server
 # Expose RabbitMQ management console port and RabbitMQ server port
