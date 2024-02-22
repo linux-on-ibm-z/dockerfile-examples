@@ -33,7 +33,7 @@ ENV SOURCE_ROOT=/mysql-source
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR $SOURCE_ROOT
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.1.0/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.2.0/patch/"
 
 RUN apt-get update \
     && apt-get install -y curl wget tar bison cmake gcc g++ git hostname libncurses-dev libssl-dev make openssl \
@@ -43,9 +43,9 @@ RUN apt-get update \
     && wget https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.bz2 \
     && cd /usr/include && tar xf ${SOURCE_ROOT}/boost_1_77_0.tar.bz2 --strip-components=1 \
     && cd $SOURCE_ROOT \
-    && wget https://downloads.mysql.com/archives/get/p/23/file/mysql-8.1.0.tar.gz \
-    && tar xf mysql-8.1.0.tar.gz --strip-components=1 \
-    && rm -f boost_1_77_0.tar.bz2 mysql-8.1.0.tar.gz \
+    && wget https://downloads.mysql.com/archives/get/p/23/file/mysql-8.2.0.tar.gz \
+    && tar xf mysql-8.2.0.tar.gz --strip-components=1 \
+    && rm -f boost_1_77_0.tar.bz2 mysql-8.2.0.tar.gz \
     && curl -sSL ${PATCH_URL}/mt-asm.patch | git apply - \
     && curl -sSL ${PATCH_URL}/NdbHW.patch | git apply - \
     && curl -sSL ${PATCH_URL}/my-timer-cycles.patch | git apply - \
