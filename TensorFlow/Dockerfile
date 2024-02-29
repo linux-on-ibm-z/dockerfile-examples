@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2023
+# © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for TensorFlow version 2.11.0 #########
+########## Dockerfile for TensorFlow version 2.13.0 #########
 #
 # This Dockerfile builds a basic installation of TensorFlow.
 #
@@ -25,7 +25,7 @@ FROM ubuntu:20.04 as builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV SOURCE_ROOT=/tmp/source
-ENV PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.11.0/patch \
+ENV PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.13.0/patch \
 PYTHON_BIN_PATH=/usr/bin/python3 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True JTOOLS=$SOURCE_ROOT/remote_java_tools_linux
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -44,6 +44,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libblas-dev  \
     liblapack-dev \
     gfortran \
+    patchelf \
     && update-alternatives --install /usr/bin/python python /usr/bin/python3 40 \
     && ldconfig \
     && pip3 install --upgrade pip \
@@ -52,8 +53,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     wheel \
     scipy==1.7.3 \
     portpicker \
-    protobuf==3.13.0 \
-    opt_einsum \    
+    protobuf \
+    opt_einsum \
     packaging \
     requests \
     psutil \
@@ -88,9 +89,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && cd $SOURCE_ROOT \
     && git clone https://github.com/tensorflow/tensorflow \
     && cd tensorflow \
-    && git checkout v2.11.0 \
-    && curl -o tf_v2.11.0.patch ${PATCH_URL}/tf_v2.11.0.patch \
-    && patch -p1 < tf_v2.11.0.patch \
+    && git checkout v2.13.0 \
+    && curl -o tf_v2.13.0.patch ${PATCH_URL}/tf_v2.13.0.patch \
+    && patch -p1 < tf_v2.13.0.patch \
 	&& cp ${SOURCE_ROOT}/icu/icu4c/source/data/out/tmp/icu_conversion_data_big_endian.c.gz.* third_party/icu/data/ \
 # Configure
     && yes "" | ./configure || true \
@@ -101,15 +102,15 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && cd $SOURCE_ROOT \
     && git clone https://github.com/tensorflow/io.git \
     && cd io/ \
-    && git checkout v0.23.1 \
+    && git checkout v0.29.0 \
     && python3 setup.py -q bdist_wheel --project tensorflow_io_gcs_filesystem \
     && cd dist \
-    && sudo pip3 install ./tensorflow_io_gcs_filesystem-0.23.1-cp*-cp*-linux_s390x.whl \
+    && sudo pip3 install ./tensorflow_io_gcs_filesystem-0.29.0-cp*-cp*-linux_s390x.whl \
 # Build TensorFlow wheel
     && cd $SOURCE_ROOT/tensorflow \
     && mkdir -p /tensorflow_wheel \
     && bazel-bin/tensorflow/tools/pip_package/build_pip_package /tensorflow_wheel \
-    && cp $SOURCE_ROOT/io/dist/tensorflow_io_gcs_filesystem-0.23.1-cp*-cp*-linux_s390x.whl /tensorflow_wheel \
+    && cp $SOURCE_ROOT/io/dist/tensorflow_io_gcs_filesystem-0.29.0-cp*-cp*-linux_s390x.whl /tensorflow_wheel \
 # Cleanup
     && apt-get -y remove \
     git \
@@ -149,8 +150,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     wheel \
     scipy==1.7.3 \
     portpicker \
-    protobuf==3.13.0 \
-    opt_einsum \   
+    protobuf \
+    opt_einsum \
     packaging \
     requests \
     setuptools==59.5.0 \
@@ -161,10 +162,10 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /tensorflow_wheel
 # COPY the wheel from builder stage
-COPY --from=builder /tensorflow_wheel/tensorflow-2.11.0-cp*-linux_s390x.whl /tensorflow_wheel/tensorflow_io_gcs_filesystem-0.23.1-cp*-cp*-linux_s390x.whl /tensorflow_wheel/
+COPY --from=builder /tensorflow_wheel/tensorflow-2.13.0-cp*-linux_s390x.whl /tensorflow_wheel/tensorflow_io_gcs_filesystem-0.29.0-cp*-cp*-linux_s390x.whl /tensorflow_wheel/
 # Install the wheel
-RUN pip3 install --no-cache-dir /tensorflow_wheel/tensorflow_io_gcs_filesystem-0.23.1-cp*-cp*-linux_s390x.whl \
-    && pip3 install --no-cache-dir /tensorflow_wheel/tensorflow-2.11.0-cp*-linux_s390x.whl \
+RUN pip3 install --no-cache-dir /tensorflow_wheel/tensorflow_io_gcs_filesystem-0.29.0-cp*-cp*-linux_s390x.whl \
+    && pip3 install --no-cache-dir /tensorflow_wheel/tensorflow-2.13.0-cp*-linux_s390x.whl \
     && rm -f /tensorflow_wheel/*.whl \
     && rm -rf /root/.cache/
 
