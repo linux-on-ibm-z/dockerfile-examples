@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 10.2.2 ############################################
+############################ Dockerfile for Grafana 10.3.3 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -21,8 +21,8 @@
 ARG BASE_IMAGE=s390x/ubuntu:22.04
 FROM ${BASE_IMAGE} AS builder
 
-ARG GRAFANA_VER=10.2.2
-ARG NODE_JS_VERSION=18.18.2
+ARG GRAFANA_VER=10.3.3
+ARG NODE_JS_VERSION=20.11.1
 ARG GO_VERSION=1.21.4
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -52,12 +52,10 @@ RUN apt-get update -y && apt-get install -y \
  # Install yarn
  && chmod ugo+w -R /usr/local/node-v${NODE_JS_VERSION}-linux-s390x/ \
  && npm install -g yarn \
- && yarn set version 4.0.0-rc.45 \
+ && yarn set version 4.1.0 \
 # Get the Grafana Soure code and build Grafana backend
- && git clone https://github.com/grafana/grafana.git \
- && cd grafana && git checkout v${GRAFANA_VER} \
- && wget -O yarnrc.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Grafana/${GRAFANA_VER}/patch/yarnrc.patch \
- &&	git apply yarnrc.patch \
+ && git clone --depth 1 -b v${GRAFANA_VER} https://github.com/grafana/grafana.git \
+ && cd grafana  \
  && make gen-go \
  && make deps-go \
  && make build-go \
@@ -79,7 +77,7 @@ ENV PATH=$PATH:/usr/share/nodejs/bin
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GF_UID="472"
 ARG GF_GID="472"
-ARG NODE_JS_VERSION=18.18.2
+ARG NODE_JS_VERSION=20.11.1
 
 ENV PATH=/usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     GF_PATHS_CONFIG="/etc/grafana/grafana.ini" \
