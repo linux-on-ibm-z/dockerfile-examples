@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2023.
+# © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Auditbeat 8.11.1 #############################
+#################### Dockerfile for Auditbeat 8.12.2 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -17,7 +17,7 @@ FROM ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BEATS_VER=8.11.1
+ARG BEATS_VER=8.12.2
 
 # Set environment variable
 ENV BEATNAME=auditbeat
@@ -85,12 +85,12 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  && wget -O rustup-init.sh https://sh.rustup.rs \
  && bash rustup-init.sh -y \
  && export PATH=$PATH:$HOME/.cargo/bin \
- && rustup toolchain install 1.65.0 \
- && rustup default 1.65.0 \
+ && rustup toolchain install 1.76.0 \
+ && rustup default 1.76.0 \
 # Install go and download beats source code
- && wget https://go.dev/dl/go1.20.10.linux-s390x.tar.gz \
- && chmod ugo+r go1.20.10.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.20.10.linux-s390x.tar.gz \
+ && wget https://go.dev/dl/go1.22.0.linux-s390x.tar.gz \
+ && chmod ugo+r go1.22.0.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.22.0.linux-s390x.tar.gz \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
