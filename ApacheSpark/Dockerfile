@@ -1,6 +1,6 @@
-# © Copyright IBM Corporation 2019, 2023.
+# © Copyright IBM Corporation 2019, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-##################### Dockerfile for Apache Spark version 3.4.0 ###################################################
+##################### Dockerfile for Apache Spark version 3.5.0 ###################################################
 #
 # This Dockerfile builds a basic installation of Apache Spark.
 #
@@ -15,12 +15,12 @@
 # Base Image
 FROM s390x/ubuntu:22.04 AS builder
 
-ARG SPARK_VER=v3.4.0
+ARG SPARK_VER=v3.5.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/3.4.0/patch/spark.diff"
+ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/3.5.0/patch/spark.diff"
 ARG JDK11_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.19%2B7/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.19_7.tar.gz"
 ARG JDK8_URL="https://github.com/ibmruntimes/semeru8-binaries/releases/download/jdk8u372-b07_openj9-0.38.0/ibm-semeru-open-jdk_s390x_linux_8u372b07_openj9-0.38.0.tar.gz"
 
@@ -37,7 +37,7 @@ ENV C_INCLUDE_PATH     $LIBRARY_PATH
 ENV CPLUS_INCLUDE_PATH $LIBRARY_PATH
 ENV LD_LIBRARY_PATH    "${LD_LIBRARY_PATH}:${SOURCE_ROOT}/leveldbjni/META-INF/native/linux64/s390x/"
 ENV MAVEN_OPTS         "-Xss128m -Xmx3g -XX:ReservedCodeCacheSize=1g"
-ENV PATH               "${PATH}:${SOURCE_DIR}/apache-maven-3.8.6/bin"
+ENV PATH               "${PATH}:${SOURCE_DIR}/apache-maven-3.8.8/bin"
 
 ENV TZ=America/Toronto
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -56,8 +56,8 @@ RUN mkdir -p /opt/openjdk/11/ \
 && tar -zxf jdk11.tar.gz -C /opt/openjdk/11/ --strip-components 1
 
 # Install Maven
-RUN wget -O apache-maven-3.8.6.tar.gz "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=maven/maven-3/3.8.6/binaries/apache-maven-3.8.6-bin.tar.gz" \
-&& tar -zxf apache-maven-3.8.6.tar.gz
+RUN wget -O apache-maven-3.8.8.tar.gz "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz" \
+&& tar -zxf apache-maven-3.8.8.tar.gz
 
 # Build Snappy
 RUN wget https://github.com/google/snappy/releases/download/1.1.3/snappy-1.1.3.tar.gz \
@@ -78,7 +78,7 @@ RUN git clone -b s390x https://github.com/linux-on-ibm-z/leveldb.git \
 && JAVA_HOME="/opt/openjdk/8/" PATH="/opt/openjdk/8/bin/:${PATH}" jar -xvf ${LEVELDBJNI_HOME}/leveldbjni-linux64-s390x/target/leveldbjni-linux64-s390x-1.8.jar
 
 # Build Apache Spark
-RUN git clone -b "${SPARK_VER}" https://github.com/apache/spark.git \
+RUN git clone -b "${SPARK_VER}" https://github.com/apache/spark.git --depth 1 \
 && cd spark \
 && curl -sSL "${PATCH_URL}" | git apply \
 && JAVA_HOME="/opt/openjdk/11/" PATH="/opt/openjdk/11/bin/:${PATH}" ./build/mvn -DskipTests clean package
