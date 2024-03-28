@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2023.
+# © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############## Dockerfile for Apache Zeppelin version 0.10.1 ###############
+############## Dockerfile for Apache Zeppelin version 0.11.0 ###############
 #
 # This Dockerfile builds a basic installation of Apache Zeppelin.
 #
@@ -17,24 +17,24 @@
 # We can view the Apache Zeppelin UI at http://<zeppelin-host-ip>:<port_number>
 #
 # Reference:
-# http://zeppelin.apache.org/docs/0.10.1/index.html
+# http://zeppelin.apache.org/docs/0.11.0/index.html
 #
 #################################################################################
 
 # Base Image
-FROM s390x/ubuntu:20.04
+FROM s390x/ubuntu:22.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV Z_VERSION=0.10.1
+ENV Z_VERSION=0.11.0
 
 ENV LOG_TAG="[ZEPPELIN_${Z_VERSION}]:" \
     Z_HOME="/zeppelin" \
     LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8 \
     DEBIAN_FRONTEND=noninteractive \
-    JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x \
+    JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x \
     PATH=$JAVA_HOME/bin:$PATH \
     ZEPPELIN_ADDR="0.0.0.0"
 
@@ -53,7 +53,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     chmod +x /usr/bin/tini && \
     echo "$LOG_TAG Install java8" && \
     apt-get -y update && \
-    apt-get install -y openjdk-8-jdk && \
+    apt-get install -y openjdk-11-jdk && \
     apt-get -y update && DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata && \
     # Note: intake-parquet and apache_beam python packages are not included on s390x
     echo "$LOG_TAG Install python related packages" && \
@@ -68,8 +68,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     apt-get install -y libblas-dev libatlas-base-dev  liblapack-dev libopenblas-dev && \
     # font, image
     apt-get install -y libpng-dev libfreetype6-dev libxft-dev libjpeg-dev && \
-    # for matplotlib
-    python -m pip install matplotlib==3.3.4 && \
+    python -m pip install --upgrade pip && \
     # for tkinter
     apt-get install -y python3-tk libxml2-dev libxslt-dev zlib1g-dev && \
     apt-get install -y python3-ipykernel && \
@@ -93,7 +92,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     python -m pip install -q 'ipython==7.*' && \
     python -m pip install -q 'ipykernel==5.*' && \
     python -m pip install -q 'jupyter_client==5.*' && \
-    python -m pip install -q 'bokeh==3.1.1' && \
+    python -m pip install -q 'bokeh==3.2.0' && \
     python -m pip install -q panel && \
     python -m pip install -q holoviews && \
     python -m pip install -q 'pyyaml==5.3.*' && \
@@ -101,6 +100,8 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     python -m pip install -q plotnine==0.8.0 && \
     python -m pip install -q intake && \
     python -m pip install -q altair && \
+    # for matplotlib
+    python -m pip install -q matplotlib==3.5.1 && \
     echo "$LOG_TAG Install R related packages" && \
     apt-get -y --allow-unauthenticated install r-base r-base-dev libzmq3-dev libgit2-dev r-cran-devtools && \
     R -e "install.packages('evaluate', repos = 'https://cloud.r-project.org')" && \
@@ -118,7 +119,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/* && \
     echo "$LOG_TAG Download Zeppelin binary" && \
-    wget --quiet -O /tmp/zeppelin-${Z_VERSION}-bin-all.tgz "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=zeppelin/zeppelin-${Z_VERSION}/zeppelin-${Z_VERSION}-bin-all.tgz" && \
+    wget --quiet -O /tmp/zeppelin-${Z_VERSION}-bin-all.tgz "https://dlcdn.apache.org/zeppelin/zeppelin-${Z_VERSION}/zeppelin-${Z_VERSION}-bin-all.tgz" && \
     tar -zxvf /tmp/zeppelin-${Z_VERSION}-bin-all.tgz && \
     rm -rf /tmp/zeppelin-${Z_VERSION}-bin-all.tgz && \
     mkdir -p ${Z_HOME} && \
