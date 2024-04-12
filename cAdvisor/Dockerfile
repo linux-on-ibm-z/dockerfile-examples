@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2023.
+# © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for cAdvisor 0.47.3 #################################
+######################## Dockerfile for cAdvisor 0.49.1 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -23,50 +23,38 @@
 ##########################################################################################
 
 # Base image
-FROM s390x/ubuntu:20.04 AS builder
+FROM s390x/golang:1.22-alpine3.18 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG CADVISOR_VER=0.47.3
+ARG CADVISOR_VER=0.49.1
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 
-# Set Environmental Variables
-ENV GOPATH=$SOURCE_DIR
-ENV PATH=$PATH:$GOPATH/bin
-ENV DEBIAN_FRONTEND noninteractive
-
 # Install dependencies
-RUN apt-get update && apt-get install -y \
+RUN apk update && apk add --no-cache \
     git \
     curl \
     patch \
     make \
     gcc \
     sudo \
-# Install go
- && export GO_INSTALL_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Go/1.18.4/build_go.sh" \
- && curl $GO_INSTALL_URL | bash -s -- -v 1.18.4 \
-# Create directory and Change the work directory
- && mkdir -p $GOPATH/src/github.com/google && cd $GOPATH/src/github.com/google \
+    wget \
+    musl-dev \
+ && apk add --no-cache --upgrade bash \
 # Checkout the code from repository
- && git clone https://github.com/google/cadvisor.git \
- && cd $GOPATH/src/github.com/google/cadvisor/ \
- && git checkout v$CADVISOR_VER \
+ && git clone -b v$CADVISOR_VER https://github.com/google/cadvisor.git \
 # Build cadvisor
- && cd $GOPATH/src/github.com/google/cadvisor \
- && sed -i "s|,-race||" Makefile \
- && sed -i "s|-race||" Makefile \
+ && cd cadvisor \
  && make build \
- && cp $GOPATH/src/github.com/google/cadvisor/_output/cadvisor /usr/bin \
+ && cp ./_output/cadvisor /usr/bin \
  && cd && rm -rf $SOURCE_DIR \
- && apt-get remove -y git && apt-get autoremove -y && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && apk del git
 
 # Multistage build
-FROM s390x/ubuntu:20.04
+FROM s390x/alpine:3.18
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 WORKDIR /root
