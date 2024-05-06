@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2023.
+# © Copyright IBM Corporation 2023, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############################################ Dockerfile for MySQL 8.x #################################################
@@ -33,7 +33,7 @@ ENV SOURCE_ROOT=/mysql-source
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR $SOURCE_ROOT
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.2.0/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.3.0/patch/"
 
 RUN apt-get update \
     && apt-get install -y curl wget tar bison cmake gcc g++ git hostname libncurses-dev libssl-dev make openssl \
@@ -43,15 +43,15 @@ RUN apt-get update \
     && wget https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.bz2 \
     && cd /usr/include && tar xf ${SOURCE_ROOT}/boost_1_77_0.tar.bz2 --strip-components=1 \
     && cd $SOURCE_ROOT \
-    && wget https://downloads.mysql.com/archives/get/p/23/file/mysql-8.2.0.tar.gz \
-    && tar xf mysql-8.2.0.tar.gz --strip-components=1 \
-    && rm -f boost_1_77_0.tar.bz2 mysql-8.2.0.tar.gz \
+    && wget https://dev.mysql.com/get/Downloads/MySQL-8.3/mysql-8.3.0.tar.gz \
+    && tar xf mysql-8.3.0.tar.gz --strip-components=1 \
+    && rm -f boost_1_77_0.tar.bz2 mysql-8.3.0.tar.gz \
     && curl -sSL ${PATCH_URL}/mt-asm.patch | git apply - \
     && curl -sSL ${PATCH_URL}/NdbHW.patch | git apply - \
-    && curl -sSL ${PATCH_URL}/my-timer-cycles.patch | git apply - \
     && curl -sSL ${PATCH_URL}/router-test.patch | git apply - \
     && curl -sSL ${PATCH_URL}/icu-cmake.patch | git apply - \
     && curl -sSL ${PATCH_URL}/floating-point-cmake.patch | git apply - \
+    && curl -sSL ${PATCH_URL}/ut0rnd.patch | git apply - \
     && mkdir build && cd build \
     && cmake .. -DWITH_SSL=system -DBUILD_CONFIG=mysql_release -DDEB_CODENAME=jammy -DDEB_ID=ubuntu -DDEB_RELEASE=22.04 \
     && sed -i '44i \\t\t-DWITH_AUTHENTICATION_CLIENT_PLUGINS=ON \\' debian/rules \
