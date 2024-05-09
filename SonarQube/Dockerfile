@@ -1,14 +1,14 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 10.4.1 ##############################
+################################ Dockerfile for SonarQube 10.5.0 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
 # SonarQube is an open source quality management platform, dedicated to continuously analyze and measure technical quality, from project portfolio to method
 #
 # To build this image, from the directory containing this Dockerfile:
-# docker build -t <image_name> -f SonarQube.dockerfile .
+# docker build -t <image_name> -f Dockerfile .
 #
 # Use the following command to start SonarQube container.
 # docker run --name <container name> -it <image name> /bin/bash
@@ -17,16 +17,16 @@
 # docker run --name <container name> -p <port_number>:9000 -d <image name>
 # Link : http://<sonarQube-ip>:<port_number_9000>
 ######################################################################################
-ARG SONARQUBE_VERSION=10.4.1.88267
+ARG SONARQUBE_VERSION=10.5.0.89998
 
-FROM eclipse-temurin:17.0.7_7-jdk AS builder
+FROM eclipse-temurin:17.0.10_7-jdk AS builder
 LABEL stage=builder
 ARG SONARQUBE_VERSION
 ARG SONARQUBE_ZIP_URL=https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-${SONARQUBE_VERSION}.zip
 ENV JAVA_HOME='/opt/java/openjdk' \
     ES_JAVA_HOME='/opt/java/openjdk' \
     PATH="/opt/java/openjdk/bin:$PATH" \
-    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/10.4.1/patch/elasticsearch.diff" \
+    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/10.5.0/patch/elasticsearch.diff" \
     LANG="en_US.UTF-8"
 
 RUN apt-get update; \
@@ -45,34 +45,13 @@ RUN git clone https://github.com/elastic/elasticsearch && \
 RUN wget -q $SONARQUBE_ZIP_URL && \
     unzip sonarqube-${SONARQUBE_VERSION}.zip && \
     cd sonarqube-${SONARQUBE_VERSION} && \
-    rm -rfd bin/* elasticsearch/* && \
+    rm -rfd bin/elasticsearch elasticsearch/* && \
     tar -xzf /elasticsearch/distribution/archives/linux-s390x-tar/build/distributions/elasticsearch-8.11.0-SNAPSHOT-linux-s390x.tar.gz \
         -C /sonarqube-${SONARQUBE_VERSION}/elasticsearch --strip-components 1 && \
-    mv elasticsearch/bin elasticsearch/temp_bin && \
-    mkdir elasticsearch/bin && \
-    cp elasticsearch/temp_bin/elasticsearch-env elasticsearch/bin/ && \
-    cp elasticsearch/temp_bin/elasticsearch-cli elasticsearch/bin/ && \
-    rm -rfd elasticsearch/temp_bin && \
-    mv elasticsearch/modules elasticsearch/temp_modules && \
-    mkdir elasticsearch/modules && \
-    cp -r elasticsearch/temp_modules/aggregations elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/analysis-common elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/apm elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/blob-cache elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/lang-painless elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/old-lucene-versions elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/parent-join elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/reindex elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/transport-netty4 elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/x-pack-aggregate-metric elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/x-pack-core elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/x-pack-profiling elasticsearch/modules/ && \
-    cp -r elasticsearch/temp_modules/x-pack-security elasticsearch/modules/ && \
-    rm -rfd elasticsearch/temp_modules && \
-    rm -rfd elasticsearch/jdk
+    cp /sonarqube-${SONARQUBE_VERSION}/elasticsearch/bin/elasticsearch /sonarqube-${SONARQUBE_VERSION}/bin
 
 FROM eclipse-temurin:17-jre as stage1
-ARG SONARQUBE_VERSION=10.4.1.88267
+ARG SONARQUBE_VERSION=10.5.0.89998
 ENV SONARQUBE_HOME=/opt/sonarqube \
     SQ_DATA_DIR="/opt/sonarqube/data" \
     SQ_EXTENSIONS_DIR="/opt/sonarqube/extensions" \
@@ -100,7 +79,7 @@ ENV LANG='en_US.UTF-8' \
 #
 # SonarQube setup
 #
-ARG SONARQUBE_VERSION=10.4.1.88267
+ARG SONARQUBE_VERSION=10.5.0.89998
 ENV DOCKER_RUNNING="true" \
     JAVA_HOME='/opt/java/openjdk' \
     SONARQUBE_HOME=/opt/sonarqube \
