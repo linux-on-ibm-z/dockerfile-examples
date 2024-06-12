@@ -53,6 +53,8 @@ RUN apt-get update \
         && cmake -Wno-dev -DBUILD_DRIVER=OFF -DSYSDIG_VERSION=${SYSDIG_VER} .. \
 # Build and Install Sysdig
         && cd $SOURCE_ROOT/sysdig/build \
+	&& sed -i 's,c-ares.haxx.se/download/,github.com/c-ares/c-ares/releases/download/cares-1_19_1/,g' ./c-ares-prefix/src/c-ares-stamp/download-c-ares.cmake \
+    	&& sed -i 's,c-ares.haxx.se/download/,github.com/c-ares/c-ares/releases/download/cares-1_19_1/,g' ./falcosecurity-libs-repo/falcosecurity-libs-prefix/src/falcosecurity-libs/cmake/modules/cares.cmake \
         && make -j $(nproc) \
         && make install \
         && cmake --build . --target package --config Release
