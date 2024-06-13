@@ -2,7 +2,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
 #
-################# Dockerfile for RabbitMQ version 3.13.0 ################################
+################# Dockerfile for RabbitMQ version 3.13.3 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -24,9 +24,9 @@
 # Base image
 FROM s390x/ubuntu:22.04 as builder
 
-ARG RABBITMQ_VER=3.13.0
-ARG ERLANG_VERSION=26.2.1
-ARG ELIXIR_VERSION=1.15.7
+ARG RABBITMQ_VER=3.13.3
+ARG ERLANG_VERSION=26.2.3
+ARG ELIXIR_VERSION=1.15.8
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
@@ -97,7 +97,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 FROM s390x/ubuntu:22.04
 ENV LC_ALL=en_US.UTF-8
-ARG RABBITMQ_VER=3.13.0
+ARG RABBITMQ_VER=3.13.3
 
 RUN apt-get update \
 && DEBIAN_FRONTEND=noninteractive apt-get install -y \
