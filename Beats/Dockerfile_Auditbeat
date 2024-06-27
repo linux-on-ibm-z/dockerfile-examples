@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Auditbeat 8.12.2 #############################
+#################### Dockerfile for Auditbeat 8.13.4 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -17,7 +17,7 @@ FROM ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BEATS_VER=8.12.2
+ARG BEATS_VER=8.13.4
 
 # Set environment variable
 ENV BEATNAME=auditbeat
@@ -94,11 +94,20 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
+ && git clone -b v0.6.0 https://github.com/elastic/ebpfevents.git \
+ && cd ebpfevents \
+ && curl -sSL ${PATCH_URL}/ebpfevents.patch | git apply - \
+ && go install golang.org/x/tools/cmd/stringer@latest \
+ && export PATH=$PATH:$(go env GOPATH)/bin \
+ && go generate ./... \
+ && cd $GOPATH/src/github.com/elastic  \
  && git clone https://github.com/elastic/beats.git  \
  && cd beats  \
  && git checkout v${BEATS_VER}  \
 # Building auditbeat
  && cd $GOPATH/src/github.com/elastic/beats/${BEATNAME} \
+ && go mod edit -replace=github.com/elastic/ebpfevents@v0.6.0=$GOPATH/src/github.com/elastic/ebpfevents \
+ && go mod tidy \
  && make \
  && make update \
  && make fmt
