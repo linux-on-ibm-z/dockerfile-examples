@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for Consul - 1.18.2 ########################
+###################### Dockerfile for Consul - 1.19.0 ########################
 #
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG CONSUL_VERSION=1.18.2
+ARG CONSUL_VERSION=1.19.0
 
 ENV TERM=xterm
 
@@ -54,8 +54,8 @@ RUN apt-get update &&  apt-get install -y \
  && service rsyslog start \
 # Install go and get source code of consul
  && cd $SOURCE_DIR \
- && wget https://golang.org/dl/go1.21.10.linux-s390x.tar.gz \
- && tar -xzf go1.21.10.linux-s390x.tar.gz \
+ && wget https://golang.org/dl/go1.22.4.linux-s390x.tar.gz \
+ && tar -xzf go1.22.4.linux-s390x.tar.gz \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
  && cd $GOPATH/src/github.com/hashicorp \
  && git clone https://github.com/hashicorp/consul.git \
@@ -64,7 +64,10 @@ RUN apt-get update &&  apt-get install -y \
  && make tools \
  && make dev
 
-FROM s390x/alpine:3.12
+FROM s390x/alpine:3.19
+
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Create a consul user and group first so the IDs get set the same way, even as
 # the rest of this may change over time.
@@ -77,6 +80,10 @@ RUN set -eux && \
 RUN apk update && apk add bash wget
 
 COPY --from=builder /tmp/source/src/github.com/hashicorp/consul/bin/consul /usr/local/bin/
+
+# The /consul/data dir is used by Consul to store state. The agent will be started
+# with /consul/config as the configuration directory so you can add additional
+# config files in that location.
 RUN mkdir -p /consul/data && \
     mkdir -p /consul/config && \
     chown -R consul:consul /consul
@@ -104,7 +111,7 @@ EXPOSE 8500 8600 8600/udp
 # Consul doesn't need root privileges so we run it as the consul user from the
 # entry point script. The entry point script also uses dumb-init as the top-level
 # process to reap any zombie processes created by Consul sub-processes.
-RUN wget -O /usr/local/bin/docker-entrypoint.sh https://raw.githubusercontent.com/hashicorp/docker-consul/master/0.X/docker-entrypoint.sh
+RUN wget -O /usr/local/bin/docker-entrypoint.sh https://raw.githubusercontent.com/hashicorp/consul/v1.19.0/.release/docker/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
