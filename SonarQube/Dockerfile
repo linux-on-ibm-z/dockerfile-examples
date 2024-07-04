@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 10.5.0 ##############################
+################################ Dockerfile for SonarQube 10.5.1 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -17,16 +17,16 @@
 # docker run --name <container name> -p <port_number>:9000 -d <image name>
 # Link : http://<sonarQube-ip>:<port_number_9000>
 ######################################################################################
-ARG SONARQUBE_VERSION=10.5.0.89998
+ARG SONARQUBE_VERSION=10.5.1.90531
 
-FROM eclipse-temurin:17.0.10_7-jdk AS builder
+FROM eclipse-temurin:17.0.11_9-jdk AS builder
 LABEL stage=builder
 ARG SONARQUBE_VERSION
 ARG SONARQUBE_ZIP_URL=https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-${SONARQUBE_VERSION}.zip
 ENV JAVA_HOME='/opt/java/openjdk' \
     ES_JAVA_HOME='/opt/java/openjdk' \
     PATH="/opt/java/openjdk/bin:$PATH" \
-    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/10.5.0/patch/elasticsearch.diff" \
+    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/10.5.1/patch/elasticsearch.diff" \
     LANG="en_US.UTF-8"
 
 RUN apt-get update; \
@@ -51,7 +51,7 @@ RUN wget -q $SONARQUBE_ZIP_URL && \
     cp /sonarqube-${SONARQUBE_VERSION}/elasticsearch/bin/elasticsearch /sonarqube-${SONARQUBE_VERSION}/bin
 
 FROM eclipse-temurin:17-jre as stage1
-ARG SONARQUBE_VERSION=10.5.0.89998
+ARG SONARQUBE_VERSION=10.5.1.90531
 ENV SONARQUBE_HOME=/opt/sonarqube \
     SQ_DATA_DIR="/opt/sonarqube/data" \
     SQ_EXTENSIONS_DIR="/opt/sonarqube/extensions" \
@@ -79,7 +79,7 @@ ENV LANG='en_US.UTF-8' \
 #
 # SonarQube setup
 #
-ARG SONARQUBE_VERSION=10.5.0.89998
+ARG SONARQUBE_VERSION=10.5.1.90531
 ENV DOCKER_RUNNING="true" \
     JAVA_HOME='/opt/java/openjdk' \
     SONARQUBE_HOME=/opt/sonarqube \
