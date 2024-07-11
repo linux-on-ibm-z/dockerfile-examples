@@ -1,6 +1,6 @@
 # © Copyright IBM Corporation 2023, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-########## Dockerfile for Terraform - 1.8.5 ########################
+########## Dockerfile for Terraform - 1.9.0 ########################
 #
 # Terraform is an infrastructure as code (IaC) tool that allows you to build, change, and version infrastructure safely and efficiently. 
 #
@@ -25,7 +25,7 @@
 FROM docker.mirror.hashicorp.services/golang:alpine AS builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG TERRAFORM_VERSION=v1.8.5
+ARG TERRAFORM_VERSION=v1.9.0
 
 RUN apk add --no-cache git bash openssh \
     && git clone -b ${TERRAFORM_VERSION} https://github.com/hashicorp/terraform.git $GOPATH/src/github.com/hashicorp/terraform
