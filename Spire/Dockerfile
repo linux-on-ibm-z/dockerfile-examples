@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for SPIRE version 1.9.6 ########################
+###################### Dockerfile for SPIRE version 1.10.0 ########################
 #
 # SPIRE (the SPIFFE Runtime Environment) is a toolchain of APIs for establishing trust between software systems across a wide variety of hosting platforms.
 # SPIRE exposes the SPIFFE Workload API,which can attest running software systems and issue SPIFFE IDs and SVIDs to them.
@@ -36,7 +36,7 @@ FROM ubuntu:22.04 as base
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 WORKDIR /spire
-ARG VERSION=1.9.6
+ARG VERSION=1.10.0
 ENV DEBIAN_FRONTEND noninteractive
 ENV SOURCE_ROOT=/tmp
 ENV CGO_ENABLED=1
