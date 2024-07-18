@@ -84,7 +84,7 @@ RUN cd $SOURCE_DIR \
 && git checkout v$CRDB_VER \
 && wget -O $SOURCE_DIR/cockroachdb.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CockroachDB/$CRDB_VER/patch/crdb.patch \
 && sed -i "s#SOURCE_ROOT_PATH#${SOURCE_DIR}#g" $SOURCE_DIR/cockroachdb.patch \
-&& git apply --reject --whitespace=fix $SOURCE_DIR/cockroachdb.patch \
+&& git apply --reject $SOURCE_DIR/cockroachdb.patch \
 && sudo cp ${SOURCE_DIR}/bazel-lib/lib/private/copy_to_directory_toolchain.bzl . \
 && sudo cp ${SOURCE_DIR}/bazel-lib/lib/private/copy_directory_toolchain.bzl . \
 && echo 'build --remote_cache=http://127.0.0.1:9867' > ~/.bazelrc \
@@ -92,25 +92,37 @@ RUN cd $SOURCE_DIR \
 && echo "test --test_tmpdir=$SOURCE_DIR/cockroach/tmp" >> .bazelrc.user \
 && ./dev doctor \
 && ./dev build \
-&& sudo cp cockroach /usr/local/bin
+&& sudo cp cockroach /usr/local/bin \
+&& bazel build c-deps:libgeos --config force_build_cdeps \
+&& sudo mkdir -p /usr/local/lib/cockroach \
+&& sudo cp _bazel/bin/c-deps/libgeos_foreign/lib/libgeos.so /usr/local/lib/cockroach/ \
+&& sudo cp _bazel/bin/c-deps/libgeos_foreign/lib/libgeos_c.so /usr/local/lib/cockroach/
 
 # Build a fresh image without all the build requirements
-FROM s390x/ubuntu:20.04
+FROM registry.access.redhat.com/ubi9/ubi
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV PATH=/usr/local/go/bin:/cockroach:$PATH
 
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get update && apt-get install -y tzdata hostname tar wget \
-libresolv-wrapper libkeyutils-dev \
+RUN yum install -y sudo tzdata hostname tar wget cmake gcc-c++ keyutils-libs-devel \
     && mkdir -p /cockroach \
     && mkdir -p /usr/local/lib/cockroach \
     && mkdir -p /docker-entrypoint-initdb.d
 
+RUN wget https://ftp.samba.org/pub/cwrap/resolv_wrapper-1.1.8.tar.gz \
+&& tar zxf resolv_wrapper-1.1.8.tar.gz \
+&& cd resolv_wrapper-1.1.8 && mkdir obj && cd obj \
+&& cmake -DCMAKE_INSTALL_PREFIX=/usr .. \
+&& make \
+&& sudo make install
+
 RUN wget -O /cockroach/cockroach.sh https://raw.githubusercontent.com/cockroachdb/cockroach/v24.1.0/build/deploy/cockroach.sh
 
 COPY --from=builder /usr/local/bin/cockroach  /cockroach/
+COPY --from=builder /usr/local/lib/cockroach/libgeos.so /usr/local/lib/cockroach/
+COPY --from=builder /usr/local/lib/cockroach/libgeos_c.so /usr/local/lib/cockroach/
 RUN chmod +x /cockroach/cockroach.sh
 
 WORKDIR /cockroach/
