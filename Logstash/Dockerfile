@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 8.14.1 #####################################################
+############################ Dockerfile for Logstash version 8.14.3 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -25,20 +25,16 @@ RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
 FROM s390x/ubuntu:20.04
 
-ARG LOGSTASH_VER=8.14.1
+ARG LOGSTASH_VER=8.14.3
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV LS_JAVA_HOME=/opt/temurin/jdk-17.0.9+9
+ENV LS_JAVA_HOME=/opt/temurin17
 # Install Dependencies
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
-    apt-get install -y procps findutils locales \
-    tar \
-    wget \
-    curl \
-    gzip && \
+    apt-get install -y procps findutils tar gzip locales curl wget && \
     locale-gen 'en_US.UTF-8' && \
 # Provide a non-root user to run the process.
     groupadd --gid 1000 logstash && \
@@ -46,11 +42,11 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
        --home /usr/share/logstash --no-create-home \
       logstash && \
 # get Temurin 17
-    mkdir /opt/temurin && \
-    cd /opt/temurin && \
-    wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.9%2B9/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.9_9.tar.gz && \
-    tar -xzf OpenJDK17U-jdk_s390x_linux_hotspot_17.0.9_9.tar.gz && \
-    rm -rf OpenJDK17U-jdk_s390x_linux_hotspot_17.0.9_9.tar.gz && \
+    mkdir /opt/temurin17 && \
+    cd /opt/temurin17 && \
+    wget -O temurin17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.12_7.tar.gz && \
+    tar -zxf temurin17.tar.gz -C /opt/temurin17 --strip-components 1 && \
+    rm -rf temurin17.tar.gz && \
 # Add Logstash itself.
     cd /tmp && \
     curl -Lo - https://artifacts.elastic.co/downloads/logstash/logstash-oss-${LOGSTASH_VER}-linux-aarch64.tar.gz  | \
@@ -75,22 +71,23 @@ ENV PATH=/usr/share/logstash/bin:$LS_JAVA_HOME/bin:$PATH
 
 # Provide a minimal configuration, so that simple invocations will provide
 # a good experience.
-ADD config/pipelines.yml config/pipelines.yml
-ADD config/logstash-oss.yml config/logstash.yml
-ADD config/log4j2.properties config/
-ADD pipeline/default.conf pipeline/logstash.conf
+COPY config/logstash-oss.yml config/logstash.yml
+COPY config/pipelines.yml config/log4j2.properties config/log4j2.file.properties config/
+COPY pipeline/default.conf pipeline/logstash.conf
 RUN chown --recursive logstash:root config/ pipeline/
-# Ensure Logstash gets a UTF-8 locale by default.
+# Ensure Logstash gets the correct locale by default.
 RUN locale-gen en_US.UTF-8
 ENV LANG='en_US.UTF-8' LC_ALL='en_US.UTF-8'
 
+COPY --from=builder /go/env2yaml /usr/local/bin/
+
 # Place the startup wrapper script.
-ADD bin/docker-entrypoint /usr/local/bin/
+COPY bin/docker-entrypoint /usr/local/bin/
+
 RUN chmod 0755 /usr/local/bin/docker-entrypoint
 
-USER 1000
 
-COPY --from=builder /go/env2yaml /usr/local/bin/
+USER 1000
 
 EXPOSE 9600 5044
 
