@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 10.5.1 ##############################
+################################ Dockerfile for SonarQube 10.6.0 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -17,7 +17,7 @@
 # docker run --name <container name> -p <port_number>:9000 -d <image name>
 # Link : http://<sonarQube-ip>:<port_number_9000>
 ######################################################################################
-ARG SONARQUBE_VERSION=10.5.1.90531
+ARG SONARQUBE_VERSION=10.6.0.92116
 
 FROM eclipse-temurin:17.0.11_9-jdk AS builder
 LABEL stage=builder
@@ -26,7 +26,7 @@ ARG SONARQUBE_ZIP_URL=https://binaries.sonarsource.com/Distribution/sonarqube/so
 ENV JAVA_HOME='/opt/java/openjdk' \
     ES_JAVA_HOME='/opt/java/openjdk' \
     PATH="/opt/java/openjdk/bin:$PATH" \
-    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/10.5.1/patch/elasticsearch.diff" \
+    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/10.6.0/patch/elasticsearch.diff" \
     LANG="en_US.UTF-8"
 
 RUN apt-get update; \
@@ -34,11 +34,24 @@ RUN apt-get update; \
     locale-gen en_US.UTF-8;
 
 # build elasticsearch
+SHELL ["/bin/bash", "-c"]
 RUN git clone https://github.com/elastic/elasticsearch && \
     cd elasticsearch && \
-    git checkout v8.11.0 && \
+    git checkout v8.13.4 && \
     wget $PATCH_URL && \
     git apply elasticsearch.diff && \
+    latest_tag="$(git describe --tags `git rev-list --tags --max-count=1`)" && \
+    latest_tag="${latest_tag:1}"-SNAPSHOT && \
+    echo $latest_tag && \
+    sed -i 's|${project.version}|'"${latest_tag}"'|g' x-pack/plugin/ml/build.gradle && \
+    mkdir -p distribution/packages/s390x-rpm/  && \
+    mkdir -p distribution/packages/s390x-deb/  && \
+    mkdir -p distribution/archives/linux-s390x-tar/  && \
+    mkdir -p distribution/docker/ubi-docker-s390x-export/  && \
+    mkdir -p distribution/docker/cloud-docker-s390x-export/  && \
+    mkdir -p distribution/docker/cloud-ess-docker-s390x-export/  && \
+    mkdir -p distribution/docker/docker-s390x-export/  && \
+    mkdir -p distribution/docker/ironbank-docker-s390x-export/  && \
     ./gradlew :distribution:archives:linux-s390x-tar:assemble --max-workers=`nproc`  --parallel
 
 # download sonarqube and replace elasticsearch
@@ -46,12 +59,12 @@ RUN wget -q $SONARQUBE_ZIP_URL && \
     unzip sonarqube-${SONARQUBE_VERSION}.zip && \
     cd sonarqube-${SONARQUBE_VERSION} && \
     rm -rfd bin/elasticsearch elasticsearch/* && \
-    tar -xzf /elasticsearch/distribution/archives/linux-s390x-tar/build/distributions/elasticsearch-8.11.0-SNAPSHOT-linux-s390x.tar.gz \
+    tar -xzf /elasticsearch/distribution/archives/linux-s390x-tar/build/distributions/elasticsearch-8.13.4-SNAPSHOT-linux-s390x.tar.gz \
         -C /sonarqube-${SONARQUBE_VERSION}/elasticsearch --strip-components 1 && \
     cp /sonarqube-${SONARQUBE_VERSION}/elasticsearch/bin/elasticsearch /sonarqube-${SONARQUBE_VERSION}/bin
 
-FROM eclipse-temurin:17-jre as stage1
-ARG SONARQUBE_VERSION=10.5.1.90531
+FROM eclipse-temurin:17-jre AS stage1
+ARG SONARQUBE_VERSION=10.6.0.92116
 ENV SONARQUBE_HOME=/opt/sonarqube \
     SQ_DATA_DIR="/opt/sonarqube/data" \
     SQ_EXTENSIONS_DIR="/opt/sonarqube/extensions" \
@@ -61,12 +74,12 @@ ENV SONARQUBE_HOME=/opt/sonarqube \
 COPY --from=builder /sonarqube-${SONARQUBE_VERSION}/ ${SONARQUBE_HOME}/
 
 RUN set -eux; \
-    groupadd --system --gid 1000 sonarqube; \
-    useradd --system --uid 1000 --gid sonarqube sonarqube; \
+    useradd --system --uid 1001 --gid 0 sonarqube; \
     cd /opt; \
+    rm -rf ${SONARQUBE_HOME}/bin/*; \
     ln -s "${SONARQUBE_HOME}/lib/sonar-application-${SONARQUBE_VERSION}.jar" "${SONARQUBE_HOME}/lib/sonarqube.jar"; \
-    chmod -R 555 ${SONARQUBE_HOME}; \
-    chmod -R ugo+wrX "${SQ_DATA_DIR}" "${SQ_EXTENSIONS_DIR}" "${SQ_LOGS_DIR}" "${SQ_TEMP_DIR}";
+    chmod -R 550 ${SONARQUBE_HOME}; \
+    chmod -R 770 "${SQ_DATA_DIR}" "${SQ_EXTENSIONS_DIR}" "${SQ_LOGS_DIR}" "${SQ_TEMP_DIR}";
 
 FROM eclipse-temurin:17-jre
 
@@ -79,7 +92,7 @@ ENV LANG='en_US.UTF-8' \
 #
 # SonarQube setup
 #
-ARG SONARQUBE_VERSION=10.5.1.90531
+ARG SONARQUBE_VERSION=10.6.0.92116
 ENV DOCKER_RUNNING="true" \
     JAVA_HOME='/opt/java/openjdk' \
     SONARQUBE_HOME=/opt/sonarqube \
@@ -92,10 +105,9 @@ ENV DOCKER_RUNNING="true" \
 COPY --from=stage1 ${SONARQUBE_HOME}/ ${SONARQUBE_HOME}/
 
 RUN set -eux; \
-    groupadd --system --gid 1000 sonarqube; \
-    useradd --system --uid 1000 --gid sonarqube sonarqube; \
+    useradd --system --uid 1001 --gid 0 sonarqube; \
     apt-get update; \
-    apt-get install -y gnupg bash fonts-dejavu; \
+    apt-get --no-install-recommends -y install gnupg bash fonts-dejavu; \
     echo "networkaddress.cache.ttl=5" >> "${JAVA_HOME}/conf/security/java.security"; \
     sed --in-place --expression="s?securerandom.source=file:/dev/random?securerandom.source=file:/dev/urandom?g" "${JAVA_HOME}/conf/security/java.security"; \
     # pub   2048R/D26468DE 2015-05-25
