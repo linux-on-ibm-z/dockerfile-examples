@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2022, 2024.
+# © Copyright IBM Corporation 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for Bazel version 7.0.2 ####################################
+#################################### Dockerfile for Bazel version 7.2.1 ####################################
 #
 # To build a Bazel image from the directory containing this Dockerfile:
 # (assuming that the file is named Dockerfile):
@@ -24,9 +24,12 @@ RUN chmod +x install_packages.sh && ./install_packages.sh
 
 FROM base_image AS builder
 
-COPY install_bazel.sh /var/bazel/
-
-RUN chmod +x install_bazel.sh && ./install_bazel.sh
+RUN mkdir build \
+&& cd build \
+&& curl -o install_bazel.sh https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/7.2.1/build_bazel.sh \
+&& chmod +x install_bazel.sh \
+&& ./install_bazel.sh -y \
+&& chmod +x /var/bazel/build/bazel/bazel-bin/src/bazel
 
 FROM base_image
 
@@ -35,5 +38,5 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 RUN useradd --system --create-home --home-dir=/home/ubuntu --shell=/bin/bash --gid=root --groups=sudo --uid=1000 ubuntu
 USER ubuntu
 WORKDIR /home/ubuntu
-COPY --from=builder /var/bazel/bazel /usr/local/bin/bazel
+COPY --from=builder /var/bazel/build/bazel/bazel-bin/src/bazel /usr/local/bin/bazel
 ENTRYPOINT ["/usr/local/bin/bazel"]
