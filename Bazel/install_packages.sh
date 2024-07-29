@@ -1,5 +1,5 @@
 #!/bin/bash
-# © Copyright IBM Corporation 2023
+# © Copyright IBM Corporation 2024
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
 
@@ -15,6 +15,7 @@ apt-get install --yes \
     curl \
     git \
     openjdk-11-jdk-headless \
+    openjdk-21-jdk-headless \
     python3 \
     python3-pip \
     python-is-python3 \
