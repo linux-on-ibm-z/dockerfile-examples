@@ -13,6 +13,7 @@ export TZ="Etc/UTC"
 apt-get install --yes \
     build-essential \
     curl \
+    sudo \
     git \
     openjdk-11-jdk-headless \
     openjdk-21-jdk-headless \
