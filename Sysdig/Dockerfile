@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Sysdig version 0.36.1 #########
+########## Dockerfile for Sysdig version 0.38.0 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -27,7 +27,7 @@
 # Base Image
 FROM s390x/ubuntu:22.04 AS builder
 
-ARG SYSDIG_VER=0.36.1
+ARG SYSDIG_VER=0.38.0
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -38,7 +38,7 @@ WORKDIR $SOURCE_ROOT
 # Install dependencies
 RUN apt-get update \
         && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y git g++ \
-        linux-headers-generic cmake libelf-dev pkg-config kmod rpm \
+        linux-headers-generic clang llvm cmake libelf-dev pkg-config kmod rpm \
 	&& mkdir -p /lib/modules/$(uname -r) \
         && version=$(ls /usr/src/ | grep generic | tail -1) \
         && ln -s /usr/src/$version /lib/modules/$(uname -r)/build \
@@ -48,6 +48,12 @@ RUN apt-get update \
         && cd sysdig      \
         && git checkout ${SYSDIG_VER}  \
         && mkdir build \
+# Install bpftool
+	&& cd $SOURCE_ROOT \
+        && git clone --recurse-submodules https://github.com/libbpf/bpftool.git \
+        && cd bpftool && cd src \
+        && make \
+        && make install \
 # Configure Sysdig
         && cd build \
         && cmake -Wno-dev -DBUILD_DRIVER=OFF -DSYSDIG_VERSION=${SYSDIG_VER} .. \
@@ -64,7 +70,7 @@ FROM s390x/ubuntu:22.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BUILD_VERSION=0.36.1
+ARG BUILD_VERSION=0.38.0
 ENV BUILD_VERSION=${BUILD_VERSION}
 
 ENV SYSDIG_HOST_ROOT /host
