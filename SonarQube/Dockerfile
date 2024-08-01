@@ -40,8 +40,9 @@ RUN git clone https://github.com/elastic/elasticsearch && \
     git checkout v8.13.4 && \
     wget $PATCH_URL && \
     git apply elasticsearch.diff && \
-    latest_tag="$(git describe --tags `git rev-list --tags --max-count=1`)" && \
-    latest_tag="${latest_tag:1}"-SNAPSHOT && \
+    git fetch --tags && \
+    latest_tag=$(git tag | sort -V | tail -n1) && \
+    latest_tag="${latest_tag:1}-SNAPSHOT" && \
     echo $latest_tag && \
     sed -i 's|${project.version}|'"${latest_tag}"'|g' x-pack/plugin/ml/build.gradle && \
     mkdir -p distribution/packages/s390x-rpm/  && \
