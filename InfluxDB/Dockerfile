@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2024
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for InfluxDB 2.7.5 ############################s
+#################### Dockerfile for InfluxDB 2.7.7 ############################s
 #
 # Builds InfluxDB
 #
@@ -27,7 +27,7 @@ FROM debian:bookworm-slim as builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Environment
-ARG VERSION=2.7.5
+ARG VERSION=2.7.7
 ENV DEBIAN_FRONTEND noninteractive
 ENV SOURCE_ROOT=/tmp
 ENV GOPATH=$HOME/go
