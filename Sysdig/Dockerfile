@@ -18,6 +18,10 @@
 # "docker run --rm -i -t --privileged --net=host -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v 
 # /boot:/host/boot:ro -v /src:/src -v /lib/modules:/host/lib/modules:ro -v /usr:/host/usr:ro -v /etc:/host/etc:ro --name <NAME> <IMAGE-NAME>"
 #
+# Some features use "skeletons" (feature-clang-bpf-co-re compilation option) which require kernel 5.15 or more recent, to compile bpftool, 
+# hence use "CLANG=Nope make" on Ubuntu 20.04. 
+# For more details, see https://github.com/libbpf/bpftool/releases/tag/v7.2.0
+#
 # For more details, see https://github.com/draios/sysdig/wiki/How-to-Install-Sysdig-for-Linux#installation-inside-a-docker-container
 #
 # The official website
