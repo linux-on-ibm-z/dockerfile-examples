@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2019, 2023.
+# © Copyright IBM Corporation 2019, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for ScyllaDB version 5.2.9 #########
+########## Dockerfile for ScyllaDB version 5.4.6 #########
 #
 # This Dockerfile builds a basic installation of ScyllaDB.
 #
@@ -26,14 +26,14 @@ ENV PATH=/root/.cargo/bin:/usr/local/bin:/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/lib64:/usr/local/lib:/usr/lib64:$LD_LIBRARY_PATH
 ENV LD_RUN_PATH=/usr/local/lib64:/usr/local/lib:/usr/lib64:$LD_RUN_PATH
 ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
-ENV CC=clang-14
-ENV CXX=clang++-14
+ENV CC=clang-17
+ENV CXX=clang++
 ENV ver=1.0
 ENV URL=https
 ENV LC_ALL=C
 ENV JAVA8_HOME=/usr/lib/jvm/java-8-openjdk-s390x
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/5.2.9/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ScyllaDB/5.4.6/patch/"
 
 ARG TARGET=native
 
@@ -53,7 +53,7 @@ RUN apt-get update \
     make git maven ninja-build unzip bzip2 wget curl xz-utils texinfo diffutils liblua5.3-dev \
     libnuma-dev libunistring-dev python3 python3-pip pigz ragel stow patch locales valgrind \
     libudev-dev libdeflate-dev zlib1g-dev libabsl-dev \
-    net-tools ethtool gnutls-bin patchelf util-linux \
+    net-tools ethtool gnutls-bin patchelf util-linux doxygen sudo clang-12 librapidxml-dev \
     gawk gzip openjdk-11-jdk devscripts dh-make \
   && python3 -m pip install --user --upgrade pip \
   && python3 -m pip install --user pyparsing colorama pyyaml boto3 requests pytest scylla-driver \
@@ -64,6 +64,7 @@ RUN apt-get update \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh /dev/stdin -y \
   && cargo install cxxbridge-cmd --root $SOURCE_ROOT/cxxbridge \
   && cp -r $SOURCE_ROOT/cxxbridge/. /usr/local \
+  && rustup target add wasm32-wasi \
 #######################################################################
   && ver=2.38 \
   && cd "$SOURCE_ROOT" \
@@ -79,7 +80,11 @@ RUN apt-get update \
   && ln -s /usr/bin/ld /usr/bin/s390x-linux-gnu-ld \
   && ln -s /usr/bin/ld.bfd /usr/bin/s390x-linux-gnu-ld.bfd \
 #######################################################################
-  && curl -sSL https://apt.llvm.org/llvm.sh | bash -s 14 \ 
+  && curl -sSL https://apt.llvm.org/llvm.sh | bash -s 17 \
+  && sudo rm -f /usr/bin/clang \
+  && sudo rm -f /usr/bin/clang++ \
+  && sudo ln -s /usr/bin/clang-17 /usr/bin/clang \
+  && sudo ln -s /usr/bin/clang++-17 /usr/bin/clang++ \
 #######################################################################
   && ver=3.17.4 \
   && cd "$SOURCE_ROOT" \
@@ -168,6 +173,7 @@ RUN apt-get update \
   && URL=http://archive.apache.org/dist/thrift/${ver}/thrift-${ver}.tar.gz \
   && curl -sSL $URL | tar xzf - \
   && cd thrift-${ver} \
+  && curl -sSL ${PATCH_URL}/thrift.diff | patch -p1  \
   && ./configure --without-java --without-lua --without-go --disable-tests --disable-tutorial \
   && make -j 2 \
   && make install \
@@ -194,14 +200,31 @@ RUN apt-get update \
   && cd "$SOURCE_ROOT" \
   && export PATH="$HOME/.cargo/bin:$PATH" \
   && echo "$PATH" \
+  &&  cd "$SOURCE_ROOT" \
+  && git clone --recursive --depth 1 https://github.com/WebAssembly/wabt \
+  && cd wabt \
+  && mkdir build \
+  && cd build \
+  && cmake .. \
+  && cmake --build . \
+  && sudo make install \
+  && cargo install wasm-opt \
+#######################################################################
+  && sudo apt-get install -y gcc-12 gcc-12 \
+  && sudo apt-get install -y gcc-12 g++-12 \
+  && sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-12 100 \
+  && sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 \
+  && sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100 \
+  && sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-12 100 \
+  && sudo locale-gen en_US.UTF-8 \
+  && export LC_ALL=C \
+  && unset LANGUAGE \
   && cd "$SOURCE_ROOT" \
-  && git clone https://github.com/scylladb/scylla.git \
+  && git clone --depth 1 -b scylla-5.4.6 https://github.com/scylladb/scylla.git \
   && cd scylla \
-  && git checkout scylla-5.2.9 \
   && git submodule update --init --force --recursive \
-  && curl -sSL ${PATCH_URL}/seastar.diff | patch -d seastar -p1 \
   && curl -sSL ${PATCH_URL}/python3.diff | patch -d tools/python3 -p1 \
-  && curl -sSL ${PATCH_URL}/scylla.diff | patch -p1  \
+  && curl -sSL ${PATCH_URL}/scylla_ub.diff | patch -p1  \
   && sed -i 's,#!/bin/sh,#!/bin/bash,g' SCYLLA-VERSION-GEN \
   && sed -i 's,#!/bin/sh,#!/bin/bash,g' tools/jmx/SCYLLA-VERSION-GEN \
   && sed -i 's,#!/bin/sh,#!/bin/bash,g' tools/java/SCYLLA-VERSION-GEN \
@@ -217,12 +240,17 @@ RUN apt-get update \
 # Packaging
   && cd "$SOURCE_ROOT"/scylla \
   && mkdir -p /opt/scylladb/dependencies/ \
-  && (cd /opt/scylladb/dependencies/ && curl -L -O https://github.com/prometheus/node_exporter/releases/download/v1.4.0/node_exporter-1.4.0.linux-s390x.tar.gz) \
+  && (cd /opt/scylladb/dependencies/ && curl -L -O https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-s390x.tar.gz) \
   && ln -s /usr/local/bin/hwloc-* /usr/bin/ \
   && mkdir -p /lib64 \
   && ln -s /lib/s390x-linux-gnu/libthread_db.so /lib64/libthread_db.so \
   && mkdir -p /etc/crypto-policies/back-ends \
   && touch /etc/crypto-policies/back-ends/gnutls.config \
+  && apt-get install -y python3-venv zip \
+  && sed -i '1s|#!/bin/sh|#!/bin/bash|' SCYLLA-VERSION-GEN \
+  && sed -i 's|VERSION=$(./SCYLLA-VERSION-GEN|VERSION=$(bash ./SCYLLA-VERSION-GEN|' "$SOURCE_ROOT/scylla/tools/cqlsh/reloc/build_reloc.sh" \
+  && chmod +x ./SCYLLA-VERSION-GEN \
+  && cd "$SOURCE_ROOT"/scylla \
   && ninja dist-deb \
 #######################################################################
   && rm -rf $SOURCE_ROOT/antlr3-3.5.2 \
@@ -257,10 +285,9 @@ COPY --from=builder $SOURCE_ROOT/scylla/build/dist/release/debian/*.deb $SOURCE_
 COPY --from=builder $SOURCE_ROOT/scylla/tools/java/build/debian/*.deb $SOURCE_ROOT/
 COPY --from=builder $SOURCE_ROOT/scylla/tools/jmx/build/debian/*.deb $SOURCE_ROOT/
 COPY --from=builder $SOURCE_ROOT/scylla/tools/python3/build/debian/*.deb $SOURCE_ROOT/
-
+COPY --from=builder $SOURCE_ROOT/scylla/tools/cqlsh/build/debian/*.deb $SOURCE_ROOT/
 COPY --from=builder $SOURCE_ROOT/scylla/dist/docker/etc etc/
 COPY --from=builder $SOURCE_ROOT/scylla/dist/docker/scylla-housekeeping-service.sh /scylla-housekeeping-service.sh
-COPY --from=builder $SOURCE_ROOT/scylla/dist/docker/sshd-service.sh /sshd-service.sh
 COPY --from=builder $SOURCE_ROOT/scylla/dist/docker/scyllasetup.py /scyllasetup.py
 COPY --from=builder $SOURCE_ROOT/scylla/dist/docker/commandlineparser.py /commandlineparser.py
 COPY --from=builder $SOURCE_ROOT/scylla/dist/docker/docker-entrypoint.py /docker-entrypoint.py
@@ -292,6 +319,7 @@ COPY --from=builder $SOURCE_ROOT/scylla/dist/common/supervisor/scylla-server.sh 
 COPY --from=builder $SOURCE_ROOT/scylla/dist/common/supervisor/scylla-jmx.sh /opt/scylladb/supervisor/scylla-jmx.sh
 COPY --from=builder $SOURCE_ROOT/scylla/dist/common/supervisor/scylla-node-exporter.sh /opt/scylladb/supervisor/scylla-node-exporter.sh
 COPY --from=builder $SOURCE_ROOT/scylla/dist/common/supervisor/scylla_util.sh /opt/scylladb/supervisor/scylla_util.sh
+COPY --from=builder $SOURCE_ROOT/scylla/dist/common/scripts/scylla_dev_mode_setup /opt/scylladb/scripts/scylla_dev_mode_setup
 
 ENV PATH=/opt/scylladb/python3/bin:/usr/bin:/usr/sbin
 ENV LANG=en_US.UTF-8
