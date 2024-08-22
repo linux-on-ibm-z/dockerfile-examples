@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 8.14.3 #####################################################
+############################ Dockerfile for Logstash version 8.15.0 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -25,7 +25,7 @@ RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
 FROM s390x/ubuntu:20.04
 
-ARG LOGSTASH_VER=8.14.3
+ARG LOGSTASH_VER=8.15.0
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
