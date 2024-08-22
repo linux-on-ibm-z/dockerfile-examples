@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Packetbeat 8.13.4 #############################
+#################### Dockerfile for Packetbeat 8.14.3 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -12,12 +12,12 @@
 #################################################################################
 
 # Base image
-FROM ubuntu:20.04 AS builder
+FROM ubuntu:22.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BEATS_VER=8.13.4
+ARG BEATS_VER=8.14.3
 
 # Set environment variable
 ENV BEATNAME=packetbeat
@@ -117,7 +117,7 @@ RUN mkdir -p $BEATHOME \
  && chmod 0775 $BEATHOME/data $BEATHOME/logs \
  && chmod 0755 $BEATHOME/$BEATNAME
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
