@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 8.11.0 ############################################
+###################################### Dockerfile for Kibana version 8.14.0 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -31,8 +31,8 @@
 ##############################################################################################################
 FROM ubuntu:20.04 AS builder
 
-ARG KIBANA_VER=8.11.0
-ARG NODE_JS_VERSION=18.18.2
+ARG KIBANA_VER=8.14.0
+ARG NODE_JS_VERSION=20.13.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
