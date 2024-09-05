@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Sysdig version 0.38.0 #########
+########## Dockerfile for Sysdig version 0.38.1 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -31,7 +31,7 @@
 # Base Image
 FROM s390x/ubuntu:22.04 AS builder
 
-ARG SYSDIG_VER=0.38.0
+ARG SYSDIG_VER=0.38.1
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -46,25 +46,23 @@ RUN apt-get update \
 	&& mkdir -p /lib/modules/$(uname -r) \
         && version=$(ls /usr/src/ | grep generic | tail -1) \
         && ln -s /usr/src/$version /lib/modules/$(uname -r)/build \
-# Download source code
-	&& cd $SOURCE_ROOT \
-        && git clone https://github.com/draios/sysdig.git \
-        && cd sysdig      \
-        && git checkout ${SYSDIG_VER}  \
-        && mkdir build \
 # Install bpftool
 	&& cd $SOURCE_ROOT \
         && git clone --recurse-submodules https://github.com/libbpf/bpftool.git \
         && cd bpftool && cd src \
         && make \
         && make install \
+# Download source code
+	&& cd $SOURCE_ROOT \
+        && git clone https://github.com/draios/sysdig.git \
+        && cd sysdig      \
+        && git checkout ${SYSDIG_VER}  \
+        && mkdir build \
 # Configure Sysdig
         && cd build \
         && cmake -Wno-dev -DBUILD_DRIVER=OFF -DSYSDIG_VERSION=${SYSDIG_VER} .. \
 # Build and Install Sysdig
         && cd $SOURCE_ROOT/sysdig/build \
-	&& sed -i 's,c-ares.haxx.se/download/,github.com/c-ares/c-ares/releases/download/cares-1_19_1/,g' ./c-ares-prefix/src/c-ares-stamp/download-c-ares.cmake \
-    	&& sed -i 's,c-ares.haxx.se/download/,github.com/c-ares/c-ares/releases/download/cares-1_19_1/,g' ./falcosecurity-libs-repo/falcosecurity-libs-prefix/src/falcosecurity-libs/cmake/modules/cares.cmake \
         && make -j $(nproc) \
         && make install \
         && cmake --build . --target package --config Release
@@ -74,7 +72,7 @@ FROM s390x/ubuntu:22.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BUILD_VERSION=0.38.0
+ARG BUILD_VERSION=0.38.1
 ENV BUILD_VERSION=${BUILD_VERSION}
 
 ENV SYSDIG_HOST_ROOT /host
