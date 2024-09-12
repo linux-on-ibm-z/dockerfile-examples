@@ -33,29 +33,28 @@ ENV SOURCE_ROOT=/mysql-source
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR $SOURCE_ROOT
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.3.0/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.4.2/patch/"
 
 RUN apt-get update \
     && apt-get install -y curl wget tar bison cmake gcc g++ git hostname libncurses-dev libssl-dev make openssl \
     pkg-config gawk procps doxygen python-is-python3 net-tools libtirpc-dev libarchive-tools xz-utils \
     devscripts lintian debhelper po-debconf psmisc elfutils dh-apparmor \
-    libldap2-dev libsasl2-dev libudev-dev libaio-dev zlib1g-dev libnuma-dev libmecab-dev libkrb5-dev \
-    && wget https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.bz2 \
-    && cd /usr/include && tar xf ${SOURCE_ROOT}/boost_1_77_0.tar.bz2 --strip-components=1 \
+    libldap-dev libldap2-dev libsasl2-dev libsasl2-modules-gssapi-mit libudev-dev libaio-dev zlib1g-dev \
+    libnuma-dev libmecab-dev libkrb5-dev libfido2-dev \
+    libprotoc-dev libprotobuf-c-dev libprotobuf-dev protobuf-c-compiler protobuf-compiler \
     && cd $SOURCE_ROOT \
-    && wget https://dev.mysql.com/get/Downloads/MySQL-8.3/mysql-8.3.0.tar.gz \
-    && tar xf mysql-8.3.0.tar.gz --strip-components=1 \
-    && rm -f boost_1_77_0.tar.bz2 mysql-8.3.0.tar.gz \
+    && wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.2.tar.gz \
+    && tar xf mysql-8.4.2.tar.gz --strip-components=1 \
+    && rm -f mysql-8.4.2.tar.gz \
     && curl -sSL ${PATCH_URL}/mt-asm.patch | git apply - \
     && curl -sSL ${PATCH_URL}/NdbHW.patch | git apply - \
     && curl -sSL ${PATCH_URL}/router-test.patch | git apply - \
-    && curl -sSL ${PATCH_URL}/icu-cmake.patch | git apply - \
-    && curl -sSL ${PATCH_URL}/floating-point-cmake.patch | git apply - \
     && curl -sSL ${PATCH_URL}/ut0rnd.patch | git apply - \
+    && curl -sSL ${PATCH_URL}/CMakeLists.patch | git apply - \
     && mkdir build && cd build \
-    && cmake .. -DWITH_SSL=system -DBUILD_CONFIG=mysql_release -DDEB_CODENAME=jammy -DDEB_ID=ubuntu -DDEB_RELEASE=22.04 \
-    && sed -i '44i \\t\t-DWITH_AUTHENTICATION_CLIENT_PLUGINS=ON \\' debian/rules \
-    && sed -i 's/make test/@echo "skipping tests"/' debian/rules \
+    && cmake .. -DWITH_SSL=system -DWITH_PROTOBUF=system -DWITH_KERBEROS=system -DWITH_FIDO=system -DBUILD_CONFIG=mysql_release -DDEB_CODENAME=jammy -DDEB_ID=ubuntu -DDEB_RELEASE=22.04 \
+    && sed -i '54i \\t\t-DWITH_AUTHENTICATION_CLIENT_PLUGINS=ON \\' debian/rules \
+    && sed -i 's/make test-unit/@echo "skipping tests"/' debian/rules \
     && sed -i 's/icudt73l/icudt73b/' debian/mysql-community-server-core.install \
     && cd ../ && ln -s build/debian debian \
     && debuild -us -uc -b
@@ -84,6 +83,7 @@ RUN groupadd -r mysql && useradd -r -g mysql mysql \
     zstd \
     gosu \
     libsasl2-2 libaio1 libmecab2 libnuma1 \
+    libprotoc-dev libprotobuf-c-dev libprotobuf-dev \
     && gosu nobody true \
     && mkdir /docker-entrypoint-initdb.d \
     # the "/var/lib/mysql" stuff here is because the mysql-server postinst doesn't have an explicit way to disable the mysql_install_db codepath besides having a database already "configured" (ie, stuff in /var/lib/mysql/mysql)
@@ -97,7 +97,7 @@ RUN groupadd -r mysql && useradd -r -g mysql mysql \
     && dpkg --install /mysql-common*.deb /mysql-community-client*.deb /mysql-community-server-core*.deb \
     && rm -rf /var/lib/mysql \
     && mkdir -p /var/lib/mysql /var/run/mysqld /var/lib/mysql-files/ && touch /mysql-init-complete \
-    && chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /etc/ /var/lib/mysql-files/ /mysql-init-complete \
+    && chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /var/lib/mysql-files/ /mysql-init-complete \
     # ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
     && chmod 1777 /var/run/mysqld /var/lib/mysql \
     && apt-get autoremove -y \
