@@ -7,7 +7,7 @@ set -o errexit -o nounset -o pipefail
 
 WORK_ROOT=$(pwd)
 SOURCE_ROOT=$(pwd)/build
-PACKAGE_VERSION="7.0.2"
+PACKAGE_VERSION="7.3.1"
 NETTY_TCNATIVE_VERSION="2.0.61"
 NETTY_VERSION="4.1.93"
 PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/${PACKAGE_VERSION}/patch"
@@ -19,7 +19,6 @@ function buildNetty() {
     # Install netty-tcnative 2.0.61
     cd $SOURCE_ROOT
     wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/netty-tcnative/2.0.61/build_netty.sh
-    sed -i 's/"ubuntu-23.04"/"ubuntu-23.10"/g' build_netty.sh
     bash build_netty.sh -y
 
     # Install netty 4.1.93 Final
@@ -38,11 +37,11 @@ apt-get install -y --no-install-recommends \
 
 mkdir -p $SOURCE_ROOT/
 
-# Download and patch rules_java v5.5.1
+# Download and patch rules_java v7.6.1
 cd $SOURCE_ROOT
-git clone -b 7.1.0 https://github.com/bazelbuild/rules_java.git
+git clone -b 7.6.1 https://github.com/bazelbuild/rules_java.git
 cd rules_java
-curl -sSL $PATCH_URL/rules_java_7.1.0.patch | git apply
+curl -sSL $PATCH_URL/rules_java_7.6.1.patch | git apply
 
 # Download Bazel distribution archive
 cd $SOURCE_ROOT
