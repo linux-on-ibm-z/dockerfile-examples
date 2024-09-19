@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation  2017, 2024
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Couchbase version 7.2.0 ###################################
+############### Dockerfile for Couchbase version 7.6.2 ###################################
 #
 # Couchbase is open source database software.
 #
@@ -20,20 +20,20 @@ FROM s390x/ubuntu:20.04 as builder
 
 ENV SOURCE_ROOT=/tmp/source
 WORKDIR $SOURCE_ROOT
-ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Couchbase/7.2.0
+ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Couchbase/7.6.2
 
 SHELL ["/bin/bash", "-c"]
 
 RUN apt-get update && apt-get install -y sudo wget locales
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
-ENV LANG en_US.UTF-8  
-ENV LANGUAGE en_US:en  
-ENV LC_ALL en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 RUN cd $SOURCE_ROOT \
 && wget $PATCH_URL/build_couchbase.sh \
-&& bash build_couchbase.sh -p /opt/couchbase 
+&& bash build_couchbase.sh -p /opt/couchbase
 
 FROM s390x/ubuntu:20.04
 
@@ -55,19 +55,26 @@ SHELL ["/bin/bash", "-c"]
 #  net-tools: ifconfig, arp, netstat
 RUN set -x && \
     apt-get update && \
-    apt-get install -yq runit wget chrpath patchelf tzdata libgflags2.2 \
+    apt-get install -yq wget chrpath patchelf tzdata libgflags2.2 \
     lsof lshw sysstat net-tools bzip2 && \
     apt-get autoremove && apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
+RUN set -x \
+    && apt-get update \
+    && apt-get install -y gcc git make sudo \
+    && cd /usr/src \
+    && git clone https://github.com/couchbasedeps/runit \
+    && cd runit \
+    && git checkout edb631449d89d5b452a5992c6ffaa1e384fea697 \
+    && ./package/compile \
+    && cp ./command/* /sbin/ \
+    && apt-get purge -y --autoremove gcc git make \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /usr/src/runit
 # http://smarden.org/runit/useinit.html#sysv - at some point the script
 # runsvdir-start was moved/renamed to this odd name, so we put it back
 # somewhere sensible. This appears to be necessary for Ubuntu 20 but
 # not Ubuntu 16.
-RUN if [ ! -x /usr/sbin/runsvdir-start ]; then \
-        cp -a /etc/runit/2 /usr/sbin/runsvdir-start; \
-    fi
-
 ENV PATH=$PATH:/opt/couchbase/bin:/opt/couchbase/bin/tools:/opt/couchbase/bin/install
 ENV LD_LIBRARY_PATH=/opt/couchbase/lib
 
@@ -78,10 +85,10 @@ RUN groupadd -g 1000 couchbase && useradd couchbase -u 1000 -g couchbase -M
 # Add runit script for couchbase-server
 COPY scripts/run /etc/service/couchbase-server/run
 RUN chmod a+x /etc/service/couchbase-server/run \
-    && mkdir -p /etc/runit/runsvdir/default/couchbase-server/supervise \
+    && mkdir -p /etc/service/couchbase-server/supervise \
     && chown -R couchbase:couchbase \
                 /etc/service \
-                /etc/runit/runsvdir/default/couchbase-server/supervise \
+                /etc/service/couchbase-server/supervise \
                 /opt/couchbase/etc
 
 # Add dummy script for commands invoked by cbcollect_info that
