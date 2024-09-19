@@ -2,7 +2,7 @@
 # Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 11.1.0 ############################################
+############################ Dockerfile for Grafana 11.2.0 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -18,7 +18,7 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=11.1.0
+ARG GRAFANA_VERSION=11.2.0
 
 ARG BASE_IMAGE=ubuntu:22.04
 ARG GO_IMAGE=golang:1.22.4
@@ -59,8 +59,11 @@ COPY --from=go-src-builder /tmp/grafana/.bingo .bingo
 COPY --from=go-src-builder /tmp/grafana/pkg/util/xorm/go.* pkg/util/xorm/
 COPY --from=go-src-builder /tmp/grafana/pkg/apiserver/go.* pkg/apiserver/
 COPY --from=go-src-builder /tmp/grafana/pkg/apimachinery/go.* pkg/apimachinery/
+COPY --from=go-src-builder /tmp/grafana/pkg/build/go.* pkg/build/
 COPY --from=go-src-builder /tmp/grafana/pkg/build/wire/go.* pkg/build/wire/
 COPY --from=go-src-builder /tmp/grafana/pkg/promlib/go.* pkg/promlib/
+COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resource/go.* pkg/storage/unified/resource/
+COPY --from=go-src-builder /tmp/grafana/pkg/semconv/go.* pkg/semconv/
 
 RUN go mod download
 RUN if [[ "$BINGO" = "true" ]]; then \
