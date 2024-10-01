@@ -40,7 +40,7 @@ RUN apt update \
 RUN tar zxf /tmp/neo4j/packaging/standalone/target/neo4j-community-$NEO4J_VER-unix.tar.gz -C /tmp
 
 #Base Image
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
