@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Packetbeat 8.14.3 #############################
+#################### Dockerfile for Packetbeat 8.15.2 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -17,7 +17,7 @@ FROM ubuntu:22.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BEATS_VER=8.14.3
+ARG BEATS_VER=8.15.2
 
 # Set environment variable
 ENV BEATNAME=packetbeat
@@ -94,9 +94,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
- && git clone https://github.com/elastic/beats.git  \
+ && git clone -b v${BEATS_VER} https://github.com/elastic/beats.git  \
  && cd beats  \
- && git checkout v${BEATS_VER}  \
 # Building packetbeat
  && cd $GOPATH/src/github.com/elastic/beats/${BEATNAME} \
  && make \
@@ -143,7 +142,8 @@ RUN chmod 755 /usr/local/bin/docker-entrypoint
 
 COPY --from=builder /usr/share/$BEATNAME /usr/share/$BEATNAME
 
-RUN groupadd --gid 1000 $BEATNAME \
+RUN readlink -f /usr/share/$BEATNAME/$BEATNAME | xargs setcap cap_net_raw,cap_net_admin+eip \
+ && groupadd --gid 1000 $BEATNAME \
  && useradd -M --uid 1000 --gid 1000 --groups 0 --home /usr/share/$BEATHOME $BEATNAME \
  && passwd -d $BEATNAME
 
