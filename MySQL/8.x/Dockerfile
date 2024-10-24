@@ -33,7 +33,7 @@ ENV SOURCE_ROOT=/mysql-source
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR $SOURCE_ROOT
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.4.2/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.4.3/patch/"
 
 RUN apt-get update \
     && apt-get install -y curl wget tar bison cmake gcc g++ git hostname libncurses-dev libssl-dev make openssl \
@@ -43,14 +43,13 @@ RUN apt-get update \
     libnuma-dev libmecab-dev libkrb5-dev libfido2-dev \
     libprotoc-dev libprotobuf-c-dev libprotobuf-dev protobuf-c-compiler protobuf-compiler \
     && cd $SOURCE_ROOT \
-    && wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.2.tar.gz \
-    && tar xf mysql-8.4.2.tar.gz --strip-components=1 \
-    && rm -f mysql-8.4.2.tar.gz \
+    && wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.3.tar.gz \
+    && tar xf mysql-8.4.3.tar.gz --strip-components=1 \
+    && rm -f mysql-8.4.3.tar.gz \
     && curl -sSL ${PATCH_URL}/mt-asm.patch | git apply - \
     && curl -sSL ${PATCH_URL}/NdbHW.patch | git apply - \
     && curl -sSL ${PATCH_URL}/router-test.patch | git apply - \
     && curl -sSL ${PATCH_URL}/ut0rnd.patch | git apply - \
-    && curl -sSL ${PATCH_URL}/CMakeLists.patch | git apply - \
     && mkdir build && cd build \
     && cmake .. -DWITH_SSL=system -DWITH_PROTOBUF=system -DWITH_KERBEROS=system -DWITH_FIDO=system -DBUILD_CONFIG=mysql_release -DDEB_CODENAME=jammy -DDEB_ID=ubuntu -DDEB_RELEASE=22.04 \
     && sed -i '54i \\t\t-DWITH_AUTHENTICATION_CLIENT_PLUGINS=ON \\' debian/rules \
