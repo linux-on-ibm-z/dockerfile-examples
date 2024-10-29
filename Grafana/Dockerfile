@@ -21,7 +21,7 @@
 ARG GRAFANA_VERSION=11.2.2
 
 ARG BASE_IMAGE=ubuntu:22.04
-ARG GO_IMAGE=golang:1.22.4
+ARG GO_IMAGE=golang:1.22.7
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
