@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 10.6.0 ##############################
+################################ Dockerfile for SonarQube 10.7.0 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -17,7 +17,7 @@
 # docker run --name <container name> -p <port_number>:9000 -d <image name>
 # Link : http://<sonarQube-ip>:<port_number_9000>
 ######################################################################################
-ARG SONARQUBE_VERSION=10.6.0.92116
+ARG SONARQUBE_VERSION=10.7.0.96327
 
 FROM eclipse-temurin:17.0.11_9-jdk AS builder
 LABEL stage=builder
@@ -26,7 +26,7 @@ ARG SONARQUBE_ZIP_URL=https://binaries.sonarsource.com/Distribution/sonarqube/so
 ENV JAVA_HOME='/opt/java/openjdk' \
     ES_JAVA_HOME='/opt/java/openjdk' \
     PATH="/opt/java/openjdk/bin:$PATH" \
-    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/10.6.0/patch/elasticsearch.diff" \
+    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/10.7.0/patch/elasticsearch.diff" \
     LANG="en_US.UTF-8"
 
 RUN apt-get update; \
@@ -37,7 +37,7 @@ RUN apt-get update; \
 SHELL ["/bin/bash", "-c"]
 RUN git clone https://github.com/elastic/elasticsearch && \
     cd elasticsearch && \
-    git checkout v8.13.4 && \
+    git checkout v8.14.1 && \
     wget $PATCH_URL && \
     git apply elasticsearch.diff && \
     git fetch --tags && \
@@ -60,12 +60,12 @@ RUN wget -q $SONARQUBE_ZIP_URL && \
     unzip sonarqube-${SONARQUBE_VERSION}.zip && \
     cd sonarqube-${SONARQUBE_VERSION} && \
     rm -rfd bin/elasticsearch elasticsearch/* && \
-    tar -xzf /elasticsearch/distribution/archives/linux-s390x-tar/build/distributions/elasticsearch-8.13.4-SNAPSHOT-linux-s390x.tar.gz \
+    tar -xzf /elasticsearch/distribution/archives/linux-s390x-tar/build/distributions/elasticsearch-8.14.1-SNAPSHOT-linux-s390x.tar.gz \
         -C /sonarqube-${SONARQUBE_VERSION}/elasticsearch --strip-components 1 && \
     cp /sonarqube-${SONARQUBE_VERSION}/elasticsearch/bin/elasticsearch /sonarqube-${SONARQUBE_VERSION}/bin
 
 FROM eclipse-temurin:17-jre AS stage1
-ARG SONARQUBE_VERSION=10.6.0.92116
+ARG SONARQUBE_VERSION=10.7.0.96327
 ENV SONARQUBE_HOME=/opt/sonarqube \
     SQ_DATA_DIR="/opt/sonarqube/data" \
     SQ_EXTENSIONS_DIR="/opt/sonarqube/extensions" \
@@ -93,7 +93,7 @@ ENV LANG='en_US.UTF-8' \
 #
 # SonarQube setup
 #
-ARG SONARQUBE_VERSION=10.6.0.92116
+ARG SONARQUBE_VERSION=10.7.0.96327
 ENV DOCKER_RUNNING="true" \
     JAVA_HOME='/opt/java/openjdk' \
     SONARQUBE_HOME=/opt/sonarqube \
