@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for Consul - 1.19.2 ########################
+###################### Dockerfile for Consul - 1.20.0 ########################
 #
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:20.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG CONSUL_VERSION=1.19.2
+ARG CONSUL_VERSION=1.20.0
 
 ENV TERM=xterm
 
@@ -54,12 +54,12 @@ RUN apt-get update &&  apt-get install -y \
  && service rsyslog start \
 # Install go and get source code of consul
  && cd $SOURCE_DIR \
- && wget https://golang.org/dl/go1.22.5.linux-s390x.tar.gz \
- && tar -xzf go1.22.5.linux-s390x.tar.gz \
+ && wget https://golang.org/dl/go1.22.7.linux-s390x.tar.gz \
+ && tar -xzf go1.22.7.linux-s390x.tar.gz \
  && mkdir -p $GOPATH/src/github.com/hashicorp \
  && cd $GOPATH/src/github.com/hashicorp \
- && git clone https://github.com/hashicorp/consul.git \
- && cd consul && git checkout v${CONSUL_VERSION} \
+ && git clone --depth 1 -b v${CONSUL_VERSION} https://github.com/hashicorp/consul.git \
+ && cd consul \
 # Build consul
  && make tools \
  && make dev
@@ -111,7 +111,7 @@ EXPOSE 8500 8600 8600/udp
 # Consul doesn't need root privileges so we run it as the consul user from the
 # entry point script. The entry point script also uses dumb-init as the top-level
 # process to reap any zombie processes created by Consul sub-processes.
-RUN wget -O /usr/local/bin/docker-entrypoint.sh https://raw.githubusercontent.com/hashicorp/consul/v1.19.2/.release/docker/docker-entrypoint.sh
+RUN wget -O /usr/local/bin/docker-entrypoint.sh https://raw.githubusercontent.com/hashicorp/consul/v1.20.0/.release/docker/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
