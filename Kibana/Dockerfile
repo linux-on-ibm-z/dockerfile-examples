@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 8.14.0 ############################################
+###################################### Dockerfile for Kibana version 8.15.2 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -31,8 +31,8 @@
 ##############################################################################################################
 FROM ubuntu:20.04 AS builder
 
-ARG KIBANA_VER=8.14.0
-ARG NODE_JS_VERSION=20.13.1
+ARG KIBANA_VER=8.15.2
+ARG NODE_JS_VERSION=20.15.1
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -105,7 +105,7 @@ COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
 
-ENV ELASTIC_CONTAINER true
+ENV ELASTIC_CONTAINER=true
 ENV PATH=/usr/share/kibana/bin:$PATH
 
 # Set some Kibana configuration defaults.
