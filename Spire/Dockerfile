@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for SPIRE version 1.10.4 ########################
+###################### Dockerfile for SPIRE version 1.11.0 ########################
 #
 # SPIRE (the SPIFFE Runtime Environment) is a toolchain of APIs for establishing trust between software systems across a wide variety of hosting platforms.
 # SPIRE exposes the SPIFFE Workload API,which can attest running software systems and issue SPIFFE IDs and SVIDs to them.
@@ -32,13 +32,13 @@
 #####################################################################
 
 # Build stage
-ARG goversion=1.23.0
+ARG goversion=1.23.2
 # Use alpine3.18 until go-sqlite works in 3.19
 FROM --platform=${BUILDPLATFORM} golang:${goversion}-alpine3.20 as base
 WORKDIR /spire
 RUN apk --no-cache --update add file bash clang lld pkgconfig git wget make
-RUN wget https://raw.githubusercontent.com/spiffe/spire/v1.10.4/go.mod && \
-wget https://raw.githubusercontent.com/spiffe/spire/v1.10.4/go.sum
+RUN wget https://raw.githubusercontent.com/spiffe/spire/v1.11.0/go.mod && \
+wget https://raw.githubusercontent.com/spiffe/spire/v1.11.0/go.sum
 
 # https://go.dev/ref/mod#module-cache
 RUN --mount=type=cache,target=/go/pkg/mod go mod download
@@ -53,7 +53,7 @@ FROM --platform=$BUILDPLATFORM tonistiigi/xx@sha256:904fe94f236d36d65aeb5a2462f8
 FROM --platform=${BUILDPLATFORM} base as builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-ARG VERSION=1.10.4
+ARG VERSION=1.11.0
 COPY --link --from=xx / /
 
 RUN xx-go --wrap
