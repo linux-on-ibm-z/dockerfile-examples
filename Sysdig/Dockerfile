@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Sysdig version 0.38.1 #########
+########## Dockerfile for Sysdig version 0.39.0 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -31,7 +31,7 @@
 # Base Image
 FROM s390x/ubuntu:22.04 AS builder
 
-ARG SYSDIG_VER=0.38.1
+ARG SYSDIG_VER=0.39.0
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -72,7 +72,7 @@ FROM s390x/ubuntu:22.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BUILD_VERSION=0.38.1
+ARG BUILD_VERSION=0.39.0
 ENV BUILD_VERSION=${BUILD_VERSION}
 
 ENV SYSDIG_HOST_ROOT /host
