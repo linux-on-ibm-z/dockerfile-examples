@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Logstash version 8.15.0 #####################################################
+############################ Dockerfile for Logstash version 8.15.3 #####################################################
 #
 # This Dockerfile builds a basic installation of Logstash
 #
@@ -25,7 +25,7 @@ RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
 FROM s390x/ubuntu:20.04
 
-ARG LOGSTASH_VER=8.15.0
+ARG LOGSTASH_VER=8.15.3
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -44,7 +44,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 # get Temurin 17
     mkdir /opt/temurin17 && \
     cd /opt/temurin17 && \
-    wget -O temurin17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.12_7.tar.gz && \
+    wget -O temurin17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.13%2B11/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.13_11.tar.gz && \
     tar -zxf temurin17.tar.gz -C /opt/temurin17 --strip-components 1 && \
     rm -rf temurin17.tar.gz && \
 # Add Logstash itself.
