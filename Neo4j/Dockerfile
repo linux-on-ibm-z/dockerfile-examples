@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2024.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 5.24.0 ##################################
+########## Dockerfile for Neo4j version 5.25.1 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -18,26 +18,26 @@
 ##################################################################################
 
 FROM ubuntu:20.04 AS builder
-ARG NEO4J_VER=5.24.0
+ARG NEO4J_VER=5.25.1
 
 ENV SOURCE_ROOT=/tmp
 ENV MAVEN_OPTS="-Xmx2048m -Xss8m"
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-s390x
-ENV PATH=$JAVA_HOME/bin:$SOURCE_ROOT/apache-maven-3.9.8/bin:$PATH
+ENV PATH=$JAVA_HOME/bin:$SOURCE_ROOT/apache-maven-3.9.9/bin:$PATH
 
-COPY neo4j-$NEO4J_VER.patch $SOURCE_ROOT/neo4j-$NEO4J_VER.patch
+COPY neo4j-"${NEO4J_VER}".patch $SOURCE_ROOT/neo4j-"${NEO4J_VER}".patch
 
 RUN apt update \
   && DEBIAN_FRONTEND=noninteractive apt install -y openjdk-17-jdk git wget tar \
   && cd $SOURCE_ROOT \
-  && wget -q https://archive.apache.org/dist/maven/maven-3/3.9.8/binaries/apache-maven-3.9.8-bin.tar.gz \
-  && tar -zxf apache-maven-3.9.8-bin.tar.gz \
-  && git clone --depth 1 -b $NEO4J_VER https://github.com/neo4j/neo4j.git \
+  && wget -q https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz \
+  && tar -zxf apache-maven-3.9.9-bin.tar.gz \
+  && git clone --depth 1 -b "${NEO4J_VER}" https://github.com/neo4j/neo4j.git \
   && cd neo4j \
-  && git apply $SOURCE_ROOT/neo4j-$NEO4J_VER.patch \
+  && git apply $SOURCE_ROOT/neo4j-"${NEO4J_VER}".patch \
   && mvn clean install -B -V -DskipTests
 
-RUN tar zxf /tmp/neo4j/packaging/standalone/target/neo4j-community-$NEO4J_VER-unix.tar.gz -C /tmp
+RUN tar zxf /tmp/neo4j/packaging/standalone/target/neo4j-community-"${NEO4J_VER}"-unix.tar.gz -C /tmp
 
 #Base Image
 FROM debian:bookworm-slim
@@ -49,25 +49,26 @@ ENV JAVA_HOME=/opt/java/openjdk
 COPY --from=eclipse-temurin:17 $JAVA_HOME $JAVA_HOME
 ENV PATH="${JAVA_HOME}/bin:${PATH}" \
     NEO4J_EDITION=community \
-    NEO4J_HOME="/var/lib/neo4j"
-ARG NEO4J_VER=5.24.0
+    NEO4J_HOME="/var/lib/neo4j" \
+    LANG=C.UTF-8
+ARG NEO4J_VER=5.25.1
 
 RUN addgroup --gid 7474 --system neo4j && adduser --uid 7474 --system --no-create-home --home "${NEO4J_HOME}" --ingroup neo4j neo4j
 
-COPY --from=builder /tmp/neo4j-community-5.24.0 /var/lib/neo4j-community-5.24.0
+COPY --from=builder /tmp/neo4j-community-$NEO4J_VER /var/lib/neo4j-community-"${NEO4J_VER}"
 
 RUN apt update \
     && apt-get install -y curl gcc git jq make procps tini wget \
     && mv /var/lib/neo4j-* "${NEO4J_HOME}" \
-    && wget https://repo1.maven.org/maven2/org/neo4j/client/neo4j-browser/5.15.0/neo4j-browser-5.15.0.jar -P "${NEO4J_HOME}"/lib \
-    && wget https://repo1.maven.org/maven2/org/neo4j/procedure/apoc-core/5.24.0/apoc-core-5.24.0-core.jar -P "${NEO4J_HOME}"/labs \
+    && wget https://repo1.maven.org/maven2/org/neo4j/client/neo4j-browser/5.24.0/neo4j-browser-5.24.0.jar -P "${NEO4J_HOME}"/lib \
+    && wget https://repo1.maven.org/maven2/org/neo4j/procedure/apoc-core/"${NEO4J_VER}"/apoc-core-"${NEO4J_VER}"-core.jar -P "${NEO4J_HOME}"/labs \
     && sed -i 's/Package Type:.*/Package Type: docker bullseye/' $NEO4J_HOME/packaging_info \
     && mkdir -p /startup \
-    && wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/5.24.0/bullseye/community/local-package/docker-entrypoint.sh -P /startup \
-    && wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/5.24.0/bullseye/community/local-package/neo4j-admin-report.sh -P /startup \
-    && wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/5.24.0/bullseye/community/local-package/neo4j-plugins.json -P /startup \
-    && wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/5.24.0/bullseye/community/local-package/utilities.sh -P /startup \
-    && wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/5.24.0/bullseye/community/local-package/semver.jq -P /startup \
+    && wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/bullseye/community/local-package/docker-entrypoint.sh -P /startup \
+    && wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/bullseye/community/local-package/neo4j-admin-report.sh -P /startup \
+    && wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/bullseye/community/local-package/neo4j-plugins.json -P /startup \
+    && wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/bullseye/community/local-package/utilities.sh -P /startup \
+    && wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/bullseye/community/local-package/semver.jq -P /startup \
     && chmod +x /startup/neo4j-admin-report.sh /startup/docker-entrypoint.sh /startup/utilities.sh /startup/semver.jq \
     && mv /startup/neo4j-admin-report.sh "${NEO4J_HOME}"/bin/neo4j-admin-report \
     && mv "${NEO4J_HOME}"/data /data \
