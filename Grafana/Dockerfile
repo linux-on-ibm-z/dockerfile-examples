@@ -21,7 +21,7 @@
 ARG GRAFANA_VERSION=11.3.0
 
 ARG BASE_IMAGE=ubuntu:22.04
-ARG GO_IMAGE=golang:1.22.7
+ARG GO_IMAGE=golang:1.23.1
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
@@ -64,6 +64,9 @@ COPY --from=go-src-builder /tmp/grafana/pkg/build/wire/go.* pkg/build/wire/
 COPY --from=go-src-builder /tmp/grafana/pkg/promlib/go.* pkg/promlib/
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resource/go.* pkg/storage/unified/resource/
 COPY --from=go-src-builder /tmp/grafana/pkg/semconv/go.* pkg/semconv/
+COPY --from=go-src-builder /tmp/grafana/apps/playlist /tmp/grafana/apps/playlist
+COPY --from=go-src-builder /tmp/grafana/pkg/aggregator /tmp/grafana/pkg/aggregator
+COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore /tmp/grafana/pkg/storage/unified/apistore
 
 RUN go mod download
 RUN if [[ "$BINGO" = "true" ]]; then \
