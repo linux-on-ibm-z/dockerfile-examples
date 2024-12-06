@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for CockroachDB version 24.1.4 ####################################
+#################################### Dockerfile for CockroachDB version 24.1.6 ####################################
 #
 # To build CockroachDB image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -16,7 +16,7 @@
 FROM s390x/ubuntu:20.04 AS builder
 
 # CockroachDB version
-ARG CRDB_VER=24.1.4
+ARG CRDB_VER=24.1.6
 ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CockroachDB/${CRDB_VER}
 
 # The author
@@ -64,7 +64,7 @@ RUN wget https://ftp.samba.org/pub/cwrap/resolv_wrapper-1.1.8.tar.gz \
 && make \
 && sudo make install
 
-RUN wget -O /cockroach/cockroach.sh https://raw.githubusercontent.com/cockroachdb/cockroach/v24.1.4/build/deploy/cockroach.sh
+RUN wget -O /cockroach/cockroach.sh https://raw.githubusercontent.com/cockroachdb/cockroach/v24.1.6/build/deploy/cockroach.sh
 
 COPY --from=builder /usr/local/bin/cockroach  /cockroach/
 COPY --from=builder /usr/local/lib/cockroach/libgeos.so /usr/local/lib/cockroach/
