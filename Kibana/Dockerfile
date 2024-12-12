@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2024.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 8.15.2 ############################################
+###################################### Dockerfile for Kibana version 8.16.1 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -31,7 +31,7 @@
 ##############################################################################################################
 FROM ubuntu:20.04 AS builder
 
-ARG KIBANA_VER=8.15.2
+ARG KIBANA_VER=8.16.1
 ARG NODE_JS_VERSION=20.15.1
 
 # The author
@@ -42,7 +42,6 @@ ENV SOURCE_ROOT=/home/nonroot
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 ENV PATH=/usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x/bin:/usr/share/kibana/bin:$JAVA_HOME/bin:$SOURCE_ROOT/bazel/output/:$PATH
 ENV USE_BAZEL_VERSION=$SOURCE_ROOT/bazel/output/bazel
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Kibana/${KIBANA_VER}/patch"
 ENV NODE_OPTIONS="--max_old_space_size=4096"
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -yq \
