@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2019, 2024.
+# © Copyright IBM Corporation 2019, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ########## Dockerfile for ScyllaDB version 5.4.6 #########
@@ -160,7 +160,7 @@ RUN apt-get update \
   && chmod +x /usr/local/bin/antlr3 \
 #######################################################################
   && cd "$SOURCE_ROOT" \
-  && URL=https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz \
+  && URL=https://sourceforge.net/projects/boost/files/boost/1.74.0/boost_1_74_0.tar.gz \
   && curl -sSL $URL | tar xzf - \
   && cd boost_1_74_0 \
   && sed -i 's/array\.hpp/array_wrapper.hpp/g' boost/numeric/ublas/matrix.hpp \
