@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2024
+# © Copyright IBM Corporation 2024, 2025
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 #################### Dockerfile for Apache Kafka 3.9.0 ############################
@@ -70,7 +70,7 @@ RUN set -eux ; \
     chmod -R ug+w /etc/kafka /var/lib/kafka /etc/kafka/secrets; \
     cp /opt/kafka/config/log4j.properties /etc/kafka/docker/log4j.properties; \
     cp /opt/kafka/config/tools-log4j.properties /etc/kafka/docker/tools-log4j.properties; \
-    cp /opt/kafka/config/kraft/reconfig-server.properties /etc/kafka/docker/server.properties; \
+    cp /opt/kafka/config/kraft/server.properties /etc/kafka/docker/server.properties; \
     rm kafka.tgz; \
     cd /etc/kafka/docker; \
     wget -O bash-config       https://github.com/apache/kafka/raw/refs/tags/3.9.0/docker/resources/common-scripts/bash-config; \
