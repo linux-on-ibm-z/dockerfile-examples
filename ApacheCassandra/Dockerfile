@@ -1,7 +1,7 @@
-# Copyright IBM Corporation 2017, 2024.
+# Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Cassandra version 4.1.7 #########
+########## Dockerfile for Cassandra version 5.0.2 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -22,7 +22,7 @@ FROM eclipse-temurin:11-jdk-focal as builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-ARG CASSANDRA_VER=4.1.7
+ARG CASSANDRA_VER=5.0.2
 
 ENV SOURCE_ROOT=/tmp/source \
     CASSANDRA_USE_JDK11=true
@@ -58,17 +58,10 @@ maven \
     && bash build_netty.sh -y -j Temurin11 \
 # Build netty
     && cd $SOURCE_ROOT \
-    && git clone -b netty-4.1.58.Final https://github.com/netty/netty.git \
+    && git clone -b netty-4.1.68.Final https://github.com/netty/netty.git \
     && cd netty\
     && curl -o netty.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/netty.patch \
     && git apply --ignore-whitespace netty.patch \
-    && mvn install -DskipTests -Dmaven.javadoc.skip=true \
-# Build Chronicle-core
-    && cd $SOURCE_ROOT \
-    && git clone -b chronicle-bytes-2.20.111 https://github.com/OpenHFT/Chronicle-Bytes \
-    && cd Chronicle-Bytes \
-    && curl -o bytes.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/bytes.patch \
-    && git apply --ignore-whitespace bytes.patch \
     && mvn install -DskipTests -Dmaven.javadoc.skip=true \
 # Build Apache Cassandra
     && cd $SOURCE_ROOT \
@@ -150,7 +143,7 @@ RUN set -eux; \
 ENV CASSANDRA_HOME /opt/cassandra
 ENV CASSANDRA_CONF /etc/cassandra
 ENV PATH $CASSANDRA_HOME/bin:$PATH
-ENV CASSANDRA_VERSION 4.1.7
+ENV CASSANDRA_VERSION 5.0.2
 
 
 RUN mkdir -p "$CASSANDRA_HOME";
