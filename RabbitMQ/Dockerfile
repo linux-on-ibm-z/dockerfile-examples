@@ -1,8 +1,8 @@
-# © Copyright IBM Corporation 2022, 2024.
+# © Copyright IBM Corporation 2022, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
 #
-################# Dockerfile for RabbitMQ version 4.0.3 ################################
+################# Dockerfile for RabbitMQ version 4.0.5 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -24,8 +24,8 @@
 # Base image
 FROM s390x/ubuntu:22.04 as builder
 
-ARG RABBITMQ_VER=4.0.3
-ARG ERLANG_VERSION=27.0.1
+ARG RABBITMQ_VER=4.0.5
+ARG ERLANG_VERSION=27.2
 ARG ELIXIR_VERSION=1.17.2
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
@@ -97,7 +97,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 FROM s390x/ubuntu:22.04
 ENV LC_ALL=en_US.UTF-8
-ARG RABBITMQ_VER=4.0.3
+ARG RABBITMQ_VER=4.0.5
 
 RUN apt-get update \
 && DEBIAN_FRONTEND=noninteractive apt-get install -y \
