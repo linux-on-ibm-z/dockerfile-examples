@@ -64,7 +64,7 @@ RUN apt-get update \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh /dev/stdin -y \
   && cargo install cxxbridge-cmd --root $SOURCE_ROOT/cxxbridge \
   && cp -r $SOURCE_ROOT/cxxbridge/. /usr/local \
-  && rustup target add wasm32-wasi \
+  && rustup target add wasm32-wasip1 \
 #######################################################################
   && ver=2.38 \
   && cd "$SOURCE_ROOT" \
@@ -230,6 +230,7 @@ RUN apt-get update \
   && sed -i 's,#!/bin/sh,#!/bin/bash,g' tools/java/SCYLLA-VERSION-GEN \
   && sed -i 's/boost\/function_output_iterator\.hpp/boost\/iterator\/function_output_iterator\.hpp/g' \
     /usr/local/include/boost/signals2/detail/null_output_iterator.hpp \
+  && find . -type f -exec sed -i 's,wasm32-wasi,wasm32-wasip1,g' {} + \
   && ./configure.py --mode=release --target=${TARGET} --debuginfo=0 \
     --cflags="-I/usr/local/include -I/usr/local/include/boost" \
     --compiler="${CXX}" --c-compiler="${CC}"\
