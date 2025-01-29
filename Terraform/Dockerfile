@@ -1,6 +1,6 @@
-# © Copyright IBM Corporation 2023, 2024.
+# © Copyright IBM Corporation 2023, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-########## Dockerfile for Terraform - 1.10.2 ########################
+########## Dockerfile for Terraform - 1.10.4 ########################
 #
 # Terraform is an infrastructure as code (IaC) tool that allows you to build, change, and version infrastructure safely and efficiently.
 #
@@ -24,17 +24,17 @@
 
 FROM docker.mirror.hashicorp.services/golang:alpine AS builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-
-ARG TERRAFORM_VERSION=v1.10.2
-
+ARG TERRAFORM_VERSION=v1.10.4
 RUN apk add --no-cache git bash openssh \
-    && git clone -b ${TERRAFORM_VERSION} https://github.com/hashicorp/terraform.git $GOPATH/src/github.com/hashicorp/terraform
-
+    && git clone -b ${TERRAFORM_VERSION} https://github.com/hashicorp/terraform.git /go/src/github.com/hashicorp/terraform
 ENV TF_DEV=true
 ENV TF_RELEASE=1
-
-WORKDIR $GOPATH/src/github.com/hashicorp/terraform
+WORKDIR /go/src/github.com/hashicorp/terraform
 RUN /bin/bash ./scripts/build.sh
-
-WORKDIR $GOPATH
-ENTRYPOINT ["terraform"]
+FROM docker.mirror.hashicorp.services/alpine:latest
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+ARG BIN_NAME=terraform
+COPY --from=builder /go/bin/terraform /bin/terraform
+COPY --from=builder /go/src/github.com/hashicorp/terraform/LICENSE /usr/share/doc/${BIN_NAME}/LICENSE.txt
+WORKDIR /go
+ENTRYPOINT ["/bin/terraform"]
