@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
-# Copyright IBM Corporation 2017, 2024.
+# Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 11.4.0 ############################################
+############################ Dockerfile for Grafana 11.5.1 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -18,7 +18,7 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=11.4.0
+ARG GRAFANA_VERSION=11.5.1
 
 ARG BASE_IMAGE=ubuntu:22.04
 ARG GO_IMAGE=golang:1.23.1
