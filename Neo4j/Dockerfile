@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2018, 2024.
+# © Copyright IBM Corporation 2018, 2025.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 5.25.1 ##################################
+########## Dockerfile for Neo4j version 5.26.0 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -18,7 +18,7 @@
 ##################################################################################
 
 FROM ubuntu:20.04 AS builder
-ARG NEO4J_VER=5.25.1
+ARG NEO4J_VER=5.26.0
 
 ENV SOURCE_ROOT=/tmp
 ENV MAVEN_OPTS="-Xmx2048m -Xss8m"
@@ -35,6 +35,7 @@ RUN apt update \
   && git clone --depth 1 -b "${NEO4J_VER}" https://github.com/neo4j/neo4j.git \
   && cd neo4j \
   && git apply $SOURCE_ROOT/neo4j-"${NEO4J_VER}".patch \
+  && mvn spotless:apply -B -V \
   && mvn clean install -B -V -DskipTests
 
 RUN tar zxf /tmp/neo4j/packaging/standalone/target/neo4j-community-"${NEO4J_VER}"-unix.tar.gz -C /tmp
@@ -51,7 +52,7 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}" \
     NEO4J_EDITION=community \
     NEO4J_HOME="/var/lib/neo4j" \
     LANG=C.UTF-8
-ARG NEO4J_VER=5.25.1
+ARG NEO4J_VER=5.26.0
 
 RUN addgroup --gid 7474 --system neo4j && adduser --uid 7474 --system --no-create-home --home "${NEO4J_HOME}" --ingroup neo4j neo4j
 
