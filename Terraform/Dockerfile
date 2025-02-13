@@ -24,7 +24,7 @@
 
 FROM docker.mirror.hashicorp.services/golang:alpine AS builder
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-ARG TERRAFORM_VERSION=v1.10.4
+ARG TERRAFORM_VERSION=v1.10.5
 RUN apk add --no-cache git bash openssh \
     && git clone -b ${TERRAFORM_VERSION} https://github.com/hashicorp/terraform.git /go/src/github.com/hashicorp/terraform
 ENV TF_DEV=true
