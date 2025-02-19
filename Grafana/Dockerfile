@@ -21,7 +21,7 @@
 ARG GRAFANA_VERSION=11.5.1
 
 ARG BASE_IMAGE=ubuntu:22.04
-ARG GO_IMAGE=golang:1.23.1
+ARG GO_IMAGE=golang:1.23.5
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
@@ -64,9 +64,16 @@ COPY --from=go-src-builder /tmp/grafana/pkg/build/wire/go.* pkg/build/wire/
 COPY --from=go-src-builder /tmp/grafana/pkg/promlib/go.* pkg/promlib/
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resource/go.* pkg/storage/unified/resource/
 COPY --from=go-src-builder /tmp/grafana/pkg/semconv/go.* pkg/semconv/
-COPY --from=go-src-builder /tmp/grafana/apps/playlist /tmp/grafana/apps/playlist
-COPY --from=go-src-builder /tmp/grafana/pkg/aggregator /tmp/grafana/pkg/aggregator
-COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore /tmp/grafana/pkg/storage/unified/apistore
+
+# Fix for package dependencies
+COPY --from=go-src-builder /tmp/grafana/apps/playlist apps/playlist
+COPY --from=go-src-builder /tmp/grafana/pkg/aggregator pkg/aggregator
+COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore pkg/storage/unified/apistore
+COPY --from=go-src-builder /tmp/grafana/apps/alerting apps/alerting
+COPY --from=go-src-builder /tmp/grafana/apps/investigation apps/investigation
+COPY --from=go-src-builder /tmp/grafana/kindsv2 kindsv2
+COPY --from=go-src-builder /tmp/grafana/pkg/codegen pkg/codegen
+COPY --from=go-src-builder /tmp/grafana/pkg/plugins/codegen pkg/plugins/codegen
 
 RUN go mod download
 RUN if [[ "$BINGO" = "true" ]]; then \
@@ -163,7 +170,7 @@ RUN if grep -i -q alpine /etc/issue && [ `arch` = "x86_64" ]; then \
       rm -f /etc/ld.so.cache; \
     fi
 
-COPY --from=go-src /tmp/grafana/conf ./conf
+COPY --from=go-builder /tmp/grafana/conf ./conf
 
 RUN if [ ! $(getent group "$GF_GID") ]; then \
       if grep -i -q alpine /etc/issue; then \
