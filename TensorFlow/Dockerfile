@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2024.
+# © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for TensorFlow version 2.16.1 #########
+########## Dockerfile for TensorFlow version 2.18.0 #########
 #
 # This Dockerfile builds a basic installation of TensorFlow.
 #
@@ -27,13 +27,8 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y wget sudo \
-    && wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.16.1/build_tensorflow.sh \
-    && bash build_tensorflow.sh -y -p 3.11 \
-# Cleanup 
-    && apt-get autoremove -y \
-    && rm -rf /root/.cache/ \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.18.0/build_tensorflow.sh \
+    && bash build_tensorflow.sh -y -p 3.11
 # End of builder stage
 
 # Base Image
@@ -62,12 +57,12 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && sudo update-alternatives --install /usr/local/bin/pip3 pip3 /usr/local/bin/pip3.11 50  
 	
 # COPY the wheel from builder stage
-COPY --from=builder /tmp/tensorflow_wheel/tensorflow-2.16.1-cp*-linux_s390x.whl  /tensorflow_wheel/
-COPY --from=builder /io/dist/tensorflow_io_gcs_filesystem-0.29.0-cp*-cp*-linux_s390x.whl /tensorflow_wheel/
+COPY --from=builder /tensorflow/bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow-2.18.0-cp*-cp*-linux_s390x.whl /tensorflow_wheel/
+COPY --from=builder /io/dist/tensorflow_io_gcs_filesystem-0.37.1-cp*-cp*-linux_s390x.whl /tensorflow_wheel/
 
 # Install the wheel
-RUN pip3 install --no-cache-dir /tensorflow_wheel/tensorflow_io_gcs_filesystem-0.29.0-cp*-cp*-linux_s390x.whl \
-    && pip3 install --no-cache-dir /tensorflow_wheel/tensorflow-2.16.1-cp*-linux_s390x.whl \
+RUN pip3 install --no-cache-dir /tensorflow_wheel/tensorflow_io_gcs_filesystem-0.37.1-cp*-cp*-linux_s390x.whl \
+    && pip3 install --no-cache-dir /tensorflow_wheel/tensorflow-2.18.0-cp*-linux_s390x.whl \
     && rm -f /tensorflow_wheel/*.whl \
     && apt-get autoremove -y \
     && apt-get clean \
