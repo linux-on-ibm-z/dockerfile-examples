@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2024.
+# © Copyright IBM Corporation 2024, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############################################ Dockerfile for MySQL 9.x #################################################
@@ -33,7 +33,7 @@ ENV SOURCE_ROOT=/mysql-source
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR $SOURCE_ROOT
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/9.1.0/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/9.2.0/patch/"
 
 
 RUN apt-get update \
@@ -43,9 +43,9 @@ RUN apt-get update \
     libldap-dev libldap2-dev libsasl2-dev libsasl2-modules-gssapi-mit libudev-dev libaio-dev zlib1g-dev libnuma-dev libmecab-dev libkrb5-dev libfido2-dev \
     libprotoc-dev libprotobuf-c-dev libprotobuf-dev protobuf-c-compiler protobuf-compiler \
     && cd $SOURCE_ROOT \
-    && wget https://dev.mysql.com/get/Downloads/MySQL-9.1.0/mysql-9.1.0.tar.gz \
-    && tar xf mysql-9.1.0.tar.gz --strip-components=1 \
-    && rm -f mysql-9.1.0.tar.gz \
+    && wget https://dev.mysql.com/get/Downloads/MySQL-9.2.0/mysql-9.2.0.tar.gz \
+    && tar xf mysql-9.2.0.tar.gz --strip-components=1 \
+    && rm -f mysql-9.2.0.tar.gz \
     && curl -sSL ${PATCH_URL}/mt-asm.patch | git apply - \
     && curl -sSL ${PATCH_URL}/NdbHW.patch | git apply - \
     && curl -sSL ${PATCH_URL}/router-test.patch | git apply - \
