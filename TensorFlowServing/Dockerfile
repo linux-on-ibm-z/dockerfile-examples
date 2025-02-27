@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2020, 2024.
+# © Copyright IBM Corporation 2020, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for TensorFlow Serving version 2.16.1 #########
+########## Dockerfile for TensorFlow Serving version 2.18.0 #########
 #
 # This Dockerfile builds a basic installation of TensorFlow Serving.
 #
@@ -18,7 +18,7 @@
 #
 # Please run the following command as an example of the TensorFlow Serving image:
 #
-# git clone -b 2.16.1 https://github.com/tensorflow/serving
+# git clone -b 2.18.0 https://github.com/tensorflow/serving
 # TESTDATA="$(pwd)/serving/tensorflow_serving/servables/tensorflow/testdata"
 # docker run -t --rm -p 8501:8501 \
 #   -v "$TESTDATA/saved_model_half_plus_two_cpu:/models/half_plus_two" \
@@ -43,7 +43,7 @@
 ##################################################################################
 
 # Base Image
-FROM ubuntu:20.04 AS builder
+FROM ubuntu:22.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -54,20 +54,12 @@ ENV SOURCE_ROOT=/tmp/source
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y wget sudo \
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
-    && wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/TensorflowServing/2.16.1/build_tensorflow_serving.sh  \
+    && wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/TensorflowServing/2.18.0/build_tensorflow_serving.sh  \
 # Build TensorFlow Serving
-    && bash build_tensorflow_serving.sh -y \
-# Cleanup
-    && apt-get -y remove \
-    wget \
-    && apt-get autoremove -y \
-    && rm -rf $SOURCE_ROOT \
-    && rm -rf /root/.cache/ \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && bash build_tensorflow_serving.sh -y
 #End of builder stage
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
