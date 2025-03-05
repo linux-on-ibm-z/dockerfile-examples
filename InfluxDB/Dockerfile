@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2020, 2024
+# © Copyright IBM Corporation 2020, 2025
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 #################### Dockerfile for InfluxDB 2.7.11 ############################s
@@ -53,6 +53,7 @@ RUN apt-get update \
 &&  git clone -b v${VERSION} https://github.com/influxdata/influxdb.git \
 &&  cd influxdb \
 &&  export NODE_OPTIONS=--max_old_space_size=4096 \
+&& rustup toolchain install 1.68-s390x-unknown-linux-gnu \
 &&  make
 
 # Base image
