@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2024,2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for SPIRE version 1.11.1 ########################
+###################### Dockerfile for SPIRE version 1.11.2 ########################
 #
 # SPIRE (the SPIFFE Runtime Environment) is a toolchain of APIs for establishing trust between software systems across a wide variety of hosting platforms.
 # SPIRE exposes the SPIFFE Workload API,which can attest running software systems and issue SPIFFE IDs and SVIDs to them.
@@ -32,13 +32,12 @@
 #####################################################################
 
 # Build stage
-ARG goversion=1.23.2
-# Use alpine3.18 until go-sqlite works in 3.19
+ARG goversion=1.23.6
 FROM --platform=${BUILDPLATFORM} golang:${goversion}-alpine3.20 as base
 WORKDIR /spire
 RUN apk --no-cache --update add file bash clang lld pkgconfig git wget make
-RUN wget https://raw.githubusercontent.com/spiffe/spire/v1.11.1/go.mod && \
-wget https://raw.githubusercontent.com/spiffe/spire/v1.11.1/go.sum
+RUN wget https://raw.githubusercontent.com/spiffe/spire/v1.11.2/go.mod && \
+wget https://raw.githubusercontent.com/spiffe/spire/v1.11.2/go.sum
 
 # https://go.dev/ref/mod#module-cache
 RUN --mount=type=cache,target=/go/pkg/mod go mod download
@@ -47,13 +46,13 @@ COPY . .
 # xx is a helper for cross-compilation
 # when bumping to a new version analyze the new version for security issues
 # then use crane to lookup the digest of that version so we are immutable
-# crane digest tonistiigi/xx:1.3.0
-FROM --platform=$BUILDPLATFORM tonistiigi/xx@sha256:904fe94f236d36d65aeb5a2462f88f2c537b8360475f6342e7599194f291fb7e AS xx
+# crane digest tonistiigi/xx:1.5.0
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.5.0@sha256:0c6a569797744e45955f39d4f7538ac344bfb7ebf0a54006a0a4297b153ccf0f AS xx
 
 FROM --platform=${BUILDPLATFORM} base as builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-ARG VERSION=1.11.1
+ARG VERSION=1.11.2
 COPY --link --from=xx / /
 
 RUN xx-go --wrap
