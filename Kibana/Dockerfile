@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2024.
+# © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 8.16.1 ############################################
+###################################### Dockerfile for Kibana version 8.17.3 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -29,19 +29,22 @@
 # Kibana can be accessed by browser via http://localhost:5601 or http://host-ip:5601
 #
 ##############################################################################################################
-FROM ubuntu:20.04 AS builder
 
-ARG KIBANA_VER=8.16.1
-ARG NODE_JS_VERSION=20.15.1
+################################################################################
+# Build stage 0 `builder`:
+# Build Kibana artifact
+################################################################################
+FROM ubuntu:22.04 AS builder
 
-# The author
+ARG KIBANA_VER=8.17.3
+ARG NODE_JS_VERSION=20.18.2
+
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Set Environment Variable
 ENV SOURCE_ROOT=/home/nonroot
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 ENV PATH=/usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x/bin:/usr/share/kibana/bin:$JAVA_HOME/bin:$SOURCE_ROOT/bazel/output/:$PATH
-ENV USE_BAZEL_VERSION=$SOURCE_ROOT/bazel/output/bazel
 ENV NODE_OPTIONS="--max_old_space_size=4096"
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -yq \
@@ -49,39 +52,26 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install 
     git \
     tzdata \
     curl \
- && useradd -s /bin/bash -d /home/nonroot/ -m -G sudo nonroot \
- && echo "nonroot ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+  && useradd -s /bin/bash -d /home/nonroot/ -m -G sudo nonroot \
+  && echo "nonroot ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Kibana cannot be built as root
 USER nonroot
-
 RUN cd $SOURCE_ROOT \
- && curl -o build_kibana.sh https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Kibana/$KIBANA_VER/build_kibana.sh \
- && bash build_kibana.sh -y
+  && curl -o build_kibana.sh https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Kibana/$KIBANA_VER/build_kibana.sh \
+  && bash build_kibana.sh -y
 
 USER root
-RUN cd $SOURCE_ROOT/kibana \
- && mkdir -p /usr/share/kibana/ \
- && tar xzf target/kibana-${KIBANA_VER}-SNAPSHOT-linux-s390x.tar.gz -C /usr/share/kibana --strip-components 1
-
 WORKDIR /usr/share/kibana
+RUN cd $SOURCE_ROOT/kibana \
+  && mkdir -p /usr/share/kibana/ \
+  && tar xzf target/kibana-${KIBANA_VER}-linux-s390x.tar.gz -C /usr/share/kibana --strip-components 1
+
+# Ensure that group permissions are the same as user permissions.
+# This will help when relying on GID-0 to run Kibana, rather than UID-1000.
+# OpenShift does this, for example.
+# REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
-
-# Add an init process, check the checksum to make sure it's a match
-FROM ubuntu:20.04
-EXPOSE 5601
-
-RUN for iter in {1..10}; do \
-      export DEBIAN_FRONTEND=noninteractive && \
-      apt-get update  && \
-      apt-get upgrade -y  && \
-      apt-get install -y --no-install-recommends \
-       fontconfig fonts-liberation libnss3 libfontconfig1 ca-certificates curl && \
-      apt-get clean && \
-      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
 
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
@@ -93,14 +83,38 @@ RUN set -e ; \
   rm "${TINI_BIN}.sha256sum" ; \
   mv "${TINI_BIN}" /bin/tini ; \
   chmod +x /bin/tini
+RUN mkdir -p /usr/share/fonts/local && \
+  curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc && \
+  echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
 
-RUN mkdir /usr/share/fonts/local
-RUN curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
-RUN echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
-RUN fc-cache -v
+################################################################################
+# Build stage 1 (the actual Kibana image):
+#
+# Copy kibana from stage 0
+# Add entrypoint
+################################################################################
+FROM ubuntu:22.04
+EXPOSE 5601
+
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+
+RUN for iter in {1..10}; do \
+      export DEBIAN_FRONTEND=noninteractive && \
+      apt-get update  && \
+      apt-get upgrade -y  && \
+      apt-get install -y --no-install-recommends \
+      fontconfig fonts-liberation libnss3 curl ca-certificates && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \      sleep 10; \
+    done; \
+    (exit $exit_code)
 
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
+COPY --from=builder --chown=0:0 /bin/tini /bin/tini
+# Load reporting fonts
+COPY --from=builder --chown=0:0 /usr/share/fonts/local/NotoSansCJK-Regular.ttc /usr/share/fonts/local/NotoSansCJK-Regular.ttc
+RUN fc-cache -v
 WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
 
@@ -112,7 +126,7 @@ COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
-COPY --chown=1000:0 bin/kibana-docker /usr/local/bin/
+COPY bin/kibana-docker /usr/local/bin/
 
 # Ensure gid 0 write permissions for OpenShift.
 RUN chmod g+ws /usr/share/kibana && \
@@ -128,8 +142,19 @@ RUN groupadd --gid 1000 kibana && \
       --home-dir /usr/share/kibana --no-create-home \
       kibana
 
+LABEL org.label-schema.license="Elastic License" \
+      org.label-schema.name="Kibana" \
+      org.label-schema.schema-version="1.0" \
+      org.label-schema.vcs-url="https://github.com/elastic/kibana" \
+      org.label-schema.version="8.17.3-SNAPSHOT" \
+      org.opencontainers.image.documentation="https://www.elastic.co/guide/en/kibana/reference/index.html" \
+      org.opencontainers.image.licenses="Elastic License" \
+      org.opencontainers.image.source="https://github.com/elastic/kibana" \
+      org.opencontainers.image.title="Kibana" \
+      org.opencontainers.image.version="8.17.3-SNAPSHOT"
+
 ENTRYPOINT ["/bin/tini", "--"]
 
 CMD ["/usr/local/bin/kibana-docker"]
 
-USER kibana
+USER 1000
