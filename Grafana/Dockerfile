@@ -2,7 +2,7 @@
 # Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 11.5.1 ############################################
+############################ Dockerfile for Grafana 11.5.2 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -18,10 +18,10 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=11.5.1
+ARG GRAFANA_VERSION=11.5.2
 
-ARG BASE_IMAGE=ubuntu:22.04
-ARG GO_IMAGE=golang:1.23.5
+ARG BASE_IMAGE=alpine:3.21
+ARG GO_IMAGE=golang:1.24.1-alpine
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
@@ -32,6 +32,7 @@ ARG GRAFANA_VERSION
 
 WORKDIR /tmp
 
+RUN apk add --no-cache git
 RUN git clone --depth=1 --single-branch -b v"${GRAFANA_VERSION}" https://github.com/grafana/grafana.git
 
 FROM ${GO_IMAGE} as go-builder
@@ -47,7 +48,7 @@ RUN if grep -i -q alpine /etc/issue; then \
           # This is required to allow building on arm64 due to https://github.com/golang/go/issues/22040
           binutils-gold \
           # Install build dependencies
-          gcc g++ make git; \
+          gcc g++ make git bash; \
     fi
 
 WORKDIR /tmp/grafana
@@ -104,7 +105,10 @@ ARG GRAFANA_VERSION
 
 WORKDIR /tmp/grafana
 
-RUN if grep -i -q ubuntu /etc/issue; then \
+RUN if grep -i -q alpine /etc/issue; then \
+        apk add --no-cache ca-certificates bash curl tzdata musl-utils && \
+        apk info -vv | sort; \
+    elif grep -i -q ubuntu /etc/issue; then \
         DEBIAN_FRONTEND=noninteractive && \
         apt-get update && \
         apt-get install -y wget && \
