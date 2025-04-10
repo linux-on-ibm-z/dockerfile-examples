@@ -79,7 +79,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  && wget https://bootstrap.pypa.io/get-pip.py \
  && python3 get-pip.py \
  && pip3 install wheel -v \
- && pip3 install "cython<3.0.0" pyyaml==5.4.1 --no-build-isolation -v \
+ && pip3 install "cython<3.0.0" pyyaml==6.0.2 --no-build-isolation -v \
  && rm get-pip.py \
  && cd $SOURCE_DIR \
  && wget -O rustup-init.sh https://sh.rustup.rs \
