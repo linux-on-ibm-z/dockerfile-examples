@@ -2,7 +2,7 @@
 # Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 11.5.2 ############################################
+############################ Dockerfile for Grafana 11.6.0 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -18,10 +18,10 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=11.5.2
+ARG GRAFANA_VERSION=11.6.0
 
 ARG BASE_IMAGE=alpine:3.21
-ARG GO_IMAGE=golang:1.24.1-alpine
+ARG GO_IMAGE=golang:1.23.7-alpine
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
@@ -71,7 +71,8 @@ COPY --from=go-src-builder /tmp/grafana/apps/playlist apps/playlist
 COPY --from=go-src-builder /tmp/grafana/pkg/aggregator pkg/aggregator
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore pkg/storage/unified/apistore
 COPY --from=go-src-builder /tmp/grafana/apps/alerting apps/alerting
-COPY --from=go-src-builder /tmp/grafana/apps/investigation apps/investigation
+COPY --from=go-src-builder /tmp/grafana/apps/investigations apps/investigations
+COPY --from=go-src-builder /tmp/grafana/apps/advisor apps/advisor
 COPY --from=go-src-builder /tmp/grafana/kindsv2 kindsv2
 COPY --from=go-src-builder /tmp/grafana/pkg/codegen pkg/codegen
 COPY --from=go-src-builder /tmp/grafana/pkg/plugins/codegen pkg/plugins/codegen
