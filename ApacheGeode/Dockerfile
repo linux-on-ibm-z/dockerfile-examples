@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2017, 2022.
+# © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ########## Dockerfile for Apache Geode version 1.15.1 #####################
@@ -23,7 +23,7 @@
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:20.04
+FROM s390x/ubuntu:22.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -74,3 +74,4 @@ VOLUME ["/data"]
 CMD ["gfsh"]
 
 # End of Dockerfile
+
