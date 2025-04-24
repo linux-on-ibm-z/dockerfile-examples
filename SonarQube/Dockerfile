@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 25.3.0 ##############################
+################################ Dockerfile for SonarQube 25.4.0 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -17,16 +17,16 @@
 # docker run --name <container name> -p <port_number>:9000 -d <image name>
 # Link : http://<sonarQube-ip>:<port_number_9000>
 ######################################################################################
-ARG SONARQUBE_VERSION=25.3.0.104237
+ARG SONARQUBE_VERSION=25.4.0.105899
 
-FROM eclipse-temurin:17.0.11_9-jdk AS builder
+FROM eclipse-temurin:17.0.14_7-jdk AS builder
 LABEL stage=builder
 ARG SONARQUBE_VERSION
 ARG SONARQUBE_ZIP_URL=https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-${SONARQUBE_VERSION}.zip
 ENV JAVA_HOME='/opt/java/openjdk' \
     ES_JAVA_HOME='/opt/java/openjdk' \
     PATH="/opt/java/openjdk/bin:$PATH" \
-    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/25.3.0/patch/elasticsearch.diff" \
+    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/25.4.0/patch/elasticsearch.diff" \
     LANG="en_US.UTF-8"
 
 RUN apt-get update; \
@@ -64,7 +64,7 @@ RUN wget -q $SONARQUBE_ZIP_URL && \
     cp /sonarqube-${SONARQUBE_VERSION}/elasticsearch/bin/elasticsearch /sonarqube-${SONARQUBE_VERSION}/bin
 
 FROM eclipse-temurin:17-jre-noble AS stage1
-ARG SONARQUBE_VERSION=25.3.0.104237
+ARG SONARQUBE_VERSION=25.4.0.105899
 ENV SONARQUBE_HOME=/opt/sonarqube \
     SQ_DATA_DIR="/opt/sonarqube/data" \
     SQ_EXTENSIONS_DIR="/opt/sonarqube/extensions" \
@@ -74,10 +74,14 @@ ENV SONARQUBE_HOME=/opt/sonarqube \
 COPY --from=builder /sonarqube-${SONARQUBE_VERSION}/ ${SONARQUBE_HOME}/
 
 RUN set -eux; \
-    useradd --system --uid 1001 --gid 0 sonarqube; \
+    deluser ubuntu; \
+    useradd --system --uid 1000 --gid 0 sonarqube; \
+    mkdir --parents /opt; \
     cd /opt; \
     rm -rf ${SONARQUBE_HOME}/bin/*; \
     ln -s "${SONARQUBE_HOME}/lib/sonar-application-${SONARQUBE_VERSION}.jar" "${SONARQUBE_HOME}/lib/sonarqube.jar"; \
+    chown -R sonarqube:root ${SONARQUBE_HOME}; \
+    chown -R sonarqube:root "${SQ_DATA_DIR}" "${SQ_EXTENSIONS_DIR}" "${SQ_LOGS_DIR}" "${SQ_TEMP_DIR}"; \
     chmod -R 550 ${SONARQUBE_HOME}; \
     chmod -R 770 "${SQ_DATA_DIR}" "${SQ_EXTENSIONS_DIR}" "${SQ_LOGS_DIR}" "${SQ_TEMP_DIR}";
 
@@ -92,7 +96,7 @@ ENV LANG='en_US.UTF-8' \
 #
 # SonarQube setup
 #
-ARG SONARQUBE_VERSION=25.3.0.104237
+ARG SONARQUBE_VERSION=25.4.0.105899
 ENV DOCKER_RUNNING="true" \
     JAVA_HOME='/opt/java/openjdk' \
     SONARQUBE_HOME=/opt/sonarqube \
@@ -105,9 +109,15 @@ ENV DOCKER_RUNNING="true" \
 COPY --from=stage1 ${SONARQUBE_HOME}/ ${SONARQUBE_HOME}/
 
 RUN set -eux; \
-    useradd --system --uid 1001 --gid 0 sonarqube; \
+    deluser ubuntu; \
+    useradd --system --uid 1000 --gid 0 sonarqube; \
     apt-get update; \
-    apt-get --no-install-recommends -y install gnupg bash fonts-dejavu; \
+    apt-get --no-install-recommends -y install \
+        bash \
+        curl \
+        fonts-dejavu \
+        gnupg \
+        unzip; \
     echo "networkaddress.cache.ttl=5" >> "${JAVA_HOME}/conf/security/java.security"; \
     sed --in-place --expression="s?securerandom.source=file:/dev/random?securerandom.source=file:/dev/urandom?g" "${JAVA_HOME}/conf/security/java.security"; \
     # pub   2048R/D26468DE 2015-05-25
@@ -121,8 +131,9 @@ RUN set -eux; \
     apt-get remove -y gnupg unzip curl; \
     rm -rf /var/lib/apt/lists/*;
 
-COPY entrypoint.sh ${SONARQUBE_HOME}/docker/
-RUN chmod +x ${SONARQUBE_HOME}/docker/entrypoint.sh
+VOLUME ["${SQ_DATA_DIR}", "${SQ_EXTENSIONS_DIR}", "${SQ_LOGS_DIR}", "${SQ_TEMP_DIR}"]
+
+COPY --chown=root:root --chmod=555 entrypoint.sh ${SONARQUBE_HOME}/docker/
 
 WORKDIR ${SONARQUBE_HOME}
 EXPOSE 9000
