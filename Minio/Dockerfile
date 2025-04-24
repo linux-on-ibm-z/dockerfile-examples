@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
-###################### Dockerfile for Minio - RELEASE.2024-12-18T13-15-44Z ########################
+###################### Dockerfile for Minio - RELEASE.2025-04-08T15-41-24Z ########################
 #
 # MinIO is a High Performance Object Storage released under GNU Affero General Public License v3.0. 
 # It is API compatible with Amazon S3 cloud storage service. 
