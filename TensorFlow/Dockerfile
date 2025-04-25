@@ -56,7 +56,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && sudo update-alternatives --install /usr/local/bin/python python /usr/local/bin/python3 40 \
     && sudo update-alternatives --install /usr/local/bin/pip3 pip3 /usr/local/bin/pip3.11 50  \
     && rm -f build_python3.sh \
-    && rm -rf python* \
+    && rm -rf python*
 	
 # COPY the wheel from builder stage
 COPY --from=builder /tensorflow/bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow-2.18.0-cp*-cp*-linux_s390x.whl /tensorflow_wheel/
