@@ -22,9 +22,9 @@
 #########################################################################################
 
 # Base image
-FROM s390x/ubuntu:22.04 as builder
+FROM s390x/ubuntu:24.04 as builder
 
-ARG RABBITMQ_VER=4.0.7
+ARG RABBITMQ_VER=4.0.8
 ARG ERLANG_VERSION=27.2
 ARG ELIXIR_VERSION=1.17.2
 # The author
@@ -95,9 +95,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  && apt autoremove -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-FROM s390x/ubuntu:22.04
+FROM s390x/ubuntu:24.04
 ENV LC_ALL=en_US.UTF-8
-ARG RABBITMQ_VER=4.0.7
+ARG RABBITMQ_VER=4.0.8
 
 RUN apt-get update \
 && DEBIAN_FRONTEND=noninteractive apt-get install -y \
