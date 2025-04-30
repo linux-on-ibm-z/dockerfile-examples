@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2024.
+# © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Sysdig version 0.39.0 #########
+########## Dockerfile for Sysdig version 0.40.1 #########
 #
 # This Dockerfile builds a basic installation of Sysdig.
 #
@@ -18,10 +18,6 @@
 # "docker run --rm -i -t --privileged --net=host -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v 
 # /boot:/host/boot:ro -v /src:/src -v /lib/modules:/host/lib/modules:ro -v /usr:/host/usr:ro -v /etc:/host/etc:ro --name <NAME> <IMAGE-NAME>"
 #
-# Some features use "skeletons" (feature-clang-bpf-co-re compilation option) which require kernel 5.15 or more recent, to compile bpftool, 
-# hence use "CLANG=Nope make" on Ubuntu 20.04. 
-# For more details, see https://github.com/libbpf/bpftool/releases/tag/v7.2.0
-#
 # For more details, see https://github.com/draios/sysdig/wiki/How-to-Install-Sysdig-for-Linux#installation-inside-a-docker-container
 #
 # The official website
@@ -31,7 +27,7 @@
 # Base Image
 FROM s390x/ubuntu:22.04 AS builder
 
-ARG SYSDIG_VER=0.39.0
+ARG SYSDIG_VER=0.40.1
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
@@ -72,7 +68,7 @@ FROM s390x/ubuntu:22.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BUILD_VERSION=0.39.0
+ARG BUILD_VERSION=0.40.1
 ENV BUILD_VERSION=${BUILD_VERSION}
 
 ENV SYSDIG_HOST_ROOT /host
