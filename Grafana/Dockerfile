@@ -2,7 +2,7 @@
 # Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 11.6.0 ############################################
+############################ Dockerfile for Grafana 12.0.0 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -18,10 +18,10 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=11.6.0
+ARG GRAFANA_VERSION=12.0.0
 
 ARG BASE_IMAGE=alpine:3.21
-ARG GO_IMAGE=golang:1.23.7-alpine
+ARG GO_IMAGE=golang:1.24.2-alpine
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
@@ -33,7 +33,7 @@ ARG GRAFANA_VERSION
 WORKDIR /tmp
 
 RUN apk add --no-cache git
-RUN git clone --depth=1 --single-branch -b v"${GRAFANA_VERSION}" https://github.com/grafana/grafana.git
+RUN git clone -b v"${GRAFANA_VERSION}" https://github.com/grafana/grafana.git
 
 FROM ${GO_IMAGE} as go-builder
 
@@ -55,6 +55,13 @@ WORKDIR /tmp/grafana
 
 COPY --from=go-src-builder /tmp/grafana/go.* ./
 COPY --from=go-src-builder /tmp/grafana/.bingo .bingo
+COPY --from=go-src-builder /tmp/grafana/.citools/bra .citools/bra
+COPY --from=go-src-builder /tmp/grafana/.citools/cue .citools/cue
+COPY --from=go-src-builder /tmp/grafana/.citools/cog .citools/cog
+COPY --from=go-src-builder /tmp/grafana/.citools/lefthook .citools/lefthook
+COPY --from=go-src-builder /tmp/grafana/.citools/jb .citools/jb
+COPY --from=go-src-builder /tmp/grafana/.citools/golangci-lint .citools/golangci-lint
+COPY --from=go-src-builder /tmp/grafana/.citools/swagger .citools/swagger
 
 # Include vendored dependencies
 COPY --from=go-src-builder /tmp/grafana/pkg/util/xorm/go.* pkg/util/xorm/
@@ -68,6 +75,9 @@ COPY --from=go-src-builder /tmp/grafana/pkg/semconv/go.* pkg/semconv/
 
 # Fix for package dependencies
 COPY --from=go-src-builder /tmp/grafana/apps/playlist apps/playlist
+COPY --from=go-src-builder /tmp/grafana/apps/dashboard apps/dashboard
+COPY --from=go-src-builder /tmp/grafana/apps/folder apps/folder
+COPY --from=go-src-builder /tmp/grafana/pkg/apis/secret pkg/apis/secret
 COPY --from=go-src-builder /tmp/grafana/pkg/aggregator pkg/aggregator
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore pkg/storage/unified/apistore
 COPY --from=go-src-builder /tmp/grafana/apps/alerting apps/alerting
