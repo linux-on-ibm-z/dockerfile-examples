@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Cassandra version 5.0.2 #########
+########## Dockerfile for Cassandra version 5.0.4 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -18,11 +18,11 @@
 #
 #################################################################################
 
-FROM eclipse-temurin:11-jdk-focal as builder
+FROM eclipse-temurin:17-jdk-focal as builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-ARG CASSANDRA_VER=5.0.2
+ARG CASSANDRA_VER=5.0.4
 
 ENV SOURCE_ROOT=/tmp/source \
     CASSANDRA_USE_JDK11=true
@@ -55,13 +55,45 @@ maven \
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
     && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/build_netty.sh  \
-    && bash build_netty.sh -y -j Temurin11 \
+    && bash build_netty.sh -y -j Temurin17 \
+# Build go
+    && cd $SOURCE_ROOT \
+    && export GO_VERSION="1.23.3" \
+    && wget -q https://storage.googleapis.com/golang/go"$GO_VERSION".linux-s390x.tar.gz \
+    && chmod ugo+r go"$GO_VERSION".linux-s390x.tar.gz \
+    && sudo tar -C /usr/local -xzf go"$GO_VERSION".linux-s390x.tar.gz \
+    && sudo ln -sf /usr/local/go/bin/go /usr/bin/ \
+    && sudo ln -sf /usr/local/go/bin/gofmt /usr/bin/ \
+    && go version \
+# Build ACCP
+    && cd $SOURCE_ROOT \
+    && git clone https://github.com/corretto/amazon-corretto-crypto-provider.git \
+    && cd amazon-corretto-crypto-provider \
+    && git checkout 2.4.1 \
+    && git submodule update --init --recursive \
+    && cd aws-lc \
+    && mkdir build \
+    && cd build \
+    && cmake -DCMAKE_BUILD_TYPE=Release \
+	-DTARGET_ARCH=s390x \
+	-DCMAKE_C_FLAGS="-Wno-string-compare" \
+	.. \
+    && make -j"$(nproc)" \
+    && cd $SOURCE_ROOT/amazon-corretto-crypto-provider \
+    && ./gradlew build -Pclassifier=linux-s390x -x test \
+    && mvn install:install-file \
+	-Dfile=build/lib/AmazonCorrettoCryptoProvider.jar \
+	-DgroupId=software.amazon.cryptools \
+	-DartifactId=AmazonCorrettoCryptoProvider \
+	-Dversion=2.4.1 \
+	-Dclassifier=linux-s390_64 \
+	-Dpackaging=jar \
+    && export CLASSPATH=$CLASSPATH:$SOURCE_ROOT/amazon-corretto-crypto-provider/build/lib/AmazonCorrettoCryptoProvider.jar \
 # Build netty
     && cd $SOURCE_ROOT \
-    && git clone -b netty-4.1.68.Final https://github.com/netty/netty.git \
-    && cd netty\
-    && curl -o netty.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/netty.patch \
-    && git apply --ignore-whitespace netty.patch \
+    && git clone -b netty-4.1.119.Final https://github.com/netty/netty.git \
+    && cd netty \
+    && sed -i 's/2.0.71/2.0.70/g' pom.xml \
     && mvn install -DskipTests -Dmaven.javadoc.skip=true \
 # Build Apache Cassandra
     && cd $SOURCE_ROOT \
@@ -88,7 +120,7 @@ maven \
     && rm -rf /var/lib/apt/lists/*
 #End of builder stage    
 
-FROM eclipse-temurin:11-jre-focal
+FROM eclipse-temurin:17-jre-focal
 
 # explicitly set user/group IDs
 RUN set -eux; \
@@ -143,7 +175,7 @@ RUN set -eux; \
 ENV CASSANDRA_HOME /opt/cassandra
 ENV CASSANDRA_CONF /etc/cassandra
 ENV PATH $CASSANDRA_HOME/bin:$PATH
-ENV CASSANDRA_VERSION 5.0.2
+ENV CASSANDRA_VERSION 5.0.4
 
 
 RUN mkdir -p "$CASSANDRA_HOME";
