@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Heartbeat 8.17.4 #############################
+#################### Dockerfile for Heartbeat 9.0.1 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -17,7 +17,7 @@ FROM ubuntu:22.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG BEATS_VER=8.17.4
+ARG BEATS_VER=9.0.1
 
 # Set environment variable
 ENV BEATNAME=heartbeat
@@ -87,9 +87,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  && export PATH=$PATH:$HOME/.cargo/bin \
  && rustup toolchain install 1.76.0 \
  && rustup default 1.76.0 \
- && wget https://go.dev/dl/go1.22.0.linux-s390x.tar.gz \
- && chmod ugo+r go1.22.0.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.22.0.linux-s390x.tar.gz \
+ && wget https://go.dev/dl/go1.24.1.linux-s390x.tar.gz \
+ && chmod ugo+r go1.24.1.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.24.1.linux-s390x.tar.gz \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
@@ -119,7 +119,7 @@ FROM ubuntu:22.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV ELASTIC_CONTAINER "true"
+ENV ELASTIC_CONTAINER="true"
 ENV BEATNAME=heartbeat
 ENV BEATHOME=/usr/share/$BEATNAME
 ENV NODE_PATH=$BEATHOME/.node
@@ -184,32 +184,82 @@ RUN chmod 755 /usr/local/bin/docker-entrypoint
 # Setup synthetics env vars
 ENV ELASTIC_SYNTHETICS_CAPABLE=true
 ENV SUITES_DIR=$BEATHOME/suites
-ENV NODE_VERSION=18.16.0
+ENV NODE_VERSION=18.20.7
 ENV PATH="$NODE_PATH/node/bin:$PATH"
-
-RUN groupadd --gid 1000 $BEATNAME \
- && useradd -M --uid 1000 --gid 1000 --groups 0 --home $BEATHOME $BEATNAME \
- && passwd -d $BEATNAME
 
 # Install the latest version of @elastic/synthetics forcefully ignoring the previously
 # cached node_modules, heartbeat then calls the global executable to run test suites
 # Setup node
-
 RUN cd /usr/share/heartbeat/.node \
   && NODE_DOWNLOAD_URL="https://nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-s390x.tar.xz" \
   && mkdir -p node \
   && curl ${NODE_DOWNLOAD_URL} | tar -xJ --strip 1 -C node \
-  && chmod ug+rwX -R $NODE_PATH \
-  && chown -R $BEATNAME $NODE_PATH
+  && chmod ug+rwX -R $NODE_PATH 
 
-USER $BEATNAME
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
 RUN npm i -g --loglevel verbose --engine-strict @elastic/synthetics@stack_release || sh -c 'tail -n +1 /usr/share/heartbeat/.npm/_logs/*' \
   && chmod ug+rwX -R $NODE_PATH
-RUN chmod ug+rwX -R $NODE_PATH 
+
 USER root
+# Install the deps as needed by the exact version of playwright elastic synthetics uses
+# Community does not use npx playwright install-deps because that could pull a newer version
+# Install additional fonts as well
+RUN for iter in {1..10}; do \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        fontconfig \
+        libfreetype6 \
+        libcairo2 \
+        libglib2.0-0 \
+        libgtk-3-0 \
+        libpango-1.0-0 \
+        x11-utils \
+        xfonts-base \
+        xfonts-100dpi \
+        at-spi2-core \
+        libatk1.0-0 \
+        libatspi2.0-0 \
+        libasound2 \
+        libcups2 \
+        libdbus-1-3 \
+        libdrm2 \
+        libegl1 \
+        libgbm1 \
+        libnspr4 \
+        libnss3 \
+        libx11-6 \
+        libx11-xcb1 \
+        libxcb1 \
+        libxcomposite1 \
+        libxdamage1 \
+        libxext6 \
+        libxfixes3 \
+        libxrandr2 \
+        libxkbcommon0 \
+        libxshmfence1 \
+        libicu70 \
+        libgl1 \
+        unzip && \
+    mkdir -p /usr/share/fonts/google-noto && \
+    curl -LO https://noto-website-2.storage.googleapis.com/pkgs/NotoSansCJKjp-hinted.zip && \
+    unzip NotoSansCJKjp-hinted.zip -d /usr/share/fonts/google-noto && \
+    rm -f NotoSansCJKjp-hinted.zip && \
+    apt-get remove -y unzip && \
+    curl -LO https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf && \
+    mv NotoSans-Regular.ttf /usr/share/fonts/google-noto && \
+    curl -LO https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf && \
+    mv NotoColorEmoji.ttf /usr/share/fonts/google-noto && \
+    fc-cache -fv && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && sleep 10; \
+done; \
+(exit $exit_code)
 
 COPY --from=builder /usr/share/$BEATNAME /usr/share/$BEATNAME
+
+RUN groupadd --gid 1000 $BEATNAME \
+ && useradd -M --uid 1000 --gid 1000 --groups 0 --home $BEATHOME $BEATNAME 
 
 USER 1000
 
