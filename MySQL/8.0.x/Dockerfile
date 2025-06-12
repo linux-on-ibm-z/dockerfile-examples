@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2018, 2024.
+# © Copyright IBM Corporation 2018, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############################################ Dockerfile for MySQL 8.0.x #################################################
@@ -25,7 +25,7 @@
 #
 ####################################################################################################################
 # Base image
-FROM s390x/ubuntu:20.04
+FROM s390x/ubuntu:22.04
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends gnupg && rm -rf
 
 # add gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
-ENV GOSU_VERSION 1.16
+ENV GOSU_VERSION 1.17
 RUN set -eux; \
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
@@ -67,26 +67,28 @@ RUN echo $TZ > /etc/timezone \
     && dpkg-reconfigure tzdata
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y \
-    bzip2 \
-    openssl \
-    perl \
-    xz-utils \
-    zstd \
-    mysql-server-8.0 \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        bzip2 \
+        openssl \
+        perl \
+        xz-utils \
+        zstd \
+        mysql-server-8.0 \
+# Cleanup
+    && apt autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
     && mkdir /docker-entrypoint-initdb.d \
     && rm -rf /var/lib/mysql \
     && mkdir -p /var/lib/mysql /var/run/mysqld /var/lib/mysql-files/ && touch /mysql-init-complete \
-    && chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /etc/ /var/lib/mysql-files/ /mysql-init-complete \
+    && chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /var/lib/mysql-files/ /mysql-init-complete \
     # ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
-    && chmod 1777 /var/run/mysqld /var/lib/mysql \
-# Cleanup
-    && apt autoremove -y \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* 
+    && chmod 1777 /var/run/mysqld /var/lib/mysql
 
 VOLUME /var/lib/mysql
 
-# Copying con files
+# Config files
 COPY config/ /etc/mysql/
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backward compatible
@@ -95,6 +97,5 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Default port
 EXPOSE 3306 33060
-
 CMD ["mysqld"]
 # End of dockerfile
