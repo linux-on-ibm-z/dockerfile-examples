@@ -13,20 +13,21 @@
 ####################################################################################################################
 
 # Base image
-FROM registry.access.redhat.com/ubi9/ubi:9.4-1214.1729773476 AS builder
+FROM ubuntu:22.04 AS builder
 
+# CockroachDB version
 ARG CRDB_VER=24.3.10
 ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CockroachDB/${CRDB_VER}
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-RUN dnf install wget sudo -y
-
-RUN useradd -m build_user \
-&& usermod -aG wheel build_user \
+RUN apt-get update \
+&& apt-get install -y sudo wget \
+&& useradd -m build_user \
+&& usermod -aG sudo build_user \
 # disable sudo password
-&& echo '%wheel ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+&& echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # CockroachDB dev script cannot be run by root user
 USER build_user
@@ -43,15 +44,18 @@ RUN cd $SOURCE_ROOT \
 && bash build_crdb.sh -y
 
 # Build a fresh image without all the build requirements
-FROM registry.access.redhat.com/ubi9/ubi:9.4-1214.1729773476 
+FROM ubuntu:22.04
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV PATH=/usr/local/go/bin:/cockroach:$PATH
 
-RUN dnf install sudo tzdata hostname tar wget cmake gcc-c++ keyutils-libs-devel -y \
-    && mkdir -p /cockroach \
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    tzdata wget curl hostname sudo cmake gcc g++ libkeyutils-dev && \
+    mkdir -p /cockroach \
     && mkdir -p /usr/local/lib/cockroach \
     && mkdir -p /docker-entrypoint-initdb.d
 
