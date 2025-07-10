@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for CockroachDB version 24.3.10 ####################################
+#################################### Dockerfile for CockroachDB version 24.3.14 ####################################
 #
 # To build CockroachDB image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -13,21 +13,44 @@
 ####################################################################################################################
 
 # Base image
-FROM ubuntu:22.04 AS builder
+FROM registry.access.redhat.com/ubi9/ubi:9.4-1214.1729773476 AS builder
 
-# CockroachDB version
-ARG CRDB_VER=24.3.10
-ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CockroachDB/${CRDB_VER}
+ARG CRDB_VER=24.3.14
+ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/refs/heads/master/CockroachDB/${CRDB_VER}
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-RUN apt-get update \
-&& apt-get install -y sudo wget \
-&& useradd -m build_user \
-&& usermod -aG sudo build_user \
+RUN dnf install wget sudo -y
+
+# Install basic build tools and dependencies
+RUN dnf install -y wget gcc make m4 autoconf automake libtool gettext \
+    diffutils findutils
+
+# Build and install flex from source
+RUN cd /tmp \
+    && wget https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz \
+    && tar -xzf flex-2.6.4.tar.gz \
+    && cd flex-2.6.4 \
+    && ./configure --prefix=/usr \
+    && make -j$(nproc) \
+    && make install \
+    && cd / && rm -rf /tmp/flex*
+
+# Build and install bison from source
+RUN cd /tmp \
+    && wget http://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.gz \
+    && tar -xzf bison-3.8.2.tar.gz \
+    && cd bison-3.8.2 \
+    && ./configure --prefix=/usr MAKEINFO=true \
+    && make -j$(nproc) MAKEINFO=true \
+    && make install \
+    && cd / && rm -rf /tmp/bison*
+
+RUN useradd -m build_user \
+&& usermod -aG wheel build_user \
 # disable sudo password
-&& echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+&& echo '%wheel ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # CockroachDB dev script cannot be run by root user
 USER build_user
@@ -41,21 +64,19 @@ WORKDIR $SOURCE_ROOT
 ENV USER=build_user
 RUN cd $SOURCE_ROOT \
 && wget $PATCH_URL/build_crdb.sh \
+&& sed -i 's/\b\(bison\)\b//g' build_crdb.sh \
 && bash build_crdb.sh -y
 
 # Build a fresh image without all the build requirements
-FROM ubuntu:22.04
+FROM registry.access.redhat.com/ubi9/ubi:9.4-1214.1729773476
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV PATH=/usr/local/go/bin:/cockroach:$PATH
 
-
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    tzdata wget curl hostname sudo cmake gcc g++ libkeyutils-dev && \
-    mkdir -p /cockroach \
+RUN dnf install sudo tzdata hostname tar wget cmake gcc-c++ keyutils-libs-devel -y \
+    && mkdir -p /cockroach \
     && mkdir -p /usr/local/lib/cockroach \
     && mkdir -p /docker-entrypoint-initdb.d
 
@@ -66,7 +87,7 @@ RUN wget https://ftp.samba.org/pub/cwrap/resolv_wrapper-1.1.8.tar.gz \
 && make \
 && sudo make install
 
-RUN wget -O /cockroach/cockroach.sh https://raw.githubusercontent.com/cockroachdb/cockroach/v24.3.10/build/deploy/cockroach.sh
+RUN wget -O /cockroach/cockroach.sh https://raw.githubusercontent.com/cockroachdb/cockroach/v24.3.14/build/deploy/cockroach.sh
 
 COPY --from=builder /usr/local/bin/cockroach  /cockroach/
 COPY --from=builder /usr/local/lib/cockroach/libgeos.so /usr/local/lib/cockroach/
