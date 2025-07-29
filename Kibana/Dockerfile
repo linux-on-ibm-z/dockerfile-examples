@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 8.17.3 ############################################
+###################################### Dockerfile for Kibana version 9.0.2 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -34,9 +34,9 @@
 # Build stage 0 `builder`:
 # Build Kibana artifact
 ################################################################################
-FROM ubuntu:22.04 AS builder
+FROM redhat/ubi9-minimal:latest AS builder
 
-ARG KIBANA_VER=8.17.3
+ARG KIBANA_VER=9.0.2
 ARG NODE_JS_VERSION=20.18.2
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -47,12 +47,8 @@ ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x
 ENV PATH=/usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x/bin:/usr/share/kibana/bin:$JAVA_HOME/bin:$SOURCE_ROOT/bazel/output/:$PATH
 ENV NODE_OPTIONS="--max_old_space_size=4096"
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -yq \
-    sudo \
-    git \
-    tzdata \
-    curl \
-  && useradd -s /bin/bash -d /home/nonroot/ -m -G sudo nonroot \
+RUN microdnf install -y findutils tar gzip sudo dnf which \
+  && useradd -s /bin/bash -d /home/nonroot/ -m -G wheel nonroot \
   && echo "nonroot ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Kibana cannot be built as root
@@ -93,19 +89,17 @@ RUN mkdir -p /usr/share/fonts/local && \
 # Copy kibana from stage 0
 # Add entrypoint
 ################################################################################
-FROM ubuntu:22.04
+FROM redhat/ubi9-minimal:latest
 EXPOSE 5601
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 RUN for iter in {1..10}; do \
-      export DEBIAN_FRONTEND=noninteractive && \
-      apt-get update  && \
-      apt-get upgrade -y  && \
-      apt-get install -y --no-install-recommends \
-      fontconfig fonts-liberation libnss3 curl ca-certificates && \
-      apt-get clean && \
-      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \      sleep 10; \
+      microdnf update --setopt=tsflags=nodocs -y && \
+      microdnf install --setopt=tsflags=nodocs -y \
+      fontconfig liberation-fonts-common freetype shadow-utils nss findutils && \
+      microdnf clean all && exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && \
+      sleep 10; \
     done; \
     (exit $exit_code)
 
@@ -146,12 +140,12 @@ LABEL org.label-schema.license="Elastic License" \
       org.label-schema.name="Kibana" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.vcs-url="https://github.com/elastic/kibana" \
-      org.label-schema.version="8.17.3-SNAPSHOT" \
+      org.label-schema.version="9.0.2-SNAPSHOT" \
       org.opencontainers.image.documentation="https://www.elastic.co/guide/en/kibana/reference/index.html" \
       org.opencontainers.image.licenses="Elastic License" \
       org.opencontainers.image.source="https://github.com/elastic/kibana" \
       org.opencontainers.image.title="Kibana" \
-      org.opencontainers.image.version="8.17.3-SNAPSHOT"
+      org.opencontainers.image.version="9.0.2-SNAPSHOT"
 
 ENTRYPOINT ["/bin/tini", "--"]
 
