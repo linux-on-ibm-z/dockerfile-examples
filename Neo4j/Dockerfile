@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2025.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 5.26.5 ##################################
+########## Dockerfile for Neo4j version 5.26.9 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -18,14 +18,14 @@
 ##################################################################################
 
 FROM ubuntu:22.04 AS builder
-ARG NEO4J_VER=5.26.5
+ARG NEO4J_VER=5.26.9
 
 ENV SOURCE_ROOT=/tmp
 ENV MAVEN_OPTS="-Xmx2048m -Xss8m"
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-s390x
 ENV PATH=$JAVA_HOME/bin:$SOURCE_ROOT/apache-maven-3.9.9/bin:$PATH
 
-COPY neo4j-"${NEO4J_VER}".patch $SOURCE_ROOT/neo4j-"${NEO4J_VER}".patch
+COPY neo4j.patch $SOURCE_ROOT/neo4j.patch
 
 RUN apt update \
   && DEBIAN_FRONTEND=noninteractive apt install -y openjdk-17-jdk git wget tar \
@@ -34,7 +34,7 @@ RUN apt update \
   && tar -zxf apache-maven-3.9.9-bin.tar.gz \
   && git clone --depth 1 -b "${NEO4J_VER}" https://github.com/neo4j/neo4j.git \
   && cd neo4j \
-  && git apply $SOURCE_ROOT/neo4j-"${NEO4J_VER}".patch \
+  && git apply $SOURCE_ROOT/neo4j.patch \
   && mvn spotless:apply -B -V \
   && mvn clean install -B -V -DskipTests
 
@@ -52,7 +52,7 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}" \
     NEO4J_EDITION=community \
     NEO4J_HOME="/var/lib/neo4j" \
     LANG=C.UTF-8
-ARG NEO4J_VER=5.26.5
+ARG NEO4J_VER=5.26.9
 
 RUN addgroup --gid 7474 --system neo4j && adduser --uid 7474 --system --no-create-home --home "${NEO4J_HOME}" --ingroup neo4j neo4j
 
@@ -62,7 +62,7 @@ RUN apt update \
     && apt-get install -y curl gcc git jq make procps tini wget \
     && mv /var/lib/neo4j-* "${NEO4J_HOME}" \
     && wget https://repo1.maven.org/maven2/org/neo4j/client/neo4j-browser/5.24.0/neo4j-browser-5.24.0.jar -P "${NEO4J_HOME}"/lib \
-    && wget https://repo1.maven.org/maven2/org/neo4j/procedure/apoc-core/"${NEO4J_VER}"/apoc-core-"${NEO4J_VER}"-core.jar -P "${NEO4J_HOME}"/labs \
+    && wget https://repo1.maven.org/maven2/org/neo4j/procedure/apoc-core/5.26.5/apoc-core-5.26.5-core.jar -P "${NEO4J_HOME}"/labs \
     && sed -i 's/Package Type:.*/Package Type: docker bullseye/' $NEO4J_HOME/packaging_info \
     && mkdir -p /startup \
     && wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/bullseye/community/local-package/docker-entrypoint.sh -P /startup \
