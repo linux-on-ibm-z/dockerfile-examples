@@ -2,7 +2,7 @@
 # Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 12.0.2 ############################################
+############################ Dockerfile for Grafana 12.1.0 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -18,7 +18,7 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=12.0.2
+ARG GRAFANA_VERSION=12.1.0
 
 ARG BASE_IMAGE=alpine:3.21
 ARG GO_IMAGE=golang:1.24.4-alpine
@@ -55,13 +55,7 @@ WORKDIR /tmp/grafana
 
 COPY --from=go-src-builder /tmp/grafana/go.* ./
 COPY --from=go-src-builder /tmp/grafana/.bingo .bingo
-COPY --from=go-src-builder /tmp/grafana/.citools/bra .citools/bra
-COPY --from=go-src-builder /tmp/grafana/.citools/cue .citools/cue
-COPY --from=go-src-builder /tmp/grafana/.citools/cog .citools/cog
-COPY --from=go-src-builder /tmp/grafana/.citools/lefthook .citools/lefthook
-COPY --from=go-src-builder /tmp/grafana/.citools/jb .citools/jb
-COPY --from=go-src-builder /tmp/grafana/.citools/golangci-lint .citools/golangci-lint
-COPY --from=go-src-builder /tmp/grafana/.citools/swagger .citools/swagger
+COPY --from=go-src-builder /tmp/grafana/.citools .citools
 
 # Include vendored dependencies
 COPY --from=go-src-builder /tmp/grafana/pkg/util/xorm/go.* pkg/util/xorm/
@@ -77,6 +71,7 @@ COPY --from=go-src-builder /tmp/grafana/pkg/semconv/go.* pkg/semconv/
 COPY --from=go-src-builder /tmp/grafana/apps/playlist apps/playlist
 COPY --from=go-src-builder /tmp/grafana/apps/dashboard apps/dashboard
 COPY --from=go-src-builder /tmp/grafana/apps/folder apps/folder
+COPY --from=go-src-builder /tmp/grafana/apps/iam apps/iam
 COPY --from=go-src-builder /tmp/grafana/pkg/apis/secret pkg/apis/secret
 COPY --from=go-src-builder /tmp/grafana/pkg/aggregator pkg/aggregator
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore pkg/storage/unified/apistore
@@ -140,7 +135,8 @@ FROM ${JS_SRC} as js-src
 # Final stage
 FROM ${BASE_IMAGE}
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
 ARG GF_UID="472"
 ARG GF_GID="0"
