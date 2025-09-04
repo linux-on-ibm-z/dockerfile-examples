@@ -27,13 +27,14 @@
 
 FROM s390x/ubuntu:22.04 as builder
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+# The author
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
 ENV SOURCE_ROOT=/mysql-source
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR $SOURCE_ROOT
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.4.5/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.4.6/patch/"
 
 RUN apt-get update \
     && apt-get install -y curl wget tar bison cmake gcc g++ git hostname libncurses-dev libssl-dev make openssl \
@@ -43,9 +44,9 @@ RUN apt-get update \
     libnuma-dev libmecab-dev libkrb5-dev libfido2-dev \
     libprotoc-dev libprotobuf-c-dev libprotobuf-dev protobuf-c-compiler protobuf-compiler \
     && cd $SOURCE_ROOT \
-    && wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.5.tar.gz \
-    && tar xf mysql-8.4.5.tar.gz --strip-components=1 \
-    && rm -f mysql-8.4.5.tar.gz \
+    && wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.6.tar.gz \
+    && tar xf mysql-8.4.6.tar.gz --strip-components=1 \
+    && rm -f mysql-8.4.6.tar.gz \
     && curl -sSL ${PATCH_URL}/mt-asm.patch | git apply - \
     && curl -sSL ${PATCH_URL}/NdbHW.patch | git apply - \
     && curl -sSL ${PATCH_URL}/router-test.patch | git apply - \
@@ -54,7 +55,7 @@ RUN apt-get update \
     && cmake .. -DWITH_SSL=system -DWITH_PROTOBUF=system -DWITH_KERBEROS=system -DWITH_FIDO=system -DBUILD_CONFIG=mysql_release -DDEB_CODENAME=jammy -DDEB_ID=ubuntu -DDEB_RELEASE=22.04 \
     && sed -i '54i \\t\t-DWITH_AUTHENTICATION_CLIENT_PLUGINS=ON \\' debian/rules \
     && sed -i 's/make test-unit/@echo "skipping tests"/' debian/rules \
-    && sed -i 's/icudt73l/icudt73b/' debian/mysql-community-server-core.install \
+    && sed -i 's/icudt77l/icudt77b/' debian/mysql-community-server-core.install \
     && cd ../ && ln -s build/debian debian \
     && debuild -us -uc -b
 
