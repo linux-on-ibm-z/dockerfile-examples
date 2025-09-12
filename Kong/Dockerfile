@@ -80,7 +80,6 @@ ENV PATH="${JAVA_HOME}/bin:/usr/local/lib:${PATH}"
 
 RUN wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Kong/${KONG_VERSION}/build_kong.sh && \
     chmod +x build_kong.sh && \
-    sed -i '41,47d' build_kong.sh && \
     echo "export GITHUB_TOKEN=${GITHUB_TOKEN}" >> /etc/environment && \
     bash ./build_kong.sh -y
 
