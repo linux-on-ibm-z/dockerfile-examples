@@ -1,12 +1,20 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-if [ "${1:0:1}" = '-' ]; then
-    set -- influxd "$@"
+args=("${@}")
+
+if [[ "${args[0]:-}" == serve ]] ; then
+    args=(influxdb3 "${args[@]}")
 fi
 
-if [ "$1" = 'influxd' ]; then
-	/init-influxdb.sh "${@:2}"
+if [[ "${args[0]:-}" =~ ^- ]] ; then
+    args=(influxdb3 serve "${args[@]}")
 fi
 
-exec "$@"
+if [[ "${args[0]:-}" == influxdb3 ]] ; then
+    for i in "${!args[@]}"; do
+        args[i]="$(envsubst <<<"${args[i]}")"
+    done
+fi
+
+exec "${args[@]}"
