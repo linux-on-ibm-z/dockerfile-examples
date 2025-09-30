@@ -25,10 +25,10 @@ RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
 FROM s390x/ubuntu:22.04
 
-ARG LOGSTASH_VER=9.1.2
+ARG LOGSTASH_VER=9.1.4
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
 ENV LS_JAVA_HOME=/opt/temurin21
 # Install Dependencies
