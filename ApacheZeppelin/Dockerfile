@@ -79,7 +79,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     #downgraded cython because of decpricated conditional compilation. Version should be changes to latest after grpcio community fix it.
     python -m pip install -q Cython==0.29.33 && \
     python -m pip install -q setuptools==59.5.0 && \
-    GRPC_PYTHON_BUILD_WITH_CYTHON=1 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 python -m pip install -q grpcio && \
+    GRPC_PYTHON_BUILD_WITH_CYTHON=1 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 python -m pip install -q grpcio==1.75.0 && \
     python -m pip install setuptools==68.2.2 && \
     python -m pip install -q pybind11 && \
     python -m pip install -q 'numpy==1.*' && \
