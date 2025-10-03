@@ -66,6 +66,7 @@ RUN \
     mkdir -p /var/lib/influxdb3 \
              /usr/lib/influxdb3 \
              /plugins && \
+    chmod +x /tmp/fetch-python-standalone.bash && \
     /tmp/fetch-python-standalone.bash /influxdb3/python-artifacts "${PBS_DATE}" "${PBS_VERSION}" && \
     tar -C /influxdb3/python-artifacts -zxf /influxdb3/python-artifacts/all.tar.gz "./s390x-unknown-linux-gnu" && \
     sed -i 's#tmp/workspace#influxdb3#' "/influxdb3/python-artifacts/s390x-unknown-linux-gnu/pyo3_config_file.txt" && \
@@ -104,6 +105,7 @@ RUN \
               /root/.rustup
 
 COPY entrypoint.sh /usr/bin/entrypoint.sh
+RUN chmod +x /usr/bin/entrypoint.sh
 
 USER influxdb3
 RUN mkdir ~/.influxdb3
