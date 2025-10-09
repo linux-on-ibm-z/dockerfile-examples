@@ -2,7 +2,7 @@
 # Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 12.1.0 ############################################
+############################ Dockerfile for Grafana 12.2.0 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -18,10 +18,10 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=12.1.0
+ARG GRAFANA_VERSION=12.2.0
 
 ARG BASE_IMAGE=alpine:3.21
-ARG GO_IMAGE=golang:1.24.4-alpine
+ARG GO_IMAGE=golang:1.24.6-alpine
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
@@ -41,7 +41,6 @@ ARG COMMIT_SHA=""
 ARG BUILD_BRANCH=""
 ARG GO_BUILD_TAGS="oss"
 ARG WIRE_TAGS="oss"
-ARG BINGO="true"
 
 RUN if grep -i -q alpine /etc/issue; then \
       apk add --no-cache \
@@ -54,39 +53,40 @@ RUN if grep -i -q alpine /etc/issue; then \
 WORKDIR /tmp/grafana
 
 COPY --from=go-src-builder /tmp/grafana/go.* ./
-COPY --from=go-src-builder /tmp/grafana/.bingo .bingo
 COPY --from=go-src-builder /tmp/grafana/.citools .citools
 
 # Include vendored dependencies
-COPY --from=go-src-builder /tmp/grafana/pkg/util/xorm/go.* pkg/util/xorm/
-COPY --from=go-src-builder /tmp/grafana/pkg/apiserver/go.* pkg/apiserver/
-COPY --from=go-src-builder /tmp/grafana/pkg/apimachinery/go.* pkg/apimachinery/
-COPY --from=go-src-builder /tmp/grafana/pkg/build/go.* pkg/build/
-COPY --from=go-src-builder /tmp/grafana/pkg/build/wire/go.* pkg/build/wire/
-COPY --from=go-src-builder /tmp/grafana/pkg/promlib/go.* pkg/promlib/
-COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resource/go.* pkg/storage/unified/resource/
-COPY --from=go-src-builder /tmp/grafana/pkg/semconv/go.* pkg/semconv/
-
-# Fix for package dependencies
-COPY --from=go-src-builder /tmp/grafana/apps/playlist apps/playlist
-COPY --from=go-src-builder /tmp/grafana/apps/dashboard apps/dashboard
-COPY --from=go-src-builder /tmp/grafana/apps/folder apps/folder
-COPY --from=go-src-builder /tmp/grafana/apps/iam apps/iam
-COPY --from=go-src-builder /tmp/grafana/pkg/apis/secret pkg/apis/secret
-COPY --from=go-src-builder /tmp/grafana/pkg/aggregator pkg/aggregator
+COPY --from=go-src-builder /tmp/grafana/pkg/util/xorm pkg/util/xorm
+COPY --from=go-src-builder /tmp/grafana/pkg/apiserver pkg/apiserver
+COPY --from=go-src-builder /tmp/grafana/pkg/apimachinery pkg/apimachinery
+COPY --from=go-src-builder /tmp/grafana/pkg/build pkg/build
+COPY --from=go-src-builder /tmp/grafana/pkg/build/wire pkg/build/wire
+COPY --from=go-src-builder /tmp/grafana/pkg/promlib pkg/promlib
+COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resource pkg/storage/unified/resource
+COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resourcepb pkg/storage/unified/resourcepb
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore pkg/storage/unified/apistore
-COPY --from=go-src-builder /tmp/grafana/apps/alerting apps/alerting
+COPY --from=go-src-builder /tmp/grafana/pkg/semconv pkg/semconv
+COPY --from=go-src-builder /tmp/grafana/pkg/aggregator pkg/aggregator
+COPY --from=go-src-builder /tmp/grafana/apps/playlist apps/playlist
+COPY --from=go-src-builder /tmp/grafana/apps/plugins apps/plugins
+COPY --from=go-src-builder /tmp/grafana/apps/shorturl apps/shorturl
+COPY --from=go-src-builder /tmp/grafana/apps/preferences apps/preferences
+COPY --from=go-src-builder /tmp/grafana/apps/provisioning apps/provisioning
+COPY --from=go-src-builder /tmp/grafana/apps/secret apps/secret
 COPY --from=go-src-builder /tmp/grafana/apps/investigations apps/investigations
 COPY --from=go-src-builder /tmp/grafana/apps/advisor apps/advisor
+COPY --from=go-src-builder /tmp/grafana/apps/dashboard apps/dashboard
+COPY --from=go-src-builder /tmp/grafana/apps/folder apps/folder
+COPY --from=go-src-builder /tmp/grafana/apps/preferences apps/preferences
+COPY --from=go-src-builder /tmp/grafana/apps/iam apps/iam
+COPY --from=go-src-builder /tmp/grafana/apps apps
 COPY --from=go-src-builder /tmp/grafana/kindsv2 kindsv2
+COPY --from=go-src-builder /tmp/grafana/apps/alerting/notifications apps/alerting/notifications
+COPY --from=go-src-builder /tmp/grafana/apps/alerting/alertenrichment apps/alerting/alertenrichment
 COPY --from=go-src-builder /tmp/grafana/pkg/codegen pkg/codegen
 COPY --from=go-src-builder /tmp/grafana/pkg/plugins/codegen pkg/plugins/codegen
 
 RUN go mod download
-RUN if [[ "$BINGO" = "true" ]]; then \
-      go install github.com/bwplotka/bingo@latest && \
-      bingo get -v; \
-    fi
 
 COPY --from=go-src-builder /tmp/grafana/embed.go /tmp/grafana/Makefile /tmp/grafana/build.go /tmp/grafana/package.json ./
 COPY --from=go-src-builder /tmp/grafana/cue.mod cue.mod
