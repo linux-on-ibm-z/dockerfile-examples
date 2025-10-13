@@ -38,7 +38,7 @@ WORKDIR $SOURCE_ROOT
 # Install dependencies
 RUN apt-get update \
         && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y git g++ \
-        linux-headers-generic clang llvm cmake libelf-dev pkg-config kmod rpm \
+        linux-headers-generic clang llvm cmake libelf-dev pkg-config kmod rpm libssl-dev \
 	&& mkdir -p /lib/modules/$(uname -r) \
         && version=$(ls /usr/src/ | grep generic | tail -1) \
         && ln -s /usr/src/$version /lib/modules/$(uname -r)/build \
