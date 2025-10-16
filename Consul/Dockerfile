@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for Consul - 1.21.3 ########################
+###################### Dockerfile for Consul - 1.21.5 ########################
 #
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter
@@ -28,8 +28,8 @@ FROM s390x/ubuntu:22.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG CONSUL_VERSION=1.21.3
-ARG GO_VERSION=1.23.10
+ARG CONSUL_VERSION=1.21.5
+ARG GO_VERSION=1.25.0
 ENV TERM=xterm
 
 # Set GO environment variables
@@ -111,7 +111,7 @@ EXPOSE 8500 8600 8600/udp
 # Consul doesn't need root privileges so we run it as the consul user from the
 # entry point script. The entry point script also uses dumb-init as the top-level
 # process to reap any zombie processes created by Consul sub-processes.
-RUN wget -O /usr/local/bin/docker-entrypoint.sh https://raw.githubusercontent.com/hashicorp/consul/v1.21.3/.release/docker/docker-entrypoint.sh
+RUN wget -O /usr/local/bin/docker-entrypoint.sh https://raw.githubusercontent.com/hashicorp/consul/v1.21.5/.release/docker/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
