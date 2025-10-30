@@ -68,7 +68,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     apt-get install -y libblas-dev libatlas-base-dev  liblapack-dev libopenblas-dev && \
     # font, image
     apt-get install -y libpng-dev libfreetype6-dev libxft-dev libjpeg-dev && \
-    python -m pip install --upgrade pip && \
+    python -m pip install --upgrade pip==25.2 && \
     # for tkinter
     apt-get install -y python3-tk libxml2-dev libxslt-dev zlib1g-dev && \
     apt-get install -y python3-ipykernel && \
