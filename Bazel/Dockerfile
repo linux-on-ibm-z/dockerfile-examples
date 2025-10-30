@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2024, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for Bazel version 8.4.1 ####################################
+#################################### Dockerfile for Bazel version 8.4.2 ####################################
 #
 # To build a Bazel image from the directory containing this Dockerfile:
 # (assuming that the file is named Dockerfile):
@@ -27,14 +27,14 @@ FROM base_image AS builder
 
 RUN mkdir build \
 && cd build \
-&& curl -o install_bazel.sh https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/8.4.1/build_bazel.sh \
+&& curl -o install_bazel.sh https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Bazel/8.4.2/build_bazel.sh \
 && chmod +x install_bazel.sh \
 && ./install_bazel.sh -y \
 && chmod +x /var/bazel/build/bazel/bazel-bin/src/bazel
 
 FROM base_image
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
 RUN useradd --system --create-home --home-dir=/home/ubuntu --shell=/bin/bash --gid=root --groups=sudo --uid=1000 ubuntu
 USER ubuntu
