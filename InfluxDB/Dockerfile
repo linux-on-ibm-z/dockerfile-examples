@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2025
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for InfluxDB 3.3.0 ############################s
+#################### Dockerfile for InfluxDB 3.4.0 ############################s
 #
 # Builds InfluxDB
 #
@@ -33,9 +33,9 @@
 FROM ubuntu:24.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
-ARG INFLUXDB_VERSION=3.3.0
+ARG INFLUXDB_VERSION=3.4.0
 ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/InfluxDB/${INFLUXDB_VERSION}/patch"
 
 RUN mkdir /influxdb3
@@ -74,7 +74,7 @@ RUN \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.88 && \
     . $HOME/.cargo/env && \
     git clone https://github.com/apache/arrow-rs.git && \
-    cd arrow-rs && git checkout eae176c21b1ef915227294e8a8a201b6f266031a && \
+    cd arrow-rs && git checkout 55.2.0 && \
     curl -sSL ${PATCH_URL}/arrow.patch | patch -p1 || error "arrow.patch" && cd .. && \
     git clone --depth 1 -b v$INFLUXDB_VERSION https://github.com/influxdata/influxdb.git && \
     cd influxdb && curl -sSL ${PATCH_URL}/influxdb.patch | patch -p1 || error "influxdb.patch" && \
