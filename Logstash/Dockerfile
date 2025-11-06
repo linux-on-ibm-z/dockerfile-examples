@@ -25,10 +25,10 @@ RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
 FROM s390x/ubuntu:22.04
 
-ARG LOGSTASH_VER=9.1.4
+ARG LOGSTASH_VER=9.2.0
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 ENV LS_JAVA_HOME=/opt/temurin21
 # Install Dependencies
@@ -44,7 +44,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 # get Temurin 21
     mkdir /opt/temurin21 && \
     cd /opt/temurin21 && \
-    wget -O temurin21.tar.gz https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.5%2B11/OpenJDK21U-jdk_s390x_linux_hotspot_21.0.5_11.tar.gz && \
+    wget -O temurin21.tar.gz https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jdk_s390x_linux_hotspot_21.0.9_10.tar.gz && \
     tar -zxf temurin21.tar.gz -C /opt/temurin21 --strip-components 1 && \
     rm -rf temurin21.tar.gz && \
 # Add Logstash itself.
