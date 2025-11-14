@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 9.0.2 ############################################
+###################################### Dockerfile for Kibana version 9.1.3 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -36,7 +36,7 @@
 ################################################################################
 FROM redhat/ubi9-minimal:latest AS builder
 
-ARG KIBANA_VER=9.0.2
+ARG KIBANA_VER=9.1.3
 ARG NODE_JS_VERSION=20.18.2
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -92,8 +92,6 @@ RUN mkdir -p /usr/share/fonts/local && \
 FROM redhat/ubi9-minimal:latest
 EXPOSE 5601
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-
 RUN for iter in {1..10}; do \
       microdnf update --setopt=tsflags=nodocs -y && \
       microdnf install --setopt=tsflags=nodocs -y \
@@ -140,12 +138,21 @@ LABEL org.label-schema.license="Elastic License" \
       org.label-schema.name="Kibana" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.vcs-url="https://github.com/elastic/kibana" \
-      org.label-schema.version="9.0.2-SNAPSHOT" \
+      org.label-schema.version="9.1.3-SNAPSHOT" \
       org.opencontainers.image.documentation="https://www.elastic.co/guide/en/kibana/reference/index.html" \
       org.opencontainers.image.licenses="Elastic License" \
       org.opencontainers.image.source="https://github.com/elastic/kibana" \
       org.opencontainers.image.title="Kibana" \
-      org.opencontainers.image.version="9.0.2-SNAPSHOT"
+      org.opencontainers.image.version="9.1.3-SNAPSHOT"
+
+LABEL name="Kibana" \
+  maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)" \
+  version="9.1.3" \
+  release="1" \
+  summary="Kibana" \
+  description="Your window into the Elastic Stack."
+
+RUN mkdir /licenses && ln LICENSE.txt /licenses/LICENSE
 
 ENTRYPOINT ["/bin/tini", "--"]
 
