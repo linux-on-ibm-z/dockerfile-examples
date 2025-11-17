@@ -34,7 +34,7 @@
 # Build stage 0 `builder`:
 # Build Kibana artifact
 ################################################################################
-FROM redhat/ubi9-minimal:latest AS builder
+FROM redhat/ubi9-minimal:9.6 AS builder
 
 ARG KIBANA_VER=9.1.3
 ARG NODE_JS_VERSION=20.18.2
