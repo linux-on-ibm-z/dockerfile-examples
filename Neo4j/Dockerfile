@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2025.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 5.26.9 ##################################
+########## Dockerfile for Neo4j version 5.26.15 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -18,7 +18,7 @@
 ##################################################################################
 
 FROM ubuntu:22.04 AS builder
-ARG NEO4J_VER=5.26.9
+ARG NEO4J_VER=5.26.15
 
 ENV SOURCE_ROOT=/tmp
 ENV MAVEN_OPTS="-Xmx2048m -Xss8m"
@@ -38,7 +38,7 @@ RUN apt update \
   && mvn spotless:apply -B -V \
   && mvn clean install -B -V -DskipTests
 
-RUN tar zxf /tmp/neo4j/packaging/standalone/target/neo4j-community-"${NEO4J_VER}"-unix.tar.gz -C /tmp
+RUN tar zxf /tmp/neo4j/packaging/standalone/target/neo4j-community-"${NEO4J_VER}"-SNAPSHOT-unix.tar.gz -C /tmp
 
 #Base Image
 FROM debian:bookworm-slim
@@ -52,11 +52,11 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}" \
     NEO4J_EDITION=community \
     NEO4J_HOME="/var/lib/neo4j" \
     LANG=C.UTF-8
-ARG NEO4J_VER=5.26.9
+ARG NEO4J_VER=5.26.15
 
 RUN addgroup --gid 7474 --system neo4j && adduser --uid 7474 --system --no-create-home --home "${NEO4J_HOME}" --ingroup neo4j neo4j
 
-COPY --from=builder /tmp/neo4j-community-$NEO4J_VER /var/lib/neo4j-community-"${NEO4J_VER}"
+COPY --from=builder /tmp/neo4j-community-$NEO4J_VER-SNAPSHOT /var/lib/neo4j-community-"${NEO4J_VER}"
 
 RUN apt update \
     && apt-get install -y curl gcc git jq make procps tini wget \
