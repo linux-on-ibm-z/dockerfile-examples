@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Geode version 1.15.1 #####################
+########## Dockerfile for Apache Geode version 1.15.2 #####################
 #
 # This Dockerfile builds a basic installation of Apache Geode.
 #
@@ -28,7 +28,7 @@ FROM s390x/ubuntu:22.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG GEODE_VER=1.15.1
+ARG GEODE_VER=1.15.2
 ARG file=apache-geode-$GEODE_VER.tgz
 
 ENV WORKDIR=/root
