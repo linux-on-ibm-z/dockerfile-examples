@@ -33,7 +33,7 @@ ENV SOURCE_ROOT=/mysql-source
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR $SOURCE_ROOT
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/9.4.0/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/9.5.0/patch/"
 
 
 RUN apt-get update \
@@ -42,10 +42,11 @@ RUN apt-get update \
     devscripts lintian debhelper po-debconf psmisc elfutils dh-apparmor \
     libldap-dev libldap2-dev libsasl2-dev libsasl2-modules-gssapi-mit libudev-dev libaio-dev zlib1g-dev libnuma-dev libmecab-dev libkrb5-dev libfido2-dev \
     libprotoc-dev libprotobuf-c-dev libprotobuf-dev protobuf-c-compiler protobuf-compiler \
+    libcurl4-openssl-dev patchelf build-essential \
     && cd $SOURCE_ROOT \
-    && wget https://dev.mysql.com/get/Downloads/MySQL-9.4.0/mysql-9.4.0.tar.gz \
-    && tar xf mysql-9.4.0.tar.gz --strip-components=1 \
-    && rm -f mysql-9.4.0.tar.gz \
+    && wget https://dev.mysql.com/get/Downloads/MySQL-9.5.0/mysql-9.5.0.tar.gz \
+    && tar xf mysql-9.5.0.tar.gz --strip-components=1 \
+    && rm -f mysql-9.5.0.tar.gz \
     && curl -sSL ${PATCH_URL}/mt-asm.patch | git apply - \
     && curl -sSL ${PATCH_URL}/NdbHW.patch | git apply - \
     && curl -sSL ${PATCH_URL}/router-test.patch | git apply - \
@@ -56,7 +57,7 @@ RUN apt-get update \
     && sed -i 's/make test-unit/@echo "skipping tests"/' debian/rules \
     && sed -i 's/icudt77l/icudt77b/' debian/mysql-community-server-core.install \
     && cd ../ && ln -s build/debian debian \
-    && debuild -us -uc -b
+    && debuild -us -uc -b   
 
 # Base image
 FROM s390x/ubuntu:22.04
