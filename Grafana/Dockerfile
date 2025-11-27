@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 12.2.1 ############################################
+############################ Dockerfile for Grafana 12.3.0 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -17,7 +17,7 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=12.2.1
+ARG GRAFANA_VERSION=12.3.0
 
 ARG BASE_IMAGE=alpine:3.21
 ARG GO_IMAGE=golang:1.25.3-alpine
