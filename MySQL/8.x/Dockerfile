@@ -34,19 +34,19 @@ ENV SOURCE_ROOT=/mysql-source
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR $SOURCE_ROOT
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.4.6/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.4.7/patch/"
 
 RUN apt-get update \
-    && apt-get install -y curl wget tar bison cmake gcc g++ git hostname libncurses-dev libssl-dev make openssl \
+    && apt-get install -y libcurl4-openssl-dev patchelf curl wget tar bison cmake gcc g++ git hostname libncurses-dev libssl-dev make openssl \
     pkg-config gawk procps doxygen python-is-python3 net-tools libtirpc-dev libarchive-tools xz-utils \
     devscripts lintian debhelper po-debconf psmisc elfutils dh-apparmor \
     libldap-dev libldap2-dev libsasl2-dev libsasl2-modules-gssapi-mit libudev-dev libaio-dev zlib1g-dev \
     libnuma-dev libmecab-dev libkrb5-dev libfido2-dev \
     libprotoc-dev libprotobuf-c-dev libprotobuf-dev protobuf-c-compiler protobuf-compiler \
     && cd $SOURCE_ROOT \
-    && wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.6.tar.gz \
-    && tar xf mysql-8.4.6.tar.gz --strip-components=1 \
-    && rm -f mysql-8.4.6.tar.gz \
+    && wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.7.tar.gz \
+    && tar xf mysql-8.4.7.tar.gz --strip-components=1 \
+    && rm -f mysql-8.4.7.tar.gz \
     && curl -sSL ${PATCH_URL}/mt-asm.patch | git apply - \
     && curl -sSL ${PATCH_URL}/NdbHW.patch | git apply - \
     && curl -sSL ${PATCH_URL}/router-test.patch | git apply - \
