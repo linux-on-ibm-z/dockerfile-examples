@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2025
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for InfluxDB 3.4.0 ############################s
+#################### Dockerfile for InfluxDB 3.6.0 ############################s
 #
 # Builds InfluxDB
 #
@@ -35,7 +35,7 @@ FROM ubuntu:24.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
-ARG INFLUXDB_VERSION=3.4.0
+ARG INFLUXDB_VERSION=3.6.0
 ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/InfluxDB/${INFLUXDB_VERSION}/patch"
 
 RUN mkdir /influxdb3
