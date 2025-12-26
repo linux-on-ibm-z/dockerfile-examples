@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2024.
+# © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for cAdvisor 0.49.2 #################################
+######################## Dockerfile for cAdvisor 0.53.0 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -23,12 +23,12 @@
 ##########################################################################################
 
 # Base image
-FROM s390x/golang:1.22-alpine3.18 AS builder
+FROM s390x/golang:1.24-alpine3.21 AS builder
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
-ARG CADVISOR_VER=0.49.2
+ARG CADVISOR_VER=0.53.0
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
@@ -54,7 +54,7 @@ RUN apk update && apk add --no-cache \
  && apk del git
 
 # Multistage build
-FROM s390x/alpine:3.18
+FROM s390x/alpine:3.21
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 WORKDIR /root
@@ -70,4 +70,3 @@ HEALTHCHECK --interval=30s --timeout=3s \
 ENTRYPOINT ["/usr/bin/cadvisor", "-logtostderr"]
 
 # End of Dockerfile
-
