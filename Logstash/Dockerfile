@@ -25,7 +25,7 @@ RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
 
 FROM s390x/ubuntu:22.04
 
-ARG LOGSTASH_VER=9.2.0
+ARG LOGSTASH_VER=9.2.3
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
