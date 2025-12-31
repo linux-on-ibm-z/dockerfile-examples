@@ -2,7 +2,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
 #
-################# Dockerfile for RabbitMQ version 4.2.1 ################################
+################# Dockerfile for RabbitMQ version 4.2.2 ################################
 #
 # RabbitMQ is an open source message broker software (sometimes called message-oriented middleware)
 # that implements the Advanced Message Queuing Protocol (AMQP).
@@ -24,7 +24,7 @@
 # Base image
 FROM s390x/ubuntu:24.04 as builder
 
-ARG RABBITMQ_VER=4.2.1
+ARG RABBITMQ_VER=4.2.2
 ARG ERLANG_VERSION=27.3
 ARG ELIXIR_VERSION=1.18.3
 # The author
