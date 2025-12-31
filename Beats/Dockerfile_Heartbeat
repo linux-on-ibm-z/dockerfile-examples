@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2025.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Heartbeat 9.1.2 #############################
+#################### Dockerfile for Heartbeat 9.2.1 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -17,7 +17,7 @@ FROM ubuntu:22.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
-ARG BEATS_VER=9.1.2
+ARG BEATS_VER=9.2.1
 
 # Set environment variable
 ENV BEATNAME=heartbeat
@@ -63,6 +63,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     uuid-dev \
     xz-utils \
     zlib1g-dev \
+    iproute2 \
 # Install Python 3.11.4
  && cd $SOURCE_DIR \
  && wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz \
@@ -87,9 +88,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  && export PATH=$PATH:$HOME/.cargo/bin \
  && rustup toolchain install 1.76.0 \
  && rustup default 1.76.0 \
- && wget https://go.dev/dl/go1.24.5.linux-s390x.tar.gz \
- && chmod ugo+r go1.24.5.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.24.5.linux-s390x.tar.gz \
+ && wget https://go.dev/dl/go1.24.7.linux-s390x.tar.gz \
+ && chmod ugo+r go1.24.7.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.24.7.linux-s390x.tar.gz \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
@@ -117,7 +118,7 @@ RUN mkdir -p $BEATHOME \
 
 FROM ubuntu:22.04
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
 ENV ELASTIC_CONTAINER="true"
 ENV BEATNAME=heartbeat
