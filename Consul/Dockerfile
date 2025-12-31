@@ -67,7 +67,7 @@ RUN apt-get update &&  apt-get install -y \
 FROM s390x/alpine:3.22
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
 # Create a consul user and group first so the IDs get set the same way, even as
 # the rest of this may change over time.
