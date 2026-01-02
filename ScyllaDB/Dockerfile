@@ -57,7 +57,7 @@ RUN apt-get update \
 #######################################################################
   && cd "$SOURCE_ROOT" \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh /dev/stdin -y \
-  && cargo install cxxbridge-cmd --version 1.0.188 wasm-opt \
+  && cargo install cxxbridge-cmd --version 1.0.188 \
   && cargo install wasm-opt \
   && rustup target add wasm32-wasip1 \
 #######################################################################
