@@ -92,7 +92,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 # Install go and download beats source code
  && wget https://go.dev/dl/go1.24.7.linux-s390x.tar.gz \
  && chmod ugo+r go1.24.7.linux-s390x.tar.gz \
- && tar -C /usr/local -xzf go1.24.5.linux-s390x.tar.gz \
+ && tar -C /usr/local -xzf go1.24.7.linux-s390x.tar.gz \
  && setfacl -dm u::rwx,g::r,o::r $GOPATH \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
