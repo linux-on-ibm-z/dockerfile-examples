@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2018, 2025.
+# © Copyright IBM Corporation 2018, 2026.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 5.26.15 ##################################
+########## Dockerfile for Neo4j version 5.26.19 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -18,20 +18,20 @@
 ##################################################################################
 
 FROM ubuntu:22.04 AS builder
-ARG NEO4J_VER=5.26.15
+ARG NEO4J_VER=5.26.19
 
 ENV SOURCE_ROOT=/tmp
 ENV MAVEN_OPTS="-Xmx2048m -Xss8m"
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-s390x
-ENV PATH=$JAVA_HOME/bin:$SOURCE_ROOT/apache-maven-3.9.9/bin:$PATH
+ENV PATH=$JAVA_HOME/bin:$SOURCE_ROOT/apache-maven-3.9.12/bin:$PATH
 
 COPY neo4j.patch $SOURCE_ROOT/neo4j.patch
 
 RUN apt update \
   && DEBIAN_FRONTEND=noninteractive apt install -y openjdk-17-jdk git wget tar \
   && cd $SOURCE_ROOT \
-  && wget -q https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz \
-  && tar -zxf apache-maven-3.9.9-bin.tar.gz \
+  && wget -q https://archive.apache.org/dist/maven/maven-3/3.9.12/binaries/apache-maven-3.9.12-bin.tar.gz \
+  && tar -zxf apache-maven-3.9.12-bin.tar.gz \
   && git clone --depth 1 -b "${NEO4J_VER}" https://github.com/neo4j/neo4j.git \
   && cd neo4j \
   && git apply $SOURCE_ROOT/neo4j.patch \
@@ -52,7 +52,7 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}" \
     NEO4J_EDITION=community \
     NEO4J_HOME="/var/lib/neo4j" \
     LANG=C.UTF-8
-ARG NEO4J_VER=5.26.15
+ARG NEO4J_VER=5.26.19
 
 RUN addgroup --gid 7474 --system neo4j && adduser --uid 7474 --system --no-create-home --home "${NEO4J_HOME}" --ingroup neo4j neo4j
 

@@ -20,7 +20,7 @@ index 03f6a113005..30be08d4c91 100644
      void rememberToUpdateDocs() {
          final var defaultOut = System.out;
 diff --git a/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java b/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java
-index a83ef92110d..bb3b656cd7a 100644
+index a83ef92110d..74753f3318d 100644
 --- a/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java
 +++ b/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java
 @@ -46,7 +46,7 @@ public class LinuxNativeAccess implements NativeAccess {
@@ -46,25 +46,23 @@ index a83ef92110d..bb3b656cd7a 100644
 
      /**
 diff --git a/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java b/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java
-index 889070123af..a77cec9ba48 100644
+index 889070123af..f01f96d2067 100644
 --- a/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java
 +++ b/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java
-@@ -159,7 +159,12 @@ public final class UnsafeUtil {
+@@ -159,6 +159,11 @@ public final class UnsafeUtil {
              return Boolean.parseBoolean(alignmentProperty);
          }
 
--        try {
 +        String arch = System.getProperty("os.arch", "?");
 +        if (arch.equals("s390x")) {
 +            return findUnalignedMemoryAccessFromArch();
 +        }
 +
-+       try {
+         try {
              var bits = Class.forName("java.nio.Bits");
              var unaligned = bits.getDeclaredMethod("unaligned");
-             unaligned.setAccessible(true);
 diff --git a/pom.xml b/pom.xml
-index 3038ceb26f7..1d67b38a6f5 100644
+index 929d4d88823..4d18dad409b 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -93,6 +93,7 @@
