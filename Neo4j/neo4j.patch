@@ -1,5 +1,5 @@
 diff --git a/community/cypher-shell/cypher-shell/src/test/java/org/neo4j/shell/cli/CliArgHelperTest.java b/community/cypher-shell/cypher-shell/src/test/java/org/neo4j/shell/cli/CliArgHelperTest.java
-index 03f6a113005..30be08d4c91 100644
+index 03f6a113005..89dbbc587a6 100644
 --- a/community/cypher-shell/cypher-shell/src/test/java/org/neo4j/shell/cli/CliArgHelperTest.java
 +++ b/community/cypher-shell/cypher-shell/src/test/java/org/neo4j/shell/cli/CliArgHelperTest.java
 @@ -49,6 +49,7 @@ import java.util.logging.ConsoleHandler;
@@ -10,17 +10,16 @@ index 03f6a113005..30be08d4c91 100644
  import org.junit.jupiter.api.Test;
  import org.neo4j.shell.Environment;
  import org.neo4j.shell.parameter.ParameterService;
-@@ -531,7 +532,7 @@ class CliArgHelperTest extends LocaleDependentTestBase {
-         assertEquals(timeout, args.getIdleTimeout());
+@@ -532,6 +533,7 @@ class CliArgHelperTest extends LocaleDependentTestBase {
          assertEquals(delay, args.getIdleTimeoutDelay());
      }
--
+ 
 +    @Disabled("TODO formatting causing test to fail")
      @Test
      void rememberToUpdateDocs() {
          final var defaultOut = System.out;
 diff --git a/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java b/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java
-index a83ef92110d..bb3b656cd7a 100644
+index a83ef92110d..74753f3318d 100644
 --- a/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java
 +++ b/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java
 @@ -46,7 +46,7 @@ public class LinuxNativeAccess implements NativeAccess {
@@ -29,31 +28,31 @@ index a83ef92110d..bb3b656cd7a 100644
       */
 -    private static final int POSIX_FADV_DONTNEED = 4;
 +    private static final int POSIX_FADV_DONTNEED;
-
+ 
      private static final boolean NATIVE_ACCESS_AVAILABLE;
      private static final Throwable INITIALIZATION_FAILURE;
 @@ -64,6 +64,12 @@ public class LinuxNativeAccess implements NativeAccess {
          }
          NATIVE_ACCESS_AVAILABLE = available;
          INITIALIZATION_FAILURE = initFailure;
-+       // POSIX_FADV_DONTNEED == 4 on every arch except s390x
++	// POSIX_FADV_DONTNEED == 4 on every arch except s390x
 +        int posix_fadv_dontneed = 4;
 +        if ("s390x".equals(Platform.ARCH)) {
 +            posix_fadv_dontneed = 6;
 +        }
 +        POSIX_FADV_DONTNEED = posix_fadv_dontneed;
      }
-
+ 
      /**
 diff --git a/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java b/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java
-index 889070123af..f01f96d2067 100644
+index 889070123af..18cca788633 100644
 --- a/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java
 +++ b/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java
 @@ -159,6 +159,11 @@ public final class UnsafeUtil {
              return Boolean.parseBoolean(alignmentProperty);
          }
-
-+        String arch = System.getProperty("os.arch", "?");
+ 
++	String arch = System.getProperty("os.arch", "?");
 +        if (arch.equals("s390x")) {
 +            return findUnalignedMemoryAccessFromArch();
 +        }
