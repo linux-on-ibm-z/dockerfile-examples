@@ -81,9 +81,10 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     python -m pip install -q setuptools==59.5.0 && \
     GRPC_PYTHON_BUILD_WITH_CYTHON=1 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 python -m pip install -q grpcio==1.75.0 && \
     python -m pip install setuptools==68.2.2 && \
+    python -m pip install wheel && \
     python -m pip install -q pybind11 && \
     python -m pip install -q 'numpy==1.*' && \
-    python -m pip install -q 'pandas==1.3.*' && \
+    python -m pip install -q pandas==2.2.0 && \
     python -m pip install -q 'scipy==1.*' && \
     python -m pip install -q bkzep==0.6.1 && \
     python -m pip install -q hvplot && \
@@ -92,7 +93,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     python -m pip install -q 'ipython==7.*' && \
     python -m pip install -q 'ipykernel==5.*' && \
     python -m pip install -q 'jupyter_client==5.*' && \
-    python -m pip install -q 'bokeh==3.2.0' && \
+    python -m pip install -q 'bokeh==3.8.0' && \
     python -m pip install -q panel && \
     python -m pip install -q holoviews && \
     python -m pip install -q 'pyyaml==5.3.*' && \
