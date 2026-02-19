@@ -1,7 +1,7 @@
-# Copyright IBM Corporation 2025.
+# Copyright IBM Corporation 2025, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Cassandra version 4.1.9 #########
+########## Dockerfile for Cassandra version 4.1.10 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -22,7 +22,7 @@ FROM eclipse-temurin:11-jdk-focal as builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-ARG CASSANDRA_VER=4.1.9
+ARG CASSANDRA_VER=4.1.10
 
 ENV SOURCE_ROOT=/tmp/source \
     CASSANDRA_USE_JDK11=true
@@ -126,7 +126,7 @@ RUN set -eux; \
 
 # grab gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
-ENV GOSU_VERSION 1.16
+ENV GOSU_VERSION 1.19
 RUN set -eux; \
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
@@ -150,7 +150,7 @@ RUN set -eux; \
 ENV CASSANDRA_HOME /opt/cassandra
 ENV CASSANDRA_CONF /etc/cassandra
 ENV PATH $CASSANDRA_HOME/bin:$PATH
-ENV CASSANDRA_VERSION 4.1.9
+ENV CASSANDRA_VERSION 4.1.10
 
 
 RUN mkdir -p "$CASSANDRA_HOME";
