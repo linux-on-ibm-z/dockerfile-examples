@@ -98,6 +98,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  && cd $GOPATH/src/github.com/elastic  \
  && git clone -b v${BEATS_VER} https://github.com/elastic/beats.git  \
  && cd beats  \
+ && curl -sSL ${PATCH_URL}/beats.patch | git apply - || error "beats patch" \
 # Building auditbeat
  && cd $GOPATH/src/github.com/elastic/beats/${BEATNAME} \
  && make \
