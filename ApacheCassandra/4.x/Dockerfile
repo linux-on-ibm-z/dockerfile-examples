@@ -18,7 +18,7 @@
 #
 #################################################################################
 
-FROM eclipse-temurin:11-jdk-focal as builder
+FROM debian:bookworm-slim as builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -26,6 +26,13 @@ ARG CASSANDRA_VER=4.1.10
 
 ENV SOURCE_ROOT=/tmp/source \
     CASSANDRA_USE_JDK11=true
+
+# Set JAVA_HOME
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+# Copy Java 11 from Temurin for build stage
+COPY --from=eclipse-temurin:11-jdk $JAVA_HOME $JAVA_HOME
 
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -95,7 +102,7 @@ maven \
     && rm -rf /var/lib/apt/lists/*
 #End of builder stage    
 
-FROM eclipse-temurin:11-jre-focal
+FROM debian:bookworm-slim
 
 # explicitly set user/group IDs
 RUN set -eux; \
@@ -146,6 +153,11 @@ RUN set -eux; \
 	chmod +x /usr/local/bin/gosu; \
 	gosu --version; \
 	gosu nobody true
+
+ENV JAVA_HOME /opt/java/openjdk
+COPY --from=eclipse-temurin:11-jre $JAVA_HOME $JAVA_HOME
+ENV PATH $JAVA_HOME/bin:$PATH
+RUN java --version
 
 ENV CASSANDRA_HOME /opt/cassandra
 ENV CASSANDRA_CONF /etc/cassandra
