@@ -1,7 +1,7 @@
-# Copyright IBM Corporation 2017, 2025.
+# Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Cassandra version 5.0.5 #########
+########## Dockerfile for Cassandra version 5.0.6 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -18,14 +18,20 @@
 #
 #################################################################################
 
-FROM eclipse-temurin:17-jdk-focal as builder
+FROM debian:bookworm-slim as builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-ARG CASSANDRA_VER=5.0.5
+ARG CASSANDRA_VER=5.0.6
 
 ENV SOURCE_ROOT=/tmp/source \
     CASSANDRA_USE_JDK11=true
+# Set JAVA_HOME
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+# Copy Java 17 from Temurin for build stage
+COPY --from=eclipse-temurin:17-jdk $JAVA_HOME $JAVA_HOME
 
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -51,6 +57,8 @@ locales-all \
 unzip \
 python3-dev \
 maven \
+golang-go \
+cmake \
 # Build netty-tcnative
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
@@ -72,12 +80,13 @@ maven \
     && git checkout 2.4.1 \
     && git submodule update --init --recursive \
     && cd aws-lc \
+    && sed -i 's/-Wno-c11-extensions//g' CMakeLists.txt \
+    && sed -i 's/-Werror//g' CMakeLists.txt \
     && mkdir build \
     && cd build \
     && cmake -DCMAKE_BUILD_TYPE=Release \
-	-DTARGET_ARCH=s390x \
-	-DCMAKE_C_FLAGS="-Wno-string-compare" \
-	.. \
+      -DTARGET_ARCH=s390x \
+      .. \
     && make -j"$(nproc)" \
     && cd $SOURCE_ROOT/amazon-corretto-crypto-provider \
     && ./gradlew build -Pclassifier=linux-s390x -x test \
@@ -99,7 +108,6 @@ maven \
     && cd $SOURCE_ROOT \
     && git clone -b cassandra-$CASSANDRA_VER https://github.com/apache/cassandra.git \
     && cd cassandra \
-    && curl -o cassandra.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/cassandra.patch \
     && git apply --ignore-whitespace cassandra.patch \
     && ant \
 # Copy required libs
@@ -120,7 +128,7 @@ maven \
     && rm -rf /var/lib/apt/lists/*
 #End of builder stage    
 
-FROM eclipse-temurin:17-jre-focal
+FROM debian:bookworm-slim
 
 # explicitly set user/group IDs
 RUN set -eux; \
@@ -151,7 +159,7 @@ RUN set -eux; \
 
 # grab gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
-ENV GOSU_VERSION 1.16
+ENV GOSU_VERSION 1.19
 RUN set -eux; \
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
@@ -172,10 +180,15 @@ RUN set -eux; \
 	gosu --version; \
 	gosu nobody true
 
+ENV JAVA_HOME /opt/java/openjdk
+COPY --from=eclipse-temurin:17-jre $JAVA_HOME $JAVA_HOME
+ENV PATH $JAVA_HOME/bin:$PATH
+RUN java --version
+
 ENV CASSANDRA_HOME /opt/cassandra
 ENV CASSANDRA_CONF /etc/cassandra
 ENV PATH $CASSANDRA_HOME/bin:$PATH
-ENV CASSANDRA_VERSION 5.0.5
+ENV CASSANDRA_VERSION 5.0.6
 
 
 RUN mkdir -p "$CASSANDRA_HOME";
