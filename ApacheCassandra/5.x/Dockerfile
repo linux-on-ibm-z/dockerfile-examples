@@ -108,6 +108,7 @@ cmake \
     && cd $SOURCE_ROOT \
     && git clone -b cassandra-$CASSANDRA_VER https://github.com/apache/cassandra.git \
     && cd cassandra \
+    && curl -o cassandra.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/cassandra.patch \
     && git apply --ignore-whitespace cassandra.patch \
     && ant \
 # Copy required libs
