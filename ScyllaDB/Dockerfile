@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2019, 2025.
+# © Copyright IBM Corporation 2019, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ########## Dockerfile for ScyllaDB version 6.1.1 #########
@@ -19,7 +19,7 @@
 # Base Image
 FROM ubuntu:24.04 AS builder
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
 ENV SOURCE_ROOT=/tmp/source
 ENV PATH=$HOME/.local/bin:/root/.cargo/bin:/usr/local/bin:/bin:$PATH
@@ -124,7 +124,8 @@ RUN apt-get update \
   && mkdir -p /etc/crypto-policies/back-ends \
   && touch /etc/crypto-policies/back-ends/gnutls.config \
   && cd "$SOURCE_ROOT"/scylla \
-  && ninja dist-deb \
+  && echo "setuptools==$(python3 -c 'import setuptools; print(setuptools.__version__)')" > $SOURCE_ROOT/scylla/constraints.txt \
+  && PIP_CONSTRAINT=$SOURCE_ROOT/scylla/constraints.txt ninja dist-deb \
 #######################################################################
   && rm -rf $SOURCE_ROOT/antlr3-3.5.2 \
       $SOURCE_ROOT/fmt \
