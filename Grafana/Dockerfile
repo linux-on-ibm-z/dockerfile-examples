@@ -1,7 +1,7 @@
-# Copyright IBM Corporation 2017, 2025.
+# Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 12.3.2 ############################################
+############################ Dockerfile for Grafana 12.4.0 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -17,15 +17,15 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=12.3.2
+ARG GRAFANA_VERSION=12.4.0
 
 ARG BASE_IMAGE=alpine:3.23
-ARG GO_IMAGE=golang:1.25.6-alpine
+ARG GO_IMAGE=golang:1.25.7-alpine
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
 
-FROM ${GO_IMAGE} as go-src-builder
+FROM ${GO_IMAGE} AS go-src-builder
 
 ARG GRAFANA_VERSION
 
@@ -34,7 +34,7 @@ WORKDIR /tmp
 RUN apk add --no-cache git
 RUN git clone -b v"${GRAFANA_VERSION}" https://github.com/grafana/grafana.git
 
-FROM ${GO_IMAGE} as go-builder
+FROM ${GO_IMAGE} AS go-builder
 
 ARG COMMIT_SHA=""
 ARG BUILD_BRANCH=""
@@ -66,24 +66,10 @@ COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resourcepb pkg/stora
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore pkg/storage/unified/apistore
 COPY --from=go-src-builder /tmp/grafana/pkg/semconv pkg/semconv
 COPY --from=go-src-builder /tmp/grafana/pkg/aggregator pkg/aggregator
-COPY --from=go-src-builder /tmp/grafana/apps/playlist apps/playlist
-COPY --from=go-src-builder /tmp/grafana/apps/plugins apps/plugins
-COPY --from=go-src-builder /tmp/grafana/apps/shorturl apps/shorturl
-COPY --from=go-src-builder /tmp/grafana/apps/preferences apps/preferences
-COPY --from=go-src-builder /tmp/grafana/apps/provisioning apps/provisioning
-COPY --from=go-src-builder /tmp/grafana/apps/secret apps/secret
-COPY --from=go-src-builder /tmp/grafana/apps/investigations apps/investigations
-COPY --from=go-src-builder /tmp/grafana/apps/advisor apps/advisor
-COPY --from=go-src-builder /tmp/grafana/apps/dashboard apps/dashboard
-COPY --from=go-src-builder /tmp/grafana/apps/folder apps/folder
-COPY --from=go-src-builder /tmp/grafana/apps/preferences apps/preferences
-COPY --from=go-src-builder /tmp/grafana/apps/iam apps/iam
 COPY --from=go-src-builder /tmp/grafana/apps apps
 COPY --from=go-src-builder /tmp/grafana/kindsv2 kindsv2
-COPY --from=go-src-builder /tmp/grafana/apps/alerting/notifications apps/alerting/notifications
-COPY --from=go-src-builder /tmp/grafana/apps/alerting/alertenrichment apps/alerting/alertenrichment
 COPY --from=go-src-builder /tmp/grafana/pkg/codegen pkg/codegen
-COPY --from=go-src-builder /tmp/grafana/pkg/plugins/codegen pkg/plugins/codegen
+COPY --from=go-src-builder /tmp/grafana/pkg/plugins pkg/plugins
 
 RUN go mod download
 
@@ -104,7 +90,7 @@ ENV BUILD_BRANCH=${BUILD_BRANCH}
 
 RUN make build-go GO_BUILD_TAGS=${GO_BUILD_TAGS} WIRE_TAGS=${WIRE_TAGS}
 
-FROM ${BASE_IMAGE} as tgz-builder
+FROM ${BASE_IMAGE} AS tgz-builder
 
 ARG GRAFANA_VERSION
 
@@ -128,8 +114,8 @@ RUN if grep -i -q alpine /etc/issue; then \
 RUN tar x -z -f /tmp/grafana.tar.gz --strip-components=1
 
 # helpers for COPY --from
-FROM ${GO_SRC} as go-src
-FROM ${JS_SRC} as js-src
+FROM ${GO_SRC} AS go-src
+FROM ${JS_SRC} AS js-src
 
 # Final stage
 FROM ${BASE_IMAGE}
