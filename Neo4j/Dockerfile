@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2026.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 5.26.20 ##################################
+########## Dockerfile for Neo4j version 5.26.21 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -18,7 +18,7 @@
 ##################################################################################
 
 FROM redhat/ubi9-minimal:latest as builder
-ARG NEO4J_VER=5.26.20
+ARG NEO4J_VER=5.26.21
 
 ENV SOURCE_ROOT=/tmp
 ENV MAVEN_OPTS="-Xmx2048m -Xss8m"
@@ -31,13 +31,13 @@ RUN microdnf  install -y java-17-openjdk java-17-openjdk-devel git wget tar whic
   && export PATH="$JAVA_HOME/bin:$SOURCE_ROOT/apache-maven-3.9.12/bin:$PATH" \
   && wget -q https://archive.apache.org/dist/maven/maven-3/3.9.12/binaries/apache-maven-3.9.12-bin.tar.gz \
   && tar -zxf apache-maven-3.9.12-bin.tar.gz \
-  && git clone --depth 1 -b 5.26.20  https://github.com/neo4j/neo4j.git \
+  && git clone --depth 1 -b 5.26.21 https://github.com/neo4j/neo4j.git \
   && cd neo4j \
   && git apply $SOURCE_ROOT/neo4j.patch \
   && mvn spotless:apply -B -V \
   && mvn clean install -B -V -DskipTests
 
-RUN tar zxf /tmp/neo4j/packaging/standalone/target/neo4j-community-5.26.20-SNAPSHOT-unix.tar.gz -C /tmp
+RUN tar zxf /tmp/neo4j/packaging/standalone/target/neo4j-community-5.26.21-SNAPSHOT-unix.tar.gz -C /tmp
 
 #base image
 FROM redhat/ubi9-minimal:latest
@@ -81,9 +81,9 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}" \
     NEO4J_EDITION=community \
     NEO4J_HOME="/var/lib/neo4j" \
     LANG=C.UTF-8
-ARG NEO4J_VER=5.26.20
+ARG NEO4J_VER=5.26.21
 
-COPY --from=builder /tmp/neo4j-community-5.26.20-SNAPSHOT /var/lib/neo4j-community-"5.26.20"
+COPY --from=builder /tmp/neo4j-community-5.26.21-SNAPSHOT /var/lib/neo4j-community-"5.26.21"
 
 RUN set -eux; \
     groupadd --gid 7474 --system neo4j && useradd --uid 7474 --system --no-create-home --home "${NEO4J_HOME}" --gid neo4j neo4j; \

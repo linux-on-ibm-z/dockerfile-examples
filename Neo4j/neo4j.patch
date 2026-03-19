@@ -19,7 +19,7 @@ index 03f6a113005..89dbbc587a6 100644
      void rememberToUpdateDocs() {
          final var defaultOut = System.out;
 diff --git a/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java b/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java
-index a83ef92110d..74753f3318d 100644
+index a83ef92110d..026465ee5dc 100644
 --- a/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java
 +++ b/community/native/src/main/java/org/neo4j/internal/nativeimpl/LinuxNativeAccess.java
 @@ -46,7 +46,7 @@ public class LinuxNativeAccess implements NativeAccess {
@@ -35,7 +35,7 @@ index a83ef92110d..74753f3318d 100644
          }
          NATIVE_ACCESS_AVAILABLE = available;
          INITIALIZATION_FAILURE = initFailure;
-+	// POSIX_FADV_DONTNEED == 4 on every arch except s390x
++        // POSIX_FADV_DONTNEED == 4 on every arch except s390x
 +        int posix_fadv_dontneed = 4;
 +        if ("s390x".equals(Platform.ARCH)) {
 +            posix_fadv_dontneed = 6;
@@ -45,14 +45,14 @@ index a83ef92110d..74753f3318d 100644
  
      /**
 diff --git a/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java b/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java
-index 889070123af..18cca788633 100644
+index 889070123af..f01f96d2067 100644
 --- a/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java
 +++ b/community/unsafe/src/main/java/org/neo4j/internal/unsafe/UnsafeUtil.java
 @@ -159,6 +159,11 @@ public final class UnsafeUtil {
              return Boolean.parseBoolean(alignmentProperty);
          }
  
-+	String arch = System.getProperty("os.arch", "?");
++        String arch = System.getProperty("os.arch", "?");
 +        if (arch.equals("s390x")) {
 +            return findUnalignedMemoryAccessFromArch();
 +        }
@@ -61,7 +61,7 @@ index 889070123af..18cca788633 100644
              var bits = Class.forName("java.nio.Bits");
              var unaligned = bits.getDeclaredMethod("unaligned");
 diff --git a/pom.xml b/pom.xml
-index fedc7fef201..19d61c236e4 100644
+index 5ca9be7fc73..eb62a6faf95 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -93,6 +93,7 @@
