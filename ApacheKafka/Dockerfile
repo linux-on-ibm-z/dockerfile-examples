@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2025
+# © Copyright IBM Corporation 2025, 2026
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Apache Kafka 4.1.1 ############################
+#################### Dockerfile for Apache Kafka 4.2.0 ############################
 #
 # Apache Kafka is an open-source event streaming platform used to collect, 
 # process, store, and integrate data at scale in real time. It powers 
@@ -26,7 +26,9 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/ope
 
 USER root
 
-ENV kafka_url https://archive.apache.org/dist/kafka/4.1.1/kafka_2.13-4.1.1.tgz
+ENV kafka_url="https://archive.apache.org/dist/kafka/4.2.0/kafka_2.13-4.2.0.tgz"
+ENV kafka_asc_url="https://archive.apache.org/dist/kafka/4.2.0/kafka_2.13-4.2.0.tgz.asc"
+ENV kafka_keys_url="https://downloads.apache.org/kafka/KEYS"
 
 RUN set -eux ; \
     apt update ; \
@@ -34,11 +36,15 @@ RUN set -eux ; \
     apt install -y wget gpg gpg-agent procps bash; \
     mkdir opt/kafka; \
     wget -nv -O kafka.tgz "$kafka_url"; \
+    wget -nv -O kafka.tgz.asc "$kafka_asc_url"; \
+    wget -nv -O KEYS "$kafka_keys_url"; \
+    gpg --import KEYS ; \
+    gpg --batch --verify kafka.tgz.asc kafka.tgz ; \
     tar xfz kafka.tgz -C /opt/kafka --strip-components 1; \
     mkdir -p /etc/kafka/docker; \
-    wget -O /etc/kafka/docker/jsa_launch https://raw.githubusercontent.com/apache/kafka/refs/tags/4.1.1/docker/jvm/jsa_launch; \
+    wget -O /etc/kafka/docker/jsa_launch https://raw.githubusercontent.com/apache/kafka/refs/tags/4.2.0/docker/jvm/jsa_launch; \
     chmod +x /etc/kafka/docker/jsa_launch; \
-    wget -O /etc/kafka/docker/server.properties https://raw.githubusercontent.com/apache/kafka/refs/tags/4.1.1/docker/server.properties
+    wget -O /etc/kafka/docker/server.properties https://raw.githubusercontent.com/apache/kafka/refs/tags/4.2.0/docker/server.properties
 
 # Generate jsa files using dynamic CDS for kafka server start command and kafka storage format command
 RUN /etc/kafka/docker/jsa_launch
@@ -54,14 +60,20 @@ EXPOSE 9092
 
 USER root
 
-ENV kafka_url https://archive.apache.org/dist/kafka/4.1.1/kafka_2.13-4.1.1.tgz
+ENV kafka_url="https://archive.apache.org/dist/kafka/4.2.0/kafka_2.13-4.2.0.tgz"
+ENV kafka_asc_url="https://archive.apache.org/dist/kafka/4.2.0/kafka_2.13-4.2.0.tgz.asc"
+ENV kafka_keys_url="https://downloads.apache.org/kafka/KEYS"
 
 RUN set -eux ; \
     apt update ; \
     apt upgrade -y ; \
     apt install -y wget gpg gpg-agent procps bash; \
-    mkdir opt/kafka; \
+    mkdir opt/kafka; \ 
     wget -nv -O kafka.tgz "$kafka_url"; \
+    wget -nv -O kafka.tgz.asc "$kafka_asc_url"; \
+    wget -nv -O KEYS "$kafka_keys_url"; \
+    gpg --import KEYS; \
+    gpg --batch --verify kafka.tgz.asc kafka.tgz; \
     tar xfz kafka.tgz -C /opt/kafka --strip-components 1; \
     mkdir -p /var/lib/kafka/data /etc/kafka/secrets; \
     mkdir -p /etc/kafka/docker /usr/logs /mnt/shared/config; \
@@ -71,15 +83,16 @@ RUN set -eux ; \
     chmod -R ug+w /etc/kafka /var/lib/kafka /etc/kafka/secrets; \
     cp /opt/kafka/config/log4j2.yaml /etc/kafka/docker/log4j2.yaml; \
     cp /opt/kafka/config/tools-log4j2.yaml /etc/kafka/docker/tools-log4j2.yaml; \
-    rm kafka.tgz; \
+    rm -f kafka.tgz kafka.tgz.asc KEYS; \
     cd /etc/kafka/docker; \
-    wget -O bash-config       https://github.com/apache/kafka/raw/refs/tags/4.1.1/docker/resources/common-scripts/bash-config; \
-    wget -O configure         https://github.com/apache/kafka/raw/refs/tags/4.1.1/docker/resources/common-scripts/configure; \
-    wget -O configureDefaults https://github.com/apache/kafka/raw/refs/tags/4.1.1/docker/resources/common-scripts/configureDefaults; \
-    wget -O run               https://github.com/apache/kafka/raw/refs/tags/4.1.1/docker/resources/common-scripts/run; \
-    wget -O launch            https://github.com/apache/kafka/raw/refs/tags/4.1.1/docker/jvm/launch; \
+    wget -O bash-config       https://github.com/apache/kafka/raw/refs/tags/4.2.0/docker/resources/common-scripts/bash-config; \
+    wget -O configure         https://github.com/apache/kafka/raw/refs/tags/4.2.0/docker/resources/common-scripts/configure; \
+    wget -O configureDefaults https://github.com/apache/kafka/raw/refs/tags/4.2.0/docker/resources/common-scripts/configureDefaults; \
+    wget -O run               https://github.com/apache/kafka/raw/refs/tags/4.2.0/docker/resources/common-scripts/run; \
+    wget -O launch            https://github.com/apache/kafka/raw/refs/tags/4.2.0/docker/jvm/launch; \
     chmod +x configure configureDefaults run launch; \
     chown appuser:appuser bash-config configure configureDefaults run launch; \
+
     apt-get -y purge --auto-remove wget gpg gpg-agent; \
     apt-get autoremove -y; \
     rm -rf /var/lib/apt/lists/*;
