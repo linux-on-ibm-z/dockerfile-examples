@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for Packetbeat 9.2.4 #############################
+#################### Dockerfile for Packetbeat 9.3.1 #############################
 # Beats is the platform for single-purpose data shippers
 #
 # To build this image, from the directory containing this Dockerfile
@@ -17,7 +17,7 @@ FROM ubuntu:22.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
-ARG BEATS_VER=9.2.4
+ARG BEATS_VER=9.3.1
 
 # Set environment variable
 ENV BEATNAME=packetbeat
@@ -25,12 +25,10 @@ ENV BEATHOME=/usr/share/$BEATNAME
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
 ENV GOPATH=$SOURCE_DIR
-ENV PATH=$PATH:/usr/local/go/bin/:$GOPATH/bin:/usr/local/bin
+ENV PATH=$PATH:/usr/local/go/bin/:$GOPATH/bin:/usr/local/bin:/opt/python3.11/bin
 ENV GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=true
-ENV PYTHON_EXE=python3
-ENV PYTHON_ENV=/tmp/venv3
+ENV PYTHON_EXE=python3.11
 ENV TZ=America/Toronto
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Beats/${BEATS_VER}/patch"
 
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -70,25 +68,13 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  && wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz \
  && tar -xzf Python-3.11.4.tgz \
  && cd Python-3.11.4 \
- && ./configure --prefix=/usr/local --exec-prefix=/usr/local \
- && make \
+ && ./configure --prefix=/opt/python3.11 --enable-optimizations --with-lto \
+ && make -j$(nproc) \
  && make install \
- && /usr/bin/update-alternatives --install /usr/bin/python python /usr/local/bin/python3.11 10 \
- && /usr/bin/update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.11 10 \
- && /usr/bin/update-alternatives --display python3 \
- && python3 -V \
- && cd $SOURCE_DIR \
- && wget https://bootstrap.pypa.io/get-pip.py \
- && python3 get-pip.py \
- && pip3 install wheel -v \
- && pip3 install "cython<3.0.0" pyyaml==6.0.2 --no-build-isolation -v \
- && rm get-pip.py \
  && rm -rf Python* \
  && wget -O rustup-init.sh https://sh.rustup.rs \
  && bash rustup-init.sh -y \
  && export PATH=$PATH:$HOME/.cargo/bin \
- && rustup toolchain install 1.76.0 \
- && rustup default 1.76.0 \
 # Install go and download beats source code
  && wget https://go.dev/dl/go1.24.11.linux-s390x.tar.gz \
  && chmod ugo+r go1.24.11.linux-s390x.tar.gz \
@@ -97,8 +83,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  && mkdir -p $GOPATH/src/github.com/elastic  \
  && cd $GOPATH/src/github.com/elastic  \
  && git clone -b v${BEATS_VER} https://github.com/elastic/beats.git  \
- && cd beats  \
- && curl -sSL ${PATCH_URL}/beats.patch | git apply - || error "beats patch" \
 # Building packetbeat
  && cd $GOPATH/src/github.com/elastic/beats/${BEATNAME} \
  && make \
@@ -108,9 +92,10 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 # Setup directory layout
 RUN mkdir -p $BEATHOME \
  && cp $GOPATH/src/github.com/elastic/beats/${BEATNAME}/${BEATNAME} $BEATHOME \
- && cp $GOPATH/src/github.com/elastic/beats/${BEATNAME}/${BEATNAME}.yml $BEATHOME \
+ && cp $GOPATH/src/github.com/elastic/beats/LICENSE.txt $BEATHOME/LICENSE.txt \
+ && cp $GOPATH/src/github.com/elastic/beats/NOTICE.txt  $BEATHOME/NOTICE.txt \
  && cp $GOPATH/src/github.com/elastic/beats/${BEATNAME}/${BEATNAME}.reference.yml $BEATHOME \
- && cp $GOPATH/src/github.com/elastic/beats/${BEATNAME}/fields.yml $BEATHOME/fields.yml \
+ && cp $GOPATH/src/github.com/elastic/beats/${BEATNAME}/fields.yml $BEATHOME \
  && cp -r $GOPATH/src/github.com/elastic/beats/${BEATNAME}/build/kibana $BEATHOME \
  && mkdir -p $BEATHOME/data $BEATHOME/logs \
  && chown -R root:root $BEATHOME \
@@ -119,7 +104,7 @@ RUN mkdir -p $BEATHOME \
  && chmod 0775 $BEATHOME/data $BEATHOME/logs \
  && chmod 0755 $BEATHOME/$BEATNAME
 
-FROM ubuntu:22.04
+FROM docker.elastic.co/ubi9/ubi-minimal
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
@@ -127,12 +112,15 @@ ENV ELASTIC_CONTAINER="true"
 ENV BEATNAME=packetbeat
 ENV BEATHOME=/usr/share/$BEATNAME
 ENV PATH=$BEATHOME:$PATH
+ENV GODEBUG=madvdontneed=1
 
 RUN for iter in {1..10}; do \
-        apt-get update -y && \
-        DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes ca-certificates curl gawk libpcap0.8 libcap2-bin xz-utils && \
-        apt-get clean all && \
-        exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && sleep 10; \
+        microdnf update -y && \
+        microdnf -y install findutils shadow-utils ca-certificates \
+        gawk libcap libpcap xz tar && \
+        microdnf clean all && \
+        ln -sf /usr/lib64/libpcap.so.1 /usr/lib64/libpcap.so.0.8 && \
+        exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && sleep 10; \
     done; \
     (exit $exit_code)
 
@@ -144,10 +132,14 @@ COPY docker-entrypoint /usr/local/bin/docker-entrypoint
 RUN chmod 755 /usr/local/bin/docker-entrypoint
 
 COPY --from=builder /usr/share/$BEATNAME /usr/share/$BEATNAME
+RUN readlink -f /usr/share/$BEATNAME/$BEATNAME | xargs setcap cap_net_raw,cap_net_admin+eip
 
-RUN readlink -f /usr/share/$BEATNAME/$BEATNAME | xargs setcap cap_net_raw,cap_net_admin+eip \
- && groupadd --gid 1000 $BEATNAME \
- && useradd -M --uid 1000 --gid 1000 --groups 0 --home /usr/share/$BEATHOME $BEATNAME
+RUN mkdir /licenses
+COPY --from=builder /usr/share/$BEATNAME/LICENSE.txt /licenses
+COPY --from=builder /usr/share/$BEATNAME/NOTICE.txt /licenses
+
+RUN groupadd --gid 1000 $BEATNAME \
+ && useradd -M --uid 1000 --gid 1000 --groups 0 --home $BEATHOME $BEATNAME
 
 USER 1000
 
@@ -155,6 +147,6 @@ ENV LIBBEAT_MONITORING_CGROUPS_HIERARCHY_OVERRIDE=/
 
 WORKDIR $BEATHOME
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-entrypoint"]
-CMD ["-environment", "container"]
+CMD ["--environment", "container"]
 
 #End of Dockerfile
