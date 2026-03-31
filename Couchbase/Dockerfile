@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation  2017, 2025
+# © Copyright IBM Corporation  2017, 2026
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Couchbase version 7.6.5 ###################################
+############### Dockerfile for Couchbase version 8.0.0 ###################################
 #
 # Couchbase is open source database software.
 #
@@ -16,15 +16,15 @@
 #
 ##########################################################################################
 
-FROM s390x/ubuntu:22.04 as builder
+FROM s390x/ubuntu:24.04 as builder
 
 ENV SOURCE_ROOT=/tmp/source
 WORKDIR $SOURCE_ROOT
-ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Couchbase/7.6.5
+ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Couchbase/8.0.0
 
 SHELL ["/bin/bash", "-c"]
 
-RUN apt-get update && apt-get install -y sudo wget locales curl
+RUN apt-get update && apt-get install -y sudo wget locales curl software-properties-common ca-certificates git sed xz-utils
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
 ENV LANG=en_US.UTF-8
@@ -32,10 +32,11 @@ ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
 RUN cd $SOURCE_ROOT \
+&& mkdir -p "${SOURCE_ROOT}/patch" \
 && wget $PATCH_URL/build_couchbase.sh \
 && bash build_couchbase.sh -p /opt/couchbase
 
-FROM s390x/ubuntu:22.04
+FROM s390x/ubuntu:24.04
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 WORKDIR /opt
@@ -55,7 +56,7 @@ SHELL ["/bin/bash", "-c"]
 #  net-tools: ifconfig, arp, netstat
 RUN set -x && \
     apt-get update && \
-    apt-get install -yq wget chrpath patchelf tzdata libgflags2.2 \
+    apt-get install -yq wget chrpath patchelf tzdata \
     lsof lshw sysstat net-tools bzip2 && \
     apt-get autoremove && apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -78,9 +79,21 @@ RUN set -x \
 ENV PATH=$PATH:/opt/couchbase/bin:/opt/couchbase/bin/tools:/opt/couchbase/bin/install
 ENV LD_LIBRARY_PATH=/opt/couchbase/lib
 
-# Create Couchbase user with UID 1000 (necessary to match default
-# boot2docker UID)
-RUN groupadd -g 1000 couchbase && useradd couchbase -u 1000 -g couchbase -M
+# Create couchbase user/group with fixed UID/GID 1000 for consistency across environments
+# (modifies existing user/group in images which already have UID/GID 1000 - e.g. ubuntu:24.04)
+RUN set -x \
+    && if getent group 1000 >/dev/null; then \
+          existing_group=$(getent group 1000 | cut -d: -f1); \
+          groupmod --new-name couchbase "${existing_group}"; \
+       else \
+          groupadd -g 1000 couchbase; \
+       fi \
+    && if getent passwd 1000 >/dev/null; then \
+          existing_user=$(getent passwd 1000 | cut -d: -f1); \
+          usermod --login couchbase -d /home/couchbase -m -g couchbase -s /bin/sh "${existing_user}"; \
+       else \
+          useradd couchbase -u 1000 -g couchbase -M -s /bin/sh; \
+       fi
 
 # Add runit script for couchbase-server
 COPY scripts/run /etc/service/couchbase-server/run
