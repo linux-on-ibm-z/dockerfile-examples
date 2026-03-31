@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2013-2024 Draios Inc dba Sysdig.
+# Copyright (C) 2013-2018 Draios Inc dba Sysdig.
 #
 # This file is part of sysdig .
 #
@@ -20,20 +20,9 @@
 
 echo "* Setting up /usr/src links from host"
 
-if [[ "ubuntu" == $(awk -F'=' '/^ID=/ {print tolower($2)}' $SYSDIG_HOST_ROOT/etc/os-release 2> /dev/null) ]]
-then
-        echo "Detected Ubuntu. Installing linux-headers...";
-        apt-get update -y;
-        apt-get install -y linux-headers-generic;
-        if [ $? -ne 0 ]
-        then
-                echo "*** Unable to install linux-headers-$(uname -r) , the sysdig command may not work properly.";
-        fi
-fi
-
-for i in $(ls $SYSDIG_HOST_ROOT/usr/src)
+for i in $(ls $HOST_ROOT/usr/src)
 do
-        ln -s $SYSDIG_HOST_ROOT/usr/src/$i /usr/src/$i
+    ln -s $HOST_ROOT/usr/src/$i /usr/src/$i
 done
 
 /usr/bin/scap-driver-loader
