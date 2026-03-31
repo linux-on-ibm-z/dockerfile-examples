@@ -1,6 +1,6 @@
-# © Copyright IBM Corporation 2019, 2025.
+# © Copyright IBM Corporation 2019, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-##################### Dockerfile for Apache Spark version 3.5.4 ###################################################
+##################### Dockerfile for Apache Spark version 4.0.1 ###################################################
 #
 # This Dockerfile builds a basic installation of Apache Spark.
 #
@@ -15,13 +15,13 @@
 # Base Image
 FROM s390x/ubuntu:22.04 AS builder
 
-ARG SPARK_VER=v3.5.4
+ARG SPARK_VER=v4.0.1
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/3.5.4/patch"
-ARG JDK11_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.25%2B9/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.25_9.tar.gz"
-ARG JDK8_URL="https://github.com/ibmruntimes/semeru8-binaries/releases/download/jdk8u432-b06_openj9-0.48.0/ibm-semeru-open-jdk_s390x_linux_8u432b06_openj9-0.48.0.tar.gz"
+ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/4.0.1/patch"
+ARG JDK17_URL="https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.13%2B11/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.13_11.tar.gz"
+ARG JDK8_URL="https://github.com/ibmruntimes/semeru8-binaries/releases/download/jdk8u472-b08_openj9-0.56.0/ibm-semeru-open-jdk_s390x_linux_8u472b08_openj9-0.56.0.tar.gz"
 
 ENV     SOURCE_DIR /root
 WORKDIR $SOURCE_DIR
@@ -45,10 +45,10 @@ RUN mkdir -p /opt/openjdk/8/ \
 && curl -sSL -o jdk8.tar.gz "${JDK8_URL}" \
 && tar -zxf jdk8.tar.gz -C /opt/openjdk/8/ --strip-components 1
 
-# Install Java (JDK 11)
-RUN mkdir -p /opt/openjdk/11/ \
-&& curl -SL -o jdk11.tar.gz "${JDK11_URL}" \
-&& tar -zxf jdk11.tar.gz -C /opt/openjdk/11/ --strip-components 1
+# Install Java (JDK 17)
+RUN mkdir -p /opt/openjdk/17/ \
+&& curl -SL -o jdk17.tar.gz "${JDK17_URL}" \
+&& tar -zxf jdk17.tar.gz -C /opt/openjdk/17/ --strip-components 1
 
 # Install Maven
 RUN wget -O apache-maven-3.8.8.tar.gz "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz" \
@@ -73,16 +73,16 @@ RUN git clone -b s390x https://github.com/linux-on-ibm-z/leveldb.git \
 && JAVA_HOME="/opt/openjdk/8" PATH="/opt/openjdk/8/bin:${SOURCE_DIR}/apache-maven-3.8.8/bin:${PATH}" jar -xvf ${LEVELDBJNI_HOME}/leveldbjni-linux64-s390x/target/leveldbjni-linux64-s390x-1.8.jar
 
 # Build AirCompressor
-RUN git clone -b "0.27" --single-branch https://github.com/airlift/aircompressor.git \
+RUN git clone -b "2.0.2" --single-branch https://github.com/airlift/aircompressor.git \
 && cd aircompressor \
 && curl -sSL "${PATCH_URL}/aircompressor.diff" | git apply - \
-&& JAVA_HOME="/opt/openjdk/11" PATH="/opt/openjdk/11/bin:${SOURCE_DIR}/apache-maven-3.8.8/bin:${PATH}" mvn install -B -V -DskipTests -Dair.check.skip-all
+&& JAVA_HOME="/opt/openjdk/17" PATH="/opt/openjdk/17/bin:${SOURCE_DIR}/apache-maven-3.8.8/bin:${PATH}" mvn install -B -V -DskipTests -Dair.check.skip-all
 
 # Build Apache Spark
 RUN git clone -b "${SPARK_VER}" --depth 1  https://github.com/apache/spark.git \
 && cd spark \
 && curl -sSL "${PATCH_URL}/spark.diff" | git apply - \
-&& JAVA_HOME="/opt/openjdk/11" PATH="/opt/openjdk/11/bin:${PATH}" ./build/mvn -DskipTests clean package
+&& JAVA_HOME="/opt/openjdk/17" PATH="/opt/openjdk/17/bin:${PATH}" ./build/mvn -DskipTests clean package
 
 # Create a tar of the files needed to run spark
 RUN mkdir -p dist/spark/lib_override \
@@ -96,7 +96,7 @@ RUN mkdir -p dist/spark/lib_override \
 && mv spark/assembly/target/scala-2.12/jars dist/spark/jars \
 && tar cf dist.tar dist/
 
-FROM s390x/eclipse-temurin:11-jre-focal
+FROM s390x/eclipse-temurin:17-jre-focal
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
