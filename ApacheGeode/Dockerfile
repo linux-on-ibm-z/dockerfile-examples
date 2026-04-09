@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2025.
+# © Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Geode version 1.15.2 #####################
+########## Dockerfile for Apache Geode version 2.0.1 #####################
 #
 # This Dockerfile builds a basic installation of Apache Geode.
 #
@@ -23,16 +23,16 @@
 ##################################################################################
 
 # Base Image
-FROM s390x/ubuntu:22.04
+FROM s390x/ubuntu:24.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
-ARG GEODE_VER=1.15.2
+ARG GEODE_VER=2.0.1
 ARG file=apache-geode-$GEODE_VER.tgz
 
 ENV WORKDIR=/root
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-s390x
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-s390x
 ENV PATH=$JAVA_HOME/bin:$WORKDIR/apache-geode-$GEODE_VER/bin:$PATH
 
 WORKDIR /root
@@ -40,18 +40,18 @@ WORKDIR /root
 RUN apt-get update && apt-get install -y \
     tar \
     wget \
-    openjdk-8-jdk 
+    openjdk-17-jdk
  # Download and extract apache geode
 RUN  for url in \
-			"https://www.apache.org/dyn/closer.cgi?action=download&filename=geode/$GEODE_VER/$file" \
-			"https://downloads.apache.org/geode/$GEODE_VER/$file" \
-			"https://archive.apache.org/dist/geode/$GEODE_VER/$file" \
-		; do \
-			if wget -O "$file" "$url"; then \
-				break; \
-			fi; \
-		done; 
- 
+                        "https://www.apache.org/dyn/closer.cgi?action=download&filename=geode/$GEODE_VER/$file" \
+                        "https://downloads.apache.org/geode/$GEODE_VER/$file" \
+                        "https://archive.apache.org/dist/geode/$GEODE_VER/$file" \
+                ; do \
+                        if wget -O "$file" "$url"; then \
+                                break; \
+                        fi; \
+                done;
+
 RUN tar -xvzf apache-geode-$GEODE_VER.tgz \
 # Clean up cache data and remove dependencies which are not required
  && apt-get remove -y \
@@ -74,4 +74,3 @@ VOLUME ["/data"]
 CMD ["gfsh"]
 
 # End of Dockerfile
-
