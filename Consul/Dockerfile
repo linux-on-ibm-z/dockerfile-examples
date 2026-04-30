@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################### Dockerfile for Consul - 1.22.6 ########################
+###################### Dockerfile for Consul - 1.22.7 ########################
 #
 # Consul is a tool for service discovery and configuration. Consul is distributed, highly available, and extremely scalable.
 # Consul provides several key features like Service Discovery, Health Checking , Key/Value Storage , Multi-Datacenter
@@ -28,8 +28,8 @@ FROM s390x/ubuntu:22.04 AS builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
-ARG CONSUL_VERSION=1.22.6
-ARG GO_VERSION=1.25.8
+ARG CONSUL_VERSION=1.22.7
+ARG GO_VERSION=1.25.9
 ENV TERM=xterm
 
 # Set GO environment variables
