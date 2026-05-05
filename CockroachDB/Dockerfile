@@ -13,7 +13,7 @@
 ####################################################################################################################
 
 # Base image
-FROM registry.access.redhat.com/ubi9/ubi:9.4-1214.1729773476 AS builder
+FROM registry.access.redhat.com/ubi9/ubi:9.6-1760340943 AS builder
 
 ARG CRDB_VER=25.4.8
 ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/refs/heads/master/CockroachDB/${CRDB_VER}
@@ -68,7 +68,7 @@ RUN cd $SOURCE_ROOT \
 && bash build_crdb.sh -y
 
 # Build a fresh image without all the build requirements
-FROM registry.access.redhat.com/ubi9/ubi:9.4-1214.1729773476
+FROM registry.access.redhat.com/ubi9/ubi:9.6-1760340943
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
