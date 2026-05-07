@@ -17,7 +17,7 @@
 #
 ##################################################################################
 
-FROM redhat/ubi9-minimal:latest as builder
+FROM redhat/ubi10-minimal:latest as builder
 ARG NEO4J_VER=5.26.25
 
 ENV SOURCE_ROOT=/tmp
@@ -25,7 +25,7 @@ ENV MAVEN_OPTS="-Xmx2048m -Xss8m"
 
 COPY neo4j.patch $SOURCE_ROOT/neo4j.patch
 
-RUN microdnf  install -y java-17-openjdk java-17-openjdk-devel git wget tar which \
+RUN microdnf  install -y java-21-openjdk java-21-openjdk-devel git wget tar which \
   && cd $SOURCE_ROOT \
   && JAVA_HOME="$(dirname $(dirname $(readlink -f $(which java))))" \
   && export PATH="$JAVA_HOME/bin:$SOURCE_ROOT/apache-maven-3.9.12/bin:$PATH" \
@@ -40,42 +40,42 @@ RUN microdnf  install -y java-17-openjdk java-17-openjdk-devel git wget tar whic
 RUN tar zxf /tmp/neo4j/packaging/standalone/target/neo4j-community-5.26.25-SNAPSHOT-unix.tar.gz -C /tmp
 
 #base image
-FROM redhat/ubi9-minimal:latest
+FROM redhat/ubi10-minimal:latest
 
 # The Author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # gather pre-requisite packages
 RUN set -eux; \
+        tini_url="https://github.com/krallin/tini/releases/download/v0.19.0/tini-s390x"; \
+    tini_sha="931b70a182af879ca249ae9de87ef68423121b38d235c78997fafc680ceab32d"; \
+    suexec_url="https://github.com/ncopa/su-exec/releases/download/v0.3/su-exec-static-v0.3-s390x"; \
+    suexec_sha="cd1ee9642b823a766a3cd1ee3241b342072f76ffa400ed0c57bd8582fd00cd99"; \
     microdnf install -y --nodocs \
         findutils \
-        gcc \
-        git \
+        gnupg \
         gzip \
         hostname \
-        java-17-openjdk-headless \
+        java-21-openjdk-headless \
         jq \
-        make \
         procps \
-        shadow-utils \
         tar \
         wget \
         which; \
-    \
-    wget https://github.com/krallin/tini/releases/download/v0.19.0/tini-s390x; \
-    cp tini-s390x /usr/bin/tini; \
-    chmod +x /usr/bin/tini; \
-    \
-    git clone https://github.com/ncopa/su-exec.git; \
-    cd su-exec; \
-    git checkout 4c3bb42b093f14da70d8ab924b487ccfbb1397af; \
-    echo d6c40440609a23483f12eb6295b5191e94baf08298a856bab6e15b10c3b82891 su-exec.c | sha256sum -c; \
-    echo 2a87af245eb125aca9305a0b1025525ac80825590800f047419dc57bba36b334 Makefile | sha256sum -c; \
-    make; \
-    mv su-exec /usr/bin/su-exec; \
+    wget -q ${tini_url} -O /usr/bin/tini; \
+    wget -q ${tini_url}.asc -O tini.asc; \
+    echo "${tini_sha}"  /usr/bin/tini | sha256sum -c --strict --quiet; \
+    chmod a+x /usr/bin/tini; \
+    export GNUPGHOME="$(mktemp -d)"; \
+    gpg --batch --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys \
+        595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
+        B42F6819007F00F88E364FD4036A9C25BF357DD4; \
+    gpg --batch --verify tini.asc /usr/bin/tini; \
+    wget -q ${suexec_url} -O /usr/bin/su-exec; \
+    echo "${suexec_sha}" /usr/bin/su-exec | sha256sum -c; \
     chmod +x /usr/bin/su-exec; \
-    rm -rf /tini /su-exec; \
-    microdnf remove -y git* perl* make gcc glibc-headers glibc-devel libxcrypt-devel; \
+    gpgconf --kill all; \
+    rm -rf "$GNUPGHOME" /tini.asc; \
     microdnf clean all
 ENV PATH="${JAVA_HOME}/bin:${PATH}" \
     NEO4J_EDITION=community \
@@ -88,13 +88,13 @@ COPY --from=builder /tmp/neo4j-community-5.26.25-SNAPSHOT /var/lib/neo4j-communi
 RUN set -eux; \
     groupadd --gid 7474 --system neo4j && useradd --uid 7474 --system --no-create-home --home "${NEO4J_HOME}" --gid neo4j neo4j; \
     mv /var/lib/neo4j-* "${NEO4J_HOME}"; \
-    sed -i 's/Package Type:.*/Package Type: docker ubi9/' $NEO4J_HOME/packaging_info; \
+    sed -i 's/Package Type:.*/Package Type: docker ubi10/' $NEO4J_HOME/packaging_info; \
      mkdir -p /startup; \
-     wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/ubi9/community/local-package/docker-entrypoint.sh -P /startup; \
-     wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/ubi9/community/local-package/neo4j-admin-report.sh -P /startup; \
-     wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/ubi9/community/local-package/neo4j-plugins.json -P /startup; \
-     wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/ubi9/community/local-package/utilities.sh -P /startup; \
-     wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/ubi9/community/local-package/semver.jq -P /startup; \
+     wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/ubi10/community/local-package/docker-entrypoint.sh -P /startup; \
+     wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/ubi10/community/local-package/neo4j-admin-report.sh -P /startup; \
+     wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/ubi10/community/local-package/neo4j-plugins.json -P /startup; \
+     wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/ubi10/community/local-package/utilities.sh -P /startup; \
+     wget https://raw.githubusercontent.com/neo4j/docker-neo4j-publish/master/"${NEO4J_VER}"/ubi10/community/local-package/semver.jq -P /startup; \
      chmod +x /startup/neo4j-admin-report.sh /startup/docker-entrypoint.sh /startup/utilities.sh /startup/semver.jq; \
      mv /startup/neo4j-admin-report.sh "${NEO4J_HOME}"/bin/neo4j-admin-report; \
      mv "${NEO4J_HOME}"/data /data; \
