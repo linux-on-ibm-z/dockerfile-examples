@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Cassandra version 5.0.6 #########
+########## Dockerfile for Cassandra version 5.0.8 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -22,7 +22,7 @@ FROM debian:bookworm-slim as builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-ARG CASSANDRA_VER=5.0.6
+ARG CASSANDRA_VER=5.0.8
 
 ENV SOURCE_ROOT=/tmp/source \
     CASSANDRA_USE_JDK11=true
