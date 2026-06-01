@@ -32,7 +32,7 @@
 #####################################################################
 
 # Build stage
-ARG goversion=1.26.2
+ARG goversion=1.26.3
 FROM --platform=${BUILDPLATFORM} golang:${goversion}-alpine3.22 as base
 WORKDIR /spire
 RUN apk --no-cache --update add file bash clang lld pkgconfig git wget make
