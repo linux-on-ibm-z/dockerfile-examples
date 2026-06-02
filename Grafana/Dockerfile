@@ -20,7 +20,7 @@
 ARG GRAFANA_VERSION=13.0.1
 
 ARG BASE_IMAGE=alpine:3.23
-ARG GO_IMAGE=golang:1.25.8-alpine
+ARG GO_IMAGE=golang:1.25.9-alpine
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
@@ -60,7 +60,6 @@ COPY --from=go-src-builder /tmp/grafana/pkg/apiserver pkg/apiserver
 COPY --from=go-src-builder /tmp/grafana/pkg/apimachinery pkg/apimachinery
 COPY --from=go-src-builder /tmp/grafana/pkg/build pkg/build
 COPY --from=go-src-builder /tmp/grafana/pkg/build/wire pkg/build/wire
-COPY --from=go-src-builder /tmp/grafana/pkg/promlib pkg/promlib
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resource pkg/storage/unified/resource
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resourcepb pkg/storage/unified/resourcepb
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore pkg/storage/unified/apistore
@@ -70,10 +69,11 @@ COPY --from=go-src-builder /tmp/grafana/apps apps
 COPY --from=go-src-builder /tmp/grafana/kindsv2 kindsv2
 COPY --from=go-src-builder /tmp/grafana/pkg/codegen pkg/codegen
 COPY --from=go-src-builder /tmp/grafana/pkg/plugins pkg/plugins
+COPY --from=go-src-builder /tmp/grafana/pkg/infra/features pkg/infra/features
 
 RUN go mod download
 
-COPY --from=go-src-builder /tmp/grafana/embed.go /tmp/grafana/Makefile /tmp/grafana/build.go /tmp/grafana/package.json ./
+COPY --from=go-src-builder /tmp/grafana/embed.go /tmp/grafana/Makefile /tmp/grafana/package.json ./
 COPY --from=go-src-builder /tmp/grafana/cue.mod cue.mod
 COPY --from=go-src-builder /tmp/grafana/kinds kinds
 COPY --from=go-src-builder /tmp/grafana/local local
@@ -200,13 +200,12 @@ COPY --from=go-src /tmp/grafana/bin/grafana* /tmp/grafana/bin/*/grafana* ./bin/
 COPY --from=js-src /tmp/grafana/public ./public
 COPY --from=js-src /tmp/grafana/LICENSE ./
 
+COPY --from=go-src-builder /tmp/grafana/packaging/docker/run.sh /run.sh
+
 EXPOSE 3000
-
-ARG RUN_SH=./run.sh
-
-COPY ${RUN_SH} /run.sh
 
 RUN chmod +x /run.sh
 
 USER "$GF_UID"
 ENTRYPOINT [ "/run.sh" ]
+
