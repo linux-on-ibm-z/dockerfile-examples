@@ -18,74 +18,91 @@
 # Logstash can be started with custom configuration by changing the pipeline/default.conf file
 ###############################################################################################################
 
-FROM golang:1.15 AS builder
+FROM redhat/ubi9-minimal:latest
 
-ADD env2yaml/env2yaml.go /go/
-RUN go get gopkg.in/yaml.v2 && go build /go/env2yaml.go
+ARG LOGSTASH_VER=9.4.2
 
-FROM s390x/ubuntu:22.04
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
-ARG LOGSTASH_VER=9.3.3
-
-# The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-
+ENV ELASTIC_CONTAINER=true
 ENV LS_JAVA_HOME=/opt/temurin21
-# Install Dependencies
-RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt-get update && \
-    apt-get install -y procps findutils tar gzip locales curl wget && \
-    locale-gen 'en_US.UTF-8' && \
-# Provide a non-root user to run the process.
-    groupadd --gid 1000 logstash && \
+ENV PATH=/usr/share/logstash/bin:$LS_JAVA_HOME/bin:$PATH
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+WORKDIR /usr/share
+
+# Install packages
+RUN microdnf install -y \
+      procps \
+      findutils \
+      tar \
+      gzip \
+      openssl \
+      shadow-utils && \
+    microdnf clean all
+
+# Provide a non-root user
+# Install Temurin JDK for s390x
+# Install Logstash and set permissions
+RUN groupadd --gid 1000 logstash && \
     adduser --uid 1000 --gid 1000 \
-       --home /usr/share/logstash --no-create-home \
+      --home "/usr/share/logstash" \
+      --no-create-home \
       logstash && \
-# get Temurin 21
-    mkdir /opt/temurin21 && \
-    cd /opt/temurin21 && \
-    wget -O temurin21.tar.gz https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jdk_s390x_linux_hotspot_21.0.9_10.tar.gz && \
-    tar -zxf temurin21.tar.gz -C /opt/temurin21 --strip-components 1 && \
-    rm -rf temurin21.tar.gz && \
-# Add Logstash itself.
-    cd /tmp && \
-    curl -Lo - https://artifacts.elastic.co/downloads/logstash/logstash-oss-${LOGSTASH_VER}-linux-aarch64.tar.gz  | \
-    tar zxf - -C /usr/share && \
+    mkdir -p /opt/temurin21 && \
+    curl --fail --location \
+      https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.11%2B10/OpenJDK21U-jdk_s390x_linux_hotspot_21.0.11_10.tar.gz \
+      --output /tmp/temurin21.tar.gz && \
+    tar -zxf /tmp/temurin21.tar.gz \
+      -C /opt/temurin21 \
+      --strip-components=1 && \
+    rm -f /tmp/temurin21.tar.gz && \
+    curl --fail --location \
+      --output logstash.tar.gz \
+      https://artifacts.elastic.co/downloads/logstash/logstash-oss-${LOGSTASH_VER}-linux-aarch64.tar.gz && \
+    tar -zxf logstash.tar.gz -C /usr/share && \
+    rm logstash.tar.gz && \
     mv /usr/share/logstash-${LOGSTASH_VER} /usr/share/logstash && \
-    rm -rf logstash-oss-${LOGSTASH_VER}-linux-aarch64.tar.gz && \
     rm -rf /usr/share/logstash/jdk && \
-    chown --recursive logstash:logstash /usr/share/logstash/ && \
     chown -R logstash:root /usr/share/logstash && \
     chmod -R g=u /usr/share/logstash && \
     find /usr/share/logstash -type d -exec chmod g+s {} \; && \
-    ln -s /usr/share/logstash /opt/logstash && \
-# Cleanup Cache data , unused packages and source files
-    apt-get remove -y wget curl && apt-get autoremove -y && \
-    apt-get clean all && \
-    apt-get clean metadata && \
-    rm -rf /var/lib/apt/lists/*
+    ln -s /usr/share/logstash /opt/logstash
+
+RUN curl --fail --location \
+      https://github.com/elastic/dockerfiles/archive/refs/tags/v${LOGSTASH_VER}.tar.gz \
+      -o /tmp/dockerfiles.tar.gz && \
+    tar -xzf /tmp/dockerfiles.tar.gz -C /tmp && \
+    mkdir -p /usr/share/logstash/env2yaml/classes && \
+    mkdir -p /usr/share/logstash/env2yaml/lib && \
+    cp -r /tmp/dockerfiles-${LOGSTASH_VER}/logstash/env2yaml/classes/* \
+        /usr/share/logstash/env2yaml/classes/ && \
+    cp -r /tmp/dockerfiles-${LOGSTASH_VER}/logstash/env2yaml/lib/* \
+        /usr/share/logstash/env2yaml/lib/ && \
+    install -m 0755 /tmp/dockerfiles-${LOGSTASH_VER}/logstash/env2yaml/env2yaml \
+        /usr/local/bin/env2yaml && \
+    rm -rf /tmp/dockerfiles*
+
+COPY --chown=logstash:root \
+    config/pipelines.yml \
+    config/log4j2.properties \
+    config/log4j2.file.properties \
+    /usr/share/logstash/config/
+
+COPY --chown=logstash:root \
+    config/logstash-oss.yml \
+    /usr/share/logstash/config/logstash.yml
+
+COPY --chown=logstash:root \
+    pipeline/default.conf \
+    /usr/share/logstash/pipeline/logstash.conf
+
+COPY --chmod=0755 \
+    bin/docker-entrypoint \
+    /usr/local/bin/
 
 WORKDIR /usr/share/logstash
-ENV ELASTIC_CONTAINER true
-ENV PATH=/usr/share/logstash/bin:$LS_JAVA_HOME/bin:$PATH
-
-# Provide a minimal configuration, so that simple invocations will provide
-# a good experience.
-COPY config/logstash-oss.yml config/logstash.yml
-COPY config/pipelines.yml config/log4j2.properties config/log4j2.file.properties config/
-COPY pipeline/default.conf pipeline/logstash.conf
-RUN chown --recursive logstash:root config/ pipeline/
-# Ensure Logstash gets the correct locale by default.
-RUN locale-gen en_US.UTF-8
-ENV LANG='en_US.UTF-8' LC_ALL='en_US.UTF-8'
-
-COPY --from=builder /go/env2yaml /usr/local/bin/
-
-# Place the startup wrapper script.
-COPY bin/docker-entrypoint /usr/local/bin/
-
-RUN chmod 0755 /usr/local/bin/docker-entrypoint
-
 
 USER 1000
 
