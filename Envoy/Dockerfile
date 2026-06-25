@@ -1,28 +1,28 @@
 # © Copyright IBM Corporation 2024, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Envoy version 1.36.3 #########
+########## Dockerfile for Envoy version 1.37.1 #########
 #
 # This Dockerfile builds a basic installation of Envoy.
 #
 #
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
-# docker build -t envoy:v1.36.3 .
+# docker build -t envoy:v1.37.1 .
 #
 # To start container from image & start an application in production mode
-# docker run -d --name envoy -p 9901:9901 -p 10000:10000 envoy:v1.36.3
+# docker run -d --name envoy -p 9901:9901 -p 10000:10000 envoy:v1.37.1
 # Reference:
 # https://github.com/envoyproxy/envoy
-# https://www.envoyproxy.io/docs/envoy/v1.36.3/start/docker
+# https://www.envoyproxy.io/docs/envoy/v1.37.1/start/docker
 #
 ##################################################################################
-FROM s390x/ubuntu:22.04 as builder
+FROM s390x/ubuntu:22.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 ENV SOURCE_ROOT=/tmp/source
-ENV PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Envoy/1.36.3/patch
+ENV PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Envoy/1.37.1/patch
 ENV PREFIX=/usr/local
 
 RUN  apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y sudo \
@@ -117,7 +117,7 @@ RUN export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-s390x \
     && sudo cp output/bazel /usr/local/bin/ \
 # Build rules_rust cargo bazel
     && cd "$SOURCE_ROOT" \
-    && git clone -b "0.56.0" --depth 1 https://github.com/bazelbuild/rules_rust.git \
+    && git clone -b "0.68.1" --depth 1 https://github.com/bazelbuild/rules_rust.git \
     && cd rules_rust/crate_universe/ \
     && cargo build --release --locked --bin cargo-bazel \
     && cp target/release/cargo-bazel "$SOURCE_ROOT"/ \
@@ -125,14 +125,14 @@ RUN export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-s390x \
     && cd "$SOURCE_ROOT"/ \
     && export PATH=$PATH:${SOURCE_ROOT}/bazel/output/ \
     && rm -rf envoy \
-    && git clone --depth 1 -b v1.36.3 https://github.com/envoyproxy/envoy.git \
+    && git clone --depth 1 -b v1.37.1 https://github.com/envoyproxy/envoy.git \
     && cd envoy \
-    && ./bazel/setup_clang.sh "${SOURCE_ROOT}/LLVM-18.1.8-Linux" \
     && echo "build --repo_env=CARGO_BAZEL_GENERATOR_URL=file:${SOURCE_ROOT}/cargo-bazel" >> user.bazelrc \
+    && echo "build --test_env=HEAPCHECK=" >> user.bazelrc \
+    && echo "test --test_env=HEAPCHECK=" >> user.bazelrc \
+    && echo "common --repo_env=BAZEL_LLVM_PATH=${LLVM_HOME_DIR}" >> user.bazelrc \
 # Apply patches
-    && curl -sSL $PATCH_URL/envoy-build.patch | git apply - \
-    && curl -sSL $PATCH_URL/envoy-gurl-backport.patch | git apply - \
-    && curl -sSL $PATCH_URL/envoy-test.patch | git apply - \
+    && curl -sSL $PATCH_URL/envoy.patch | git apply - \
     && curl -sSL $PATCH_URL/boringssl-s390x.patch > $SOURCE_ROOT/envoy/bazel/boringssl-s390x.patch \
     && curl -sSL $PATCH_URL/quiche-s390x.patch > $SOURCE_ROOT/envoy/bazel/external/quiche-s390x.patch \
     && curl -sSL $PATCH_URL/proxy_wasm_cpp_host-s390x.patch > $SOURCE_ROOT/envoy/bazel/proxy_wasm_cpp_host-s390x.patch \
@@ -143,8 +143,11 @@ RUN export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-s390x \
     && curl -sSL $PATCH_URL/highway-s390x.patch > $SOURCE_ROOT/envoy/bazel/highway-s390x.patch \
     && curl -sSL $PATCH_URL/luajit-as.patch > $SOURCE_ROOT/envoy/bazel/foreign_cc/luajit-as.patch \
     && curl -sSL $PATCH_URL/grpc-s390x.patch > $SOURCE_ROOT/envoy/bazel/grpc-s390x.patch \
+    && curl -sSL $PATCH_URL/toolchains_llvm-s390x.patch > $SOURCE_ROOT/envoy/bazel/toolchains_llvm-s390x.patch \
+    && curl -sSL $PATCH_URL/protobuf-s390x.patch > $SOURCE_ROOT/envoy/bazel/protobuf-s390x.patch \
 # Build envoy
-    && bazel build envoy.stripped -c opt --config=clang \
+    && bazel build envoy -c opt --config=clang --strip=always \
+    && strip bazel-bin/source/exe/envoy-static || true \
     && cd $SOURCE_ROOT/envoy/ \
 # Build su-exec
     && bazel build @com_github_ncopa_suexec//:su-exec -c opt --config=clang
@@ -166,6 +169,9 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
   && apt-get -qq upgrade -y \
   && apt-get -qq install --no-install-recommends -y ca-certificates tzdata libatomic1 \
   && apt-get -qq autoremove -y \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /var/cache/apt/* \
   && mkdir -p /usr/local/bin
 # Copy envoy.yaml
 COPY --from=builder --chown=0:0 --chmod=644 $SOURCE_ROOT/envoy/configs/envoyproxy_io_proxy.yaml /etc/envoy/envoy.yaml
@@ -173,4 +179,4 @@ COPY --from=builder --chown=0:0 --chmod=644 $SOURCE_ROOT/envoy/configs/envoyprox
 COPY --from=builder --chown=0:0 --chmod=755 $SOURCE_ROOT/envoy/bazel-bin/external/com_github_ncopa_suexec/su-exec /usr/local/bin/su-exec
 # Copy docker-entrypoint.sh
 COPY --from=builder --chown=0:0 --chmod=755 $SOURCE_ROOT/envoy/distribution/docker/docker-entrypoint.sh /
-COPY --from=builder --chown=0:0 --chmod=755 $SOURCE_ROOT/envoy/bazel-bin/source/exe/envoy-static.stripped /usr/local/bin/envoy
+COPY --from=builder --chown=0:0 --chmod=755 $SOURCE_ROOT/envoy/bazel-bin/source/exe/envoy-static /usr/local/bin/envoy
