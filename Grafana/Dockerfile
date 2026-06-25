@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 13.0.1 ############################################
+############################ Dockerfile for Grafana 13.0.2 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -17,10 +17,10 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=13.0.1
+ARG GRAFANA_VERSION=13.0.2
 
 ARG BASE_IMAGE=alpine:3.23
-ARG GO_IMAGE=golang:1.25.9-alpine
+ARG GO_IMAGE=golang:1.26.3-alpine
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
@@ -108,7 +108,7 @@ RUN if grep -i -q alpine /etc/issue; then \
     else \
         echo 'ERROR: Unsupported base image' && /bin/false; \
     fi && \
-    wget -O /tmp/grafana.tar.gz https://dl.grafana.com/oss/release/grafana-${GRAFANA_VERSION}.linux-amd64.tar.gz
+    wget -O /tmp/grafana.tar.gz https://dl.grafana.com/oss/release/grafana-${GRAFANA_VERSION}.linux-s390x.tar.gz
 
 # add -v to make tar print every file it extracts
 RUN tar x -z -f /tmp/grafana.tar.gz --strip-components=1
@@ -148,22 +148,6 @@ RUN if grep -i -q alpine /etc/issue; then \
       rm -rf /var/lib/apt/lists/*; \
     else \
       echo 'ERROR: Unsupported base image' && /bin/false; \
-    fi
-
-# glibc support for alpine x86_64 only
-RUN if grep -i -q alpine /etc/issue && [ `arch` = "x86_64" ]; then \
-      wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
-      wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glibc-2.35-r0.apk \
-        -O /tmp/glibc-2.35-r0.apk && \
-      wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glibc-bin-2.35-r0.apk \
-        -O /tmp/glibc-bin-2.35-r0.apk && \
-      apk add --force-overwrite --no-cache /tmp/glibc-2.35-r0.apk /tmp/glibc-bin-2.35-r0.apk && \
-      rm -f /lib64/ld-linux-x86-64.so.2 && \
-      ln -s /usr/glibc-compat/lib64/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2 && \
-      rm -f /tmp/glibc-2.35-r0.apk && \
-      rm -f /tmp/glibc-bin-2.35-r0.apk && \
-      rm -f /lib/ld-linux-x86-64.so.2 && \
-      rm -f /etc/ld.so.cache; \
     fi
 
 COPY --from=go-builder /tmp/grafana/conf ./conf
