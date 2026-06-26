@@ -25,15 +25,15 @@
 #
 ####################################################################################################################
 
-FROM s390x/ubuntu:22.04 as builder
+FROM s390x/ubuntu:22.04 AS builder
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
 ENV SOURCE_ROOT=/mysql-source
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR $SOURCE_ROOT
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/9.6.0/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/9.7.0/patch/"
 
 
 RUN apt-get update \
@@ -44,9 +44,9 @@ RUN apt-get update \
     libprotoc-dev libprotobuf-c-dev libprotobuf-dev protobuf-c-compiler protobuf-compiler \
     libcurl4-openssl-dev patchelf build-essential \
     && cd $SOURCE_ROOT \
-    && wget https://dev.mysql.com/get/Downloads/MySQL-9.6.0/mysql-9.6.0.tar.gz \
-    && tar xf mysql-9.6.0.tar.gz --strip-components=1 \
-    && rm -f mysql-9.6.0.tar.gz \
+    && wget https://dev.mysql.com/get/Downloads/MySQL-9.7.0/mysql-9.7.0.tar.gz \
+    && tar xf mysql-9.7.0.tar.gz --strip-components=1 \
+    && rm -f mysql-9.7.0.tar.gz \
     && curl -sSL ${PATCH_URL}/mt-asm.patch | git apply - \
     && curl -sSL ${PATCH_URL}/NdbHW.patch | git apply - \
     && curl -sSL ${PATCH_URL}/router-test.patch | git apply - \
@@ -66,7 +66,7 @@ FROM s390x/ubuntu:22.04
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ 'America/Toronto'
+ENV TZ=America/Toronto
 
 COPY --from=builder /mysql-common*.deb /mysql-community-client*.deb /mysql-community-server-core*.deb /
 
@@ -82,6 +82,7 @@ RUN groupadd -r mysql && useradd -r -g mysql mysql \
     xz-utils \
     zstd \
     gosu \
+    libcurl4 \
     libsasl2-2 libaio1 libmecab2 libnuma1 \
     libprotoc-dev libprotobuf-c-dev libprotobuf-dev \
     && gosu nobody true \
