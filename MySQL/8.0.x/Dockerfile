@@ -1,4 +1,4 @@
-# © Copyright IBM Corporation 2018, 2025.
+# © Copyright IBM Corporation 2018, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 ############################################ Dockerfile for MySQL 8.0.x #################################################
@@ -28,7 +28,7 @@
 FROM s390x/ubuntu:22.04
 
 # The Author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
 ENV PATH /usr/local/mysql/bin:$PATH 
 ENV DEBIAN_FRONTEND=noninteractive
