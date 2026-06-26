@@ -2,7 +2,7 @@
 # Copyright IBM Corporation 2025, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for pgvector 0.8.2 ############################################
+############################ Dockerfile for pgvector 0.8.3 ############################################
 #
 # This Dockerfile builds a basic installation of pgvector.
 #
@@ -21,7 +21,7 @@ ARG DEBIAN_CODENAME=bookworm
 FROM ubuntu:22.04 AS builder
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
 ARG PG_MAJOR
 ENV PG_SRC_DIR=/usr/local/src/postgresql
@@ -43,7 +43,7 @@ RUN wget https://ftp.postgresql.org/pub/source/v${PG_MAJOR}.0/postgresql-${PG_MA
     make install
 
 # Build pgvector
-RUN git clone -b v0.8.2 https://github.com/pgvector/pgvector.git /tmp/pgvector && \
+RUN git clone -b v0.8.3 https://github.com/pgvector/pgvector.git /tmp/pgvector && \
     cd /tmp/pgvector && \
     PATH=/usr/local/pgsql/bin:$PATH make OPTFLAGS="" && \
     PATH=/usr/local/pgsql/bin:$PATH make install && \
