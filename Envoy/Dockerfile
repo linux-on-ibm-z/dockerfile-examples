@@ -24,6 +24,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 ENV SOURCE_ROOT=/tmp/source
 ENV PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Envoy/1.37.1/patch
 ENV PREFIX=/usr/local
+ENV LLVM_HOME_DIR="${SOURCE_ROOT}/LLVM-18.1.8-Linux"
 
 RUN  apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y sudo \
      && sudo useradd -s /bin/bash -d /home/nonroot/ -m -G sudo nonroot \
@@ -131,6 +132,7 @@ RUN export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-s390x \
     && echo "build --test_env=HEAPCHECK=" >> user.bazelrc \
     && echo "test --test_env=HEAPCHECK=" >> user.bazelrc \
     && echo "common --repo_env=BAZEL_LLVM_PATH=${LLVM_HOME_DIR}" >> user.bazelrc \
+    && echo "common --@envoy_repo//:use_local_llvm_flag=True" >> user.bazelrc \
 # Apply patches
     && curl -sSL $PATCH_URL/envoy.patch | git apply - \
     && curl -sSL $PATCH_URL/boringssl-s390x.patch > $SOURCE_ROOT/envoy/bazel/boringssl-s390x.patch \
