@@ -1,7 +1,7 @@
-# © Copyright IBM Corporation 2017, 2025.
+# © Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############## Dockerfile for Apache Zeppelin version 0.12.0 ###############
+############## Dockerfile for Apache Zeppelin version 0.12.1 ###############
 #
 # This Dockerfile builds a basic installation of Apache Zeppelin.
 #
@@ -17,7 +17,7 @@
 # We can view the Apache Zeppelin UI at http://<zeppelin-host-ip>:<port_number>
 #
 # Reference:
-# http://zeppelin.apache.org/docs/0.12.0/index.html
+# http://zeppelin.apache.org/docs/0.12.1/index.html
 #
 #################################################################################
 
@@ -27,7 +27,7 @@ FROM s390x/ubuntu:22.04
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
-ENV Z_VERSION=0.12.0
+ENV Z_VERSION=0.12.1
 
 ENV LOG_TAG="[ZEPPELIN_${Z_VERSION}]:" \
     Z_HOME="/zeppelin" \
@@ -35,7 +35,8 @@ ENV LOG_TAG="[ZEPPELIN_${Z_VERSION}]:" \
     LC_ALL=en_US.UTF-8 \
     DEBIAN_FRONTEND=noninteractive \
     JAVA_HOME=/usr/lib/jvm/java-11-openjdk-s390x \
-    PATH=$JAVA_HOME/bin:$PATH \
+    PATH=/usr/lib/jvm/java-11-openjdk-s390x/bin:${PATH} \
+    PIP_NO_CACHE_DIR=1 \
     ZEPPELIN_ADDR="0.0.0.0"
 
 RUN echo "$LOG_TAG update and install basic packages" && \
@@ -46,16 +47,12 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     apt-get -y autoclean && \
     apt-get -y dist-upgrade && \
     apt-get install -y build-essential wget && \
-    echo "$LOG_TAG install tini related packages" && \
-    apt-get install -y apt-transport-https && \
-    wget -O tini-s390x https://github.com/krallin/tini/releases/download/v0.19.0/tini-s390x && \
-    mv tini-s390x /usr/bin/tini && \
-    chmod +x /usr/bin/tini && \
-    echo "$LOG_TAG Install java8" && \
+    echo "$LOG_TAG Install java 11" && \
     apt-get -y update && \
-    apt-get install -y openjdk-11-jdk && \
+    apt-get install -y openjdk-11-jdk tini && \
     apt-get -y update && DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata && \
-    # Note: intake-parquet and apache_beam python packages are not included on s390x
+    # Note: intake-parquet is not included on s390x because its pyarrow dependency
+    # requires Apache Arrow C++ development files when built from source.
     echo "$LOG_TAG Install python related packages" && \
     apt-add-repository universe && \
     apt-get -y update && \
@@ -70,7 +67,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     apt-get install -y libpng-dev libfreetype6-dev libxft-dev libjpeg-dev && \
     python -m pip install --upgrade pip==25.2 && \
     # for tkinter
-    apt-get install -y python3-tk libxml2-dev libxslt-dev zlib1g-dev && \
+    apt-get install -y python3-tk libxml2-dev libxslt-dev zlib1g-dev pkg-config libhdf5-dev libnetcdf-dev && \
     apt-get install -y python3-ipykernel && \
     apt-get install -y libzmq3-dev libcurl4-openssl-dev libssl-dev jupyter-core jupyter-client && \
     hash -r && \
@@ -96,10 +93,12 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     python -m pip install -q 'bokeh==3.8.0' && \
     python -m pip install -q panel && \
     python -m pip install -q holoviews && \
-    python -m pip install -q 'pyyaml==5.3.*' && \
+    python -m pip install -q 'pyyaml==6.0.3' && \
     python -m pip install -q seaborn && \
     python -m pip install -q plotnine==0.8.0 && \
     python -m pip install -q intake && \
+    python -m pip install -q intake-xarray==2.0.0 && \
+    python -m pip install -q vega_datasets==0.9.0 plotly==6.8.0 && \
     python -m pip install -q altair && \
     # for matplotlib
     python -m pip install -q matplotlib==3.5.1 && \
@@ -118,7 +117,7 @@ RUN echo "$LOG_TAG update and install basic packages" && \
     echo "$LOG_TAG Cleanup" && \
     apt-get -y autoclean && \
     apt-get -y clean && \
-    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/lib/apt/lists/* /root/.cache/pip /tmp/* /var/tmp/* && \
     echo "$LOG_TAG Download Zeppelin binary" && \
     wget --quiet -O /tmp/zeppelin-${Z_VERSION}-bin-all.tgz "https://dlcdn.apache.org/zeppelin/zeppelin-${Z_VERSION}/zeppelin-${Z_VERSION}-bin-all.tgz" && \
     tar -zxvf /tmp/zeppelin-${Z_VERSION}-bin-all.tgz && \
@@ -144,3 +143,4 @@ EXPOSE 8080
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 WORKDIR ${Z_HOME}
 CMD ["bin/zeppelin.sh"]
+
