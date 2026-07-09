@@ -1,8 +1,7 @@
 #!/bin/bash
-# © Copyright IBM Corporation 2024, 2025
+# © Copyright IBM Corporation 2024, 2026
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
-
 set -o errexit -o nounset -o pipefail
 
 apt-get update
@@ -13,11 +12,12 @@ export TZ="Etc/UTC"
 apt-get install --yes \
     build-essential \
     curl \
-    sudo \
     git \
-    openjdk-21-jdk-headless \
+    openjdk-8-jdk \
     python3 \
     python3-pip \
-    python-is-python3 \
     unzip \
-    zip
+    zip \
+    sudo
+
+ln -s "$(which python3)" /usr/bin/python
