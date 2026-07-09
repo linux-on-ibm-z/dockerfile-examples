@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-######################## Dockerfile for cAdvisor 0.57.0 #################################
+######################## Dockerfile for cAdvisor 0.60.3 #################################
 #
 # This Dockerfile builds a basic installation of cAdvisor.
 #
@@ -23,12 +23,12 @@
 ##########################################################################################
 
 # Base image
-FROM s390x/golang:1.24-alpine3.21 AS builder
+FROM golang:1.25-alpine3.23 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
-ARG CADVISOR_VER=0.57.0
+ARG CADVISOR_VER=0.60.3
 
 ENV SOURCE_DIR=/tmp/source
 WORKDIR $SOURCE_DIR
@@ -54,10 +54,16 @@ RUN apk update && apk add --no-cache \
  && apk del git
 
 # Multistage build
-FROM s390x/alpine:3.21
+FROM mirror.gcr.io/library/alpine:3.23
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 WORKDIR /root
+
+# Install runtime dependencies for s390x and configure host resolution
+RUN apk --no-cache add libc6-compat device-mapper findutils thin-provisioning-tools zfs && \
+    echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf && \
+    rm -rf /var/cache/apk/*
+
 COPY --from=builder /usr/bin/cadvisor /usr/bin/cadvisor
 # Port for cAdvisor
 EXPOSE 8080
