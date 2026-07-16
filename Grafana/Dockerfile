@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 13.0.2 ############################################
+############################ Dockerfile for Grafana 13.1.0 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -17,10 +17,10 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=13.0.2
+ARG GRAFANA_VERSION=13.1.0
 
 ARG BASE_IMAGE=alpine:3.23
-ARG GO_IMAGE=golang:1.26.3-alpine
+ARG GO_IMAGE=golang:1.26.4-alpine
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
@@ -56,6 +56,7 @@ COPY --from=go-src-builder /tmp/grafana/.citools .citools
 
 # Include vendored dependencies
 COPY --from=go-src-builder /tmp/grafana/pkg/util/xorm pkg/util/xorm
+COPY --from=go-src-builder /tmp/grafana/pkg/util/sqlite pkg/util/sqlite
 COPY --from=go-src-builder /tmp/grafana/pkg/apiserver pkg/apiserver
 COPY --from=go-src-builder /tmp/grafana/pkg/apimachinery pkg/apimachinery
 COPY --from=go-src-builder /tmp/grafana/pkg/build pkg/build
@@ -63,10 +64,8 @@ COPY --from=go-src-builder /tmp/grafana/pkg/build/wire pkg/build/wire
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resource pkg/storage/unified/resource
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resourcepb pkg/storage/unified/resourcepb
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore pkg/storage/unified/apistore
-COPY --from=go-src-builder /tmp/grafana/pkg/semconv pkg/semconv
 COPY --from=go-src-builder /tmp/grafana/pkg/aggregator pkg/aggregator
 COPY --from=go-src-builder /tmp/grafana/apps apps
-COPY --from=go-src-builder /tmp/grafana/kindsv2 kindsv2
 COPY --from=go-src-builder /tmp/grafana/pkg/codegen pkg/codegen
 COPY --from=go-src-builder /tmp/grafana/pkg/plugins pkg/plugins
 COPY --from=go-src-builder /tmp/grafana/pkg/infra/features pkg/infra/features
