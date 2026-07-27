@@ -1,0 +1,32 @@
+name: python_3_with_R
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pycodestyle
+  - scipy
+  - numpy
+  - protobuf
+  - pandasql
+  - ipython
+  - ipykernel
+  - jupyter_client
+  - bokeh==3.8.0
+  - panel
+  - holoviews
+  - hvplot
+  - plotnine
+  - seaborn
+  - matplotlib
+  - intake
+  - altair
+  - vega_datasets
+  - plotly
+  - pip
+  - pip:
+    - pybind11
+    - pandas==2.2.0
+    - bkzep==0.6.1
+    - pyyaml==6.0.3
+    - intake-xarray==2.0.0
