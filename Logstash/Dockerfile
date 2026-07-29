@@ -20,7 +20,7 @@
 
 FROM redhat/ubi9-minimal:latest
 
-ARG LOGSTASH_VER=9.4.2
+ARG LOGSTASH_VER=9.4.3
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
@@ -82,6 +82,7 @@ RUN curl --fail --location \
         /usr/share/logstash/env2yaml/lib/ && \
     install -m 0755 /tmp/dockerfiles-${LOGSTASH_VER}/logstash/env2yaml/env2yaml \
         /usr/local/bin/env2yaml && \
+    sed -i 's#exec /usr/share/logstash/jdk/bin/java#exec "${LS_JAVA_HOME}/bin/java"#' /usr/local/bin/env2yaml && \
     rm -rf /tmp/dockerfiles*
 
 COPY --chown=logstash:root \
