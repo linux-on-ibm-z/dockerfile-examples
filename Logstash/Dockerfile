@@ -20,7 +20,7 @@
 
 FROM redhat/ubi9-minimal:latest
 
-ARG LOGSTASH_VER=9.4.3
+ARG LOGSTASH_VER=9.4.4
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
