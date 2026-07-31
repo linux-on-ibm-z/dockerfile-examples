@@ -33,7 +33,7 @@ ENV SOURCE_ROOT=/mysql-source
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR $SOURCE_ROOT
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/9.7.0/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/9.7.1/patch/"
 
 
 RUN apt-get update \
@@ -44,14 +44,17 @@ RUN apt-get update \
     libprotoc-dev libprotobuf-c-dev libprotobuf-dev protobuf-c-compiler protobuf-compiler \
     libcurl4-openssl-dev patchelf build-essential \
     && cd $SOURCE_ROOT \
-    && wget https://dev.mysql.com/get/Downloads/MySQL-9.7.0/mysql-9.7.0.tar.gz \
-    && tar xf mysql-9.7.0.tar.gz --strip-components=1 \
-    && rm -f mysql-9.7.0.tar.gz \
+    && wget https://dev.mysql.com/get/Downloads/MySQL-9.7.1/mysql-9.7.1.tar.gz \
+    && tar xf mysql-9.7.1.tar.gz --strip-components=1 \
+    && rm -f mysql-9.7.1.tar.gz \
     && curl -sSL ${PATCH_URL}/mt-asm.patch | git apply - \
     && curl -sSL ${PATCH_URL}/NdbHW.patch | git apply - \
     && curl -sSL ${PATCH_URL}/router-test.patch | git apply - \
     && curl -sSL ${PATCH_URL}/ut0rnd.patch | git apply - \
-    && mkdir build && cd build \
+	&& curl -sSL ${PATCH_URL}/type-vector.patch | git apply - \
+	&& curl -sSL ${PATCH_URL}/loaddata.patch | git apply - \
+	&& curl -sSL ${PATCH_URL}/gunit-test.patch | git apply - \
+	&& mkdir build && cd build \
     && cmake .. -DWITH_SSL=system -DWITH_PROTOBUF=system -DWITH_KERBEROS=system -DWITH_FIDO=system -DBUILD_CONFIG=mysql_release -DDEB_CODENAME=jammy -DDEB_ID=ubuntu -DDEB_RELEASE=22.04 \
     && sed -i '54i \\t\t-DWITH_AUTHENTICATION_CLIENT_PLUGINS=ON \\' debian/rules \
     && sed -i 's/make test-unit/@echo "skipping tests"/' debian/rules \
