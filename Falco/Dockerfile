@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2026
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for Falco 0.43.1 ####################
+################## Dockerfile for Falco 0.44.1 ####################
 #
 # This Dockerfile builds a basic installation of Falco.
 #
@@ -22,9 +22,9 @@
 # Base image
 FROM s390x/ubuntu:22.04 AS builder
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 WORKDIR /home/root/
-ARG VERSION=0.43.1
+ARG VERSION=0.44.1
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -49,6 +49,8 @@ RUN curl  -SLO https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/F
 RUN strip /usr/bin/falco || true
 
 FROM s390x/ubuntu:22.04
+
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/developerworks/community/groups/community/lozopensource)"
 
 LABEL RUN="docker run -i -t --privileged --name NAME -v /var/run/docker.sock:/host/var/run/docker.sock -v /proc:/host/proc:ro  -v /etc:/host/etc:ro -v /sys/kernel/tracing:/sys/kernel/tracing:ro IMAGE"
 
