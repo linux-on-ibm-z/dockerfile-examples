@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2025, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Cassandra version 4.1.10 #########
+########## Dockerfile for Cassandra version 4.1.11 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -18,11 +18,11 @@
 #
 #################################################################################
 
-FROM debian:bookworm-slim as builder
+FROM debian:bookworm-slim AS builder
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
-ARG CASSANDRA_VER=4.1.10
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
+ARG CASSANDRA_VER=4.1.11
 
 ENV SOURCE_ROOT=/tmp/source \
     CASSANDRA_USE_JDK11=true
@@ -133,7 +133,7 @@ RUN set -eux; \
 
 # grab gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
-ENV GOSU_VERSION 1.19
+ENV GOSU_VERSION=1.19
 RUN set -eux; \
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
@@ -154,15 +154,15 @@ RUN set -eux; \
 	gosu --version; \
 	gosu nobody true
 
-ENV JAVA_HOME /opt/java/openjdk
+ENV JAVA_HOME=/opt/java/openjdk
 COPY --from=eclipse-temurin:11-jre $JAVA_HOME $JAVA_HOME
-ENV PATH $JAVA_HOME/bin:$PATH
+ENV PATH=$JAVA_HOME/bin:$PATH
 RUN java --version
 
-ENV CASSANDRA_HOME /opt/cassandra
-ENV CASSANDRA_CONF /etc/cassandra
-ENV PATH $CASSANDRA_HOME/bin:$PATH
-ENV CASSANDRA_VERSION 4.1.10
+ENV CASSANDRA_HOME=/opt/cassandra
+ENV CASSANDRA_CONF=/etc/cassandra
+ENV PATH=$CASSANDRA_HOME/bin:$PATH
+ENV CASSANDRA_VERSION=4.1.11
 
 
 RUN mkdir -p "$CASSANDRA_HOME";
