@@ -94,7 +94,7 @@ RUN set -eux; \
 
 FROM eclipse-temurin:21-jdk-noble
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
 ENV LANG='en_US.UTF-8' \
     LANGUAGE='en_US:en' \
