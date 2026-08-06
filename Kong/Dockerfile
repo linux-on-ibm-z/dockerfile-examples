@@ -83,8 +83,15 @@ RUN wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Kong/${
     echo "export GITHUB_TOKEN=${GITHUB_TOKEN}" >> /etc/environment && \
     bash /usr/local/build_kong.sh -y
 
-# Remove dangling Bazel symlinks, copy proto include files, and populate bazel-bin
+# Install Kong's Lua sources into the luarocks tree so they appear on LUA_PATH
+# at runtime. 'make build-kong' only builds native components; the Kong Lua
+# modules (kong/globalpatches.lua etc.) must be installed via luarocks make.
+# This is required for 'docker exec' sessions which do not invoke the
+# entrypoint and therefore cannot rely on ./?.lua resolving to the source tree.
+# Then resolve dangling Bazel symlinks and copy proto include files.
 RUN cd /usr/local/kong && \
+    . bazel-bin/build/kong-dev-venv.sh && \
+    luarocks make && \
     BAZEL_OUT_DIR=$(find /root/.cache/bazel -name "kong-dev" -type d | head -n 1 | sed 's|/kong-dev$||') && \
     rm -rf bazel-* && \
     mkdir -p bazel-bin/build && \
@@ -129,7 +136,27 @@ RUN apt-get update \
     && ln -sf /usr/local/kong/bazel-bin/build/kong-dev/openresty/nginx/sbin/nginx /usr/local/openresty/nginx/sbin/nginx \
     && . /home/kong/kong.env && kong version
 
-ENV PATH="/usr/local/kong/bin:${PATH}"
+ENV LUA_PATH="./?.lua;./?/init.lua;/?.lua;/?/init.lua;\
+/usr/local/kong/bazel-bin/build/kong-dev/share/lua/5.1/?.lua;\
+/usr/local/kong/bazel-bin/build/kong-dev/share/lua/5.1/?.ljbc;\
+/usr/local/kong/bazel-bin/build/kong-dev/share/lua/5.1/?/init.lua;\
+/usr/local/kong/bazel-bin/build/kong-dev/share/lua/5.1/?/init.ljbc;\
+/usr/local/kong/bazel-bin/build/kong-dev/openresty/site/lualib/?.lua;\
+/usr/local/kong/bazel-bin/build/kong-dev/openresty/site/lualib/?.ljbc;\
+/usr/local/kong/bazel-bin/build/kong-dev/openresty/site/lualib/?/init.lua;\
+/usr/local/kong/bazel-bin/build/kong-dev/openresty/site/lualib/?/init.ljbc;\
+/usr/local/kong/bazel-bin/build/kong-dev/openresty/lualib/?.lua;\
+/usr/local/kong/bazel-bin/build/kong-dev/openresty/lualib/?.ljbc;\
+/usr/local/kong/bazel-bin/build/kong-dev/openresty/lualib/?/init.lua;\
+/usr/local/kong/bazel-bin/build/kong-dev/openresty/lualib/?/init.ljbc;\
+/usr/local/kong/bazel-bin/build/kong-dev/openresty/luajit/share/luajit-2.1/?.lua;;" \
+    LUA_CPATH="/usr/local/kong/bazel-bin/build/kong-dev/openresty/site/lualib/?.so;\
+/usr/local/kong/bazel-bin/build/kong-dev/openresty/lualib/?.so;\
+./?.so;\
+/usr/local/kong/bazel-bin/build/kong-dev/lib/lua/5.1/?.so;\
+/usr/local/kong/bazel-bin/build/kong-dev/openresty/luajit/lib/lua/5.1/?.so;\
+/usr/local/kong/bazel-bin/build/kong-dev/lib/lua/5.1/?.so;;" \
+    PATH="/usr/local/kong/bin:${PATH}"
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /docker-entrypoint.sh
