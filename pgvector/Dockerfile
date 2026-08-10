@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Copyright IBM Corporation 2025, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
@@ -14,7 +15,7 @@
 #
 ################################################################################################################
 ARG PG_MAJOR=17
-ARG DEBIAN_CODENAME=bookworm
+ARG DEBIAN_CODENAME=trixie
 
 # Build PostgreSQL + pgvector
 FROM ubuntu:22.04 AS builder
@@ -56,3 +57,5 @@ COPY --from=builder /usr/local/pgsql /usr/local/pgsql
 
 # Update PATH so postgres uses our custom build
 ENV PATH="/usr/local/pgsql/bin:$PATH"
+
+
