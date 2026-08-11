@@ -18,7 +18,7 @@
 #
 #################################################################################
 
-FROM debian:bookworm-slim as builder
+FROM debian:trixie-slim AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
@@ -103,7 +103,7 @@ cmake \
     && git clone -b netty-4.1.119.Final https://github.com/netty/netty.git \
     && cd netty \
     && sed -i 's/2.0.71/2.0.70/g' pom.xml \
-    && mvn install -DskipTests -Dmaven.javadoc.skip=true \
+    && ./mvnw install -DskipTests -Dmaven.javadoc.skip=true \
 # Build Apache Cassandra
     && cd $SOURCE_ROOT \
     && git clone -b cassandra-$CASSANDRA_VER https://github.com/apache/cassandra.git \
@@ -129,7 +129,7 @@ cmake \
     && rm -rf /var/lib/apt/lists/*
 #End of builder stage    
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 # explicitly set user/group IDs
 RUN set -eux; \

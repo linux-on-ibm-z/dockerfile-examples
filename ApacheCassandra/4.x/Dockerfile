@@ -18,7 +18,7 @@
 #
 #################################################################################
 
-FROM debian:bookworm-slim AS builder
+FROM debian:trixie-slim AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
@@ -62,7 +62,7 @@ maven \
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
     && wget -q https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/build_netty.sh  \
-    && bash build_netty.sh -y -j Temurin11 \
+	&& bash build_netty.sh -y -j Temurin11 \
 # Build netty
     && cd $SOURCE_ROOT \
     && git clone -b netty-4.1.58.Final https://github.com/netty/netty.git \
@@ -102,7 +102,7 @@ maven \
     && rm -rf /var/lib/apt/lists/*
 #End of builder stage    
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 # explicitly set user/group IDs
 RUN set -eux; \
