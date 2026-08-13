@@ -1,28 +1,28 @@
 # © Copyright IBM Corporation 2024, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Envoy version 1.37.1 #########
+########## Dockerfile for Envoy version 1.39.0 #########
 #
 # This Dockerfile builds a basic installation of Envoy.
 #
 #
 # To build this image, from the directory containing this Dockerfile
 # (assuming that the file is named Dockerfile):
-# docker build -t envoy:v1.37.1 .
+# docker build -t envoy:v1.39.0 .
 #
 # To start container from image & start an application in production mode
-# docker run -d --name envoy -p 9901:9901 -p 10000:10000 envoy:v1.37.1
+# docker run -d --name envoy -p 9901:9901 -p 10000:10000 envoy:v1.39.0
 # Reference:
 # https://github.com/envoyproxy/envoy
-# https://www.envoyproxy.io/docs/envoy/v1.37.1/start/docker
+# https://www.envoyproxy.io/docs/envoy/v1.39.0/start/docker
 #
 ##################################################################################
 FROM s390x/ubuntu:22.04 AS builder
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 ENV SOURCE_ROOT=/tmp/source
-ENV PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Envoy/1.37.1/patch
+ENV PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Envoy/1.39.0/patch
 ENV PREFIX=/usr/local
 ENV LLVM_HOME_DIR="${SOURCE_ROOT}/LLVM-18.1.8-Linux"
 
@@ -103,22 +103,22 @@ RUN export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-s390x \
     && export PATH=$HOME/.cargo/bin:$PATH \
 # Install Golang
     && cd "$SOURCE_ROOT" \
-    && wget https://go.dev/dl/go1.24.6.linux-s390x.tar.gz \
-    && sudo tar -C /usr/local -xzf go1.24.6.linux-s390x.tar.gz \
+    && wget https://go.dev/dl/go1.25.0.linux-s390x.tar.gz \
+    && sudo tar -C /usr/local -xzf go1.25.0.linux-s390x.tar.gz \
     && export PATH=/usr/local/go/bin:$PATH \
     && export GOROOT=/usr/local/go \
     && export GOPATH=$SOURCE_ROOT/go/bin \
 # Build bazel
     && cd "$SOURCE_ROOT" \
     && mkdir bazel && cd bazel \
-    && wget https://github.com/bazelbuild/bazel/releases/download/7.7.1/bazel-7.7.1-dist.zip \
-    && unzip -q bazel-7.7.1-dist.zip \
+    && wget https://github.com/bazelbuild/bazel/releases/download/8.7.0/bazel-8.7.0-dist.zip \
+    && unzip -q bazel-8.7.0-dist.zip \
     && chmod -R +w . \
-    && env EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" BAZEL_DEV_VERSION_OVERRIDE="7.7.1" bash ./compile.sh \
+    && env EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" BAZEL_DEV_VERSION_OVERRIDE="8.7.0" bash ./compile.sh \
     && sudo cp output/bazel /usr/local/bin/ \
 # Build rules_rust cargo bazel
     && cd "$SOURCE_ROOT" \
-    && git clone -b "0.68.1" --depth 1 https://github.com/bazelbuild/rules_rust.git \
+    && git clone -b "0.69.0" --depth 1 https://github.com/bazelbuild/rules_rust.git \
     && cd rules_rust/crate_universe/ \
     && cargo build --release --locked --bin cargo-bazel \
     && cp target/release/cargo-bazel "$SOURCE_ROOT"/ \
@@ -126,7 +126,7 @@ RUN export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-s390x \
     && cd "$SOURCE_ROOT"/ \
     && export PATH=$PATH:${SOURCE_ROOT}/bazel/output/ \
     && rm -rf envoy \
-    && git clone --depth 1 -b v1.37.1 https://github.com/envoyproxy/envoy.git \
+    && git clone --depth 1 -b v1.39.0 https://github.com/envoyproxy/envoy.git \
     && cd envoy \
     && echo "build --repo_env=CARGO_BAZEL_GENERATOR_URL=file:${SOURCE_ROOT}/cargo-bazel" >> user.bazelrc \
     && echo "build --test_env=HEAPCHECK=" >> user.bazelrc \
@@ -147,16 +147,25 @@ RUN export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-s390x \
     && curl -sSL $PATCH_URL/grpc-s390x.patch > $SOURCE_ROOT/envoy/bazel/grpc-s390x.patch \
     && curl -sSL $PATCH_URL/toolchains_llvm-s390x.patch > $SOURCE_ROOT/envoy/bazel/toolchains_llvm-s390x.patch \
     && curl -sSL $PATCH_URL/protobuf-s390x.patch > $SOURCE_ROOT/envoy/bazel/protobuf-s390x.patch \
+    && curl -sSL $PATCH_URL/v8-s390x.patch > $SOURCE_ROOT/envoy/bazel/v8-s390x.patch \
 # Build envoy
     && bazel build envoy -c opt --config=clang --strip=always \
-    && strip bazel-bin/source/exe/envoy-static || true \
     && cd $SOURCE_ROOT/envoy/ \
 # Build su-exec
-    && bazel build @com_github_ncopa_suexec//:su-exec -c opt --config=clang
-
-FROM s390x/ubuntu:22.04
+    && bazel build @su-exec//:su-exec -c opt --config=clang \
+# Prepare runtime files and strip binaries to optimize image size
+    && mkdir -p /tmp/bin \
+    && cp -f $SOURCE_ROOT/envoy/bazel-bin/source/exe/envoy-static /tmp/bin/envoy \
+    && cp -f $SOURCE_ROOT/envoy/bazel-bin/external/su-exec/su-exec /tmp/bin/su-exec \
+    && cp -f $SOURCE_ROOT/envoy/configs/envoyproxy_io_proxy.yaml /tmp/bin/envoyproxy_io_proxy.yaml \
+    && cp -f $SOURCE_ROOT/envoy/distribution/docker/docker-entrypoint.sh /tmp/bin/docker-entrypoint.sh \
+    && chmod +w /tmp/bin/envoy /tmp/bin/su-exec \
+    && strip --strip-all /tmp/bin/envoy \
+    && strip --strip-all /tmp/bin/su-exec
+# STAGE: envoy-base
+FROM s390x/ubuntu:22.04 AS envoy-base
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 ENV SOURCE_ROOT=/tmp/source
 ENV DEBIAN_FRONTEND=noninteractive
 #Expose the port for envoy
@@ -166,19 +175,16 @@ RUN mkdir -p /etc/envoy \
     && adduser --group --system envoy
 ENTRYPOINT ["/docker-entrypoint.sh"]
 RUN --mount=type=tmpfs,target=/var/cache/apt \
-  --mount=type=tmpfs,target=/var/lib/apt/lists \
-  apt-get -qq update \
-  && apt-get -qq upgrade -y \
-  && apt-get -qq install --no-install-recommends -y ca-certificates tzdata libatomic1 \
-  && apt-get -qq autoremove -y \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
-  && rm -rf /var/cache/apt/* \
-  && mkdir -p /usr/local/bin
-# Copy envoy.yaml
-COPY --from=builder --chown=0:0 --chmod=644 $SOURCE_ROOT/envoy/configs/envoyproxy_io_proxy.yaml /etc/envoy/envoy.yaml
-# Copy su-exec binary
-COPY --from=builder --chown=0:0 --chmod=755 $SOURCE_ROOT/envoy/bazel-bin/external/com_github_ncopa_suexec/su-exec /usr/local/bin/su-exec
-# Copy docker-entrypoint.sh
-COPY --from=builder --chown=0:0 --chmod=755 $SOURCE_ROOT/envoy/distribution/docker/docker-entrypoint.sh /
-COPY --from=builder --chown=0:0 --chmod=755 $SOURCE_ROOT/envoy/bazel-bin/source/exe/envoy-static /usr/local/bin/envoy
+    --mount=type=tmpfs,target=/var/lib/apt/lists \
+    apt-get -qq update \
+    && apt-get -qq upgrade -y \
+    && apt-get -qq install --no-install-recommends -y ca-certificates tzdata libatomic1 \
+    && apt-get -qq autoremove -y
+# STAGE: envoy
+FROM envoy-base AS envoy
+COPY --from=builder --chown=0:0 --chmod=644 /tmp/bin/envoyproxy_io_proxy.yaml /etc/envoy/envoy.yaml
+COPY --from=builder --chown=0:0 --chmod=755 /tmp/bin/su-exec /usr/local/bin/su-exec
+COPY --from=builder --chown=0:0 --chmod=755 /tmp/bin/docker-entrypoint.sh /
+COPY --from=builder --chown=0:0 --chmod=755 /tmp/bin/envoy /usr/local/bin/envoy
+# Set final image to envoy
+FROM envoy
