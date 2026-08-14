@@ -40,13 +40,14 @@ RUN apt-get update \
     libiconv-hook-dev liblzma-dev libbz2-dev libxslt-dev libc-ares-dev libprotobuf-dev \
     protobuf-compiler libcrypto++-dev libtool perl ant libffi-dev rapidjson-dev automake \
     make git maven ninja-build unzip bzip2 wget curl xz-utils texinfo diffutils liblua5.3-dev \
-    libnuma-dev libunistring-dev pigz ragel stow patch locales valgrind software-properties-common\
-    libudev-dev libdeflate-dev zlib1g-dev doxygen librapidxml-dev sudo patchelf gawk ethtool hwloc\
+    libnuma-dev libunistring-dev pigz ragel stow patch locales valgrind software-properties-common \
+    libudev-dev libdeflate-dev zlib1g-dev doxygen librapidxml-dev sudo patchelf gawk ethtool hwloc \
     libjsoncpp-dev libzstd-dev libxxhash-dev libboost-all-dev gdb devscripts dh-make \
     liblz4-dev cmake libhwloc-dev libyaml-cpp-dev wabt antlr3 net-tools openjdk-11-jdk \
     gcc-12 g++-12 python3 python3-pip python3-aiohttp python3-magic \
     python3-colorama python3-tabulate python3-boto3 python3-pytest python3-pytest-asyncio \
     python3-redis python3-unidiff python3-humanfriendly python3-jinja2 python3-geomet python3-treelib \
+    python3-setuptools python3-pkg-resources python3-venv zip \
   && pip3 install --user --break-system-packages scylla-driver traceback-with-variables scylla-api-client allure-pytest \
   && python3 --version \
 #######################################################################
@@ -125,6 +126,17 @@ RUN apt-get update \
   && touch /etc/crypto-policies/back-ends/gnutls.config \
   && cd "$SOURCE_ROOT"/scylla \
   && echo "setuptools==$(python3 -c 'import setuptools; print(setuptools.__version__)')" > $SOURCE_ROOT/scylla/constraints.txt \
+  && python3 -m pip download --no-deps --dest /tmp/scylla-driver-sdist "scylla-driver==3.26.9" \
+  && cd /tmp/scylla-driver-sdist \
+  && tar xzf scylla_driver-3.26.9.tar.gz \
+  && sed -i 's/self\.chown(tarinfo,/self.chown(tarinfo, True,/g' /tmp/scylla-driver-sdist/scylla_driver-3.26.9/ez_setup.py \
+  && sed -i 's/import pkg_resources/import pkg_resources  # noqa/' /tmp/scylla-driver-sdist/scylla_driver-3.26.9/ez_setup.py \
+  && python3 -m pip wheel --wheel-dir /tmp/scylla-driver-wheels /tmp/scylla-driver-sdist/scylla_driver-3.26.9 --no-build-isolation \
+  && mkdir -p /root/.config/pip \
+  && printf '[global]\nfind-links = /tmp/scylla-driver-wheels\n' > /etc/pip.conf \
+  && printf '[global]\nfind-links = /tmp/scylla-driver-wheels\n' > /root/.config/pip/pip.conf \
+  && echo "scylla-driver==3.26.9" >> $SOURCE_ROOT/scylla/constraints.txt \
+  && cd "$SOURCE_ROOT"/scylla \
   && PIP_CONSTRAINT=$SOURCE_ROOT/scylla/constraints.txt ninja dist-deb \
 #######################################################################
   && rm -rf $SOURCE_ROOT/antlr3-3.5.2 \
