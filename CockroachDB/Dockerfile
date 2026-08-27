@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################################### Dockerfile for CockroachDB version 25.4.10 ####################################
+#################################### Dockerfile for CockroachDB version 25.4.15 ####################################
 #
 # To build CockroachDB image from the directory containing this Dockerfile
 # (assuming that the file is named "Dockerfile"):
@@ -37,16 +37,16 @@ RUN mkdir -p /cockroach \
 RUN export SOURCE_ROOT=/tmp/source \
     && mkdir -p ${SOURCE_ROOT} \
     && cd ${SOURCE_ROOT} \
-    && wget https://binaries.cockroachdb.com/cockroach-v25.4.10.linux-s390x.tgz \
-    && tar zxf cockroach-v25.4.10.linux-s390x.tgz \
-    && cp ${SOURCE_ROOT}/cockroach-v25.4.10.linux-s390x/cockroach /cockroach/ \
-    && cp ${SOURCE_ROOT}/cockroach-v25.4.10.linux-s390x/lib/libgeos.so /usr/local/lib/cockroach/ \
-    && cp ${SOURCE_ROOT}/cockroach-v25.4.10.linux-s390x/lib/libgeos_c.so /usr/local/lib/cockroach/ \
-    && cp ${SOURCE_ROOT}/cockroach-v25.4.10.linux-s390x/LICENSE /licenses/ \
-    && cp ${SOURCE_ROOT}/cockroach-v25.4.10.linux-s390x/THIRD-PARTY-NOTICES.txt /licenses/ 
+    && wget https://binaries.cockroachdb.com/cockroach-v25.4.15.linux-s390x.tgz \
+    && tar zxf cockroach-v25.4.15.linux-s390x.tgz \
+    && cp ${SOURCE_ROOT}/cockroach-v25.4.15.linux-s390x/cockroach /cockroach/ \
+    && cp ${SOURCE_ROOT}/cockroach-v25.4.15.linux-s390x/lib/libgeos.so /usr/local/lib/cockroach/ \
+    && cp ${SOURCE_ROOT}/cockroach-v25.4.15.linux-s390x/lib/libgeos_c.so /usr/local/lib/cockroach/ \
+    && cp ${SOURCE_ROOT}/cockroach-v25.4.15.linux-s390x/LICENSE /licenses/ \
+    && cp ${SOURCE_ROOT}/cockroach-v25.4.15.linux-s390x/THIRD-PARTY-NOTICES.txt /licenses/ 
 
 RUN wget -O /cockroach/cockroach.sh \
-    https://raw.githubusercontent.com/cockroachdb/cockroach/refs/tags/v25.4.10/build/deploy/cockroach.sh \
+    https://raw.githubusercontent.com/cockroachdb/cockroach/refs/tags/v25.4.15/build/deploy/cockroach.sh \
     && chmod +x /cockroach/cockroach.sh
 
 # Set working directory so that relative paths
