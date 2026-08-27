@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 13.1.3 ############################################
+############################ Dockerfile for Grafana 13.2.0 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -17,10 +17,10 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=13.1.3
+ARG GRAFANA_VERSION=13.2.0
 
-ARG BASE_IMAGE=alpine:3.23
-ARG GO_IMAGE=golang:1.26.5-alpine
+ARG BASE_IMAGE=alpine:3.24.1
+ARG GO_IMAGE=golang:1.26.6-alpine
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
@@ -64,7 +64,6 @@ COPY --from=go-src-builder /tmp/grafana/pkg/build/wire pkg/build/wire
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resource pkg/storage/unified/resource
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resourcepb pkg/storage/unified/resourcepb
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore pkg/storage/unified/apistore
-COPY --from=go-src-builder /tmp/grafana/pkg/aggregator pkg/aggregator
 COPY --from=go-src-builder /tmp/grafana/apps apps
 COPY --from=go-src-builder /tmp/grafana/pkg/codegen pkg/codegen
 COPY --from=go-src-builder /tmp/grafana/pkg/plugins pkg/plugins
@@ -96,7 +95,7 @@ ARG GRAFANA_VERSION
 WORKDIR /tmp/grafana
 
 RUN if grep -i -q alpine /etc/issue; then \
-        apk add --no-cache ca-certificates bash curl tzdata musl-utils && \
+        apk add --no-cache ca-certificates bash bubblewrap curl tzdata musl-utils && \
         apk info -vv | sort; \
     elif grep -i -q ubuntu /etc/issue; then \
         DEBIAN_FRONTEND=noninteractive && \
@@ -137,7 +136,7 @@ WORKDIR $GF_PATHS_HOME
 
 # Install dependencies
 RUN if grep -i -q alpine /etc/issue; then \
-      apk add --no-cache ca-certificates bash curl tzdata musl-utils && \
+      apk add --no-cache ca-certificates bash bubblewrap curl tzdata musl-utils && \
       apk info -vv | sort; \
     elif grep -i -q ubuntu /etc/issue; then \
       DEBIAN_FRONTEND=noninteractive && \
