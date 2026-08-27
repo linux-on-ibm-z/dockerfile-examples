@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2018, 2026.
 # LICENSE: GPL v3 license, Version 3 (http://www.gnu.org/licenses)
 
-########## Dockerfile for Neo4j version 5.26.28 ##################################
+########## Dockerfile for Neo4j version 5.26.30 ##################################
 #
 # This Dockerfile builds a basic installation of Neo4j.
 #
@@ -18,7 +18,7 @@
 ##################################################################################
 
 FROM redhat/ubi10-minimal:latest as builder
-ARG NEO4J_VER=5.26.28
+ARG NEO4J_VER=5.26.30
 
 ENV SOURCE_ROOT=/tmp
 ENV MAVEN_OPTS="-Xmx2048m -Xss8m"
@@ -81,7 +81,7 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}" \
     NEO4J_EDITION=community \
     NEO4J_HOME="/var/lib/neo4j" \
     LANG=C.UTF-8
-ARG NEO4J_VER=5.26.28
+ARG NEO4J_VER=5.26.30
 
 COPY --from=builder /tmp/neo4j-community-${NEO4J_VER}-SNAPSHOT /var/lib/neo4j-community-"${NEO4J_VER}"
 
