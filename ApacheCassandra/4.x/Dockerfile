@@ -1,7 +1,7 @@
-# Copyright IBM Corporation 2025, 2026.
+# Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Cassandra version 4.1.11 #########
+########## Dockerfile for Cassandra version 4.1.12 #########
 #
 # This Dockerfile builds a basic installation of Cassandra.
 #
@@ -22,7 +22,8 @@ FROM debian:trixie-slim AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
-ARG CASSANDRA_VER=4.1.11
+ARG CASSANDRA_VER=4.1.12
+ARG PYTHON_VERSION=3.11.4
 
 ENV SOURCE_ROOT=/tmp/source \
     CASSANDRA_USE_JDK11=true
@@ -58,6 +59,15 @@ locales-all \
 unzip \
 python3-dev \
 maven \
+libssl-dev \
+zlib1g-dev \
+libbz2-dev \
+libffi-dev \
+liblzma-dev \
+libreadline-dev \
+libsqlite3-dev \
+libncurses-dev \
+xz-utils \
 # Build netty-tcnative
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
@@ -84,9 +94,18 @@ maven \
     && curl -o cassandra.patch https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheCassandra/$CASSANDRA_VER/patch/cassandra.patch \
     && git apply --ignore-whitespace cassandra.patch \
     && ant \
+# Build Python 3.11 for cqlsh
+    && cd $SOURCE_ROOT \
+    && wget -q https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz \
+    && tar -xzf Python-${PYTHON_VERSION}.tgz \
+    && cd Python-${PYTHON_VERSION} \
+    && ./configure --prefix=/opt/python311 \
+    && make -j"$(nproc)" \
+    && make install \
 # Copy required libs
     && mkdir -p /cassandra_libs \
     && cp -r $SOURCE_ROOT/cassandra /cassandra_libs \
+	&& cp -r /opt/python311 /cassandra_libs/python311 \
     && cp -r $SOURCE_ROOT/netty-tcnative/boringssl-static/target/native-jar-work/META-INF/native/libnetty_tcnative_linux_s390_64.so /cassandra_libs \
     && cp -r $SOURCE_ROOT/netty/transport-native-epoll/target/classes/META-INF/native/libnetty_transport_native_epoll_s390_64.so /cassandra_libs \
 # Cleanup
@@ -162,8 +181,11 @@ RUN java --version
 ENV CASSANDRA_HOME=/opt/cassandra
 ENV CASSANDRA_CONF=/etc/cassandra
 ENV PATH=$CASSANDRA_HOME/bin:$PATH
-ENV CASSANDRA_VERSION=4.1.11
+ENV CASSANDRA_VERSION=4.1.12
 
+COPY --from=builder /cassandra_libs/python311 /opt/python311
+
+ENV CQLSH_PYTHON=/opt/python311/bin/python3.11
 
 RUN mkdir -p "$CASSANDRA_HOME";
 
