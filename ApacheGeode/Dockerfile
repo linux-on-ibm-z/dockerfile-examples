@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Apache Geode version 2.0.2 #####################
+########## Dockerfile for Apache Geode version 2.0.3 #####################
 #
 # This Dockerfile builds a basic installation of Apache Geode.
 #
@@ -22,47 +22,47 @@
 #
 ##################################################################################
 
-# Base Image
-FROM s390x/ubuntu:24.04
+# Base Image with Eclipse Temurin Java 17 (Supports s390x natively)
+FROM eclipse-temurin:17-jdk-jammy
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
-ARG GEODE_VER=2.0.2
+ARG GEODE_VER=2.0.3
 ARG file=apache-geode-$GEODE_VER.tgz
 
 ENV WORKDIR=/root
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-s390x
+ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH=$JAVA_HOME/bin:$WORKDIR/apache-geode-$GEODE_VER/bin:$PATH
 
 WORKDIR /root
-# Installing dependencies
+
+# Installing minimal dependencies
 RUN apt-get update && apt-get install -y \
     tar \
     wget \
-    openjdk-17-jdk
- # Download and extract apache geode
-RUN  for url in \
-                        "https://www.apache.org/dyn/closer.cgi?action=download&filename=geode/$GEODE_VER/$file" \
-                        "https://downloads.apache.org/geode/$GEODE_VER/$file" \
-                        "https://archive.apache.org/dist/geode/$GEODE_VER/$file" \
-                ; do \
-                        if wget -O "$file" "$url"; then \
-                                break; \
-                        fi; \
-                done;
+ && rm -rf /var/lib/apt/lists/*
 
-RUN tar -xvzf apache-geode-$GEODE_VER.tgz \
-# Clean up cache data and remove dependencies which are not required
- && apt-get remove -y \
-                 wget \
+# Download and extract apache geode
+RUN for url in \
+        "https://www.apache.org/dyn/closer.cgi?action=download&filename=geode/$GEODE_VER/$file" \
+        "https://downloads.apache.org/geode/$GEODE_VER/$file" \
+        "https://archive.apache.org/dist/geode/$GEODE_VER/$file" \
+    ; do \
+        if wget -O "$file" "$url"; then \
+            break; \
+        fi; \
+    done \
+ && tar -xvzf apache-geode-$GEODE_VER.tgz \
+ # Clean up build dependencies
+ && apt-get remove -y wget \
  && apt-get autoremove -y \
- && apt autoremove -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* \
  && rm -rf /root/apache-geode-$GEODE_VER.tgz \
-# smoke test to ensure the shell can still run properly after removing temporary deps
+ # smoke test to ensure the shell can still run properly
  && gfsh version
+
 # Default ports:
 # RMI/JMX 1099
 # REST 8080
