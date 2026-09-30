@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2026
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for InfluxDB 3.10.0 ############################s
+#################### Dockerfile for InfluxDB 3.11.4 ############################s
 #
 # Builds InfluxDB
 #
@@ -57,9 +57,8 @@ RUN \
     -DCMAKE_CXX_COMPILER_WORKS=ON && \
     cmake --build build/sysroot --target install && \
     cmake --build build/sysroot --target dist && \
-    mkdir dist-my-platform && \
-    cp build/toolchain/dist/* build/sysroot/dist/* dist-my-platform && \
-    ./ci/merge-artifacts.sh && \
+    # Only the sysroot tarball is consumed below
+    ls -l build/toolchain/dist build/sysroot/dist && \
     cd /tmp && \
     rustup target add wasm32-wasip2 && \
     cargo install --locked cargo-deny && \
@@ -77,7 +76,9 @@ RUN \
     git clone https://github.com/influxdata/datafusion-udf-wasm && \
     cd datafusion-udf-wasm && \
     git checkout -b for-influxdb 89ab4ae6312c3a44859ddd43d9df4d4300d3086a && \
-    export WASI_SDK_LOCAL_TARBALL="/tmp/wasi-sdk/build/sysroot/dist/wasi-sysroot-24.0.tar.gz" && \
+    # the sysroot tarball carries a version suffix (e.g. 24.0+m) when the wasi-sdk tree is patched
+    export WASI_SDK_LOCAL_TARBALL="$(ls /tmp/wasi-sdk/build/sysroot/dist/wasi-sysroot-*.tar.gz | head -n1)" && \
+    test -f "$WASI_SDK_LOCAL_TARBALL" && \
     just guests::python::build-release && \
     mkdir -p out && \
     cargo run --bin=compile --features="all-arch" --release -- \
@@ -94,7 +95,8 @@ FROM ubuntu:24.04 AS influxdb-builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
-ARG INFLUXDB_VERSION=3.10.0
+ARG INFLUXDB_VERSION=3.11.4
+ARG ARROW_RS_VERSION=57.3.1
 ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/InfluxDB/${INFLUXDB_VERSION}/patch"
 
 RUN mkdir /influxdb3
@@ -127,13 +129,17 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     cat "/influxdb3/python-artifacts/s390x-unknown-linux-gnu/pyo3_config_file.txt" && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.88 && \
     . $HOME/.cargo/env && \
-    git clone --depth 1 -b 57.3.0 https://github.com/apache/arrow-rs.git && \
+    git clone --depth 1 -b ${ARROW_RS_VERSION} https://github.com/apache/arrow-rs.git && \
     cd arrow-rs && \
-    curl -sSL ${PATCH_URL}/arrow.patch | git apply || error "arrow.patch" && cd .. && \
+    curl -fsSL ${PATCH_URL}/arrow.patch | git apply - && cd .. && \
     git clone --depth 1 -b v$INFLUXDB_VERSION https://github.com/influxdata/influxdb.git && \
-    cd influxdb && curl -sSL ${PATCH_URL}/influxdb.patch | git apply || error "influxdb.patch" && \
+    cd influxdb && curl -fsSL ${PATCH_URL}/influxdb.patch | git apply - && \
     sed -i "s|SOURCE_ROOT|/influxdb3|g" Cargo.toml && \
     sed -i "s|SOURCE_ROOT|/influxdb3|g" core/iox_query_udf/build.rs && \
+    # Re-resolve the patched arrow/parquet crates against local arrow-rs
+    cargo update -p arrow -p arrow-arith -p arrow-array -p arrow-buffer -p arrow-cast \
+        -p arrow-csv -p arrow-data -p arrow-flight -p arrow-ipc -p arrow-json -p arrow-ord \
+        -p arrow-row -p arrow-schema -p arrow-select -p arrow-string -p parquet && \
     export IOX_QUERY_UDF_PYTHON_WASM="/tmp/datafusion_udf_wasm_python.release.s390x-unknown-linux-gnu.elf" && \
     PYO3_CONFIG_FILE="/influxdb3/python-artifacts/s390x-unknown-linux-gnu/pyo3_config_file.txt" cargo build --package="$PACKAGE" --profile="$PROFILE" && \
     objcopy --compress-debug-sections "target/$PROFILE/$PACKAGE" && \
@@ -164,7 +170,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 FROM ubuntu:24.04
 
 # The author
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
@@ -176,7 +182,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
         libssl3 && \
     rm -rf /var/lib/apt/lists*
 
-ENV INFLUXDB_VERSION=3.10.0
+ENV INFLUXDB_VERSION=3.11.4
 # Install from previous build stage
 COPY --from=influxdb-builder /artifacts/influxdb3/influxdb3 /usr/bin/influxdb3
 COPY --from=influxdb-builder /artifacts/influxdb3/python /usr/lib/influxdb3/python
