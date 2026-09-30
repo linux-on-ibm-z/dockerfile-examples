@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2026
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################## Dockerfile for Falco 0.44.1 ####################
+################## Dockerfile for Falco 0.45.0 ####################
 #
 # This Dockerfile builds a basic installation of Falco.
 #
@@ -24,7 +24,7 @@ FROM s390x/ubuntu:22.04 AS builder
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 WORKDIR /home/root/
-ARG VERSION=0.44.1
+ARG VERSION=0.45.0
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
