@@ -1,6 +1,6 @@
 # Copyright IBM Corporation 2025, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-############################ Dockerfile for pgvector 0.8.6 ############################################
+############################ Dockerfile for pgvector 0.8.7 ############################################
 #
 # This Dockerfile builds a basic installation of pgvector.
 #
@@ -41,7 +41,7 @@ RUN wget https://ftp.postgresql.org/pub/source/v${PG_MINOR}/postgresql-${PG_MINO
     make install
 
 # Build pgvector
-RUN git clone -b v0.8.6 https://github.com/pgvector/pgvector.git /tmp/pgvector && \
+RUN git clone -b v0.8.7 https://github.com/pgvector/pgvector.git /tmp/pgvector && \
     cd /tmp/pgvector && \
     PATH=/usr/local/pgsql/bin:$PATH make OPTFLAGS="" && \
     PATH=/usr/local/pgsql/bin:$PATH make install && \
