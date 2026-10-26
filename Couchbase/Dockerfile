@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation  2017, 2026
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for Couchbase version 8.0.0 ###################################
+############### Dockerfile for Couchbase version 8.0.3 ###################################
 #
 # Couchbase is open source database software.
 #
@@ -20,7 +20,7 @@ FROM s390x/ubuntu:24.04 as builder
 
 ENV SOURCE_ROOT=/tmp/source
 WORKDIR $SOURCE_ROOT
-ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Couchbase/8.0.0
+ARG PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Couchbase/8.0.3
 
 SHELL ["/bin/bash", "-c"]
 
@@ -38,7 +38,7 @@ RUN cd $SOURCE_ROOT \
 
 FROM s390x/ubuntu:24.04
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 WORKDIR /opt
 
 COPY --from=builder /opt/couchbase ./couchbase
