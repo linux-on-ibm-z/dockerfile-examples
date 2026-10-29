@@ -1,6 +1,6 @@
 # © Copyright IBM Corporation 2019, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-##################### Dockerfile for Apache Spark version 4.0.1 ###################################################
+##################### Dockerfile for Apache Spark version 4.2.0 ###################################################
 #
 # This Dockerfile builds a basic installation of Apache Spark.
 #
@@ -15,11 +15,11 @@
 # Base Image
 FROM s390x/ubuntu:22.04 AS builder
 
-ARG SPARK_VER=v4.0.1
+ARG SPARK_VER=v4.2.0
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
-ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/4.0.1/patch"
+ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/ApacheSpark/4.2.0/patch"
 ARG JDK17_URL="https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.13%2B11/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.13_11.tar.gz"
 ARG JDK8_URL="https://github.com/ibmruntimes/semeru8-binaries/releases/download/jdk8u472-b08_openj9-0.56.0/ibm-semeru-open-jdk_s390x_linux_8u472b08_openj9-0.56.0.tar.gz"
 
@@ -32,7 +32,7 @@ ENV LEVELDBJNI_HOME    $SOURCE_DIR/leveldbjni
 ENV LIBRARY_PATH       $SNAPPY_HOME
 ENV C_INCLUDE_PATH     $LIBRARY_PATH
 ENV CPLUS_INCLUDE_PATH $LIBRARY_PATH
-ENV LD_LIBRARY_PATH    "${LD_LIBRARY_PATH}:${SOURCE_ROOT}/leveldbjni/META-INF/native/linux64/s390x/"
+ENV LD_LIBRARY_PATH    "${LD_LIBRARY_PATH}:${SOURCE_DIR}/leveldbjni/META-INF/native/linux64/s390x/"
 
 ENV TZ=America/Toronto
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -50,9 +50,10 @@ RUN mkdir -p /opt/openjdk/17/ \
 && curl -SL -o jdk17.tar.gz "${JDK17_URL}" \
 && tar -zxf jdk17.tar.gz -C /opt/openjdk/17/ --strip-components 1
 
-# Install Maven
-RUN wget -O apache-maven-3.8.8.tar.gz "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz" \
-&& tar -zxf apache-maven-3.8.8.tar.gz
+# Install Maven 3.8.8 (required for leveldbjni hawtjni plugin and aircompressor)
+# Spark's ./build/mvn wrapper auto-downloads Maven 3.9.15 for the main build
+RUN curl -sSL -o apache-maven-3.8.8-bin.tar.gz "https://archive.apache.org/dist/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz" \
+&& tar -zxf apache-maven-3.8.8-bin.tar.gz
 
 # Build Snappy
 RUN wget https://github.com/google/snappy/releases/download/1.1.4/snappy-1.1.4.tar.gz \
@@ -69,20 +70,21 @@ RUN git clone -b s390x https://github.com/linux-on-ibm-z/leveldb.git \
 && git apply ${LEVELDBJNI_HOME}/leveldb.patch \
 && make libleveldb.a \
 && cd ${LEVELDBJNI_HOME} \
-&& JAVA_HOME="/opt/openjdk/8" PATH="/opt/openjdk/8/bin:${SOURCE_DIR}/apache-maven-3.8.8/bin:${PATH}" mvn clean install -P download -Plinux64-s390x -DskipTests \
+&& JAVA_HOME="/opt/openjdk/8" PATH="/opt/openjdk/8/bin:${SOURCE_DIR}/apache-maven-3.8.8/bin:${PATH}" mvn -B clean install -P download -Plinux64-s390x -DskipTests \
 && JAVA_HOME="/opt/openjdk/8" PATH="/opt/openjdk/8/bin:${SOURCE_DIR}/apache-maven-3.8.8/bin:${PATH}" jar -xvf ${LEVELDBJNI_HOME}/leveldbjni-linux64-s390x/target/leveldbjni-linux64-s390x-1.8.jar
 
 # Build AirCompressor
-RUN git clone -b "2.0.2" --single-branch https://github.com/airlift/aircompressor.git \
+RUN git clone -b "2.0.3" --single-branch https://github.com/airlift/aircompressor.git \
 && cd aircompressor \
 && curl -sSL "${PATCH_URL}/aircompressor.diff" | git apply - \
+&& rm -f .mvn/maven.config \
 && JAVA_HOME="/opt/openjdk/17" PATH="/opt/openjdk/17/bin:${SOURCE_DIR}/apache-maven-3.8.8/bin:${PATH}" mvn install -B -V -DskipTests -Dair.check.skip-all
 
 # Build Apache Spark
 RUN git clone -b "${SPARK_VER}" --depth 1  https://github.com/apache/spark.git \
 && cd spark \
 && curl -sSL "${PATCH_URL}/spark.diff" | git apply - \
-&& JAVA_HOME="/opt/openjdk/17" PATH="/opt/openjdk/17/bin:${PATH}" ./build/mvn -DskipTests clean package
+&& JAVA_HOME="/opt/openjdk/17" PATH="/opt/openjdk/17/bin:${PATH}" ./build/mvn -B -DskipTests clean install
 
 # Create a tar of the files needed to run spark
 RUN mkdir -p dist/spark/lib_override \
@@ -93,12 +95,12 @@ RUN mkdir -p dist/spark/lib_override \
 && mv spark/resource-managers/kubernetes/integration-tests/tests dist/spark/tests \
 && mv spark/resource-managers/kubernetes/docker/src/main/dockerfiles/spark/decom.sh dist/decom.sh \
 && mv leveldbjni/META-INF/native/linux64/s390x/libleveldbjni.so dist/spark/lib_override/libleveldbjni.so \
-&& mv spark/assembly/target/scala-2.12/jars dist/spark/jars \
+&& mv spark/assembly/target/scala-2.13/jars dist/spark/jars \
 && tar cf dist.tar dist/
 
 FROM s390x/eclipse-temurin:17-jre-focal
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
 ARG spark_uid=185
 
