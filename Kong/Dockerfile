@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for Kong version 3.9.3 #########
+########## Dockerfile for Kong version 3.9.4 #########
 #
 # This Dockerfile builds a basic installation of Kong.
 #
@@ -42,7 +42,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/ope
 ARG GITHUB_TOKEN
 ENV GITHUB_TOKEN=${GITHUB_TOKEN}
 
-ARG KONG_VERSION=3.9.3
+ARG KONG_VERSION=3.9.4
 ENV KONG_VERSION=$KONG_VERSION
 
 WORKDIR /usr/local
@@ -107,7 +107,7 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/ope
 ARG ASSET=ce
 ENV ASSET $ASSET
 
-ARG KONG_VERSION=3.9.3
+ARG KONG_VERSION=3.9.4
 ENV KONG_VERSION $KONG_VERSION
 
 ARG EE_PORTS
