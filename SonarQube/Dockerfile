@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-################################ Dockerfile for SonarQube 26.7.0 ##############################
+################################ Dockerfile for SonarQube 26.9.0 ##############################
 #
 # This Dockerfile builds a basic installation of SonarQube
 #
@@ -17,18 +17,17 @@
 # docker run --name <container name> -p <port_number>:9000 -d <image name>
 # Link : http://<sonarQube-ip>:<port_number_9000>
 ######################################################################################
-ARG SONARQUBE_VERSION=26.7.0.124771
+ARG SONARQUBE_VERSION=26.9.0.129388
 
 FROM eclipse-temurin:21.0.8_9-jdk AS builder
 LABEL stage=builder
 ARG SONARQUBE_VERSION
 ARG SONARQUBE_ZIP_URL=https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-${SONARQUBE_VERSION}.zip
-ARG ES8_OPTS="-x libs:entitlement:qa:entitlement-test-plugin:compileMain19Java -x :libs:entitlement:compileMain19Java -x :libs:entitlement:compileMain20Java -x :libs:entitlement:qa:entitlement-test-plugin:compileMain20Java -x :libs:native:compileMain20Java -x :libs:native:compileMain22Java -x :libs:simdvec:compileMain22Java -x :libs:entitlement:compileMain25Java -x :libs:entitlement:qa:entitlement-test-plugin:compileMain25Java -x :libs:entitlement:compileMain26Java -x :libs:entitlement:qa:entitlement-test-plugin:compileMain26Java"
 ENV JAVA_HOME='/opt/java/openjdk' \
     ES_JAVA_HOME='/opt/java/openjdk' \
     RUNTIME_JAVA_HOME='/opt/java17' \
     PATH="/opt/java/openjdk/bin:$PATH" \
-    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/26.7.0/patch" \
+    PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/SonarQube/26.9.0/patch" \
     LANG="en_US.UTF-8"
 
 RUN apt-get update && \
@@ -40,11 +39,52 @@ RUN apt-get update && \
     rm -f /tmp/jdk17.tar.gz && \
     locale-gen en_US.UTF-8
 
+# build zstd for s390x
+RUN ZSTD_VERSION=1.5.7 && \
+    wget -q https://github.com/facebook/zstd/archive/refs/tags/v${ZSTD_VERSION}.tar.gz && \
+    tar -xzf v${ZSTD_VERSION}.tar.gz && \
+    cd zstd-${ZSTD_VERSION} && \
+    make -j$(nproc) lib && \
+    cd / && \
+    mkdir -p /zstd-native-dep/artifacts/linux-s390x && \
+    cp /zstd-${ZSTD_VERSION}/lib/libzstd.so \
+       /zstd-${ZSTD_VERSION}/LICENSE \
+       /zstd-native-dep/artifacts/linux-s390x/ && \
+    jar --create \
+        --no-manifest \
+        --file /zstd-native-dep/zstd-${ZSTD_VERSION}-linux-s390x.jar \
+        -C /zstd-native-dep/artifacts/ .
+
 # build elasticsearch
 SHELL ["/bin/bash", "-c"]
-RUN git clone -b v8.19.16 https://github.com/elastic/elasticsearch.git && \
+RUN git clone -b v9.4.3 https://github.com/elastic/elasticsearch.git && \
     cd elasticsearch && \
-    curl -sSL $PATCH_URL/elasticsearch.diff | git apply - && \
+    curl -sSL "$PATCH_URL/elasticsearch.patch" | git apply - && \
+	cd / && \
+    git clone --depth 1 -b jansi-2.4.0 https://github.com/fusesource/jansi.git && \
+    cd jansi && \
+    make clean-native native OS_NAME=Linux OS_ARCH=s390x && \
+    mkdir -p /jansi-jar && \
+    cd /jansi-jar && \
+    wget -q https://repo1.maven.org/maven2/org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar && \
+    jar xf jansi-2.4.0.jar && \
+    mkdir -p org/fusesource/jansi/internal/native/Linux/s390x && \
+    cp /jansi/target/native-Linux-s390x/libjansi.so \
+       org/fusesource/jansi/internal/native/Linux/s390x/ && \
+    jar cf jansi-2.4.0.jar . && \
+    mkdir -p /root/.gradle/caches/modules-2/files-2.1/org.fusesource.jansi/jansi/2.4.0/321c614f85f1dea6bb08c1817c60d53b7f3552fd/ && \
+    cp jansi-2.4.0.jar \
+       /root/.gradle/caches/modules-2/files-2.1/org.fusesource.jansi/jansi/2.4.0/321c614f85f1dea6bb08c1817c60d53b7f3552fd/ && \
+    jansi_sha256=$(sha256sum jansi-2.4.0.jar | awk '{print $1}') && \
+    sed -i \
+       -e "s|6cd91991323dd7b2fb28ca93d7ac12af5a86a2f53279e2b35827b30313fd0b9f|${jansi_sha256}|g" \
+       -e "s|616491ff68183f90e145b68874627742d796572dbfe4d8dfe64bac22a27864cb|${jansi_sha256}|g" \
+       /elasticsearch/gradle/verification-metadata.xml && \
+    cd /elasticsearch && \
+	sed -i \
+        's#%S390X_ZSTD_DEP_DIR%#/zstd-native-dep#g' \
+        libs/native/libraries/build.gradle && \
+    export LOCAL_VEC_BINARY_OS=linux-s390x && \
     git fetch --tags && \
     latest_tag=$(git tag | sort -V | tail -n1) && \
     latest_tag="${latest_tag:1}-SNAPSHOT" && \
@@ -57,21 +97,40 @@ RUN git clone -b v8.19.16 https://github.com/elastic/elasticsearch.git && \
     mkdir -p distribution/docker/cloud-ess-docker-s390x-export/  && \
     mkdir -p distribution/docker/docker-s390x-export/  && \
     mkdir -p distribution/docker/ironbank-docker-s390x-export/  && \
-    ./gradlew :distribution:archives:linux-s390x-tar:assemble $ES8_OPTS --max-workers=`nproc`  --parallel
+    ES9_OPTS="" && \
+    for task in \
+        ":libs:entitlement:bridge:compileMain22Java" \
+        ":libs:entitlement:bridge:compileMain23Java" \
+        ":libs:entitlement:compileMain22Java" \
+        ":libs:entitlement:compileMain23Java" \
+        ":libs:entitlement:compileMain25Java" \
+        ":libs:entitlement:compileMain26Java" \
+        ":libs:native:compileMain22Java" \
+        ":libs:simdvec:compileMain22Java"; \
+    do \
+        if ./gradlew -q help --task "$task" >/dev/null 2>&1; then \
+            ES9_OPTS="$ES9_OPTS -x $task"; \
+        fi; \
+    done && \
+    ./gradlew \
+        :distribution:archives:linux-s390x-tar:assemble \
+        $ES9_OPTS \
+        --max-workers=`nproc` \
+        --parallel
 
 # download sonarqube and replace elasticsearch
 RUN wget -q $SONARQUBE_ZIP_URL && \
     unzip sonarqube-${SONARQUBE_VERSION}.zip && \
     cd sonarqube-${SONARQUBE_VERSION} && \
     rm -rfd bin/elasticsearch elasticsearch/* && \
-    tar -xzf /elasticsearch/distribution/archives/linux-s390x-tar/build/distributions/elasticsearch-8.19.16-SNAPSHOT-linux-s390x.tar.gz \
+    tar -xzf /elasticsearch/distribution/archives/linux-s390x-tar/build/distributions/elasticsearch-9.4.3-SNAPSHOT-linux-s390x.tar.gz \
         -C /sonarqube-${SONARQUBE_VERSION}/elasticsearch --strip-components 1 && \
-    rm -rf /sonarqube-${SONARQUBE_VERSION}/elasticsearch/modules/x-pack-ml /sonarqube-${SONARQUBE_VERSION}/elasticsearch/modules/x-pack-esql \
-    rm -rf /sonarqube-${SONARQUBE_VERSION}/elasticsearch/modules/blob-cache /sonarqube-${SONARQUBE_VERSION}/elasticsearch/modules/searchable-snapshots \
+    rm -rf /sonarqube-${SONARQUBE_VERSION}/elasticsearch/modules/x-pack-ml /sonarqube-${SONARQUBE_VERSION}/elasticsearch/modules/x-pack-esql && \
+    rm -rf /sonarqube-${SONARQUBE_VERSION}/elasticsearch/modules/blob-cache /sonarqube-${SONARQUBE_VERSION}/elasticsearch/modules/searchable-snapshots && \
     cp /sonarqube-${SONARQUBE_VERSION}/elasticsearch/bin/elasticsearch /sonarqube-${SONARQUBE_VERSION}/bin
 
 FROM eclipse-temurin:21-jdk-noble AS stage1
-ARG SONARQUBE_VERSION=26.7.0.124771
+ARG SONARQUBE_VERSION=26.9.0.129388
 ENV SONARQUBE_HOME=/opt/sonarqube \
     SQ_DATA_DIR="/opt/sonarqube/data" \
     SQ_EXTENSIONS_DIR="/opt/sonarqube/extensions" \
@@ -103,7 +162,7 @@ ENV LANG='en_US.UTF-8' \
 #
 # SonarQube setup
 #
-ARG SONARQUBE_VERSION=26.7.0.124771
+ARG SONARQUBE_VERSION=26.9.0.129388
 ENV DOCKER_RUNNING="true" \
     JAVA_HOME='/opt/java/openjdk' \
     SONARQUBE_HOME=/opt/sonarqube \
@@ -138,10 +197,6 @@ RUN set -eux; \
     done; \
     apt-get remove -y gnupg unzip curl; \
     rm -rf /var/lib/apt/lists/*;
-
-RUN mkdir -p /opt/sonarqube/elasticsearch/lib/platform/linux-s390x && \
-    ln -s /usr/lib/s390x-linux-gnu/libzstd.so /opt/sonarqube/elasticsearch/lib/platform/linux-s390x/libzstd.so && \
-    ls -l /opt/sonarqube/elasticsearch/lib/platform/linux-s390x/
 
 VOLUME ["${SQ_DATA_DIR}", "${SQ_EXTENSIONS_DIR}", "${SQ_LOGS_DIR}", "${SQ_TEMP_DIR}"]
 
