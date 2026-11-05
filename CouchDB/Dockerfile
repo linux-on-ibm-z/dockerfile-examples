@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############### Dockerfile for CouchDB version 3.5.2 ############
+############### Dockerfile for CouchDB version 3.5.3 ############
 #
 # CouchDB, is open source database software.
 #
@@ -19,14 +19,14 @@
 ##################################################################################
 
 # Base image
-FROM s390x/ubuntu:22.04 AS builder
+FROM debian:trixie AS builder
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
-ARG ERLANG_VERSION="27.3"
-ARG ELIXIR_VERSION="v1.17.3"
-ARG NODE_VERSION="v18.20.8"
-ARG COUCHDB_VERSION="3.5.2"
+ARG ERLANG_VERSION="28.5"
+ARG ELIXIR_VERSION="v1.20.1"
+ARG NODE_VERSION="v24.21.0"
+ARG COUCHDB_VERSION="3.5.3"
 
 ENV SOURCE_ROOT=/tmp/source \
     DEBIAN_FRONTEND=noninteractive \
@@ -37,7 +37,7 @@ ENV SOURCE_ROOT=/tmp/source \
 WORKDIR $SOURCE_ROOT
 
 # Install all build dependencies in one layer:
-#   - CouchDB deps   (libicu-dev libmozjs-102-dev libssl-dev etc.)
+#   - CouchDB deps   (libicu-dev libmozjs-128-dev libssl-dev etc.)
 #   - Erlang deps    (autoconf flex fop libncurses-dev unixodbc-dev etc.)
 #   - openjdk-21-jdk (required to build Erlang)
 RUN apt-get update \
@@ -54,7 +54,7 @@ RUN apt-get update \
         gzip \
         help2man \
         libicu-dev \
-        libmozjs-102-dev \
+        libmozjs-128-dev \
         libncurses-dev \
         libssl-dev \
         libtool \
@@ -116,19 +116,23 @@ RUN cd $SOURCE_ROOT \
  && git clone https://github.com/apache/couchdb.git \
  && cd couchdb \
  && git checkout ${COUCHDB_VERSION} \
- && ./configure --spidermonkey-version 102 \
+ && wget -q -O /tmp/couchdb353-test-fixes.patch "https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/CouchDB/3.5.3/patch/couchdb353-test-fixes.patch" \
+ && git apply --check --ignore-whitespace /tmp/couchdb353-test-fixes.patch \
+ && git apply --ignore-whitespace /tmp/couchdb353-test-fixes.patch \
+ && git diff --check \
+ && ./configure --spidermonkey-version 128 \
  && make release \
  && mkdir -p /opt \
  && cp -r $SOURCE_ROOT/couchdb/rel/couchdb /opt/couchdb \
- && rm -rf $SOURCE_ROOT/couchdb
+ && rm -rf "$SOURCE_ROOT/couchdb"
 
 
 # ---- Stage 2: final image ---------------------------------------------------
 # Instead of apt-installing the couchdb package, we COPY the build output
 # from the builder stage and install runtime libs.
-FROM s390x/ubuntu:22.04
+FROM debian:trixie-slim
 
-LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
+LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
 # Copy CouchDB release and Erlang runtime from builder
 COPY --from=builder /opt/couchdb /opt/couchdb
@@ -141,14 +145,15 @@ COPY --from=builder /usr/local/bin/elixir /usr/local/bin/elixir
 COPY --from=builder /usr/local/bin/elixirc /usr/local/bin/elixirc
 COPY --from=builder /usr/local/bin/iex /usr/local/bin/iex
 COPY --from=builder /usr/local/bin/mix /usr/local/bin/mix
+COPY --from=builder /usr/local/lib/elixir /usr/local/lib/elixir
 
 # Install runtime libraries required by CouchDB (SpiderMonkey, ICU)
 # ca-certificates is required by couch_replicator for OS CA cert loading
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
         ca-certificates \
-        libicu70 \
-        libmozjs-102-0 \
+        libicu76 \
+        libmozjs-128-0 \
  && apt-get autoremove -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
@@ -164,7 +169,7 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*; \
     tini --version
 
-ENV COUCHDB_VERSION 3.5.2
+ENV COUCHDB_VERSION=3.5.3
 
 # https://github.com/apache/couchdb-pkg/blob/master/debian/README.Debian
 RUN set -eux; \
