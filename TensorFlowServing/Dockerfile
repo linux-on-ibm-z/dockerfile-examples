@@ -50,11 +50,24 @@ LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/use
 
 ENV SOURCE_ROOT=/tmp/source
 
-# Install dependencies
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y wget sudo \
+# Build TensorFlow wheel from source
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y wget sudo patch cmake pkg-config xxd \
     && mkdir -p $SOURCE_ROOT \
     && cd $SOURCE_ROOT \
+    && wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/2.21.0/build_tensorflow.sh  \
+    && sed -i '/rm -f tf_v${PACKAGE_VERSION}.patch/a\    sed -i '"'"'s/LLVM_SHA256 = ".*"/LLVM_SHA256 = ""/'"'"' third_party/xla/third_party/llvm/workspace.bzl' build_tensorflow.sh \
+    && grep -n 'LLVM_SHA256' build_tensorflow.sh \
+    && bash build_tensorflow.sh -y -p 3.10
+
+# Install the TensorFlow wheel in a virtual environment
+RUN GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True python3 -m pip install \
+    $SOURCE_ROOT/tensorflow/bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow-2.21.0*-cp310-cp310-linux_s390x.whl \
+    && python3 -c "import tensorflow as tf; print('TensorFlow version:', tf.__version__)"
+
+# Build TensorFlow Serving
+RUN cd $SOURCE_ROOT \
     && wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/TensorflowServing/2.20.0/build_tensorflow_serving.sh  \
+    && sed -i '/^ *buildBazel |& tee/s/buildBazel/#buildBazel/' build_tensorflow_serving.sh \
     && bash build_tensorflow_serving.sh -y
 #End of builder stage
 
