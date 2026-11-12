@@ -38,7 +38,7 @@ ENV TZ=America/Toronto
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install the dependencies
-RUN apt-get update -y && apt-get install -y wget tar git libtool autoconf build-essential curl apt-transport-https cmake python3 procps
+RUN apt-get update -y && apt-get install -y wget tar git libtool autoconf build-essential curl apt-transport-https cmake python3 procps zip
 
 # Install Java (JDK 8)
 RUN mkdir -p /opt/openjdk/8/ \
