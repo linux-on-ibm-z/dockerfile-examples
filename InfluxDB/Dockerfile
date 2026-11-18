@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2026
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-#################### Dockerfile for InfluxDB 3.11.4 ############################s
+#################### Dockerfile for InfluxDB 3.12.2 ############################s
 #
 # Builds InfluxDB
 #
@@ -38,47 +38,60 @@ RUN \
     apt-get install --no-install-recommends -y \
         build-essential pkg-config libssl-dev clang curl git \
         protobuf-compiler python3 python3-dev python3-pip python3-venv \
-        libprotobuf-dev cmake lld ninja-build unzip && \
+        libprotobuf-dev cmake lld ninja-build unzip libncurses-dev && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     . $HOME/.cargo/env && \
-    git clone --recursive -b wasi-sdk-24 --depth 1 https://github.com/webassembly/wasi-sdk && \
+    cd /tmp && \
+    cargo install --locked just && \
+    cargo install --locked wasm-tools && \
+    curl -LsSf https://astral.sh/uv/0.12.24/install.sh | sh && \
+    . $HOME/.local/bin/env && \
+    cd /tmp && \
+    git clone --recursive -b wasi-sdk-33 --depth 1 https://github.com/webassembly/wasi-sdk && \
     cd wasi-sdk && \
-    sed -i '22i #include <cstdint>' src/llvm-project/llvm/include/llvm/ADT/SmallVector.h && \
     cmake -G Ninja -B build/toolchain -S . \
     -DWASI_SDK_BUILD_TOOLCHAIN=ON \
     -DCMAKE_INSTALL_PREFIX=build/install && \
     cmake --build build/toolchain --target install && \
-    cmake --build build/toolchain --target dist && \
     #build sysroot
     cmake -G Ninja -B build/sysroot -S . \
     -DCMAKE_INSTALL_PREFIX=build/install \
     -DCMAKE_TOOLCHAIN_FILE=build/install/share/cmake/wasi-sdk.cmake \
     -DCMAKE_C_COMPILER_WORKS=ON \
-    -DCMAKE_CXX_COMPILER_WORKS=ON && \
+    -DCMAKE_CXX_COMPILER_WORKS=ON \
+    -DWASI_SDK_EXCEPTIONS=DUAL && \
     cmake --build build/sysroot --target install && \
-    cmake --build build/sysroot --target dist && \
-    # Only the sysroot tarball is consumed below
-    ls -l build/toolchain/dist build/sysroot/dist && \
-    cd /tmp && \
-    rustup target add wasm32-wasip2 && \
-    cargo install --locked cargo-deny && \
-    cargo install --locked just && \
-    curl -LsSf https://astral.sh/uv/0.9.30/install.sh | sh && \
-    . $HOME/.local/bin/env && \
+    cd /tmp/wasi-sdk/build/install && \
+    mkdir -p lib/clang/22/lib && \
+    cp -a clang-resource-dir/lib/. lib/clang/22/lib/ && \
     cd /tmp && \
     git clone https://github.com/tombi-toml/tombi.git && \
     cd tombi && \
     cargo build --release && \
     uvx tombi --version && \
-    cargo install --locked typos-cli && \
-    cargo install --locked wasm-tools && \
     cd /tmp && \
     git clone https://github.com/influxdata/datafusion-udf-wasm && \
     cd datafusion-udf-wasm && \
-    git checkout -b for-influxdb 89ab4ae6312c3a44859ddd43d9df4d4300d3086a && \
-    # the sysroot tarball carries a version suffix (e.g. 24.0+m) when the wasi-sdk tree is patched
-    export WASI_SDK_LOCAL_TARBALL="$(ls /tmp/wasi-sdk/build/sysroot/dist/wasi-sysroot-*.tar.gz | head -n1)" && \
-    test -f "$WASI_SDK_LOCAL_TARBALL" && \
+    git checkout -b for-influxdb 9186474d530904e787e8903b61f586c10e97e317 && \
+    sed -i '21s|^} else {$|} else if WASI_SDK_SYS == "s390x-linux" {\n    "0000000000000000000000000000000000000000000000000000000000000000"\n} else {|' guests/python/Justfile && \
+    just guests::python::download-python-sdk && \
+    cd /tmp/datafusion-udf-wasm/guests/python && \
+    python3 -m venv /tmp/pipenv && \
+    /tmp/pipenv/bin/pip install --upgrade pip && \
+    /tmp/pipenv/bin/pip install \
+        --disable-pip-version-check \
+        --no-deps \
+        --ignore-installed \
+        --implementation=py \
+        --abi=none \
+        --platform=any \
+        --isolated \
+        --only-binary=:all: \
+        --python-version=3.14.7 \
+        --requirement=requirements.txt \
+        --target="$PWD/downloads/python-sdk/lib/python3.14/site-packages" && \
+    cd /tmp/datafusion-udf-wasm && \
+    ln -s "$(realpath /tmp/wasi-sdk/build/install)" guests/python/downloads/wasi-sdk && \
     just guests::python::build-release && \
     mkdir -p out && \
     cargo run --bin=compile --features="all-arch" --release -- \
@@ -95,7 +108,7 @@ FROM ubuntu:24.04 AS influxdb-builder
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source/)"
 
-ARG INFLUXDB_VERSION=3.11.4
+ARG INFLUXDB_VERSION=3.12.2
 ARG ARROW_RS_VERSION=57.3.1
 ARG PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/InfluxDB/${INFLUXDB_VERSION}/patch"
 
@@ -182,7 +195,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
         libssl3 && \
     rm -rf /var/lib/apt/lists*
 
-ENV INFLUXDB_VERSION=3.11.4
+ENV INFLUXDB_VERSION=3.12.2
 # Install from previous build stage
 COPY --from=influxdb-builder /artifacts/influxdb3/influxdb3 /usr/bin/influxdb3
 COPY --from=influxdb-builder /artifacts/influxdb3/python /usr/lib/influxdb3/python
