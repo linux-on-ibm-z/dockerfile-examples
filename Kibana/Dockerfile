@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-###################################### Dockerfile for Kibana version 9.3.0 ############################################
+###################################### Dockerfile for Kibana version 9.4.3 ############################################
 #
 # This Dockerfile builds a basic installation of Kibana.
 #
@@ -36,16 +36,16 @@
 ################################################################################
 FROM redhat/ubi9-minimal:9.6 AS builder
 
-ARG KIBANA_VER=9.3.0
-ARG NODE_JS_VERSION=22.22.0
+ARG KIBANA_VER=9.4.3
+ARG NODE_JS_VERSION=24.14.1
 
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)"
 
 # Set Environment Variable
 ENV SOURCE_ROOT=/home/nonroot
-ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-s390x
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 ENV PATH=/usr/local/lib/nodejs/node-v${NODE_JS_VERSION}-linux-s390x/bin:/usr/share/kibana/bin:$JAVA_HOME/bin:$SOURCE_ROOT/bazel/output/:$PATH
-ENV NODE_OPTIONS="--max_old_space_size=4096"
+ENV NODE_OPTIONS="--max_old_space_size=8192"
 
 RUN microdnf install -y findutils tar gzip sudo dnf which \
   && useradd -s /bin/bash -d /home/nonroot/ -m -G wheel nonroot \
@@ -138,16 +138,16 @@ LABEL org.label-schema.license="Elastic License" \
       org.label-schema.name="Kibana" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.vcs-url="https://github.com/elastic/kibana" \
-      org.label-schema.version="9.3.0-SNAPSHOT" \
+      org.label-schema.version="9.4.3-SNAPSHOT" \
       org.opencontainers.image.documentation="https://www.elastic.co/guide/en/kibana/reference/index.html" \
       org.opencontainers.image.licenses="Elastic License" \
       org.opencontainers.image.source="https://github.com/elastic/kibana" \
       org.opencontainers.image.title="Kibana" \
-      org.opencontainers.image.version="9.3.0-SNAPSHOT"
+      org.opencontainers.image.version="9.4.3-SNAPSHOT"
 
 LABEL name="Kibana" \
   maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/usergroups/opensource)" \
-  version="9.3.0" \
+  version="9.4.3" \
   release="1" \
   summary="Kibana" \
   description="Your window into the Elastic Stack."
