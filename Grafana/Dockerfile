@@ -1,7 +1,7 @@
 # Copyright IBM Corporation 2017, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-############################ Dockerfile for Grafana 13.2.4 ############################################
+############################ Dockerfile for Grafana 13.3.1 ############################################
 #
 # This Dockerfile builds a basic installation of Grafana.
 #
@@ -17,10 +17,10 @@
 # More information in the grafana configuration documentation: http://docs.grafana.org/installation/configuration/
 ################################################################################################################
 
-ARG GRAFANA_VERSION=13.2.4
+ARG GRAFANA_VERSION=13.3.1
 
-ARG BASE_IMAGE=alpine:3.24.1
-ARG GO_IMAGE=golang:1.26.9-alpine
+ARG BASE_IMAGE=alpine:3.24.4
+ARG GO_IMAGE=golang:1.27.4-alpine
 
 ARG GO_SRC=go-builder
 ARG JS_SRC=tgz-builder
@@ -64,10 +64,14 @@ COPY --from=go-src-builder /tmp/grafana/pkg/build/wire pkg/build/wire
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resource pkg/storage/unified/resource
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resourcepb pkg/storage/unified/resourcepb
 COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/apistore pkg/storage/unified/apistore
+COPY --from=go-src-builder /tmp/grafana/pkg/storage/unified/resourceclient pkg/storage/unified/resourceclient
 COPY --from=go-src-builder /tmp/grafana/apps apps
 COPY --from=go-src-builder /tmp/grafana/pkg/codegen pkg/codegen
 COPY --from=go-src-builder /tmp/grafana/pkg/plugins pkg/plugins
 COPY --from=go-src-builder /tmp/grafana/pkg/infra/features pkg/infra/features
+COPY --from=go-src-builder /tmp/grafana/pkg/infra/log pkg/infra/log
+COPY --from=go-src-builder /tmp/grafana/pkg/infra/metrics pkg/infra/metrics
+COPY --from=go-src-builder /tmp/grafana/pkg/infra/tracing pkg/infra/tracing
 
 RUN go mod download
 
@@ -76,6 +80,7 @@ COPY --from=go-src-builder /tmp/grafana/cue.mod cue.mod
 COPY --from=go-src-builder /tmp/grafana/kinds kinds
 COPY --from=go-src-builder /tmp/grafana/local local
 COPY --from=go-src-builder /tmp/grafana/packages/grafana-schema packages/grafana-schema
+COPY --from=go-src-builder /tmp/grafana/packages/grafana-data/src/themes/themeDefinitions packages/grafana-data/src/themes/themeDefinitions
 COPY --from=go-src-builder /tmp/grafana/public/app/plugins public/app/plugins
 COPY --from=go-src-builder /tmp/grafana/public/api-merged.json public/api-merged.json
 COPY --from=go-src-builder /tmp/grafana/pkg pkg
@@ -190,4 +195,3 @@ RUN chmod +x /run.sh
 
 USER "$GF_UID"
 ENTRYPOINT [ "/run.sh" ]
-
