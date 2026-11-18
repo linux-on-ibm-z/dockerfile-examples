@@ -3,29 +3,29 @@
 
 ############################################ Dockerfile for MySQL 8.x #################################################
 # To build this image, run docker build from the directory containing this Dockerfile:
-# 
+#
 #       DOCKER_BUILDKIT=0 docker build -t mysql:8.x .
 #
 # Start a mysql server instance examples:
 # You can specify one of MYSQL_ROOT_PASSWORD, MYSQL_ALLOW_EMPTY_PASSWORD and MYSQL_RANDOM_ROOT_PASSWORD like shown below
-# 
+#
 #       docker run --name <container_name> -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:8.x
 #       docker run --name <container_name> -e MYSQL_RANDOM_ROOT_PASSWORD=true -d mysql:8.x
 #       docker run --name <container_name> -e MYSQL_ALLOW_EMPTY_PASSWORD=true -d mysql:8.x
 #
-# To connect MySQL Server from within the Container run below command 
+# To connect MySQL Server from within the Container run below command
 #       docker exec -it <container_name> mysql -uroot -p
 #
 # To see randomly generated password for the root user; use below command
 # 		docker logs <container_name> 2>&1 | grep GENERATED
-# 
+#
 # For more docker configuration, please visit the official mysql dockerhub webpage:
-# 
+#
 #       https://hub.docker.com/_/mysql
 #
 ####################################################################################################################
 
-FROM s390x/ubuntu:22.04 as builder
+FROM s390x/ubuntu:22.04 AS builder
 
 # The author
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
@@ -34,7 +34,7 @@ ENV SOURCE_ROOT=/mysql-source
 
 WORKDIR $SOURCE_ROOT
 
-ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.4.11/patch/"
+ENV PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/MySQL/8.4.13/patch/"
 
 RUN apt-get update \
     && apt-get install -y libcurl4-openssl-dev patchelf curl wget tar bison cmake gcc g++ git hostname libncurses-dev libssl-dev make openssl \
@@ -44,9 +44,9 @@ RUN apt-get update \
     libnuma-dev libmecab-dev libkrb5-dev libfido2-dev \
     libprotoc-dev libprotobuf-c-dev libprotobuf-dev protobuf-c-compiler protobuf-compiler \
     && cd $SOURCE_ROOT \
-    && wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.11.tar.gz \
-    && tar xf mysql-8.4.11.tar.gz --strip-components=1 \
-    && rm -f mysql-8.4.11.tar.gz \
+    && wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.13.tar.gz \
+    && tar xf mysql-8.4.13.tar.gz --strip-components=1 \
+    && rm -f mysql-8.4.13.tar.gz \
     && curl -sSL ${PATCH_URL}/mt-asm.patch | git apply - \
     && curl -sSL ${PATCH_URL}/NdbHW.patch | git apply - \
     && curl -sSL ${PATCH_URL}/router-test.patch | git apply - \
@@ -66,7 +66,7 @@ FROM s390x/ubuntu:22.04
 LABEL maintainer="LoZ Open Source Ecosystem (https://www.ibm.com/community/z/open-source)"
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ 'America/Toronto'
+ENV TZ='America/Toronto'
 
 COPY --from=builder /mysql-common*.deb /mysql-community-client*.deb /mysql-community-server-core*.deb /
 
