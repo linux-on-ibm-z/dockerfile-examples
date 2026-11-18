@@ -1,7 +1,7 @@
 # © Copyright IBM Corporation 2020, 2026.
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-########## Dockerfile for TensorFlow Serving version 2.20.0 #########
+########## Dockerfile for TensorFlow Serving version 2.21.0 #########
 #
 # This Dockerfile builds a basic installation of TensorFlow Serving.
 #
@@ -18,7 +18,7 @@
 #
 # Please run the following command as an example of the TensorFlow Serving image:
 #
-# git clone -b 2.20.0 https://github.com/tensorflow/serving
+# git clone -b 2.21.0 https://github.com/tensorflow/serving
 # TESTDATA="$(pwd)/serving/tensorflow_serving/servables/tensorflow/testdata"
 # docker run -t --rm -p 8501:8501 \
 #   -v "$TESTDATA/saved_model_half_plus_two_cpu:/models/half_plus_two" \
@@ -66,7 +66,7 @@ RUN GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True python3 -m pip install \
 
 # Build TensorFlow Serving
 RUN cd $SOURCE_ROOT \
-    && wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/TensorflowServing/2.20.0/build_tensorflow_serving.sh  \
+    && wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/TensorflowServing/2.21.0/build_tensorflow_serving.sh  \
     && sed -i '/^ *buildBazel |& tee/s/buildBazel/#buildBazel/' build_tensorflow_serving.sh \
     && bash build_tensorflow_serving.sh -y
 #End of builder stage
